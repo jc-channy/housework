@@ -111,6 +111,7 @@
           <div class="flex items-baseline gap-2 flex-wrap">
             <div id="atikaDateZh" class="text-2xl font-black tracking-tight"></div>
             <div id="atikaClock" class="text-base font-bold text-amber-800 tabular-nums"></div>
+            <div id="atikaTodayOff" class="hidden text-sm font-bold bg-red-500 text-white px-2 py-0.5 rounded-full"></div>
             <div id="atikaTomorrowOff" class="hidden text-sm font-bold bg-orange-500 text-white px-2 py-0.5 rounded-full"></div>
           </div>
           <div id="atikaDateId" class="id-text text-sm text-amber-900 font-medium mt-0.5"></div>
@@ -261,7 +262,7 @@
   <header class="header-hero border-b-2 border-amber-300 sticky top-0 z-30">
     <div class="container-app max-w-5xl mx-auto px-4 py-4">
       <div class="flex items-start justify-between">
-        <div>
+        <div onclick="goHome()" class="cursor-pointer" title="回首頁 / Ke Beranda">
           <div class="flex items-baseline gap-2 flex-wrap">
             <div id="mgrDateZh" class="text-2xl font-black tracking-tight"></div>
             <div id="mgrClock" class="text-base font-bold text-amber-800 tabular-nums"></div>
@@ -269,6 +270,7 @@
           <div id="mgrDateId" class="id-text text-sm text-amber-900 font-medium mt-0.5"></div>
           <div class="flex items-center gap-2 flex-wrap mt-1">
             <div id="mgrPunchStatus" class="text-sm font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full"></div>
+            <div id="mgrTodayOff" class="hidden text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-300"></div>
             <div id="mgrTomorrowOff" class="hidden text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-300"></div>
           </div>
         </div>
@@ -282,11 +284,10 @@
     </div>
     <nav class="container-app max-w-5xl mx-auto px-4 pb-2 -mt-1">
       <div class="flex gap-1 bg-white/40 backdrop-blur rounded-xl p-1 overflow-x-auto scrollbar-thin">
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week">本週</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week">🏠 首頁</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="calendar">🗓️ 月曆</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="schedule">📅 排程</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates">任務卡片</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies">備品<span id="suppliesBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates">📋 任務管理</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies">📦 備品管理<span id="suppliesBadge" class="ml-1"></span></button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll">💰 出勤與薪資<span id="leaveBadge" class="ml-1"></span></button>
       </div>
     </nav>
@@ -467,84 +468,8 @@
     </div>
 
     <!-- 排程總覽 -->
-    <div id="tab-schedule" class="tab-content hidden">
-      <h3 class="font-bold mb-3">📅 排程總覽 / Ringkasan Jadwal</h3>
-      <p class="text-xs text-gray-500 mb-4">這頁讓你檢視所有例行任務的排程結構，方便確認任務是否完整、頻率是否合理。</p>
-
-      <!-- 工作量分佈（可折疊） -->
-      <details class="mb-4">
-        <summary class="font-bold text-sm cursor-pointer py-2 px-3 bg-white border border-gray-200 rounded-xl flex items-center justify-between">
-          <span>📊 本週工作量分佈 / Distribusi Beban Mingguan</span>
-          <span class="text-xs text-gray-400">點開檢視</span>
-        </summary>
-        <div id="weekWorkload" class="mt-3"></div>
-      </details>
-
-      <!-- 每日固定 -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-blue-700 mb-2">🔵 每日固定 / Setiap Hari</h4>
-        <div id="schDaily" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-      </section>
-
-      <!-- 每週固定矩陣 -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-blue-700 mb-2">🗓 每週固定 / Mingguan Tetap</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs border border-gray-200 rounded-lg" id="schWeeklyTable">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="p-2 text-left">任務 / Tugas</th>
-                <th class="p-2">一</th><th class="p-2">二</th><th class="p-2">三</th>
-                <th class="p-2">四</th><th class="p-2">五</th><th class="p-2">六</th><th class="p-2">日</th>
-              </tr>
-            </thead>
-            <tbody id="schWeeklyBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- 每週彈性 -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-amber-700 mb-2">🟢 每週彈性 / Mingguan Fleksibel</h4>
-        <div id="schWeeklyFlex" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-      </section>
-
-      <!-- 雙週彈性（單/雙） -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-amber-700 mb-2">🟡 雙週彈性 / Dua-mingguan</h4>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <div class="text-xs text-gray-500 mb-1">任何兩週</div>
-            <div id="schBiweekAny" class="space-y-1"></div>
-          </div>
-          <div>
-            <div class="text-xs text-gray-500 mb-1">單數週</div>
-            <div id="schBiweekOdd" class="space-y-1"></div>
-          </div>
-          <div>
-            <div class="text-xs text-gray-500 mb-1">雙數週</div>
-            <div id="schBiweekEven" class="space-y-1"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 每月彈性 -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-amber-700 mb-2">🟠 每月彈性 / Bulanan</h4>
-        <div id="schMonthly" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-      </section>
-
-      <!-- 每季彈性 -->
-      <section class="mb-5">
-        <h4 class="font-bold text-sm text-amber-700 mb-2">🔴 每季彈性 / Triwulan</h4>
-        <div id="schQuarterly" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-      </section>
-
-      <!-- 統計 -->
-      <section class="mt-4 bg-gray-50 rounded-xl p-3 text-xs text-gray-600">
-        <div id="schSummary"></div>
-      </section>
-    </div>
+    <!-- 舊「排程」分頁已移至任務管理頁面的「📅 工作排程總覽」按鈕（彈出 modal） -->
+    <div id="tab-schedule" class="tab-content hidden"></div>
 
     <!-- 任務卡片（模板 + 分類整合） -->
     <div id="tab-templates" class="tab-content hidden">
@@ -555,6 +480,11 @@
           <button onclick="openAddTemplateModal()" class="bg-blue-600 text-white text-sm px-3 py-2 rounded-lg">＋ 任務</button>
         </div>
       </div>
+
+      <!-- 工作排程總覽按鈕 -->
+      <button onclick="openScheduleOverview()" class="w-full bg-indigo-600 text-white text-sm font-bold py-2.5 rounded-xl mb-3 active:scale-95">
+        📅 工作排程總覽 / Ringkasan Jadwal Mingguan
+      </button>
 
       <!-- 管理任務分類（折疊區） -->
       <details class="mb-3">
@@ -960,20 +890,25 @@
       <div id="freqWrap">
         <label class="block font-semibold mb-1">頻率 Frekuensi</label>
         <select id="tmplFreq" class="w-full border border-gray-300 rounded-lg p-2" onchange="onFreqChange()">
-          <option value="weekly">每週 / Mingguan</option>
-          <option value="biweekly">雙週 / 2-mingguan</option>
-          <option value="monthly">每月 / Bulanan</option>
+          <option value="mWeek">每月指定週 / Per minggu</option>
           <option value="quarterly">每季 / Triwulan</option>
         </select>
       </div>
-      <div id="parityWrap" class="hidden">
-        <label class="block font-semibold mb-1">出現週次（雙週任務專用）</label>
-        <select id="tmplParity" class="w-full border border-gray-300 rounded-lg p-2">
-          <option value="any">任何兩週都可（看上次完成日自動排）</option>
-          <option value="odd">只在單數週出現（如本週 21）</option>
-          <option value="even">只在雙數週出現（如本週 22）</option>
-        </select>
-        <p class="text-xs text-gray-500 mt-1">用此功能可錯開不同任務（例如 AB 在單數週、CD 在雙數週）</p>
+      <div id="weekFlagsWrap">
+        <label class="block font-semibold mb-1">月內哪幾週執行 / Minggu ke-N (可複選)</label>
+        <div class="flex flex-wrap gap-2 mb-1">
+          <button type="button" class="wf-btn px-3 py-1 rounded-full border text-sm" data-w="1">第 1 週 M1</button>
+          <button type="button" class="wf-btn px-3 py-1 rounded-full border text-sm" data-w="2">第 2 週 M2</button>
+          <button type="button" class="wf-btn px-3 py-1 rounded-full border text-sm" data-w="3">第 3 週 M3</button>
+          <button type="button" class="wf-btn px-3 py-1 rounded-full border text-sm" data-w="4">第 4 週 M4</button>
+        </div>
+        <div class="flex flex-wrap gap-1 text-[10px]">
+          <button type="button" onclick="setWeekFlagsPreset([1,2,3,4])" class="text-blue-600 underline">每週(全選)</button>
+          <button type="button" onclick="setWeekFlagsPreset([1,3])" class="text-blue-600 underline">單數週(1,3)</button>
+          <button type="button" onclick="setWeekFlagsPreset([2,4])" class="text-blue-600 underline">雙數週(2,4)</button>
+          <button type="button" onclick="setWeekFlagsPreset([1])" class="text-blue-600 underline">每月一次(第1週)</button>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">月內第 N 週 = 該月的第 ⌈日期/7⌉ 週。例：第 1 週 = 每月 1~7 日。</p>
       </div>
       <div class="border-t pt-3">
         <label class="flex items-center gap-2 cursor-pointer">
@@ -1375,8 +1310,9 @@
       </div>
       <div>
         <label class="block font-semibold mb-1">📢 請假注意事項 (給 Atika 看)</label>
-        <textarea id="pcLeavePolicyNote" rows="3" class="w-full border border-amber-300 rounded-lg p-2 bg-amber-50" placeholder="例如：請假請於前一日 21:00 前提出。連續休假期間請於最後一日晚間 20:00 前回到家中。"></textarea>
-        <p class="text-xs text-gray-500 mt-1">會顯示在 Atika 端新增請假申請的下方</p>
+        <textarea id="pcLeavePolicyNote" rows="3" data-lang="zh" data-pair="pcLeavePolicyNoteId" class="w-full border border-amber-300 rounded-lg p-2 bg-amber-50 bi-input" placeholder="例如：請假請於前一日 21:00 前提出。連續休假期間請於最後一日晚間 20:00 前回到家中。"></textarea>
+        <textarea id="pcLeavePolicyNoteId" rows="3" data-lang="id" data-pair="pcLeavePolicyNote" class="id-text w-full border border-amber-300 rounded-lg p-2 bg-amber-50 bi-input mt-1" placeholder="Catatan dalam Bahasa Indonesia (otomatis terjemahan)"></textarea>
+        <p class="text-xs text-gray-500 mt-1">💡 任一格輸入完按 Tab 會自動翻譯。會顯示在 Atika 端新增請假申請的下方。</p>
       </div>
       <div class="border-t pt-3">
         <div class="flex items-center justify-between mb-1">
@@ -1424,7 +1360,9 @@
       </div>
       <div>
         <label class="block font-semibold mb-1">原因（可選）/ Alasan</label>
-        <textarea id="leaveReason" rows="2" class="w-full border border-gray-300 rounded-lg p-2 text-sm"></textarea>
+        <textarea id="leaveReason" rows="2" data-lang="zh" data-pair="leaveReasonId" class="w-full border border-gray-300 rounded-lg p-2 text-sm bi-input" placeholder="中文原因（例：身體不適）"></textarea>
+        <textarea id="leaveReasonId" rows="2" data-lang="id" data-pair="leaveReason" class="id-text w-full border border-gray-300 rounded-lg p-2 text-sm bi-input mt-1" placeholder="Bahasa Indonesia (otomatis terjemahan)"></textarea>
+        <p class="text-[10px] text-gray-400 mt-0.5">💡 中印任一格輸入完按 Tab，會自動翻譯</p>
       </div>
       <p class="text-xs text-amber-700">⚠️ 依假別的扣薪比例計算。例休/特休通常不扣薪。</p>
       <!-- 請假注意事項（給 Atika 看，從設定讀） -->
@@ -1441,6 +1379,41 @@
 </div>
 
 <!-- ===== 小憩時段編輯 Modal ===== -->
+<!-- ===== 工作排程總覽 Modal ===== -->
+<div id="scheduleOverviewModal" class="hidden fixed inset-0 z-50 flex items-stretch justify-center modal-backdrop overflow-auto">
+  <div class="bg-white w-full max-w-6xl sm:rounded-2xl p-4 sm:m-4 self-start">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <div class="text-xl font-bold">📅 工作排程總覽</div>
+        <div class="id-text text-sm text-gray-500">Ringkasan Jadwal Mingguan</div>
+      </div>
+      <button onclick="closeScheduleOverview()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <div id="scheduleOverviewMeta" class="text-xs text-gray-600 mb-2"></div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs border-collapse" id="scheduleOverviewTable">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="p-1 sticky left-0 bg-gray-100 text-left w-20 border border-gray-200">頻率 / Frek</th>
+            <th class="p-1 border border-gray-200">週一<br><span class="id-text text-[10px] text-gray-500">Sen</span></th>
+            <th class="p-1 border border-gray-200">週二<br><span class="id-text text-[10px] text-gray-500">Sel</span></th>
+            <th class="p-1 border border-gray-200">週三<br><span class="id-text text-[10px] text-gray-500">Rab</span></th>
+            <th class="p-1 border border-gray-200">週四<br><span class="id-text text-[10px] text-gray-500">Kam</span></th>
+            <th class="p-1 border border-gray-200">週五<br><span class="id-text text-[10px] text-gray-500">Jum</span></th>
+            <th class="p-1 border border-gray-200">週六<br><span class="id-text text-[10px] text-gray-500">Sab</span></th>
+            <th class="p-1 border border-gray-200">週日<br><span class="id-text text-[10px] text-gray-500">Min</span></th>
+          </tr>
+        </thead>
+        <tbody id="scheduleOverviewBody"></tbody>
+      </table>
+    </div>
+    <div class="text-[10px] text-gray-500 mt-2 leading-snug">
+      色塊 = 任務分類顏色。點任一色塊可開啟該任務詳情。<br>
+      「每日」每欄相同；「固定週幾」只在指定日；「月內第 N 週」依當週是否符合 weekFlags；「每季」整週標示。
+    </div>
+  </div>
+</div>
+
 <div id="restScheduleModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
@@ -1846,10 +1819,65 @@ const DEFAULT_SUPPLIES = [
   ['尿布','Popok','s_baby'],
 ];
 
-/* freqType -> 週期天數（用來判斷 flex 任務是否在本週期已完成） */
-const PERIOD_DAYS = { daily:1, weekly:7, biweekly:14, monthly:30, quarterly:92 };
-const FREQ_ZH = { daily:'每日', weekly:'每週', biweekly:'雙週', monthly:'每月', quarterly:'每季' };
-const FREQ_ID = { daily:'Setiap hari', weekly:'Mingguan', biweekly:'2-mingguan', monthly:'Bulanan', quarterly:'Triwulan' };
+/* freqType -> 週期天數（舊模型備查，新模型用 getPeriodDays） */
+const PERIOD_DAYS = { daily:1, weekly:7, biweekly:14, monthly:30, quarterly:92, mWeek:14 };
+const FREQ_ZH = { daily:'每日', weekly:'每週', biweekly:'雙週', monthly:'每月', quarterly:'每季', mWeek:'指定週' };
+const FREQ_ID = { daily:'Setiap hari', weekly:'Mingguan', biweekly:'2-mingguan', monthly:'Bulanan', quarterly:'Triwulan', mWeek:'Per minggu' };
+
+/* === 新週期模型：mWeek + weekFlags (1-4 表示月內第幾週)。
+   舊資料 weekly/biweekly/monthly 自動遷移為 mWeek。 === */
+function weekOfMonth(d){
+  // 月內第 N 週：N = ceil(date / 7)。1-7 → 1、8-14 → 2、15-21 → 3、22-28 → 4、29-31 → 5
+  // 第 5 週併入第 4 週處理
+  return Math.min(4, Math.ceil(d.getDate() / 7));
+}
+function migrateTemplateFreq(t){
+  if (!t || t.mode !== 'flex') return;
+  if (t.freqType === 'mWeek'){
+    if (!Array.isArray(t.weekFlags) || !t.weekFlags.length) t.weekFlags = [1,2,3,4];
+    return;
+  }
+  if (t.freqType === 'weekly'){
+    t.freqType = 'mWeek'; t.weekFlags = [1,2,3,4];
+  } else if (t.freqType === 'biweekly'){
+    if (t.weekParity === 'odd')      t.weekFlags = [1,3];
+    else if (t.weekParity === 'even') t.weekFlags = [2,4];
+    else                              t.weekFlags = [1,3];
+    t.freqType = 'mWeek';
+  } else if (t.freqType === 'monthly'){
+    t.freqType = 'mWeek'; t.weekFlags = [1];
+  }
+}
+function getPeriodDays(t){
+  if (!t) return 7;
+  if (t.freqType==='daily') return 1;
+  if (t.freqType==='quarterly') return 92;
+  if (t.freqType==='mWeek'){
+    const flags = t.weekFlags || [1,2,3,4];
+    return Math.max(7, Math.round(30 / Math.max(1, flags.length)));
+  }
+  return PERIOD_DAYS[t.freqType] || 14;
+}
+function taskActiveThisWeek(t, d){
+  d = d || today();
+  if (!t || t.freqType !== 'mWeek') return true;
+  const w = weekOfMonth(d);
+  const flags = t.weekFlags || [1,2,3,4];
+  return flags.includes(w);
+}
+function weekFlagsLabel(t){
+  // 顯示成「第 1、3 週」、「第 1 週」、「每週」
+  if (!t || t.freqType!=='mWeek') return '';
+  const flags = [...(t.weekFlags||[1,2,3,4])].sort();
+  if (flags.length===4) return '每週 Mingguan';
+  if (flags.length===2 && flags[0]===1 && flags[1]===3) return '每月第 1、3 週 (M1,3)';
+  if (flags.length===2 && flags[0]===2 && flags[1]===4) return '每月第 2、4 週 (M2,4)';
+  if (flags.length===1 && flags[0]===1) return '每月第 1 週 Bulan M1';
+  if (flags.length===1 && flags[0]===2) return '每月第 2 週 Bulan M2';
+  if (flags.length===1 && flags[0]===3) return '每月第 3 週 Bulan M3';
+  if (flags.length===1 && flags[0]===4) return '每月第 4 週 Bulan M4';
+  return '每月第 '+flags.join('、')+' 週';
+}
 
 /* ========== 狀態 ========== */
 let state = {
@@ -1924,6 +1952,8 @@ function load() {
   if (!state.users.length) state.users = DEFAULT_USERS.map(u=>({...u}));
   // 遷移：舊使用者沒有 lang 欄位
   state.users.forEach(u=>{ if (!u.lang) u.lang = u.role==='helper'?'id':'zh'; });
+  // 遷移：舊的 weekly/biweekly/monthly → mWeek + weekFlags
+  (state.templates||[]).forEach(migrateTemplateFreq);
   if (!state.categories.length) state.categories = DEFAULT_CATS.map((c,i)=>({...c, order:i}));
   if (!state.templates.length) {
     state.templates = DEFAULT_TEMPLATES.map((t,i)=>({
@@ -2170,6 +2200,8 @@ async function cloudPull(){
         if (d.taskSkips          !== undefined) state.taskSkips          = d.taskSkips;
         if (d.restSchedules      !== undefined) state.restSchedules      = d.restSchedules;
         if (d.leavePolicyNote    !== undefined) state.leavePolicyNote    = d.leavePolicyNote;
+        // 遷移雲端拉下來的舊任務
+        (state.templates||[]).forEach(migrateTemplateFreq);
         save();   // 寫進 localStorage（cloudPush 被 _cloudSyncing 旗標跳過）
         window._lastCloudSyncAt = new Date();
         window._lastCloudSyncKind = 'pull';
@@ -2792,7 +2824,7 @@ function isDone(t, d=today()){
   // flex: 本週期內若有完成 → 已完成
   const last=lastCompleted(t);
   if (!last) return false;
-  return Math.floor((d - new Date(last))/86400000) < PERIOD_DAYS[t.freqType];
+  return Math.floor((d - new Date(last))/86400000) < getPeriodDays(t);
 }
 function toggleDone(t, d, by){
   const k=compKey(t, d);
@@ -3050,6 +3082,10 @@ function modeBadgeTiny(t){
     }
     return `<span class="mode-daily text-xs px-1.5 py-0.5 rounded-full font-semibold">指定日 Tetap</span>`;
   }
+  if (t.freqType==='mWeek'){
+    const label = weekFlagsLabel(t);
+    return `<span class="mode-flex text-xs px-1.5 py-0.5 rounded-full font-semibold">${label}</span>`;
+  }
   const z=FREQ_ZH[t.freqType]||'', id=FREQ_ID[t.freqType]||'';
   return `<span class="mode-flex text-xs px-1.5 py-0.5 rounded-full font-semibold">${z} ${id}</span>`;
 }
@@ -3077,8 +3113,8 @@ function completionStampText(t){
 function dueInText(t, d=today()){
   if (t.mode!=='flex') return '';
   const last=lastCompleted(t);
-  const periodDays=PERIOD_DAYS[t.freqType];
-  if (!last) return `⏳ 本${FREQ_ZH[t.freqType].replace('每','').replace('雙週','雙週')}期需做 / Periode ini`;
+  const periodDays=getPeriodDays(t);
+  if (!last) return `⏳ 本期需做 / Periode ini`;
   const ago=daysSinceLast(t);
   const remain=periodDays-ago;
   if (remain<=0) return `⏳ 已超期 ${-remain+1} 天 / Lewat ${-remain+1}h`;
@@ -3092,7 +3128,7 @@ function renderTaskCard(t, opts={}){
   let warnClass='';
   if (t.mode==='flex' && !done){
     const ago=daysSinceLast(t);
-    const period=PERIOD_DAYS[t.freqType];
+    const period=getPeriodDays(t);
     if (ago !== null) {
       if (ago >= period) warnClass='warn-red';
       else if (ago >= period - 2) warnClass='warn-yellow';
@@ -3231,17 +3267,26 @@ function isoWeekNum(d=today()){
   return parseInt(key.split('-W')[1]||'0', 10);
 }
 function matchesWeekParity(t, d=today()){
-  if (t.freqType!=='biweekly') return true;
-  if (!t.weekParity || t.weekParity==='any') return true;
-  const wk=isoWeekNum(d);
-  const isOdd = (wk % 2) === 1;
-  if (t.weekParity==='odd'  && !isOdd) return false;
-  if (t.weekParity==='even' &&  isOdd) return false;
-  return true;
+  // 新模型：mWeek 看 weekFlags 是否含當週；其他類別永遠 true
+  if (!t || t.freqType !== 'mWeek') return true;
+  return taskActiveThisWeek(t, d);
 }
 function flexTemplatesByPeriod(periodFreq){
+  // periodFreq 接受新值: 'mWeek-weekly'（每週=4 flags）、'mWeek-biweekly'（2 flags）、'mWeek-monthly'（1 flag）、'quarterly'
+  // 也支援舊呼叫 'weekly'/'biweekly'/'monthly'/'quarterly' 自動轉譯
+  let predicate;
+  if (periodFreq==='quarterly') predicate = t=>t.freqType==='quarterly';
+  else if (periodFreq==='weekly' || periodFreq==='mWeek-weekly')
+    predicate = t=>t.freqType==='mWeek' && (t.weekFlags||[]).length===4;
+  else if (periodFreq==='biweekly' || periodFreq==='mWeek-biweekly')
+    predicate = t=>t.freqType==='mWeek' && (t.weekFlags||[]).length===2;
+  else if (periodFreq==='monthly' || periodFreq==='mWeek-monthly')
+    predicate = t=>t.freqType==='mWeek' && (t.weekFlags||[]).length===1;
+  else if (periodFreq==='mWeek')
+    predicate = t=>t.freqType==='mWeek';
+  else predicate = t=>t.freqType===periodFreq;
   return state.templates
-    .filter(t=>t.active && t.mode==='flex' && t.freqType===periodFreq && matchesWeekParity(t))
+    .filter(t=>t.active && t.mode==='flex' && predicate(t) && matchesWeekParity(t))
     .sort((a,b)=>(a.order||0)-(b.order||0));
 }
 function adhocForToday(){
@@ -3324,9 +3369,9 @@ function renderAtikaView(){
     : `<div class="text-sm text-gray-400 italic text-center py-3">🎉 全部完成 / Selesai</div>`;
   renderSectionDone('todayDoneWrap','todayDone','todayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t)));
 
-  // 彈性（依本週/本月/本季列出）
-  const fxWeek=[...flexTemplatesByPeriod('weekly'), ...flexTemplatesByPeriod('biweekly')];
-  const fxMonth=flexTemplatesByPeriod('monthly');
+  // 彈性（依本週/本月/本季列出；mWeek 多週的 → 每週類；單週的 → 每月類）
+  const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
+  const fxMonth=flexTemplatesByPeriod('mWeek-monthly');
   const fxQuarter=flexTemplatesByPeriod('quarterly');
   const wSplit=splitDone(fxWeek, t=>isDone(t,d));
   const mSplit=splitDone(fxMonth, t=>isDone(t,d));
@@ -3370,7 +3415,7 @@ function renderManagerView(){
     total+=ts.length;
     done+=ts.filter(t=>state.completions[compKey(t,day)]).length;
   }
-  ['weekly','biweekly','monthly','quarterly'].forEach(ft=>{
+  ['mWeek-weekly','mWeek-biweekly','mWeek-monthly','quarterly'].forEach(ft=>{
     const list=flexTemplatesByPeriod(ft);
     total+=list.length;
     done+=list.filter(t=>isDone(t,d)).length;
@@ -3400,8 +3445,8 @@ function renderManagerView(){
   renderSectionDone('mgrTodayDoneWrap','mgrTodayDone','mgrTodayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t)));
 
   // 彈性 - 各週期內各自分未完成/已完成；總「已完成」收合一起
-  const fxWeek=[...flexTemplatesByPeriod('weekly'),...flexTemplatesByPeriod('biweekly')];
-  const fxMonth=flexTemplatesByPeriod('monthly');
+  const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
+  const fxMonth=flexTemplatesByPeriod('mWeek-monthly');
   const fxQuarter=flexTemplatesByPeriod('quarterly');
   const wS=splitDone(fxWeek, t=>isDone(t,d));
   const mS=splitDone(fxMonth, t=>isDone(t,d));
@@ -3672,8 +3717,10 @@ function renderWeekWorkload(){
   state.templates.filter(t=>t.active!==false && t.mode==='fixed').forEach(t=>{
     (t.weekdays||[]).forEach(d=>counts[d]++);
   });
-  const flexWeek=state.templates.filter(t=>t.active!==false && t.mode==='flex' && ['weekly','biweekly'].includes(t.freqType)).length;
-  const flexMonth=state.templates.filter(t=>t.active!==false && t.mode==='flex' && t.freqType==='monthly').length;
+  // 新模型統計：mWeek 的 weekFlags 多寡分群
+  const isMW = t => t.mode==='flex' && t.freqType==='mWeek';
+  const flexWeek=state.templates.filter(t=>t.active!==false && isMW(t) && (t.weekFlags||[]).length>=2).length;
+  const flexMonth=state.templates.filter(t=>t.active!==false && isMW(t) && (t.weekFlags||[]).length===1).length;
   const flexQuarter=state.templates.filter(t=>t.active!==false && t.mode==='flex' && t.freqType==='quarterly').length;
   const max=Math.max(...counts, 1);
   const dayLabels=['日','一','二','三','四','五','六'];
@@ -3846,7 +3893,8 @@ function calculatePayroll(viewDate){
         dayInfo.leaveType = lt;
         dayInfo.deductedPay = Math.round(dailyRate * portion * deductRate);
         const typeName = lt ? lt.nameZh : leave.type;
-        dayInfo.status = `📝 ${typeName} ${portion===1?'(全)':'(半)'}${dayInfo.deductedPay>0?' -'+dayInfo.deductedPay:' 不扣薪'}`;
+        // 請假日：紅色粗體
+        dayInfo.status = `<span class="text-red-600 font-bold">📝 ${typeName} ${portion===1?'(全)':'(半)'}${dayInfo.deductedPay>0?' -'+dayInfo.deductedPay:' 不扣薪'}</span>`;
       } else if (punched){
         actualWorkdays++;
         dayInfo.status = '✅ 出勤';
@@ -3863,8 +3911,14 @@ function calculatePayroll(viewDate){
         overtimeDays++;
         dayInfo.addedPay = Math.round(dailyRate * (c.overtimeMultiplier || 1));
         dayInfo.status = `💰 假日加班 +${dayInfo.addedPay}`;
+      } else if (leave){
+        // 例假日同時有審核通過的請假 → 紅色粗體並標示
+        dayInfo.leave = leave;
+        const lt = (state.leaveTypes||[]).find(t=>t.id===leave.type);
+        dayInfo.leaveType = lt;
+        dayInfo.status = `<span class="text-red-600 font-bold">😴 例假日（已申請休假）</span>`;
       } else {
-        dayInfo.status = '😴 例假日';
+        dayInfo.status = `😴 例假日 <span class="text-gray-400">（尚未申請休假）</span>`;
       }
     } else {
       dayInfo.status = '－';
@@ -4111,13 +4165,23 @@ function renderLeaveLists(viewDate){
     </div>
   `).join('') : '<div class="text-xs text-gray-400 italic">無待審核</div>';
   document.getElementById('leaveHistoryCount').textContent = `(${inPeriod.length})`;
+  const todayStr = ymd(today());
   document.getElementById('leaveHistoryList').innerHTML = inPeriod.length ? inPeriod.map(r=>{
     const stColor = r.status==='approved'?'text-green-700 bg-green-50 border-green-200':'text-gray-600 bg-gray-50 border-gray-200';
     const stLbl = r.status==='approved'?'✓ 批准':'✗ 拒絕';
+    // 日期 + 星期
+    const [yy,mm,dd]=r.date.split('-').map(Number);
+    const dt=new Date(yy,mm-1,dd);
+    const dowName='日一二三四五六'[dt.getDay()];
+    // 是否已休完（approved 且日期 < 今天）
+    const isPast = r.status==='approved' && r.date < todayStr;
+    const pastBadge = isPast ? '<span class="text-xs font-bold text-red-600 ml-2">已休完</span>' : '';
+    const reasonHtml = r.reason ? `<div class="text-xs text-gray-500 mt-1">原因：${r.reason}${r.reasonId?` <span class="id-text">/ ${r.reasonId}</span>`:''}</div>` : '';
     return `
       <div class="border rounded-lg p-2 ${stColor} cursor-pointer hover:border-blue-400" onclick="openLeaveModal(null,'${r.id}')">
-        <div class="flex justify-between"><span class="text-sm font-semibold">${r.date} · ${typeName(r.type)} · ${LV_PERIOD[r.period]||''}</span><span class="text-xs text-blue-600">編輯</span></div>
+        <div class="flex justify-between"><span class="text-sm font-semibold">${r.date} (週${dowName}) · ${typeName(r.type)} · ${LV_PERIOD[r.period]||''}${pastBadge}</span><span class="text-xs text-blue-600">編輯</span></div>
         <div class="text-xs">${stLbl}${r.decidedBy?' by '+r.decidedBy:''}</div>
+        ${reasonHtml}
         ${r.managerNote?`<div class="text-xs text-amber-700 mt-1">📢 ${r.managerNote}</div>`:''}
       </div>
     `;
@@ -4167,7 +4231,9 @@ function openPayrollSettings(){
     cb.checked = allowed.includes(cb.value);
   });
   // 請假注意事項
-  document.getElementById('pcLeavePolicyNote').value = c.leavePolicyNote || '';
+  const pzh=document.getElementById('pcLeavePolicyNote'), pid=document.getElementById('pcLeavePolicyNoteId');
+  pzh.value = c.leavePolicyNote || ''; pzh.dataset.orig = pzh.value;
+  pid.value = c.leavePolicyNoteId || ''; pid.dataset.orig = pid.value;
   // 假別管理列表
   renderPcLeaveTypeList();
   // 小憩時段列表
@@ -4245,6 +4311,7 @@ function savePayrollSettings(){
     overtimeMultiplier: parseFloat(document.getElementById('pcOtMult').value)||1.0,
     allowedLeavePeriods,
     leavePolicyNote: document.getElementById('pcLeavePolicyNote').value.trim(),
+    leavePolicyNoteId: document.getElementById('pcLeavePolicyNoteId').value.trim(),
   };
   save();
   closePayrollSettings();
@@ -4337,8 +4404,11 @@ function openLeaveModal(presetDate, editId){
   _editingLeaveId = editId || null;
   populateLeaveDropdowns();
   const isMgr = state.currentUser.role==='manager';
-  // 請假注意事項（Atika 端顯示）
-  const policy = state.payrollConfig?.leavePolicyNote || '';
+  // 請假注意事項（Atika 端顯示，依目前語言）
+  const policyZh = state.payrollConfig?.leavePolicyNote || '';
+  const policyId = state.payrollConfig?.leavePolicyNoteId || '';
+  const lang = getCurrentLang();
+  const policy = lang==='id' ? (policyId || policyZh) : (policyZh || policyId);
   const polBox = document.getElementById('leavePolicyNoteBox');
   if (!isMgr && policy){
     polBox.classList.remove('hidden');
@@ -4352,13 +4422,17 @@ function openLeaveModal(presetDate, editId){
     document.getElementById('leaveDate').value = r.date;
     document.getElementById('leavePeriod').value = r.period;
     document.getElementById('leaveType').value = r.type;
-    document.getElementById('leaveReason').value = r.reason || '';
+    const rzh=document.getElementById('leaveReason'), rid=document.getElementById('leaveReasonId');
+    rzh.value = r.reason || ''; rzh.dataset.orig = rzh.value;
+    rid.value = r.reasonId || ''; rid.dataset.orig = rid.value;
     document.getElementById('leaveDeleteBtn').classList.remove('hidden');
   } else {
     document.getElementById('leaveDate').value = presetDate || ymd(today());
     document.getElementById('leavePeriod').value = (state.payrollConfig?.allowedLeavePeriods||['full'])[0];
     document.getElementById('leaveType').value = (state.leaveTypes||[{id:'other'}])[0].id;
-    document.getElementById('leaveReason').value = '';
+    const rzh=document.getElementById('leaveReason'), rid=document.getElementById('leaveReasonId');
+    rzh.value=''; rzh.dataset.orig='';
+    rid.value=''; rid.dataset.orig='';
     document.getElementById('leaveDeleteBtn').classList.add('hidden');
   }
   document.getElementById('leaveModal').classList.remove('hidden');
@@ -4377,6 +4451,7 @@ function submitLeaveRequest(){
     period: document.getElementById('leavePeriod').value,
     type: document.getElementById('leaveType').value,
     reason: document.getElementById('leaveReason').value.trim(),
+    reasonId: document.getElementById('leaveReasonId').value.trim(),
   };
   if (_editingLeaveId){
     const r = state.leaveRequests.find(x=>x.id===_editingLeaveId);
@@ -5237,7 +5312,11 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
     ? `🎉 ${subject}${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
     : `🎉 ${subject}${lang==='id'?'Libur Berturut':'連休'} ${fmt(range.start)}~${fmt(range.end)} (${days}${lang==='id'?' hari':' 天'})`;
   if (chip){ chip.classList.remove('hidden'); chip.textContent=chipText; }
-  const policy = state.payrollConfig?.leavePolicyNote || '';
+  const policyZh = state.payrollConfig?.leavePolicyNote || '';
+  const policyId = state.payrollConfig?.leavePolicyNoteId || '';
+  const policy = isManager
+    ? policyZh
+    : (lang==='id' ? (policyId || policyZh) : (policyZh || policyId));
   if (banner){
     banner.classList.remove('hidden');
     banner.innerHTML = `
@@ -5258,9 +5337,33 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
 }
 function renderAtikaTomorrowOff(){
   _renderTomorrowOffInto('atikaTomorrowOff', 'atikaTomorrowOffBanner', false);
+  renderTodayOffChip('atikaTodayOff', false);
 }
 function renderMgrTomorrowOff(){
   _renderTomorrowOffInto('mgrTomorrowOff', 'mgrTomorrowOffBanner', true);
+  renderTodayOffChip('mgrTodayOff', true);
+}
+/* 今日休假 chip：當今天為固定休假日或審核通過的全天請假 */
+function getTodayOffInfo(){
+  const c = state.payrollConfig;
+  if (!c) return null;
+  const t = today();
+  const dStr = ymd(t);
+  const isFixedHoliday = (c.holidays||[]).includes(t.getDay());
+  const approvedLeave = (state.leaveRequests||[]).find(r=>r.date===dStr && r.status==='approved' && r.period==='full');
+  if (!isFixedHoliday && !approvedLeave) return null;
+  return { isFixedHoliday, leave: approvedLeave };
+}
+function renderTodayOffChip(chipId, isManager){
+  const chip = document.getElementById(chipId);
+  if (!chip) return;
+  const info = getTodayOffInfo();
+  if (!info){ chip.classList.add('hidden'); chip.textContent=''; return; }
+  const lang = isManager ? 'zh' : getCurrentLang();
+  const subject = isManager ? 'Atika ' : '';
+  const label = lang==='id' ? 'Libur Hari Ini' : '今日休假';
+  chip.classList.remove('hidden');
+  chip.textContent = `🏖 ${subject}${label}`;
 }
 
 /* === Atika 視角的假期/事件 banner === */
@@ -5355,96 +5458,84 @@ function runScheduledScenarioActions(){
 }
 
 /* ========== 排程總覽 ========== */
-function renderSchedule(){
-  // 含啟用 + 停用，停用以灰色刪除線呈現
-  const all=state.templates.slice();
-  const daily=all.filter(t=>t.mode==='fixed' && t.freqType==='daily');
-  const weekly=all.filter(t=>t.mode==='fixed' && t.weekdays.length<7);
-  const biAny=all.filter(t=>t.mode==='flex' && t.freqType==='biweekly' && (t.weekParity==='any'||!t.weekParity));
-  const biOdd=all.filter(t=>t.mode==='flex' && t.freqType==='biweekly' && t.weekParity==='odd');
-  const biEven=all.filter(t=>t.mode==='flex' && t.freqType==='biweekly' && t.weekParity==='even');
-  const weeklyFx=all.filter(t=>t.mode==='flex' && t.freqType==='weekly');
-  const monthly=all.filter(t=>t.mode==='flex' && t.freqType==='monthly');
-  const quarterly=all.filter(t=>t.mode==='flex' && t.freqType==='quarterly');
+function renderSchedule(){ /* 舊版排程渲染已停用，由 #scheduleOverviewModal 取代 */ }
 
-  // 每日/每週固定的 cell（無到期資訊）
-  const fixCell=(t)=>{
-    const cat=getCat(t.catId);
-    const inactive = t.active===false;
-    return `<div class="text-xs px-2 py-1.5 rounded ${inactive?'opacity-50':''} bg-white border border-gray-100" style="border-left:4px solid ${cat.color}">
-      <div class="font-semibold ${inactive?'line-through text-gray-500':''}">${t.nameZh}<span class="text-gray-400 font-normal"> / ${t.nameId}</span></div>
-    </div>`;
+/* === 工作排程總覽矩陣 === */
+function openScheduleOverview(){
+  renderScheduleOverview();
+  document.getElementById('scheduleOverviewModal').classList.remove('hidden');
+}
+function closeScheduleOverview(){
+  document.getElementById('scheduleOverviewModal').classList.add('hidden');
+}
+function renderScheduleOverview(){
+  const all = state.templates.filter(t=>t.active!==false);
+  const d0 = today();
+  const startW = startOfWeek(d0); // 週一
+  const weekDates = [];
+  for (let i=0;i<7;i++){ const x=new Date(startW); x.setDate(startW.getDate()+i); weekDates.push(x); }
+  // dow 排序：週一=1...週日=0；matrix columns 對應 [1,2,3,4,5,6,0]
+  const dows = [1,2,3,4,5,6,0];
+  // 任務分組
+  const daily = all.filter(t=>t.mode==='fixed' && t.freqType==='daily');
+  const fixedWeekly = all.filter(t=>t.mode==='fixed' && t.freqType==='daily' && Array.isArray(t.weekdays) && t.weekdays.length<7 && t.weekdays.length>0);
+  // 注意：原本 fixed 模式可能有 weekdays.length<7；通常 fixed 都是 daily freqType
+  const fixedSomeDays = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length<7 && t.weekdays.length>0);
+  const fixedAllDays  = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length===7);
+  const mWeekTasks = all.filter(t=>t.mode==='flex' && t.freqType==='mWeek');
+  const quarterly  = all.filter(t=>t.mode==='flex' && t.freqType==='quarterly');
+
+  const chipFor = (t, opts={}) => {
+    const cat = getCat(t.catId);
+    const inactive = opts.muted;
+    const lang = getCurrentLang();
+    const primary = lang==='id' ? t.nameId : t.nameZh;
+    return `<div class="schedule-chip text-[10px] leading-tight rounded px-1.5 py-0.5 mb-0.5 cursor-pointer hover:opacity-80 ${inactive?'opacity-50':''}"
+      style="background:${cat.color}22; border-left:3px solid ${cat.color};"
+      onclick="closeScheduleOverview(); openTaskModal('${t.id}')"
+      title="${t.nameZh} / ${t.nameId}">${primary}</div>`;
   };
-  // 彈性任務 cell（含上次完成、到期天數）
-  const flexCell=(t)=>{
-    const cat=getCat(t.catId);
-    const inactive = t.active===false;
-    const last=lastCompleted(t);
-    const lastStr = last
-      ? new Date(last).toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})
-      : '尚未做';
-    let dueLbl='';
-    if (!inactive){
-      const period=PERIOD_DAYS[t.freqType] || 7;
-      const ago=daysSinceLast(t);
-      if (ago===null){
-        dueLbl = `<span class="text-amber-700">待第一次執行</span>`;
-      } else {
-        const remain = period - ago;
-        if (remain <= 0)       dueLbl = `<span class="text-red-700 font-bold">已超期 ${-remain+1} 天</span>`;
-        else if (remain <= 2)  dueLbl = `<span class="text-amber-700 font-bold">剩 ${remain} 天</span>`;
-        else                   dueLbl = `<span class="text-gray-500">剩 ${remain} 天</span>`;
-      }
-    } else {
-      dueLbl = `<span class="text-gray-400">已停用</span>`;
-    }
-    return `<div class="text-xs px-2 py-1.5 rounded ${inactive?'opacity-50':''} bg-white border border-gray-100" style="border-left:4px solid ${cat.color}">
-      <div class="font-semibold ${inactive?'line-through text-gray-500':''}">${t.nameZh}<span class="text-gray-400 font-normal"> / ${t.nameId}</span></div>
-      <div class="text-gray-500 mt-0.5">上次 ${lastStr} · ${dueLbl}</div>
-    </div>`;
-  };
-  const emptyZH='<div class="text-xs text-gray-400 italic">無</div>';
 
-  document.getElementById('schDaily').innerHTML = daily.length?daily.map(fixCell).join(''):emptyZH;
+  const rows = [];
+  // Row 1: 每日（所有 fixed 全 7 天 + fixed freqType daily）
+  const allDailyTasks = [...new Set([...fixedAllDays, ...daily])];
+  rows.push({
+    label: '每日<br><span class="id-text text-[10px] text-gray-500">Harian</span>',
+    cells: dows.map(()=> allDailyTasks.map(t=>chipFor(t)).join('') || '<span class="text-gray-300">·</span>')
+  });
+  // Row 2: 固定週幾
+  rows.push({
+    label: '固定週幾<br><span class="id-text text-[10px] text-gray-500">Tetap</span>',
+    cells: dows.map(dow => fixedSomeDays.filter(t=>(t.weekdays||[]).includes(dow)).map(t=>chipFor(t)).join('') || '<span class="text-gray-300">·</span>')
+  });
+  // Row 3: mWeek（依 weekFlags 對當週是否符合 → muted 與否）
+  const wMonNow = weekOfMonth(d0);
+  rows.push({
+    label: `月內第 N 週<br><span class="text-[10px] text-indigo-700 font-bold">本週 = M${wMonNow}</span><br><span class="id-text text-[10px] text-gray-500">Bulan M${wMonNow}</span>`,
+    cells: dows.map(()=>{
+      const sub = mWeekTasks
+        .map(t => chipFor(t, { muted: !taskActiveThisWeek(t, d0) }))
+        .join('');
+      return sub || '<span class="text-gray-300">·</span>';
+    })
+  });
+  // Row 4: 每季
+  rows.push({
+    label: '每季<br><span class="id-text text-[10px] text-gray-500">Triwulan</span>',
+    cells: dows.map(()=> quarterly.map(t=>chipFor(t)).join('') || '<span class="text-gray-300">·</span>')
+  });
 
-  // 每週固定矩陣
-  const body=document.getElementById('schWeeklyBody');
-  body.innerHTML = weekly.length?weekly.map(t=>{
-    const cat=getCat(t.catId);
-    const inactive = t.active===false;
-    const cells=[1,2,3,4,5,6,0].map(d=>{
-      const isOn=t.weekdays.includes(d);
-      return `<td class="p-2 text-center ${isOn && !inactive?'bg-blue-100 font-bold text-blue-700':isOn?'bg-gray-100 text-gray-400':'text-gray-300'}">${isOn?'●':'·'}</td>`;
-    }).join('');
-    return `
-      <tr class="border-t border-gray-200 ${inactive?'opacity-60':''}">
-        <td class="p-2" style="border-left:4px solid ${cat.color}">
-          <div class="flex items-center gap-2">
-            <span class="font-semibold ${inactive?'line-through text-gray-500':''}">${t.nameZh}</span>
-            <span class="text-gray-500 text-xs">${t.nameId}</span>
-            ${inactive?'<span class="text-xs text-gray-400">（停用）</span>':''}
-          </div>
-        </td>
-        ${cells}
-      </tr>
-    `;
-  }).join(''):'<tr><td colspan="8" class="p-3 text-xs text-gray-400 italic text-center">無</td></tr>';
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('scheduleOverviewMeta').innerHTML =
+    `本週：${fmt(weekDates[0])} ~ ${fmt(weekDates[6])} · 啟用任務 ${all.length} 個 · 月內 = 第 ${wMonNow} 週`;
 
-  document.getElementById('schWeeklyFlex').innerHTML = weeklyFx.length?weeklyFx.map(flexCell).join(''):emptyZH;
-  document.getElementById('schBiweekAny').innerHTML  = biAny.length?biAny.map(flexCell).join(''):emptyZH;
-  document.getElementById('schBiweekOdd').innerHTML  = biOdd.length?biOdd.map(flexCell).join(''):emptyZH;
-  document.getElementById('schBiweekEven').innerHTML = biEven.length?biEven.map(flexCell).join(''):emptyZH;
-  document.getElementById('schMonthly').innerHTML    = monthly.length?monthly.map(flexCell).join(''):emptyZH;
-  document.getElementById('schQuarterly').innerHTML  = quarterly.length?quarterly.map(flexCell).join(''):emptyZH;
-
-  const activeCount = all.filter(t=>t.active!==false).length;
-  document.getElementById('schSummary').innerHTML = `
-    啟用 <b>${activeCount}</b> / 總共 <b>${all.length}</b> 個任務 ·
-    每日 ${daily.length} · 每週固定 ${weekly.length} ·
-    每週彈性 ${weeklyFx.length} ·
-    雙週 ${biAny.length+biOdd.length+biEven.length}（單 ${biOdd.length} / 雙 ${biEven.length}） ·
-    每月 ${monthly.length} · 每季 ${quarterly.length}
-  `;
+  document.getElementById('scheduleOverviewBody').innerHTML = rows.map(r=>{
+    const datesHtml = ''; // 第一列已在 thead 寫死
+    return `<tr>
+      <td class="p-1 sticky left-0 bg-white text-xs font-bold border border-gray-200 align-top w-20">${r.label}</td>
+      ${r.cells.map(c=>`<td class="p-1 border border-gray-200 align-top">${c}</td>`).join('')}
+    </tr>`;
+  }).join('');
 }
 
 function renderCatFilters(){
@@ -5491,7 +5582,7 @@ function renderTemplates(){
           <div class="id-text text-sm text-gray-600">${t.nameId}</div>
           <div class="text-xs text-gray-500 mt-1">
             📁 ${cat.nameZh} ·
-            ${t.mode==='fixed' ? '指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、') : FREQ_ZH[t.freqType]+' / '+FREQ_ID[t.freqType]}
+            ${t.mode==='fixed' ? '指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、') : (t.freqType==='mWeek' ? weekFlagsLabel(t) : (FREQ_ZH[t.freqType]||'')+' / '+(FREQ_ID[t.freqType]||''))}
           </div>
         </div>
         <button onclick="event.stopPropagation();duplicateTemplate('${t.id}')" class="text-xs text-purple-600 hover:bg-purple-50 px-2 py-1 rounded shrink-0" title="複製為新模板">📋 複製</button>
@@ -6017,13 +6108,20 @@ function openSupplyHistory(sid){
 function closeSupplyHistory(){ document.getElementById('supplyHistoryModal').classList.add('hidden'); }
 
 /* ========== Tabs ========== */
+function switchTab(tabName){
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('tab-active'));
+  btn.classList.add('tab-active');
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
+  const tabEl = document.getElementById('tab-'+tabName);
+  if (tabEl) tabEl.classList.remove('hidden');
+  // 切到頂端
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function goHome(){ switchTab('week'); }
 document.querySelectorAll('.tab-btn').forEach(b=>{
-  b.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('tab-active'));
-    b.classList.add('tab-active');
-    document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
-    document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
-  });
+  b.addEventListener('click', ()=>switchTab(b.dataset.tab));
 });
 
 /* ========== 任務詳細 Modal ========== */
@@ -6039,7 +6137,7 @@ function openTaskModal(tid){
   const cat=getCat(t.catId);
   document.getElementById('modalMeta').innerHTML=`
     <div>📁 ${cat.nameZh} / ${cat.nameId}</div>
-    <div>${modeBadgeTiny(t)} ${t.mode==='fixed'?'指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、'):FREQ_ZH[t.freqType]+' / '+FREQ_ID[t.freqType]}</div>
+    <div>${modeBadgeTiny(t)} ${t.mode==='fixed'?'指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、'):(t.freqType==='mWeek' ? weekFlagsLabel(t) : (FREQ_ZH[t.freqType]||'')+' / '+(FREQ_ID[t.freqType]||''))}</div>
     <div class="text-gray-500">${t.descZh}</div>
     <div class="id-text text-gray-500">${t.descId}</div>
     <div>上次完成：${lastDoneText(t)}</div>
@@ -6059,7 +6157,7 @@ function openTaskModal(tid){
   const periodBtn=document.getElementById('modalSkipPeriodBtn');
   if (periodBtn){
     if (t.mode==='flex'){
-      const periodDays=PERIOD_DAYS[t.freqType]||14;
+      const periodDays=getPeriodDays(t)||14;
       const freqLabel=FREQ_ZH[t.freqType]||'本期';
       periodBtn.innerHTML = `⏸ 本期不執行（${freqLabel} ${periodDays} 天）<br><span class="id-text text-xs font-normal">Lewati periode ${periodDays} hari</span>`;
       periodBtn.classList.remove('hidden');
@@ -6109,7 +6207,7 @@ function skipTaskPeriod(reason){
   if (!t) return;
   if (t.mode!=='flex'){ alert('此功能僅適用於彈性週期任務'); return; }
   const td=ymd(today());
-  const period=PERIOD_DAYS[t.freqType] || 14;
+  const period=getPeriodDays(t) || 14;
   const endDate=new Date(today()); endDate.setDate(endDate.getDate()+period-1);
   const endStr=ymd(endDate);
   state.taskSkips.push({
@@ -6257,8 +6355,7 @@ function duplicateTemplate(id){
   const setVal=(elId,val)=>{const e=document.getElementById(elId);e.value=val||'';e.dataset.orig=e.value;};
   setVal('tmplNameZh', (src.nameZh||'') + ' (副本)');
   setVal('tmplNameId', (src.nameId||'') + ' (salinan)');
-  document.getElementById('tmplFreq').value = src.freqType || 'weekly';
-  document.getElementById('tmplParity').value = src.weekParity || 'any';
+  document.getElementById('tmplFreq').value = (src.freqType==='quarterly'?'quarterly':'mWeek');
   document.getElementById('tmplActive').checked = src.active !== false;
   setVal('tmplDescZh', src.descZh);
   setVal('tmplDescId', src.descId);
@@ -6268,6 +6365,7 @@ function duplicateTemplate(id){
     if (wds.includes(parseInt(b.dataset.d))) b.classList.add('bg-blue-600','text-white','border-blue-600');
     else b.classList.remove('bg-blue-600','text-white','border-blue-600');
   });
+  setWeekFlagsButtons(src.weekFlags || [1,2,3,4]);
   document.getElementById('tmplModalTitle').textContent='新增任務（從「'+src.nameZh+'」複製）';
 }
 function openTemplateModal(id){
@@ -6281,12 +6379,14 @@ function openTemplateModal(id){
   const setVal=(id,val)=>{const e=document.getElementById(id);e.value=val||'';e.dataset.orig=e.value;};
   setVal('tmplNameZh', t?.nameZh);
   setVal('tmplNameId', t?.nameId);
-  document.getElementById('tmplFreq').value=t?.freqType||'weekly';
-  document.getElementById('tmplParity').value=t?.weekParity||'any';
+  // 新模型只剩 mWeek / quarterly；舊資料先 migrate
+  if (t) migrateTemplateFreq(t);
+  document.getElementById('tmplFreq').value = (t?.freqType==='quarterly') ? 'quarterly' : 'mWeek';
   document.getElementById('tmplActive').checked=t?(t.active!==false):true;
   setVal('tmplDescZh', t?.descZh);
   setVal('tmplDescId', t?.descId);
   setMode(t?.mode||'fixed');
+  setWeekFlagsButtons(t?.weekFlags || [1,2,3,4]);
   onFreqChange();
   const wds=t?.weekdays||[1,2,3,4,5,6,0];
   document.querySelectorAll('.wd-btn').forEach(b=>{
@@ -6297,10 +6397,22 @@ function openTemplateModal(id){
 }
 function onFreqChange(){
   const ft=document.getElementById('tmplFreq').value;
-  const isBiweekly=ft==='biweekly';
   const isFlex=tmplMode==='flex';
-  document.getElementById('parityWrap').style.display = (isFlex && isBiweekly) ? 'block' : 'none';
+  const wrap=document.getElementById('weekFlagsWrap');
+  if (wrap) wrap.style.display = (isFlex && ft==='mWeek') ? 'block' : 'none';
 }
+function setWeekFlagsButtons(flags){
+  flags = flags || [1,2,3,4];
+  document.querySelectorAll('.wf-btn').forEach(b=>{
+    const w = parseInt(b.dataset.w);
+    if (flags.includes(w)) b.classList.add('bg-purple-600','text-white','border-purple-600');
+    else b.classList.remove('bg-purple-600','text-white','border-purple-600');
+  });
+}
+function setWeekFlagsPreset(flags){ setWeekFlagsButtons(flags); }
+document.querySelectorAll('.wf-btn').forEach(b=> b.onclick=()=>{
+  b.classList.toggle('bg-purple-600'); b.classList.toggle('text-white'); b.classList.toggle('border-purple-600');
+});
 function closeTemplateModal(){ document.getElementById('templateModal').classList.add('hidden'); }
 let tmplMode='fixed';
 function setMode(m){
@@ -6320,9 +6432,14 @@ document.querySelectorAll('.wd-btn').forEach(b=> b.onclick=()=>{
 function saveTemplate(){
   try {
     const freqEl=document.getElementById('tmplFreq');
-    const parityEl=document.getElementById('tmplParity');
     const activeEl=document.getElementById('tmplActive');
-    const freqType=tmplMode==='fixed' ? 'daily' : (freqEl?.value || 'weekly');
+    const freqType=tmplMode==='fixed' ? 'daily' : (freqEl?.value || 'mWeek');
+    const weekFlags = (tmplMode==='flex' && freqType==='mWeek')
+      ? Array.from(document.querySelectorAll('.wf-btn.bg-purple-600')).map(b=>parseInt(b.dataset.w)).sort()
+      : [];
+    if (tmplMode==='flex' && freqType==='mWeek' && !weekFlags.length){
+      alert('指定週模式請至少選一個週次（第1/2/3/4 週）'); return;
+    }
     const data={
       catId: document.getElementById('tmplCat')?.value || '',
       nameZh: document.getElementById('tmplNameZh')?.value.trim() || '',
@@ -6332,7 +6449,7 @@ function saveTemplate(){
         ? Array.from(document.querySelectorAll('.wd-btn.bg-blue-600')).map(b=>parseInt(b.dataset.d))
         : [],
       freqType,
-      weekParity: (tmplMode==='flex' && freqType==='biweekly') ? (parityEl?.value || 'any') : 'any',
+      weekFlags,
       descZh: document.getElementById('tmplDescZh')?.value.trim() || '',
       descId: document.getElementById('tmplDescId')?.value.trim() || '',
       active: activeEl ? activeEl.checked : true,
