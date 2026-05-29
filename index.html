@@ -2126,7 +2126,24 @@ async function cloudPull(){
         state.supplyCats   = d.supplyCats   || state.supplyCats;
         state.supplyHistory= d.supplyHistory|| state.supplyHistory;
         state.preferences  = d.preferences  || state.preferences;
+        // ↓ 補齊缺漏欄位（這 12 個是 bug 修正前沒同步的）
+        if (d.messages           !== undefined) state.messages           = d.messages;
+        if (d.punchLog           !== undefined) state.punchLog           = d.punchLog;
+        if (d.scenarios          !== undefined) state.scenarios          = d.scenarios;
+        if (d.events             !== undefined) state.events             = d.events;
+        if (d.holidays           !== undefined) state.holidays           = d.holidays;
+        if (d.payrollConfig      !== undefined) state.payrollConfig      = d.payrollConfig;
+        if (d.leaveRequests      !== undefined) state.leaveRequests      = d.leaveRequests;
+        if (d.leaveTypes         !== undefined) state.leaveTypes         = d.leaveTypes;
+        if (d.payrollAdjustments !== undefined) state.payrollAdjustments = d.payrollAdjustments;
+        if (d.payrollReceipts    !== undefined) state.payrollReceipts    = d.payrollReceipts;
+        if (d.taskSkips          !== undefined) state.taskSkips          = d.taskSkips;
+        if (d.restSchedules      !== undefined) state.restSchedules      = d.restSchedules;
+        if (d.leavePolicyNote    !== undefined) state.leavePolicyNote    = d.leavePolicyNote;
         save();   // 寫進 localStorage（cloudPush 被 _cloudSyncing 旗標跳過）
+        window._lastCloudSyncAt = new Date();
+        window._lastCloudSyncKind = 'pull';
+        if (typeof updateCloudStatusUI === 'function') updateCloudStatusUI();
       } finally {
         window._cloudSyncing = false;
       }
@@ -2149,13 +2166,33 @@ async function cloudPushImmediate(){
       reminders: state.reminders, supplies: state.supplies,
       supplyCats: state.supplyCats, supplyHistory: state.supplyHistory,
       preferences: state.preferences,
+      // ↓ 補齊缺漏的欄位（之前漏同步，導致薪資/打卡/請假/活動/休憩等只存在本機）
+      messages: state.messages,
+      punchLog: state.punchLog,
+      scenarios: state.scenarios,
+      events: state.events,
+      holidays: state.holidays,
+      payrollConfig: state.payrollConfig,
+      leaveRequests: state.leaveRequests,
+      leaveTypes: state.leaveTypes,
+      payrollAdjustments: state.payrollAdjustments,
+      payrollReceipts: state.payrollReceipts,
+      taskSkips: state.taskSkips,
+      restSchedules: state.restSchedules,
+      leavePolicyNote: state.leavePolicyNote,
     };
     const { error } = await supabaseClient.from('app_state').upsert({
       family_id: cloudFamilyId,
       data: payload,
       updated_at: new Date().toISOString(),
     });
-    if (error) console.warn('cloudPush error:', error);
+    if (error){
+      console.warn('cloudPush error:', error);
+    } else {
+      window._lastCloudSyncAt = new Date();
+      window._lastCloudSyncKind = 'push';
+      if (typeof updateCloudStatusUI === 'function') updateCloudStatusUI();
+    }
   } catch(err){
     console.warn('cloudPushImmediate 例外：', err);
   }
@@ -2633,15 +2670,39 @@ function renderCloudStatusBox(){
     box.innerHTML = `<div class="text-sm">🟡 <b>雲端連線中⋯⋯</b></div>`;
     return;
   }
+  const last = window._lastCloudSyncAt;
+  const kind = window._lastCloudSyncKind;
+  const syncLine = last
+    ? `<div class="text-xs text-gray-600 mb-2">最後同步：<b>${last.toLocaleTimeString('zh-TW',{hour12:false})}</b>（${kind==='pull'?'⬇ 收到雲端':'⬆ 上傳本機'}）</div>`
+    : `<div class="text-xs text-gray-400 mb-2">最後同步：尚未同步</div>`;
   box.innerHTML = `
-    <div class="text-sm mb-2">🟢 <b>已連接雲端家庭</b></div>
+    <div class="text-sm mb-1">🟢 <b>已連接雲端家庭</b></div>
+    ${syncLine}
     <div class="text-xs text-gray-500 mb-1">家庭代碼（請保管好，分享給家人裝置加入）：</div>
     <div class="flex gap-2 items-center">
       <code class="flex-1 bg-white border border-gray-300 rounded px-2 py-1 text-xs font-mono break-all">${cloudFamilyId||'-'}</code>
       <button onclick="copyFamilyId()" class="bg-blue-600 text-white text-xs px-2 py-1 rounded-lg shrink-0">複製</button>
     </div>
-    <button onclick="familyLeave()" class="text-xs text-red-600 underline mt-3">離開此家庭（回到本機模式）</button>
+    <div class="flex gap-2 mt-3">
+      <button onclick="forceCloudPull()" class="bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex-1">⬇ 強制從雲端拉取（覆蓋本機）</button>
+      <button onclick="forceCloudPush()" class="bg-blue-500 text-white text-xs px-3 py-2 rounded-lg flex-1">⬆ 強制上傳本機（覆蓋雲端）</button>
+    </div>
+    <button onclick="familyLeave()" class="text-xs text-red-600 underline mt-3 block">離開此家庭（回到本機模式）</button>
   `;
+}
+// 別名供雲端 push/pull 完成後呼叫
+function updateCloudStatusUI(){ renderCloudStatusBox(); }
+async function forceCloudPull(){
+  if (!cloudReady){ alert('尚未連上雲端'); return; }
+  if (!confirm('將從雲端強制拉取資料覆蓋本機。\n本機未上傳的改動會遺失，確定嗎？')) return;
+  await cloudPull();
+  alert('已從雲端拉取最新資料');
+}
+async function forceCloudPush(){
+  if (!cloudReady){ alert('尚未連上雲端'); return; }
+  if (!confirm('將把本機資料上傳覆蓋雲端。\n其他裝置上未同步的改動會遺失，確定嗎？')) return;
+  await cloudPushImmediate();
+  alert('已上傳本機資料至雲端');
 }
 function copyFamilyId(){
   if (!cloudFamilyId) return;
