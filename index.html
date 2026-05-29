@@ -267,7 +267,10 @@
             <div id="mgrClock" class="text-base font-bold text-amber-800 tabular-nums"></div>
           </div>
           <div id="mgrDateId" class="id-text text-sm text-amber-900 font-medium mt-0.5"></div>
-          <div id="mgrPunchStatus" class="text-sm font-bold mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full"></div>
+          <div class="flex items-center gap-2 flex-wrap mt-1">
+            <div id="mgrPunchStatus" class="text-sm font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full"></div>
+            <div id="mgrTomorrowOff" class="hidden text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-300"></div>
+          </div>
         </div>
         <div class="flex items-center gap-2 mt-1">
           <span id="mgrRoleTag" class="text-xs bg-white/70 text-purple-800 px-2 py-1 rounded-full font-semibold">管理者</span>
@@ -290,6 +293,9 @@
   </header>
 
   <main class="container-app max-w-5xl mx-auto px-4 py-5">
+
+    <!-- Atika 明日休假提醒 banner（管理者視角） -->
+    <div id="mgrTomorrowOffBanner" class="hidden bg-orange-50 border-2 border-orange-300 rounded-2xl p-3 mb-4"></div>
 
     <!-- 本週概覽 -->
     <div id="tab-week" class="tab-content">
@@ -706,15 +712,18 @@
     <div class="mb-3 border border-gray-200 rounded-xl p-3">
       <div class="text-sm font-semibold mb-2">遇到特殊狀況 / Kondisi Khusus</div>
       <div class="grid grid-cols-2 gap-2 mb-2">
-        <button onclick="skipTaskToday()" class="bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-semibold">
+        <button onclick="openReasonForAction('skipToday')" class="bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-semibold">
           ⏭ 本日不執行<br><span class="id-text text-xs font-normal">Tidak hari ini</span>
         </button>
-        <button onclick="postponeTaskTomorrow()" class="bg-amber-500 text-white py-2 rounded-lg text-sm font-semibold">
+        <button onclick="openReasonForAction('postponeTomorrow')" class="bg-amber-500 text-white py-2 rounded-lg text-sm font-semibold">
           📅 移至明天<br><span class="id-text text-xs font-normal">Pindah ke besok</span>
         </button>
       </div>
-      <button onclick="openPostponeModalForTask()" class="w-full bg-amber-600 text-white py-2 rounded-lg text-sm font-semibold">
+      <button onclick="openPostponeModalForTask()" class="w-full bg-amber-600 text-white py-2 rounded-lg text-sm font-semibold mb-2">
         📅 移至指定日 / Pindah ke tanggal lain
+      </button>
+      <button id="modalSkipPeriodBtn" onclick="openReasonForAction('skipPeriod')" class="w-full bg-purple-600 text-white py-2 rounded-lg text-sm font-semibold hidden">
+        ⏸ 本期不執行<br><span class="id-text text-xs font-normal">Lewati periode ini</span>
       </button>
     </div>
     <div id="modalHistory" class="mb-4"></div>
@@ -1490,7 +1499,28 @@
       <input id="postponeKeepToday" type="checkbox" checked class="w-4 h-4">
       同時將今日的任務標為「不執行」
     </label>
+    <label class="block mt-3 text-xs text-gray-600">原因（可選） / Alasan (opsional)</label>
+    <textarea id="postponeReason" class="w-full border border-gray-300 rounded-lg p-2 text-sm" rows="2" placeholder="例如：身體不適 / 外宿不在家"></textarea>
     <button onclick="confirmPostpone()" class="w-full bg-amber-500 text-white py-3 rounded-xl font-semibold mt-3">確認移動</button>
+  </div>
+</div>
+
+<!-- ===== 跳過原因 Reason Prompt Modal ===== -->
+<div id="reasonPromptModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
+  <div class="bg-white w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl p-5">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div id="reasonModalTitle" class="text-xl font-bold">跳過任務</div>
+        <div id="reasonModalSub" class="id-text text-sm text-gray-500"></div>
+      </div>
+      <button onclick="closeReasonModal()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <label class="block text-xs text-gray-600 mb-1">原因（可選） / Alasan (opsional)</label>
+    <textarea id="reasonInput" class="w-full border border-gray-300 rounded-lg p-2 text-sm" rows="3" placeholder="不填也可以，直接送出"></textarea>
+    <div class="flex gap-2 mt-3">
+      <button onclick="closeReasonModal()" class="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-semibold">取消</button>
+      <button onclick="confirmReasonAction()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold">確認</button>
+    </div>
   </div>
 </div>
 
@@ -3007,9 +3037,16 @@ function parityBadgeHtml(t, variant){
 function modeBadgeTiny(t){
   if (!t.mode) return `<span class="mode-adhoc text-xs px-1.5 py-0.5 rounded-full font-semibold">臨時 Tmb</span>`;
   if (t.mode==='fixed'){
-    // 涵蓋週一到週日才算「每日」，否則只是「指定日」
+    // 涵蓋週一到週日才算「每日」，否則列出實際週幾
     if (t.weekdays && t.weekdays.length===7){
       return `<span class="mode-daily text-xs px-1.5 py-0.5 rounded-full font-semibold">每日 Hari</span>`;
+    }
+    if (t.weekdays && t.weekdays.length>0){
+      // 排序週幾（以週一為首）顯示成「週一、五 Sen, Jum」
+      const sorted=[...t.weekdays].sort((a,b)=>((a+6)%7)-((b+6)%7));
+      const zh='週'+sorted.map(w=>WD_ZH[w]).join('、');
+      const id=sorted.map(w=>(WD_ID[w]||'').slice(0,3)).join(', ');
+      return `<span class="mode-daily text-xs px-1.5 py-0.5 rounded-full font-semibold">${zh} <span class="id-text">${id}</span></span>`;
     }
     return `<span class="mode-daily text-xs px-1.5 py-0.5 rounded-full font-semibold">指定日 Tetap</span>`;
   }
@@ -3378,6 +3415,7 @@ function renderManagerView(){
   renderSectionDone('mgrFlexDoneWrap','mgrFlexDone','mgrFlexDoneLabel', allFxDone.map(t=>renderTaskCard(t)));
 
   renderMgrPunchStatus();
+  renderMgrTomorrowOff();
   renderWeekWorkload();
   renderTodayTimeline();
   renderCatFilters();
@@ -3397,14 +3435,85 @@ const PUNCH_TYPES = [
   { id:'rest_end',   emoji:'☀️', zh:'返回', id_:'Lanjut',    bg:'amber'  },
   { id:'work_end',   emoji:'🏠', zh:'下班', id_:'Pulang',    bg:'blue'   },
 ];
+
+/* 依今日 restSchedules 動態決定打卡步驟。
+   每段 rest 產生 rest_<rsId>_start / rest_<rsId>_end。
+   若今日無 restSchedule，回退到舊版單段 rest_start/rest_end。 */
+function getTodayRestSchedules(d=today()){
+  const dow = d.getDay();
+  return (state.restSchedules||[])
+    .filter(rs=>(rs.weekdays||[]).includes(dow))
+    .sort((a,b)=>(a.startTime||'').localeCompare(b.startTime||''));
+}
+function getPunchPlanForDate(d=today()){
+  // 依 restSchedules 動態組打卡步驟
+  const plan = [{ id:'work_start', emoji:'🌅', zh:'上班', id_:'Masuk', kind:'work' }];
+  const rests = getTodayRestSchedules(d);
+  if (rests.length){
+    rests.forEach(rs=>{
+      plan.push({
+        id:'rest_'+rs.id+'_start', emoji:'🌙',
+        zh:`${rs.nameZh} 起`, id_:`${rs.nameId||rs.nameZh} mulai`,
+        kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
+      });
+      plan.push({
+        id:'rest_'+rs.id+'_end', emoji:'☀️',
+        zh:`${rs.nameZh} 收`, id_:`${rs.nameId||rs.nameZh} kembali`,
+        kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
+      });
+    });
+  } else {
+    // 沒設小憩時段 → 用舊版單段午休
+    plan.push({ id:'rest_start', emoji:'🌙', zh:'午休', id_:'Istirahat', kind:'rest' });
+    plan.push({ id:'rest_end',   emoji:'☀️', zh:'返回', id_:'Lanjut',    kind:'rest' });
+  }
+  plan.push({ id:'work_end', emoji:'🏠', zh:'下班', id_:'Pulang', kind:'work' });
+  return plan;
+}
+function getPunchMetaByType(type, d=today()){
+  // 給定打卡 type，找出對應 plan entry（含中印文標題）；若 plan 不含則 fallback
+  const plan = getPunchPlanForDate(d);
+  const found = plan.find(p=>p.id===type);
+  if (found) return found;
+  // 舊資料：rest_<id>_start/end 但今日 schedule 已刪除
+  if (type.startsWith('rest_') && (type.endsWith('_start')||type.endsWith('_end'))){
+    const isStart = type.endsWith('_start');
+    const rsId = type.replace(/^rest_/,'').replace(/_(start|end)$/,'');
+    const rs = (state.restSchedules||[]).find(x=>x.id===rsId);
+    if (rs){
+      return {
+        id:type, emoji: isStart?'🌙':'☀️',
+        zh: `${rs.nameZh} ${isStart?'起':'收'}`,
+        id_: `${rs.nameId||rs.nameZh} ${isStart?'mulai':'kembali'}`,
+        kind:'rest', rsId,
+      };
+    }
+  }
+  // 預設 fallback
+  const lookup = PUNCH_TYPES.find(p=>p.id===type);
+  if (lookup) return { ...lookup, kind: type.includes('rest')?'rest':'work' };
+  return { id:type, emoji:'⏱', zh:type, id_:type, kind:'rest' };
+}
 function todayPunches(d=today()){ return state.punchLog[ymd(d)] || []; }
 function getPunch(list, type){ return list.find(p=>p.type===type); }
 function nowHHMM(){
   const d=new Date();
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
-function setPunch(type, at, isBackfill){
-  const td=ymd(today());
+function punchSortKey(type){
+  // 排序：work_start 最前、work_end 最後、其餘 rest 依 startTime
+  if (type==='work_start') return 0;
+  if (type==='work_end')   return 9999;
+  if (type==='rest_start') return 5000;
+  if (type==='rest_end')   return 5001;
+  // 動態 rest_<rsId>_start/end → 依 schedule 開始時間
+  const rsId = type.replace(/^rest_/,'').replace(/_(start|end)$/,'');
+  const rs = (state.restSchedules||[]).find(x=>x.id===rsId);
+  const base = rs?.startTime ? (parseInt(rs.startTime.slice(0,2))*60+parseInt(rs.startTime.slice(3,5))) : 600;
+  return 1000 + base*2 + (type.endsWith('_end')?1:0);
+}
+function setPunch(type, at, isBackfill, dateKey){
+  const td=dateKey||ymd(today());
   if (!state.punchLog[td]) state.punchLog[td]=[];
   state.punchLog[td]=state.punchLog[td].filter(p=>p.type!==type);
   state.punchLog[td].push({
@@ -3413,13 +3522,11 @@ function setPunch(type, at, isBackfill){
     by: state.currentUser?.name || '?',
     backfillAt: isBackfill ? new Date().toISOString() : null,
   });
-  // 依 PUNCH_TYPES 順序排序
-  const order=PUNCH_TYPES.reduce((m,p,i)=>(m[p.id]=i,m),{});
-  state.punchLog[td].sort((a,b)=>order[a.type]-order[b.type]);
+  state.punchLog[td].sort((a,b)=>punchSortKey(a.type)-punchSortKey(b.type));
   save();
 }
-function removePunch(type){
-  const td=ymd(today());
+function removePunch(type, dateKey){
+  const td=dateKey||ymd(today());
   if (!state.punchLog[td]) return;
   state.punchLog[td]=state.punchLog[td].filter(p=>p.type!==type);
   if (!state.punchLog[td].length) delete state.punchLog[td];
@@ -3430,11 +3537,15 @@ function renderPunchSection(){
   if (!grid) return;
   const lang=getCurrentLang();
   const punches=todayPunches();
-  const html=PUNCH_TYPES.map((pt,idx)=>{
+  const plan = getPunchPlanForDate();
+  // 動態調整 grid 欄數：4 顆走 4 欄、6 顆走 3 欄、其他走 2 欄
+  grid.className = 'grid gap-2 ' + (plan.length===4 ? 'grid-cols-4' : plan.length===6 ? 'grid-cols-3' : 'grid-cols-2');
+  const html=plan.map((pt,idx)=>{
     const p=getPunch(punches, pt.id);
-    const prev=idx===0 || getPunch(punches, PUNCH_TYPES[idx-1].id);
+    const prev=idx===0 || getPunch(punches, plan[idx-1].id);
     const priLbl = lang==='id'?pt.id_:pt.zh;
     const secLbl = lang==='id'?pt.zh:pt.id_;
+    const rangeHint = pt.range ? `<div class="text-[10px] text-gray-400 leading-tight">${pt.range}</div>` : '';
     if (p){
       const bf = p.isBackfill;
       const cls = bf ? 'bg-amber-50 border-amber-300' : 'bg-gray-50 border-gray-200';
@@ -3442,6 +3553,7 @@ function renderPunchSection(){
         <button onclick="openPunchEdit('${pt.id}')" class="${cls} border-2 rounded-xl p-2 text-center active:scale-95">
           <div class="text-xs text-gray-600">${pt.emoji} ${priLbl}</div>
           <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
+          ${rangeHint}
           <div class="font-bold text-base tabular-nums mt-1">${p.at}</div>
           ${bf?'<div class="text-xs text-amber-700 font-bold">⚠️ 補打</div>':'<div class="text-xs text-green-600">✓</div>'}
         </button>
@@ -3452,6 +3564,7 @@ function renderPunchSection(){
         <button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border-2 border-gray-200 rounded-xl p-2 text-center">
           <div class="text-xs text-gray-400">${pt.emoji} ${priLbl}</div>
           <div class="text-xs text-gray-300 id-text leading-tight">${secLbl}</div>
+          ${rangeHint}
           <div class="text-xs text-gray-400 mt-1">待前一步</div>
           <div class="text-xs text-amber-600 mt-0.5">⚠️ 補打</div>
         </button>
@@ -3461,29 +3574,56 @@ function renderPunchSection(){
       <button onclick="punchNow('${pt.id}')" class="bg-green-50 border-2 border-green-400 rounded-xl p-2 text-center active:scale-95">
         <div class="text-xs text-gray-600">${pt.emoji} ${priLbl}</div>
         <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
+        ${rangeHint}
         <div class="font-bold text-base text-green-700 mt-1">點此打卡</div>
         <div class="text-xs text-gray-500">${nowHHMM()}</div>
       </button>
     `;
   }).join('');
   grid.innerHTML=html;
-  // 工時統計
   document.getElementById('punchSummary').textContent = punchSummaryText(punches);
+}
+// 蒐集多段 rest 配對：回傳 [{startType, endType, start, end}]
+function getRestPairsFromPunches(punches, d=today()){
+  const plan = getPunchPlanForDate(d);
+  // 從 plan 蒐集 rest pairs（含動態 schedule）+ 還要加上「不在 plan 但 punch log 已有」的 legacy 配對
+  const pairs = [];
+  const seenStartTypes = new Set();
+  for (let i=0;i<plan.length;i++){
+    const a=plan[i], b=plan[i+1];
+    if (a && b && a.kind==='rest' && b.kind==='rest' && a.id.endsWith('_start') && b.id.endsWith('_end')){
+      pairs.push({ startType:a.id, endType:b.id, start:getPunch(punches,a.id), end:getPunch(punches,b.id) });
+      seenStartTypes.add(a.id);
+      i++;
+    } else if (a && a.id==='rest_start'){
+      pairs.push({ startType:'rest_start', endType:'rest_end', start:getPunch(punches,'rest_start'), end:getPunch(punches,'rest_end') });
+      seenStartTypes.add('rest_start');
+    }
+  }
+  // 補上 punch log 裡存在但 plan 沒涵蓋（schedule 後來改了）
+  punches.filter(p=>p.type.endsWith('_start') && p.type.startsWith('rest_') && !seenStartTypes.has(p.type))
+    .forEach(p=>{
+      const endType = p.type.replace(/_start$/, '_end');
+      pairs.push({ startType:p.type, endType, start:p, end:getPunch(punches,endType) });
+    });
+  return pairs;
 }
 function punchSummaryText(punches){
   const ws=getPunch(punches,'work_start');
   const we=getPunch(punches,'work_end');
-  const rs=getPunch(punches,'rest_start');
-  const re=getPunch(punches,'rest_end');
   if (!ws) return '尚未上班';
+  const pairs = getRestPairsFromPunches(punches);
+  const restingNow = pairs.find(pr=>pr.start && !pr.end);
   if (!we){
-    if (rs && !re) return `🌙 午休中（${rs.at} 開始）`;
+    if (restingNow){
+      const meta = getPunchMetaByType(restingNow.startType);
+      return `🌙 ${meta.zh.replace(' 起','')}中（${restingNow.start.at} 開始）`;
+    }
     return `工作中（${ws.at} 起）`;
   }
-  // 計算工時
   const m=(t)=>{ const [h,mm]=t.split(':').map(Number); return h*60+mm; };
   let work = m(we.at)-m(ws.at);
-  if (rs && re) work -= (m(re.at)-m(rs.at));
+  pairs.forEach(pr=>{ if (pr.start && pr.end) work -= (m(pr.end.at)-m(pr.start.at)); });
   if (work<0) work=0;
   const h=Math.floor(work/60), mm=work%60;
   return `✓ 已下班 · 實際工時 ${h}h ${mm}m`;
@@ -3495,7 +3635,7 @@ function punchNow(type){
 let _punchEditType=null;
 function openPunchEdit(type){
   _punchEditType=type;
-  const pt=PUNCH_TYPES.find(x=>x.id===type);
+  const pt=getPunchMetaByType(type);
   const existing=getPunch(todayPunches(), type);
   document.getElementById('punchEditTitle').textContent = `${pt.emoji} ${pt.zh} / ${pt.id_}`;
   document.getElementById('punchEditSubtitle').textContent = existing ? '修改打卡時間' : '補打卡（會標記為「⚠️ 補」）';
@@ -3832,41 +3972,63 @@ function renderPayrollDayRow(d){
   const isToday = d.dateStr === ymd(today());
   const punches = state.punchLog?.[d.dateStr] || [];
   const g = (type) => punches.find(p=>p.type===type);
-  const ws=g('work_start'), rs=g('rest_start'), re=g('rest_end'), we=g('work_end');
+  const ws=g('work_start'), we=g('work_end');
   const fmtTime = t => t ? t : '--:--';
-  const calcHrs = (from, to) => {
-    if (!from || !to) return null;
-    const [h1,m1]=from.split(':').map(Number);
-    const [h2,m2]=to.split(':').map(Number);
-    const mins = (h2*60+m2)-(h1*60+m1);
+  const toMin = t => { if (!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; };
+  const calcHrsMin = (from, to) => {
+    const a=toMin(from), b=toMin(to);
+    if (a==null||b==null) return null;
+    const mins = b-a;
     if (mins<=0) return null;
-    return `${Math.floor(mins/60)}h ${mins%60}m`;
+    return mins;
   };
+  const fmtDur = m => m!=null ? `${Math.floor(m/60)}h ${m%60}m` : null;
+  // 多段休息（依當天 schedule）
+  const dateObj = new Date(yy, mm-1, dd);
+  const restPairs = getRestPairsFromPunches(punches, dateObj);
   // 工時拆解
   let punchDetail = '';
-  if (ws || we || rs || re){
-    // 上班段 (work_start → rest_start or work_end)
-    const workEnd1 = rs ? rs.at : we ? we.at : null;
-    const morning = ws && workEnd1 ? calcHrs(ws.at, workEnd1) : null;
-    const restDur = rs && re ? calcHrs(rs.at, re.at) : null;
-    const afternoon = re && we ? calcHrs(re.at, we.at) : null;
+  const hasAny = ws || we || punches.length;
+  if (hasAny){
     let lines = [];
+    // 起始上班
     if (ws){
-      lines.push(`上班 ${fmtTime(ws.at)} → ${workEnd1?fmtTime(workEnd1):'未下班'}${morning?` (${morning})`:''}`);
+      // 第一個 rest 之前的工作段
+      const firstRest = restPairs.find(pr=>pr.start);
+      const firstEnd = firstRest?.start?.at || (we?we.at:null);
+      const mins = ws && firstEnd ? calcHrsMin(ws.at, firstEnd) : null;
+      lines.push(`上班 ${fmtTime(ws.at)} → ${firstEnd?fmtTime(firstEnd):'未下班'}${mins?` (${fmtDur(mins)})`:''}`);
     }
-    if (rs || re){
-      lines.push(`午休 ${fmtTime(rs?.at)} → ${fmtTime(re?.at)}${restDur?` (${restDur})`:''}`);
-    }
-    if (re && we){
-      lines.push(`下午 ${fmtTime(re.at)} → ${fmtTime(we.at)}${afternoon?` (${afternoon})`:''}`);
-    }
+    // 每段 rest + 後續工作段
+    restPairs.forEach((pr,i)=>{
+      if (pr.start || pr.end){
+        const meta = getPunchMetaByType(pr.startType, dateObj);
+        const label = meta.zh.replace(/[起收]$/,'').trim() || '休息';
+        const restMin = pr.start && pr.end ? calcHrsMin(pr.start.at, pr.end.at) : null;
+        lines.push(`${label} ${fmtTime(pr.start?.at)} → ${fmtTime(pr.end?.at)}${restMin?` (${fmtDur(restMin)})`:''}`);
+        // 該 rest 結束 → 下個 rest 開始 or 下班 的工作段
+        const next = restPairs[i+1];
+        const segEnd = next?.start?.at || (we?we.at:null);
+        if (pr.end && segEnd){
+          const mins = calcHrsMin(pr.end.at, segEnd);
+          if (mins) lines.push(`工作 ${fmtTime(pr.end.at)} → ${fmtTime(segEnd)} (${fmtDur(mins)})`);
+        }
+      }
+    });
     // 總工時
-    const totalWork = (morning?.split('h')[0]*60+parseInt((morning||'0h 0m').split('h ')[1]||0)||0)
-      + (afternoon?.split('h')[0]*60+parseInt((afternoon||'0h 0m').split('h ')[1]||0)||0);
-    if (totalWork > 0){
-      lines.push(`<b>實際工時 ${Math.floor(totalWork/60)}h ${totalWork%60}m</b>`);
+    let totalWork = ws && we ? calcHrsMin(ws.at, we.at) : null;
+    if (totalWork!=null){
+      restPairs.forEach(pr=>{
+        if (pr.start && pr.end){
+          const r = calcHrsMin(pr.start.at, pr.end.at);
+          if (r) totalWork -= r;
+        }
+      });
+      if (totalWork>0) lines.push(`<b>實際工時 ${fmtDur(totalWork)}</b>`);
     }
-    punchDetail = `<div class="text-xs text-gray-600 mt-1 ml-16 space-y-0.5">${lines.map(l=>`<div>${l}</div>`).join('')}</div>`;
+    if (lines.length){
+      punchDetail = `<div class="text-xs text-gray-600 mt-1 ml-16 space-y-0.5">${lines.map(l=>`<div>${l}</div>`).join('')}</div>`;
+    }
   }
   const editBtn = state.currentUser?.role==='manager'
     ? `<button onclick="openDayPunchEdit('${d.dateStr}')" class="text-xs text-blue-600 ml-2">編輯</button>` : '';
@@ -4529,15 +4691,21 @@ function doPrintPayroll(){
 let _editingPunchDate = null;
 function openDayPunchEdit(dateStr){
   _editingPunchDate = dateStr;
-  const dt = new Date(dateStr);
+  const [yy,mm,dd] = dateStr.split('-').map(Number);
+  const dt = new Date(yy, mm-1, dd);
   document.getElementById('dayPunchDate').textContent = `${dt.getMonth()+1}/${dt.getDate()} (${'日一二三四五六'[dt.getDay()]})`;
   const punches = state.punchLog?.[dateStr] || [];
   const g = type => punches.find(p=>p.type===type);
-  const fieldsHtml = PUNCH_TYPES.map(pt=>{
+  // 用該日的 plan 動態組欄位；額外把 punch log 中存在但 plan 沒涵蓋的舊 type 也列出
+  const plan = getPunchPlanForDate(dt);
+  const planIds = new Set(plan.map(p=>p.id));
+  const extras = punches.filter(p=>!planIds.has(p.type)).map(p=>getPunchMetaByType(p.type, dt));
+  const allFields = [...plan, ...extras];
+  const fieldsHtml = allFields.map(pt=>{
     const p = g(pt.id);
     return `
       <div class="flex items-center gap-2">
-        <span class="w-20 text-sm">${pt.emoji} ${pt.zh}</span>
+        <span class="w-28 text-xs">${pt.emoji} ${pt.zh}</span>
         <input type="time" class="dp-input flex-1 border border-gray-300 rounded-lg p-2" data-type="${pt.id}" value="${p?p.at:''}">
         ${p?.isBackfill?'<span class="text-xs text-amber-700">⚠補</span>':''}
       </div>
@@ -4561,9 +4729,7 @@ function saveDayPunchEdit(){
       });
     }
   });
-  // Order by PUNCH_TYPES
-  const order=PUNCH_TYPES.reduce((m,p,i)=>(m[p.id]=i,m),{});
-  newPunches.sort((a,b)=>order[a.type]-order[b.type]);
+  newPunches.sort((a,b)=>punchSortKey(a.type)-punchSortKey(b.type));
   if (newPunches.length){
     state.punchLog[_editingPunchDate] = newPunches;
   } else {
@@ -5054,9 +5220,9 @@ function getUpcomingHolidayRange(){
   }
   return { start: tomorrow, end: endDate };
 }
-function renderAtikaTomorrowOff(){
-  const chip = document.getElementById('atikaTomorrowOff');
-  const banner = document.getElementById('atikaTomorrowOffBanner');
+function _renderTomorrowOffInto(chipId, bannerId, isManager){
+  const chip = document.getElementById(chipId);
+  const banner = document.getElementById(bannerId);
   const range = getUpcomingHolidayRange();
   if (!range){
     if (chip){ chip.classList.add('hidden'); chip.textContent=''; }
@@ -5065,12 +5231,12 @@ function renderAtikaTomorrowOff(){
   }
   const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
   const days = Math.round((range.end - range.start)/86400000) + 1;
-  const lang = getCurrentLang();
+  const lang = isManager ? 'zh' : getCurrentLang();  // 管理者主視角中文
+  const subject = isManager ? 'Atika ' : '';
   const chipText = days===1
-    ? `🎉 ${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
-    : `🎉 ${lang==='id'?'Libur Berturut':'連休'} ${fmt(range.start)}~${fmt(range.end)} (${days}${lang==='id'?' hari':' 天'})`;
+    ? `🎉 ${subject}${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
+    : `🎉 ${subject}${lang==='id'?'Libur Berturut':'連休'} ${fmt(range.start)}~${fmt(range.end)} (${days}${lang==='id'?' hari':' 天'})`;
   if (chip){ chip.classList.remove('hidden'); chip.textContent=chipText; }
-  // 注意事項
   const policy = state.payrollConfig?.leavePolicyNote || '';
   if (banner){
     banner.classList.remove('hidden');
@@ -5089,6 +5255,12 @@ function renderAtikaTomorrowOff(){
       </div>
     `;
   }
+}
+function renderAtikaTomorrowOff(){
+  _renderTomorrowOffInto('atikaTomorrowOff', 'atikaTomorrowOffBanner', false);
+}
+function renderMgrTomorrowOff(){
+  _renderTomorrowOffInto('mgrTomorrowOff', 'mgrTomorrowOffBanner', true);
 }
 
 /* === Atika 視角的假期/事件 banner === */
@@ -5883,7 +6055,18 @@ function openTaskModal(tid){
   btn.textContent=done?'取消完成 Batalkan':'✓ 標記完成 Tandai Selesai';
   btn.className=(done?'bg-gray-200 text-gray-700':'bg-green-600 text-white')+' flex-1 py-3 rounded-xl font-semibold';
   btn.onclick=()=>{ toggleDone(t, today(), state.currentUser.name); closeTaskModal(); refreshAll(); };
-  // 備註區已移除
+  // 本期不執行 按鈕僅 flex 任務顯示
+  const periodBtn=document.getElementById('modalSkipPeriodBtn');
+  if (periodBtn){
+    if (t.mode==='flex'){
+      const periodDays=PERIOD_DAYS[t.freqType]||14;
+      const freqLabel=FREQ_ZH[t.freqType]||'本期';
+      periodBtn.innerHTML = `⏸ 本期不執行（${freqLabel} ${periodDays} 天）<br><span class="id-text text-xs font-normal">Lewati periode ${periodDays} hari</span>`;
+      periodBtn.classList.remove('hidden');
+    } else {
+      periodBtn.classList.add('hidden');
+    }
+  }
   document.getElementById('taskModal').classList.remove('hidden');
 }
 function closeTaskModal(){
@@ -5891,41 +6074,73 @@ function closeTaskModal(){
   state.selectedTask=null;
 }
 
-/* === 任務跳過 / 移至明天 / 移至指定日 === */
+/* === 任務跳過 / 移至明天 / 移至指定日 / 本期不執行 === */
 function isTaskSkippedToday(t){
-  const td=ymd(today());
-  return (state.taskSkips||[]).some(s=>s.templateId===t.id && s.date===td);
+  return isTaskSkippedOnDate(t, ymd(today()));
 }
 function isTaskSkippedOnDate(t, dateStr){
-  return (state.taskSkips||[]).some(s=>s.templateId===t.id && s.date===dateStr);
+  return (state.taskSkips||[]).some(s=>{
+    if (s.templateId!==t.id) return false;
+    if (s.kind==='period'){
+      // 期間跳過：dateStr 落在 [date, periodEnd] 內
+      return dateStr >= s.date && dateStr <= (s.periodEnd||s.date);
+    }
+    return s.date===dateStr;
+  });
 }
-function skipTaskToday(){
+function skipTaskToday(reason){
   const t=state.selectedTask?.t;
   if (!t) return;
   const td=ymd(today());
   if (!isTaskSkippedToday(t)){
-    state.taskSkips.push({ templateId:t.id, date:td, by:state.currentUser.name, at:new Date().toISOString() });
+    state.taskSkips.push({ templateId:t.id, date:td, by:state.currentUser.name, at:new Date().toISOString(), reason:reason||'' });
     save();
   }
   closeTaskModal();
   refreshAll();
-  setUndo(`已標記「${t.nameZh}」本日不執行`, ()=>{
-    state.taskSkips = state.taskSkips.filter(s=>!(s.templateId===t.id && s.date===td));
+  const note = reason ? `（${reason}）` : '';
+  setUndo(`已標記「${t.nameZh}」本日不執行${note}`, ()=>{
+    state.taskSkips = state.taskSkips.filter(s=>!(s.templateId===t.id && s.date===td && s.kind!=='period'));
     save(); refreshAll();
   });
 }
-function postponeTaskTomorrow(){
+function skipTaskPeriod(reason){
+  const t=state.selectedTask?.t;
+  if (!t) return;
+  if (t.mode!=='flex'){ alert('此功能僅適用於彈性週期任務'); return; }
+  const td=ymd(today());
+  const period=PERIOD_DAYS[t.freqType] || 14;
+  const endDate=new Date(today()); endDate.setDate(endDate.getDate()+period-1);
+  const endStr=ymd(endDate);
+  state.taskSkips.push({
+    templateId:t.id, kind:'period',
+    date:td, periodEnd:endStr,
+    by:state.currentUser.name, at:new Date().toISOString(),
+    reason:reason||'',
+  });
+  save();
+  closeTaskModal();
+  refreshAll();
+  const note = reason ? `（${reason}）` : '';
+  const ed=new Date(endStr);
+  setUndo(`已標記「${t.nameZh}」本期不執行（至 ${ed.getMonth()+1}/${ed.getDate()}）${note}`, ()=>{
+    state.taskSkips = state.taskSkips.filter(s=>!(s.templateId===t.id && s.kind==='period' && s.date===td));
+    save(); refreshAll();
+  });
+}
+function postponeTaskTomorrow(reason){
   const t=state.selectedTask?.t;
   if (!t) return;
   const tomorrow=new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
   const tomorrowStr=ymd(tomorrow);
-  _postponeForTask(t, tomorrowStr, true);
+  _postponeForTask(t, tomorrowStr, true, reason);
 }
 function openPostponeModalForTask(){
   if (!state.selectedTask) return;
   const tomorrow=new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
   document.getElementById('postponeDate').value=ymd(tomorrow);
   document.getElementById('postponeKeepToday').checked=true;
+  document.getElementById('postponeReason').value='';
   document.getElementById('postponeModal').classList.remove('hidden');
 }
 function closePostponeModal(){ document.getElementById('postponeModal').classList.add('hidden'); }
@@ -5935,39 +6150,74 @@ function confirmPostpone(){
   const date=document.getElementById('postponeDate').value;
   if (!date){ alert('請選日期'); return; }
   const skip=document.getElementById('postponeKeepToday').checked;
-  _postponeForTask(t, date, skip);
+  const reason=document.getElementById('postponeReason').value.trim();
+  _postponeForTask(t, date, skip, reason);
   closePostponeModal();
 }
-function _postponeForTask(t, dateStr, alsoSkipToday){
+function _postponeForTask(t, dateStr, alsoSkipToday, reason){
   // 1) 在 dateStr 加一個臨時任務副本（標示是從哪個任務延期來的）
+  const reasonSuffix = reason ? `（${reason}）` : '';
   state.adhoc.push({
     id:'a'+Date.now(), date:dateStr,
-    textZh:`📅 ${t.nameZh}（延期）`,
-    textId:`📅 ${t.nameId} (Ditunda)`,
+    textZh:`📅 ${t.nameZh}（延期）${reasonSuffix}`,
+    textId:`📅 ${t.nameId} (Ditunda)${reasonSuffix}`,
     completed:false, by:state.currentUser.name,
     order: state.adhoc.length,
     fromTemplateId: t.id,
+    postponeReason: reason || '',
   });
   // 2) 視情況把今日標為跳過
   if (alsoSkipToday){
     const td=ymd(today());
     if (!isTaskSkippedOnDate(t, td)){
-      state.taskSkips.push({ templateId:t.id, date:td, by:state.currentUser.name, at:new Date().toISOString() });
+      state.taskSkips.push({ templateId:t.id, date:td, by:state.currentUser.name, at:new Date().toISOString(), reason:reason||'' });
     }
   }
   save();
   closeTaskModal();
   refreshAll();
   const dt = new Date(dateStr);
-  setUndo(`已把「${t.nameZh}」移至 ${dt.getMonth()+1}/${dt.getDate()}`, ()=>{
+  const note = reason ? `（${reason}）` : '';
+  setUndo(`已把「${t.nameZh}」移至 ${dt.getMonth()+1}/${dt.getDate()}${note}`, ()=>{
     // 找剛加入的 adhoc 移除
     state.adhoc = state.adhoc.filter(a=>!(a.fromTemplateId===t.id && a.date===dateStr));
     if (alsoSkipToday){
       const td=ymd(today());
-      state.taskSkips = state.taskSkips.filter(s=>!(s.templateId===t.id && s.date===td));
+      state.taskSkips = state.taskSkips.filter(s=>!(s.templateId===t.id && s.date===td && s.kind!=='period'));
     }
     save(); refreshAll();
   });
+}
+
+/* === 原因 Reason Prompt（給 skipToday / postponeTomorrow / skipPeriod 用）=== */
+window._reasonAction = null;
+function openReasonForAction(action){
+  const t=state.selectedTask?.t;
+  if (!t) return;
+  window._reasonAction = action;
+  const titleMap = {
+    skipToday:    { zh:'⏭ 本日不執行',   id:'Tidak hari ini' },
+    postponeTomorrow:{ zh:'📅 移至明天', id:'Pindah ke besok' },
+    skipPeriod:   { zh:'⏸ 本期不執行',   id:'Lewati periode ini' },
+  };
+  const m = titleMap[action] || { zh:'執行動作', id:'' };
+  document.getElementById('reasonModalTitle').textContent = `${m.zh}：${t.nameZh}`;
+  document.getElementById('reasonModalSub').textContent = m.id;
+  document.getElementById('reasonInput').value = '';
+  document.getElementById('reasonPromptModal').classList.remove('hidden');
+}
+function closeReasonModal(){
+  document.getElementById('reasonPromptModal').classList.add('hidden');
+  window._reasonAction = null;
+}
+function confirmReasonAction(){
+  const reason = document.getElementById('reasonInput').value.trim();
+  const action = window._reasonAction;
+  document.getElementById('reasonPromptModal').classList.add('hidden');
+  window._reasonAction = null;
+  if (action==='skipToday')        skipTaskToday(reason);
+  else if (action==='postponeTomorrow') postponeTaskTomorrow(reason);
+  else if (action==='skipPeriod')  skipTaskPeriod(reason);
 }
 
 /* ========== 臨時任務 Modal ========== */
@@ -6622,12 +6872,23 @@ function getPunchStatusInfo(){
   const td=ymd(today());
   const punches = (state.punchLog?.[td]) || [];
   const g = (type) => punches.find(p=>p.type===type);
-  const ws=g('work_start'), rs=g('rest_start'), re=g('rest_end'), we=g('work_end');
+  const ws=g('work_start'), we=g('work_end');
   if (we) return { icon:'🏠', label:'已下班', detail:we.at, cls:'bg-gray-200 text-gray-700' };
-  if (re && !we) return { icon:'💼', label:'工作中（午休後）', detail:'回 '+re.at, cls:'bg-blue-100 text-blue-700' };
-  if (rs && !re) return { icon:'🌙', label:'午休中', detail:'休 '+rs.at, cls:'bg-amber-100 text-amber-800' };
-  if (ws && !rs) return { icon:'💼', label:'上班中', detail:'起 '+ws.at, cls:'bg-green-100 text-green-700' };
-  return { icon:'😴', label:'尚未上班', detail:'', cls:'bg-gray-100 text-gray-500' };
+  if (!ws) return { icon:'😴', label:'尚未上班', detail:'', cls:'bg-gray-100 text-gray-500' };
+  // 偵測進行中的休息（任一段：rest_start 或 rest_<id>_start 有但對應 end 沒有）
+  const pairs = getRestPairsFromPunches(punches);
+  const ongoing = pairs.find(pr=>pr.start && !pr.end);
+  if (ongoing){
+    const meta = getPunchMetaByType(ongoing.startType);
+    const label = meta.zh.replace(/[起收]$/,'').trim() || '休息';
+    return { icon:'🌙', label:label+'中', detail:'休 '+ongoing.start.at, cls:'bg-amber-100 text-amber-800' };
+  }
+  // 至少有一次 rest 完成過 → 工作中（休息後）
+  const completedRest = pairs.find(pr=>pr.start && pr.end);
+  if (completedRest){
+    return { icon:'💼', label:'工作中', detail:'回 '+completedRest.end.at, cls:'bg-blue-100 text-blue-700' };
+  }
+  return { icon:'💼', label:'上班中', detail:'起 '+ws.at, cls:'bg-green-100 text-green-700' };
 }
 function renderMgrPunchStatus(){
   const el=document.getElementById('mgrPunchStatus');
