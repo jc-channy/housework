@@ -58,6 +58,10 @@
   .scrollbar-thin::-webkit-scrollbar { height: 6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
   @media (max-width: 480px) { .container-app { padding-left: 10px; padding-right: 10px; } }
+  /* 裝置本地欄數設定：data-layout-cols="1" 時 .layout-grid 強制一欄 */
+  body[data-layout-cols="1"] .layout-grid {
+    grid-template-columns: 1fr !important;
+  }
 </style>
 </head>
 <body class="min-h-screen">
@@ -120,6 +124,7 @@
           <span class="text-xs bg-white/70 text-blue-800 px-2 py-1 rounded-full font-semibold">Atika</span>
           <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="我的薪資與請假">💰</button>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="atikaChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
+          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定 / Tampilan">⚙</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
         </div>
       </div>
@@ -158,8 +163,8 @@
     <!-- 快速按鈕 -->
     <div class="grid grid-cols-2 gap-2">
       <button onclick="openAddAdhocModal()" class="bg-red-600 text-white py-3 rounded-xl font-semibold text-sm active:scale-95">
-        <span class="bi-pri" data-zh="＋ 新增臨時任務" data-id="＋ Tugas Tambahan">＋ 新增臨時任務</span><br>
-        <span class="bi-sec text-xs font-normal opacity-90" data-zh="＋ 新增臨時任務" data-id="＋ Tugas Tambahan">Tugas Tambahan</span>
+        <span class="bi-pri" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">＋ 新增臨時工作</span><br>
+        <span class="bi-sec text-xs font-normal opacity-90" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">Tugas Tambahan</span>
       </button>
       <button onclick="openSuppliesModal()" class="bg-amber-500 text-white py-3 rounded-xl font-semibold text-sm active:scale-95">
         <span class="bi-pri" data-zh="📦 備品快用完" data-id="📦 Stok Hampir Habis">📦 備品快用完</span><br>
@@ -167,40 +172,40 @@
       </button>
     </div>
 
-    <!-- 臨時任務（移到最上方） -->
+    <!-- 臨時工作（移到最上方） -->
     <section id="adhocSection">
       <div class="flex items-center justify-between mb-2">
         <div>
           <h2 class="text-base font-bold flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>
-            <span class="bi-pri" data-zh="臨時任務" data-id="Tugas Tambahan">臨時任務</span>
+            <span class="bi-pri" data-zh="臨時工作" data-id="Tugas Tambahan">臨時工作</span>
           </h2>
-          <p class="bi-sec id-text text-xs text-gray-500" data-zh="臨時任務" data-id="Tugas Tambahan">Tugas Tambahan</p>
+          <p class="bi-sec id-text text-xs text-gray-500" data-zh="臨時工作" data-id="Tugas Tambahan">Tugas Tambahan</p>
         </div>
         <span id="adhocCount" class="text-xs text-gray-500"></span>
       </div>
-      <div id="adhocIncomplete" class="grid grid-cols-2 gap-2 sortable-list"></div>
+      <div id="adhocIncomplete" class="layout-grid grid grid-cols-2 gap-2 sortable-list"></div>
       <details id="adhocDoneWrap" class="mt-2 hidden">
         <summary class="text-xs text-gray-500 py-2 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
           <span id="adhocDoneLabel"></span>
           <span class="text-gray-400">▼</span>
         </summary>
-        <div id="adhocDone" class="grid grid-cols-2 gap-2 mt-2"></div>
+        <div id="adhocDone" class="layout-grid grid grid-cols-2 gap-2 mt-2"></div>
       </details>
       <div id="adhocEmpty" class="text-sm text-gray-400 italic">點上方紅色按鈕新增 / Tekan tombol merah</div>
     </section>
 
-    <!-- 本日 + 本週彈性（左右並排） -->
-    <div class="grid grid-cols-2 gap-3">
-      <!-- 本日任務 -->
+    <!-- 本日 + 本週彈性（左右並排，可由裝置設定切換為單欄） -->
+    <div class="layout-grid grid grid-cols-2 gap-3">
+      <!-- 本日工作 -->
       <section>
         <div class="mb-2">
           <h2 class="text-base font-bold flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span>
-            <span class="bi-pri" data-zh="本日任務" data-id="Tugas Hari Ini">本日任務</span>
+            <span class="bi-pri" data-zh="本日工作" data-id="Tugas Hari Ini">本日工作</span>
           </h2>
           <div class="flex items-center justify-between">
-            <p class="bi-sec id-text text-xs text-gray-500" data-zh="本日任務" data-id="Tugas Hari Ini">Tugas Hari Ini</p>
+            <p class="bi-sec id-text text-xs text-gray-500" data-zh="本日工作" data-id="Tugas Hari Ini">Tugas Hari Ini</p>
             <span id="todayCount" class="text-xs text-gray-500"></span>
           </div>
         </div>
@@ -219,10 +224,10 @@
         <div class="mb-2">
           <h2 class="text-base font-bold flex items-center gap-2">
             <span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>
-            <span class="bi-pri" data-zh="彈性任務" data-id="Tugas Fleksibel">彈性任務</span>
+            <span class="bi-pri" data-zh="彈性工作" data-id="Tugas Fleksibel">彈性工作</span>
           </h2>
           <div class="flex items-center justify-between">
-            <p class="bi-sec id-text text-xs text-gray-500" data-zh="彈性任務" data-id="Tugas Fleksibel">Tugas Fleksibel</p>
+            <p class="bi-sec id-text text-xs text-gray-500" data-zh="彈性工作" data-id="Tugas Fleksibel">Tugas Fleksibel</p>
             <span id="flexCount" class="text-xs text-gray-500"></span>
           </div>
         </div>
@@ -277,7 +282,8 @@
         <div class="flex items-center gap-2 mt-1">
           <span id="mgrRoleTag" class="text-xs bg-white/70 text-purple-800 px-2 py-1 rounded-full font-semibold">管理者</span>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="mgrChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
-          <button onclick="openSettingsModal()" class="text-amber-900 text-base" title="設定">⚙️</button>
+          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定（此裝置）">⚙</button>
+          <button onclick="openSettingsModal()" class="text-amber-900 text-base" title="系統設定">⚙️</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
         </div>
       </div>
@@ -285,7 +291,7 @@
     <nav class="container-app max-w-5xl mx-auto px-4 pb-2 -mt-1">
       <div class="flex gap-1 bg-white/40 backdrop-blur rounded-xl p-1 overflow-x-auto scrollbar-thin">
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week">🏠 首頁</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates">📋 任務管理</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates">📋 工作排程</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies">📦 備品管理<span id="suppliesBadge" class="ml-1"></span></button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll">💰 出勤與薪資<span id="leaveBadge" class="ml-1"></span></button>
       </div>
@@ -350,12 +356,12 @@
         </section>
       </div>
 
-      <!-- 左右並排：左=臨時+本日，右=彈性（依本週/本月/本季） -->
-      <div class="grid grid-cols-2 gap-3">
+      <!-- 左右並排：左=臨時+本日，右=彈性（依本週/本月/本季；可由裝置設定切單欄） -->
+      <div class="layout-grid grid grid-cols-2 gap-3">
         <div>
           <section class="mb-4">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>臨時任務 / Tugas Tambahan</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>臨時工作 / Tugas Tambahan</h3>
               <div class="flex items-center gap-2">
                 <span id="mgrAdhocCount" class="text-xs text-gray-500"></span>
                 <button onclick="openAddAdhocModal()" class="bg-red-600 text-white text-xs px-2 py-1 rounded-lg">＋ 新增</button>
@@ -371,7 +377,7 @@
           </section>
           <section>
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span>本日任務 / Tugas Hari Ini</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span>本日工作 / Tugas Hari Ini</h3>
               <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
             </div>
             <div id="mgrTodayIncomplete" class="space-y-2"></div>
@@ -386,7 +392,7 @@
         <div>
           <section>
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>彈性任務 / Tugas Fleksibel</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>彈性工作 / Tugas Fleksibel</h3>
               <span id="mgrFlexCount" class="text-xs text-gray-500"></span>
             </div>
             <div class="text-sm text-amber-800 font-semibold mt-2 mb-1">本週 / Minggu Ini</div>
@@ -410,17 +416,17 @@
     <div id="tab-calendar" class="tab-content hidden" style="display:none !important"></div>
 
     <!-- 排程總覽 -->
-    <!-- 舊「排程」分頁已移至任務管理頁面的「📅 工作排程總覽」按鈕（彈出 modal） -->
+    <!-- 舊「排程」分頁已移至工作排程頁面的「📅 工作排程總覽」按鈕（彈出 modal） -->
     <div id="tab-schedule" class="tab-content hidden"></div>
 
-    <!-- 任務管理（模板） -->
+    <!-- 工作排程（模板） -->
     <div id="tab-templates" class="tab-content hidden">
       <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <h3 class="font-bold">📋 任務管理 / Kartu Tugas</h3>
+        <h3 class="font-bold">📋 工作排程 / Kartu Tugas</h3>
         <div class="flex gap-1.5 flex-wrap justify-end">
           <button onclick="openScheduleOverview()" class="bg-indigo-600 text-white text-sm px-3 py-1.5 rounded-lg">📅 工作排程總覽</button>
           <button onclick="openCategoryManageModal()" class="bg-gray-200 text-gray-700 text-sm px-3 py-1.5 rounded-lg">📁 管理分類 <span id="catManageCount" class="text-xs text-gray-500"></span></button>
-          <button onclick="openAddTemplateModal()" class="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg">＋ 新增任務</button>
+          <button onclick="openAddTemplateModal()" class="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg">＋ 新增工作</button>
         </div>
       </div>
 
@@ -559,7 +565,7 @@
   </main>
 </section>
 
-<!-- ===== 任務詳細 Modal ===== -->
+<!-- ===== 工作詳細 Modal ===== -->
 <div id="taskModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
@@ -594,12 +600,12 @@
   </div>
 </div>
 
-<!-- ===== 新增臨時任務 Modal ===== -->
+<!-- ===== 新增臨時工作 Modal ===== -->
 <div id="adhocModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">新增臨時任務</div>
+        <div class="text-xl font-bold">新增臨時工作</div>
         <div class="id-text text-sm text-gray-500">Tambah Tugas Tambahan</div>
       </div>
       <button onclick="closeAdhocModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -779,11 +785,11 @@
   </div>
 </div>
 
-<!-- ===== 任務模板編輯 Modal ===== -->
+<!-- ===== 工作模板編輯 Modal ===== -->
 <div id="templateModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div id="tmplModalTitle" class="text-xl font-bold">新增任務模板</div>
+      <div id="tmplModalTitle" class="text-xl font-bold">新增工作模板</div>
       <button onclick="closeTemplateModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -867,7 +873,7 @@
       <div class="border-t pt-3">
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" id="tmplActive" class="w-5 h-5" checked>
-          <span class="font-semibold">啟用此任務 / Aktif</span>
+          <span class="font-semibold">啟用此工作 / Aktif</span>
         </label>
         <p class="text-xs text-gray-500 mt-1">關閉後不會出現在週表（例如「曬棉被」夏天暫停）。設定保留，隨時可重新啟用。</p>
       </div>
@@ -912,7 +918,7 @@
     <!-- 資料備份 -->
     <section class="mb-5">
       <h3 class="font-bold text-base mb-2">💾 資料備份 / Cadangan Data</h3>
-      <p class="text-xs text-gray-500 mb-3">建議每週匯出一次，存到 iCloud / Google Drive。平板故障時可從備份還原所有任務、打勾紀錄、備註、備品狀態。</p>
+      <p class="text-xs text-gray-500 mb-3">建議每週匯出一次，存到 iCloud / Google Drive。平板故障時可從備份還原所有工作、打勾紀錄、備註、備品狀態。</p>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="exportData()" class="bg-green-600 text-white py-2 rounded-lg font-semibold text-sm">📥 匯出備份</button>
         <button onclick="document.getElementById('importFile').click()" class="bg-orange-500 text-white py-2 rounded-lg font-semibold text-sm">📤 匯入還原</button>
@@ -929,7 +935,7 @@
         <h3 class="font-bold text-base">🎛️ 情境模式 / Mode Skenario</h3>
         <button onclick="openAddScenarioModal()" class="bg-blue-600 text-white text-xs px-2 py-1 rounded-lg">＋ 新增</button>
       </div>
-      <p class="text-xs text-gray-500 mb-3">一鍵批次啟用/停用整組任務模板。常用於季節性、特殊狀況。</p>
+      <p class="text-xs text-gray-500 mb-3">一鍵批次啟用/停用整組工作模板。常用於季節性、特殊狀況。</p>
       <div id="scenarioList" class="space-y-2"></div>
     </section>
 
@@ -1128,7 +1134,7 @@
         <label class="block font-semibold mb-1">說明（印尼文）</label>
         <input id="holidayTitleId" type="text" data-lang="id" data-pair="holidayTitleZh" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
       </div>
-      <p class="text-xs text-gray-500">⚠️ 假期期間的「本日任務」會自動標示為「已跳過」。彈性任務在該週期結束時會標「本期延期」。</p>
+      <p class="text-xs text-gray-500">⚠️ 假期期間的「本日工作」會自動標示為「已跳過」。彈性工作在該週期結束時會標「本期延期」。</p>
     </div>
     <div class="flex gap-2 mt-4">
       <button id="holidayDeleteBtn" onclick="deleteHoliday()" class="hidden text-red-600 px-3 py-3 rounded-xl border border-red-200">刪除</button>
@@ -1172,8 +1178,8 @@
         <input id="scenarioNameId" type="text" data-lang="id" data-pair="scenarioNameZh" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
       </div>
       <div>
-        <label class="block font-semibold mb-1">包含的任務模板（勾選要批次切換的任務）</label>
-        <div class="text-xs text-gray-500 mb-2">啟用此情境時，這些任務 → active；停用時 → inactive。任務出現在多個情境時請小心衝突。</div>
+        <label class="block font-semibold mb-1">包含的工作模板（勾選要批次切換的工作）</label>
+        <div class="text-xs text-gray-500 mb-2">啟用此情境時，這些工作 → active；停用時 → inactive。工作出現在多個情境時請小心衝突。</div>
         <div id="scenarioTaskPicker" class="border border-gray-200 rounded-lg p-2 max-h-72 overflow-y-auto space-y-1"></div>
       </div>
       <div class="border-t pt-3">
@@ -1334,6 +1340,44 @@
 
 <!-- ===== 小憩時段編輯 Modal ===== -->
 <!-- ===== 工作排程總覽 Modal ===== -->
+<!-- ===== 裝置顯示設定 Modal（不上雲，僅此裝置） ===== -->
+<div id="devicePrefsModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
+  <div class="bg-white w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl p-5">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div class="text-xl font-bold">⚙ 顯示設定</div>
+        <div class="id-text text-sm text-gray-500">Tampilan (perangkat ini)</div>
+      </div>
+      <button onclick="closeDevicePrefsModal()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <p class="text-xs text-gray-500 mb-4">這些設定只套用在「此裝置」，不會同步到其他人。</p>
+
+    <div class="mb-4">
+      <label class="block text-sm font-semibold mb-2">字體大小 / Ukuran Huruf</label>
+      <div class="grid grid-cols-4 gap-2">
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-xs" data-fs="14" onclick="setDeviceFontSize(14)">小</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-sm" data-fs="16" onclick="setDeviceFontSize(16)">中</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-base" data-fs="18" onclick="setDeviceFontSize(18)">大</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-lg" data-fs="20" onclick="setDeviceFontSize(20)">特大</button>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="block text-sm font-semibold mb-2">工作卡片欄數 / Kolom</label>
+      <div class="grid grid-cols-2 gap-2">
+        <button class="layout-cols-btn border border-gray-300 py-3 rounded-lg" data-cols="1" onclick="setDeviceLayoutCols(1)">
+          <div class="text-2xl">▮</div>
+          <div class="text-xs">一欄（適合小手機）</div>
+        </button>
+        <button class="layout-cols-btn border border-gray-300 py-3 rounded-lg" data-cols="2" onclick="setDeviceLayoutCols(2)">
+          <div class="text-2xl">▮▮</div>
+          <div class="text-xs">兩欄（電腦/大手機）</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 管理分類 Modal ===== -->
 <div id="categoryManageModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
@@ -1362,7 +1406,7 @@
     <div id="scheduleOverviewMeta" class="text-xs text-gray-600 mb-3"></div>
     <div id="scheduleOverviewSections" class="space-y-4"></div>
     <div class="text-[10px] text-gray-500 mt-3 leading-snug">
-      色塊 = 任務分類顏色。點任一色塊可開啟該任務詳情。
+      色塊 = 工作分類顏色。點任一色塊可開啟該工作詳情。
     </div>
   </div>
 </div>
@@ -1419,11 +1463,11 @@
       <div class="text-xl font-bold">📅 移至指定日</div>
       <button onclick="closePostponeModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
-    <p class="text-sm text-gray-600 mb-2">選擇要把這個任務移到的日期：</p>
+    <p class="text-sm text-gray-600 mb-2">選擇要把這個工作移到的日期：</p>
     <input id="postponeDate" type="date" class="w-full border border-gray-300 rounded-lg p-2">
     <label class="flex items-center gap-2 mt-2 text-xs">
       <input id="postponeKeepToday" type="checkbox" checked class="w-4 h-4">
-      同時將今日的任務標為「不執行」
+      同時將今日的工作標為「不執行」
     </label>
     <label class="block mt-3 text-xs text-gray-600">原因（可選） / Alasan (opsional)</label>
     <textarea id="postponeReason" class="w-full border border-gray-300 rounded-lg p-2 text-sm" rows="2" placeholder="例如：身體不適 / 外宿不在家"></textarea>
@@ -1436,7 +1480,7 @@
   <div class="bg-white w-full sm:max-w-sm sm:rounded-2xl rounded-t-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div id="reasonModalTitle" class="text-xl font-bold">跳過任務</div>
+        <div id="reasonModalTitle" class="text-xl font-bold">跳過工作</div>
         <div id="reasonModalSub" class="id-text text-sm text-gray-500"></div>
       </div>
       <button onclick="closeReasonModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1991,7 +2035,7 @@ function save() {
       const prevT = prev.templates?.length || 0;
       const prevC = prev.categories?.length || 0;
       if (prevT >= 5 && state.templates.length === 0) {
-        if (!confirm(`⚠️ 即將儲存「0 個任務」（原本有 ${prevT} 個）。\n看起來像異常狀況，確定要這樣儲存嗎？\n\n取消會還原資料。`)) {
+        if (!confirm(`⚠️ 即將儲存「0 個工作」（原本有 ${prevT} 個）。\n看起來像異常狀況，確定要這樣儲存嗎？\n\n取消會還原資料。`)) {
           load(); refreshAll(); return;
         }
       }
@@ -2178,7 +2222,7 @@ async function cloudPull(){
         if (d.taskSkips          !== undefined) state.taskSkips          = d.taskSkips;
         if (d.restSchedules      !== undefined) state.restSchedules      = d.restSchedules;
         if (d.leavePolicyNote    !== undefined) state.leavePolicyNote    = d.leavePolicyNote;
-        // 遷移雲端拉下來的舊任務
+        // 遷移雲端拉下來的舊工作
         (state.templates||[]).forEach(migrateTemplateFreq);
         save();   // 寫進 localStorage（cloudPush 被 _cloudSyncing 旗標跳過）
         window._lastCloudSyncAt = new Date();
@@ -3423,14 +3467,14 @@ function renderManagerView(){
   document.getElementById('stWeekDone').textContent=done;
   document.getElementById('stWeekPct').textContent=total?Math.round(done*100/total)+'%':'0%';
 
-  // 臨時任務 - 分未完成/已完成
+  // 臨時工作 - 分未完成/已完成
   const ad=adhocForToday();
   const adSplit=splitDone(ad, a=>a.completed);
   document.getElementById('mgrAdhocCount').textContent=`${adSplit.don.length}/${ad.length} 完成`;
   document.getElementById('mgrAdhocIncomplete').innerHTML=adSplit.inc.length?adSplit.inc.map(a=>renderAdhocCard(a)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
   renderSectionDone('mgrAdhocDoneWrap','mgrAdhocDone','mgrAdhocDoneLabel', adSplit.don.map(a=>renderAdhocCard(a)));
 
-  // 本日任務 - 分未完成/已完成
+  // 本日工作 - 分未完成/已完成
   const todays=todaysTemplates();
   const tdSplit=splitDone(todays, t=>isDone(t,d));
   document.getElementById('mgrTodayCount').textContent=`${tdSplit.don.length}/${todays.length} 完成`;
@@ -3705,7 +3749,7 @@ function punchDelete(){
 function renderWeekWorkload(){
   const box=document.getElementById('weekWorkload');
   if (!box) return;
-  // 計算每個 weekday 的固定任務數
+  // 計算每個 weekday 的固定工作數
   const counts=[0,0,0,0,0,0,0];
   state.templates.filter(t=>t.active!==false && t.mode==='fixed').forEach(t=>{
     (t.weekdays||[]).forEach(d=>counts[d]++);
@@ -3747,13 +3791,13 @@ function renderWeekWorkload(){
     if (counts[i]<counts[minDay]) minDay=i;
   }
   const insight = counts[maxDay]>counts[minDay]+2
-    ? `<div class="text-xs text-amber-700 mt-2">⚠️ 週${dayLabels[maxDay]}最忙（${counts[maxDay]} 項），週${dayLabels[minDay]}最閒（${counts[minDay]} 項）。可考慮把一些雙週任務排在週${dayLabels[minDay]}做平衡。</div>`
+    ? `<div class="text-xs text-amber-700 mt-2">⚠️ 週${dayLabels[maxDay]}最忙（${counts[maxDay]} 項），週${dayLabels[minDay]}最閒（${counts[minDay]} 項）。可考慮把一些雙週工作排在週${dayLabels[minDay]}做平衡。</div>`
     : '';
   box.innerHTML = `
     <div class="bg-white border border-gray-200 rounded-xl p-3">
       <h4 class="text-sm font-bold mb-2">📊 本週工作量分佈 / Distribusi Beban Mingguan</h4>
       <div class="space-y-1.5">${bars}</div>
-      <div class="text-xs text-gray-500 mt-2">每日固定任務數（不含彈性與臨時）。加上彈性任務：每週 ${flexWeek} · 每月 ${flexMonth} · 每季 ${flexQuarter}</div>
+      <div class="text-xs text-gray-500 mt-2">每日固定工作數（不含彈性與臨時）。加上彈性工作：每週 ${flexWeek} · 每月 ${flexMonth} · 每季 ${flexQuarter}</div>
       ${insight}
     </div>
   `;
@@ -3802,7 +3846,7 @@ function renderTodayTimeline(){
   // 出勤摘要
   const summary = punchSummaryText(punches);
   const taskCount = events.filter(e=>e.kind!=='punch').length;
-  document.getElementById('timelineCount').textContent = `${taskCount} 項任務 · ${summary}`;
+  document.getElementById('timelineCount').textContent = `${taskCount} 項工作 · ${summary}`;
   if (!events.length){
     el.innerHTML='<div class="text-sm text-gray-400 italic text-center py-4">今天還沒有紀錄 / Belum ada catatan</div>';
     return;
@@ -4846,7 +4890,7 @@ function holidaysOnDate(dateStr){
 function isOnHoliday(dateStr){
   return holidaysOnDate(dateStr).length > 0;
 }
-/* 該日完成任務數 */
+/* 該日完成工作數 */
 function completionsOnDate(dateStr){
   let n=0;
   Object.entries(state.completions).forEach(([k,v])=>{
@@ -4913,7 +4957,7 @@ function _legacy_renderCalendar(){
     const holidays = holidaysOnDate(dStr);
     const completions = inMonth ? completionsOnDate(dStr) : 0;
     const scenarioActs = scenarioActionsOnDate(dStr);
-    // 任務密度色塊
+    // 工作密度色塊
     let densityBg = '';
     if (completions > 0 && d < today()){
       const intensity = Math.min(completions, 10) / 10;
@@ -5445,6 +5489,14 @@ function runScheduledScenarioActions(){
 function renderSchedule(){ /* 舊版排程渲染已停用，由 #scheduleOverviewModal 取代 */ }
 
 /* === 工作排程總覽矩陣 === */
+function openDevicePrefsModal(){
+  highlightFontSizeButton();
+  highlightLayoutColsButton();
+  document.getElementById('devicePrefsModal').classList.remove('hidden');
+}
+function closeDevicePrefsModal(){
+  document.getElementById('devicePrefsModal').classList.add('hidden');
+}
 function openCategoryManageModal(){
   renderCategories();
   document.getElementById('categoryManageModal').classList.remove('hidden');
@@ -5462,7 +5514,7 @@ function closeScheduleOverview(){
 function renderScheduleOverview(){
   const all = state.templates.filter(t=>t.active!==false);
   const d0 = today();
-  // 任務分組
+  // 工作分組
   const dailyFixedAll7 = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length===7);
   const fixedSomeDays  = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length<7 && t.weekdays.length>0);
   const mWeekTasks     = all.filter(t=>t.mode==='flex' && t.freqType==='mWeek');
@@ -5555,7 +5607,7 @@ function renderScheduleOverview(){
   `;
 
   document.getElementById('scheduleOverviewMeta').innerHTML =
-    `啟用任務 ${all.length} 個 · 月內第 ${wMonNow} 週 · ${mNow} 月`;
+    `啟用工作 ${all.length} 個 · 月內第 ${wMonNow} 週 · ${mNow} 月`;
   document.getElementById('scheduleOverviewSections').innerHTML = tableA + tableB + tableC;
 }
 
@@ -5609,7 +5661,7 @@ function renderTemplates(){
         <button onclick="event.stopPropagation();duplicateTemplate('${t.id}')" class="text-xs text-purple-600 hover:bg-purple-50 px-2 py-1 rounded shrink-0" title="複製為新模板">📋 複製</button>
       </div>
     `;
-  }).join('') || '<div class="text-sm text-gray-400 italic">沒有任務</div>';
+  }).join('') || '<div class="text-sm text-gray-400 italic">沒有工作</div>';
 }
 function renderCategories(){
   const cnt = document.getElementById('catManageCount');
@@ -6145,7 +6197,7 @@ document.querySelectorAll('.tab-btn').forEach(b=>{
   b.addEventListener('click', ()=>switchTab(b.dataset.tab));
 });
 
-/* ========== 任務詳細 Modal ========== */
+/* ========== 工作詳細 Modal ========== */
 let modalNoteType='general';
 function openTaskModal(tid){
   const t=state.templates.find(x=>x.id===tid);
@@ -6174,7 +6226,7 @@ function openTaskModal(tid){
   btn.textContent=done?'取消完成 Batalkan':'✓ 標記完成 Tandai Selesai';
   btn.className=(done?'bg-gray-200 text-gray-700':'bg-green-600 text-white')+' flex-1 py-3 rounded-xl font-semibold';
   btn.onclick=()=>{ toggleDone(t, today(), state.currentUser.name); closeTaskModal(); refreshAll(); };
-  // 本期不執行 按鈕僅 flex 任務顯示
+  // 本期不執行 按鈕僅 flex 工作顯示
   const periodBtn=document.getElementById('modalSkipPeriodBtn');
   if (periodBtn){
     if (t.mode==='flex'){
@@ -6193,7 +6245,7 @@ function closeTaskModal(){
   state.selectedTask=null;
 }
 
-/* === 任務跳過 / 移至明天 / 移至指定日 / 本期不執行 === */
+/* === 工作跳過 / 移至明天 / 移至指定日 / 本期不執行 === */
 function isTaskSkippedToday(t){
   return isTaskSkippedOnDate(t, ymd(today()));
 }
@@ -6226,7 +6278,7 @@ function skipTaskToday(reason){
 function skipTaskPeriod(reason){
   const t=state.selectedTask?.t;
   if (!t) return;
-  if (t.mode!=='flex'){ alert('此功能僅適用於彈性週期任務'); return; }
+  if (t.mode!=='flex'){ alert('此功能僅適用於彈性週期工作'); return; }
   const td=ymd(today());
   const period=getPeriodDays(t) || 14;
   const endDate=new Date(today()); endDate.setDate(endDate.getDate()+period-1);
@@ -6274,7 +6326,7 @@ function confirmPostpone(){
   closePostponeModal();
 }
 function _postponeForTask(t, dateStr, alsoSkipToday, reason){
-  // 1) 在 dateStr 加一個臨時任務副本（標示是從哪個任務延期來的）
+  // 1) 在 dateStr 加一個臨時工作副本（標示是從哪個工作延期來的）
   const reasonSuffix = reason ? `（${reason}）` : '';
   state.adhoc.push({
     id:'a'+Date.now(), date:dateStr,
@@ -6339,7 +6391,7 @@ function confirmReasonAction(){
   else if (action==='skipPeriod')  skipTaskPeriod(reason);
 }
 
-/* ========== 臨時任務 Modal ========== */
+/* ========== 臨時工作 Modal ========== */
 function openAddAdhocModal(){
   const z=document.getElementById('adhocZh');
   const i=document.getElementById('adhocId');
@@ -6363,13 +6415,13 @@ function saveAdhoc(){
   save(); closeAdhocModal(); refreshAll();
 }
 
-/* ========== 任務模板編輯 Modal ========== */
+/* ========== 工作模板編輯 Modal ========== */
 function openAddTemplateModal(){ openTemplateModal(null); }
 function openEditTemplate(id){ openTemplateModal(id); }
 function duplicateTemplate(id){
   const src=state.templates.find(t=>t.id===id);
   if (!src) return;
-  // 開新增 modal，但預載來源任務的內容（不含 id、order）
+  // 開新增 modal，但預載來源工作的內容（不含 id、order）
   openTemplateModal(null);
   // 套用值
   document.getElementById('tmplCat').value=src.catId || state.categories[0]?.id || '';
@@ -6391,12 +6443,12 @@ function duplicateTemplate(id){
   setWeekFlagsButtons(src.weekFlags || [1,2,3,4]);
   setMonthFlagsButtons(src.monthFlags || [1,4,7,10]);
   onFreqChange();
-  document.getElementById('tmplModalTitle').textContent='新增任務（從「'+src.nameZh+'」複製）';
+  document.getElementById('tmplModalTitle').textContent='新增工作（從「'+src.nameZh+'」複製）';
 }
 function openTemplateModal(id){
   state.editingTemplateId=id;
   const t=id?state.templates.find(x=>x.id===id):null;
-  document.getElementById('tmplModalTitle').textContent=t?'編輯任務模板':'新增任務模板';
+  document.getElementById('tmplModalTitle').textContent=t?'編輯工作模板':'新增工作模板';
   document.getElementById('tmplDeleteBtn').classList.toggle('hidden', !t);
   const catSel=document.getElementById('tmplCat');
   catSel.innerHTML=state.categories.map(c=>`<option value="${c.id}">${c.nameZh} / ${c.nameId}</option>`).join('');
@@ -6505,7 +6557,7 @@ function saveTemplate(){
     if (tmplMode==='fixed' && data.weekdays.length===0){ alert('指定日模式請選擇至少一個週幾'); return; }
     if (state.editingTemplateId){
       const t=state.templates.find(x=>x.id===state.editingTemplateId);
-      if (!t){ alert('找不到要編輯的任務（可能已被刪除）'); closeTemplateModal(); return; }
+      if (!t){ alert('找不到要編輯的工作（可能已被刪除）'); closeTemplateModal(); return; }
       Object.assign(t, data);
     } else {
       data.id='t'+Date.now();
@@ -6515,7 +6567,7 @@ function saveTemplate(){
     save(); closeTemplateModal(); renderManagerView();
   } catch(err){
     console.error('saveTemplate 例外：', err);
-    alert('儲存任務失敗：'+(err?.message||err)+'\n資料未變動，請重試或開啟 Console 查看詳情。');
+    alert('儲存工作失敗：'+(err?.message||err)+'\n資料未變動，請重試或開啟 Console 查看詳情。');
   }
 }
 function deleteTemplate(){
@@ -6523,7 +6575,7 @@ function deleteTemplate(){
   const removed = state.templates.find(t=>t.id===state.editingTemplateId);
   state.templates=state.templates.filter(t=>t.id!==state.editingTemplateId);
   save(); closeTemplateModal(); renderManagerView();
-  if (removed) setUndo(`已刪除任務「${removed.nameZh}」`, ()=>{
+  if (removed) setUndo(`已刪除工作「${removed.nameZh}」`, ()=>{
     state.templates.push(removed);
     save(); renderManagerView();
   });
@@ -6564,7 +6616,7 @@ function deleteCat(){
   const used=state.templates.filter(t=>t.catId===state.editingCatId);
   const affected = used.map(t=>({id:t.id, oldCatId:t.catId}));
   if (used.length){
-    if (!confirm(`有 ${used.length} 個任務使用此分類，刪除後它們會變成「未分類」。確定？`)) return;
+    if (!confirm(`有 ${used.length} 個工作使用此分類，刪除後它們會變成「未分類」。確定？`)) return;
     used.forEach(t=>t.catId='__none');
   } else if (!confirm('確定刪除？')) return;
   const removed = state.categories.find(c=>c.id===state.editingCatId);
@@ -6614,7 +6666,7 @@ function renderScenarioList(){
               ${activeBadge}
             </div>
             <div class="id-text text-sm text-gray-500">${s.nameId}</div>
-            <div class="text-xs text-gray-500 mt-1">包含 ${cnt} 個任務</div>
+            <div class="text-xs text-gray-500 mt-1">包含 ${cnt} 個工作</div>
           </div>
           <div class="flex flex-col gap-1 shrink-0">
             <button onclick="openEditScenario('${s.id}')" class="text-blue-600 text-xs border border-blue-200 px-2 py-1 rounded-lg">✏️ 編輯</button>
@@ -6630,12 +6682,12 @@ function toggleScenario(sid){
   if (!s) return;
   const newActive = !s.active;
   if (newActive && (!s.templateIds || !s.templateIds.length)){
-    alert('此情境尚未指定任何任務，請先編輯加入。');
+    alert('此情境尚未指定任何工作，請先編輯加入。');
     return;
   }
   const action = newActive ? '啟用' : '停用';
   const verb = newActive ? '啟用' : '停用';
-  if (!confirm(`${verb}「${s.nameZh}」？這會把 ${s.templateIds.length} 個任務的「啟用」狀態切換為 ${newActive?'是':'否'}。`)) return;
+  if (!confirm(`${verb}「${s.nameZh}」？這會把 ${s.templateIds.length} 個工作的「啟用」狀態切換為 ${newActive?'是':'否'}。`)) return;
   s.active=newActive;
   s.templateIds.forEach(tid=>{
     const t=state.templates.find(x=>x.id===tid);
@@ -6656,7 +6708,7 @@ function openScenarioModal(id){
   const i=document.getElementById('scenarioNameId');
   z.value=s?.nameZh||''; i.value=s?.nameId||'';
   z.dataset.orig=z.value; i.dataset.orig=i.value;
-  // 任務選擇器
+  // 工作選擇器
   const picker=document.getElementById('scenarioTaskPicker');
   const sel=new Set(s?.templateIds||[]);
   picker.innerHTML = state.templates
@@ -6737,7 +6789,7 @@ function saveScenario(){
   }
 }
 function deleteScenario(){
-  if (!confirm('刪除這個情境？（不會影響任務目前的啟用狀態）')) return;
+  if (!confirm('刪除這個情境？（不會影響工作目前的啟用狀態）')) return;
   const removed = state.scenarios.find(s=>s.id===state.editingScenarioId);
   state.scenarios=state.scenarios.filter(s=>s.id!==state.editingScenarioId);
   save();
@@ -6764,24 +6816,53 @@ function renderSnapshotList(){
       <div class="border border-gray-200 rounded-lg p-2 flex items-center justify-between gap-2">
         <div class="flex-1 min-w-0 text-xs">
           <div class="font-semibold">快照 #${s.index+1}（${ts}）</div>
-          <div class="text-gray-500">使用者 ${s.users} · 分類 ${s.categories} · 任務 ${s.templates}</div>
+          <div class="text-gray-500">使用者 ${s.users} · 分類 ${s.categories} · 工作 ${s.templates}</div>
         </div>
         <button onclick="restoreSnapshot(${s.index})" class="text-xs bg-amber-500 text-white px-2 py-1 rounded-lg shrink-0">復原</button>
       </div>
     `;
   }).join('');
 }
+/* ===== 裝置本地設定（不上雲，僅存 localStorage） ===== */
+const DEVICE_PREFS_KEY = 'device_prefs_v1';
+function loadDevicePrefs(){
+  try {
+    const raw = localStorage.getItem(DEVICE_PREFS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e){}
+  return { fontSize: 18, layoutCols: 2 };
+}
+function saveDevicePrefs(p){
+  try { localStorage.setItem(DEVICE_PREFS_KEY, JSON.stringify(p)); } catch(e){}
+}
+let devicePrefs = loadDevicePrefs();
+function applyDevicePrefs(){
+  applyFontSize(devicePrefs.fontSize || 18);
+  applyLayoutCols(devicePrefs.layoutCols || 2);
+}
 function applyFontSize(px){
   document.documentElement.style.fontSize = px + 'px';
 }
-function setFontSize(px){
-  state.preferences.fontSize = px;
+function applyLayoutCols(cols){
+  document.body.dataset.layoutCols = String(cols);
+}
+function setDeviceFontSize(px){
+  devicePrefs.fontSize = px;
   applyFontSize(px);
-  save();
+  saveDevicePrefs(devicePrefs);
   highlightFontSizeButton();
 }
+function setDeviceLayoutCols(cols){
+  devicePrefs.layoutCols = cols;
+  applyLayoutCols(cols);
+  saveDevicePrefs(devicePrefs);
+  highlightLayoutColsButton();
+  // 重新渲染以套用 grid 變化
+  if (state.currentUser?.role==='manager') renderManagerView();
+  else if (state.currentUser?.role==='helper') renderAtikaView();
+}
 function highlightFontSizeButton(){
-  const cur = state.preferences?.fontSize || 18;
+  const cur = devicePrefs.fontSize || 18;
   document.querySelectorAll('.font-size-btn').forEach(b=>{
     if (parseInt(b.dataset.fs) === cur) {
       b.classList.add('bg-blue-600','text-white','border-blue-600');
@@ -6792,6 +6873,20 @@ function highlightFontSizeButton(){
     }
   });
 }
+function highlightLayoutColsButton(){
+  const cur = devicePrefs.layoutCols || 2;
+  document.querySelectorAll('.layout-cols-btn').forEach(b=>{
+    if (parseInt(b.dataset.cols) === cur){
+      b.classList.add('bg-blue-600','text-white','border-blue-600');
+      b.classList.remove('border');
+    } else {
+      b.classList.remove('bg-blue-600','text-white','border-blue-600');
+      b.classList.add('border');
+    }
+  });
+}
+// 舊呼叫相容
+function setFontSize(px){ setDeviceFontSize(px); }
 function closeSettingsModal(){ document.getElementById('settingsModal').classList.add('hidden'); }
 function renderUserList(){
   document.getElementById('userList').innerHTML=state.users.map(u=>`
@@ -6919,7 +7014,7 @@ function importData(ev){
   ev.target.value='';
 }
 function resetAllData(){
-  if (!confirm('⚠️ 將會清空所有資料（任務、紀錄、備註、備品、自訂使用者），確定？')) return;
+  if (!confirm('⚠️ 將會清空所有資料（工作、紀錄、備註、備品、自訂使用者），確定？')) return;
   if (!confirm('再次確認：這個動作無法復原！')) return;
   localStorage.removeItem('housework_v2');
   localStorage.removeItem('houseworkUser');
@@ -7010,7 +7105,8 @@ function refreshAll(){
 /* ========== 啟動 ========== */
 async function init(){
   load();
-  applyFontSize(state.preferences?.fontSize || 18);
+  // 裝置本地設定（不上雲）：字體大小、欄數
+  applyDevicePrefs();
   renderPinDots();
   renderPinHints();
   installPWAManifest();
