@@ -929,18 +929,6 @@
 
     <hr class="my-4 border-gray-200">
 
-    <!-- 情境模式 -->
-    <section class="mb-5">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-bold text-base">🎛️ 情境模式 / Mode Skenario</h3>
-        <button onclick="openAddScenarioModal()" class="bg-blue-600 text-white text-xs px-2 py-1 rounded-lg">＋ 新增</button>
-      </div>
-      <p class="text-xs text-gray-500 mb-3">一鍵批次啟用/停用整組工作模板。常用於季節性、特殊狀況。</p>
-      <div id="scenarioList" class="space-y-2"></div>
-    </section>
-
-    <hr class="my-4 border-gray-200">
-
     <!-- 提示音 -->
     <section class="mb-5">
       <h3 class="font-bold text-base mb-2">🔔 訊息提示音 / Nada Pesan</h3>
@@ -1161,56 +1149,7 @@
   </div>
 </div>
 
-<!-- ===== 情境模式編輯 Modal ===== -->
-<div id="scenarioModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
-  <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
-    <div class="flex items-start justify-between mb-3">
-      <div id="scenarioModalTitle" class="text-xl font-bold">新增情境</div>
-      <button onclick="closeScenarioModal()" class="text-gray-400 text-2xl leading-none">×</button>
-    </div>
-    <div class="space-y-3 text-sm">
-      <div>
-        <label class="block font-semibold mb-1">中文名稱</label>
-        <input id="scenarioNameZh" type="text" data-lang="zh" data-pair="scenarioNameId" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
-      </div>
-      <div>
-        <label class="block font-semibold mb-1">印尼文 Nama</label>
-        <input id="scenarioNameId" type="text" data-lang="id" data-pair="scenarioNameZh" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
-      </div>
-      <div>
-        <label class="block font-semibold mb-1">包含的工作模板（勾選要批次切換的工作）</label>
-        <div class="text-xs text-gray-500 mb-2">啟用此情境時，這些工作 → active；停用時 → inactive。工作出現在多個情境時請小心衝突。</div>
-        <div id="scenarioTaskPicker" class="border border-gray-200 rounded-lg p-2 max-h-72 overflow-y-auto space-y-1"></div>
-      </div>
-      <div class="border-t pt-3">
-        <label class="block font-semibold mb-1">📅 月曆預排（自動啟用/停用日期）</label>
-        <p class="text-xs text-gray-500 mb-2">設定後，到了該日期會在午夜自動執行</p>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <div class="text-xs text-gray-600 mb-1">▶️ 自動啟用日</div>
-            <div id="scenarioStartDates" class="space-y-1"></div>
-            <div class="flex gap-1 mt-1">
-              <input id="scenarioAddStartDate" type="date" class="flex-1 border border-gray-300 rounded p-1 text-xs">
-              <button onclick="scenarioAddDate('start')" class="bg-green-500 text-white px-2 rounded text-xs">＋</button>
-            </div>
-          </div>
-          <div>
-            <div class="text-xs text-gray-600 mb-1">⏸ 自動停用日</div>
-            <div id="scenarioEndDates" class="space-y-1"></div>
-            <div class="flex gap-1 mt-1">
-              <input id="scenarioAddEndDate" type="date" class="flex-1 border border-gray-300 rounded p-1 text-xs">
-              <button onclick="scenarioAddDate('end')" class="bg-gray-500 text-white px-2 rounded text-xs">＋</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="flex gap-2 mt-4">
-      <button id="scenarioDeleteBtn" onclick="deleteScenario()" class="hidden text-red-600 px-3 py-3 rounded-xl border border-red-200">刪除</button>
-      <button onclick="saveScenario()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold">儲存</button>
-    </div>
-  </div>
-</div>
+<!-- 情境模式功能已下架（先移除，未來再完整規劃） -->
 
 <!-- ===== 薪資設定 Modal ===== -->
 <div id="payrollSettingsModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
@@ -2011,10 +1950,8 @@ function load() {
       { id:'other',    nameZh:'其他', nameId:'Lainnya',  deductRate:1.0 },
     ];
   }
-  if (state.scenariosInit === undefined){
-    state.scenarios = DEFAULT_SCENARIOS.map(s=>({...s}));
-    state.scenariosInit = true;
-  }
+  // 情境模式已下架，不再自動產生預設情境（舊資料保留不動）
+  if (state.scenariosInit === undefined){ state.scenariosInit = true; }
   if (!state.supplies.length) {
     state.supplies = DEFAULT_SUPPLIES.map((s,i)=>({
       id:'s'+i, nameZh:s[0], nameId:s[1], catId:s[2]||'s_other',
@@ -2357,6 +2294,24 @@ function unlockAudio(){
 ['click','touchstart','keydown'].forEach(ev=>{
   document.addEventListener(ev, unlockAudio, { capture:true, passive:true });
 });
+// 從背景回到前景時：恢復 audioCtx 並補播放任何待機期間進來的訊息聲音
+document.addEventListener('visibilitychange', ()=>{
+  if (!document.hidden){
+    // 嘗試恢復 audioCtx
+    if (audioCtx && audioCtx.state==='suspended'){
+      audioCtx.resume().catch(()=>{});
+    }
+    // 補播放：對待機時收到的每則訊息響一聲
+    if (window._pendingForegroundReplay && window._pendingForegroundReplay.length){
+      const count = window._pendingForegroundReplay.length;
+      window._pendingForegroundReplay = [];
+      // 給 audioCtx 一點時間恢復再播
+      setTimeout(()=>{
+        ringBurst(Math.min(3, count));
+      }, 200);
+    }
+  }
+});
 
 const SOUND_PROFILES = {
   beep2: { label:'兩聲 beep（預設）',  notes:[[880,0.4,0],[1320,0.4,200]] },
@@ -2367,11 +2322,15 @@ const SOUND_PROFILES = {
 function playProfileSound(profileKey){
   const profile = SOUND_PROFILES[profileKey] || SOUND_PROFILES.beep2;
   if (!profile.notes.length) return;
-  if (!audioCtx || !audioUnlocked){
-    // 嘗試最後一次解鎖
-    unlockAudio();
-    if (!audioCtx || audioCtx.state==='suspended') return;
+  // 強制嘗試解鎖/恢復 audioCtx（避免背景回來時 suspended）
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   }
+  if (audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(()=>{});
+  }
+  if (!audioCtx || audioCtx.state==='suspended') return;
+  audioUnlocked = true;
   profile.notes.forEach(([freq,dur,delay])=>{
     setTimeout(()=>{
       try {
@@ -2386,6 +2345,8 @@ function playProfileSound(profileKey){
       } catch(e){}
     }, delay||0);
   });
+  // 嘗試震動（iOS Safari 不支援，Android 支援）
+  try { if (navigator.vibrate) navigator.vibrate([200,80,200]); } catch(e){}
 }
 function playChatSound(){
   const profile = state.preferences?.soundProfile || 'beep2';
@@ -2612,13 +2573,19 @@ async function clearAllMessages(){
   } catch(err){ alert('清空失敗：'+err.message); }
 }
 
+// 用於回到前景時補播聲音的暫存
+window._pendingForegroundReplay = [];
 function onIncomingMessage(m){
   // 預設連續響三聲（不論是否緊急）
   ringBurst(3);
   // 緊急訊息額外啟動重複響鈴排程（10 分鐘內）
   if (m.is_urgent) startUrgentRing(m);
-  // 若 App 在背景，跳系統層級通知（iOS PWA 安裝後可顯示在鎖屏）
-  if (document.hidden) showOSNotification(m);
+  // 系統通知：背景固定發、前景時若 audioCtx 無法播也補一個（提供視覺/震動）
+  if (document.hidden || !audioUnlocked){
+    showOSNotification(m);
+    // 記住：等回到前景時補播一次
+    if (!m.read_replay) window._pendingForegroundReplay.push(m);
+  }
   // 顯示通知 overlay
   const lang = getCurrentLang();
   const primary = lang==='id' ? (m.text_id||m.text_zh) : (m.text_zh||m.text_id);
@@ -6264,7 +6231,12 @@ function switchTab(tabName){
   // 切到頂端
   window.scrollTo({ top:0, behavior:'smooth' });
 }
-function goHome(){ switchTab('week'); }
+function goHome(){
+  // 切到首頁分頁，並重整頁面以拉最新資料（雲端同步可能還沒完成）
+  switchTab('week');
+  // 加 query string 避免 PWA 用快取版本；之後 service worker 仍會服務 index.html
+  setTimeout(()=>{ location.reload(); }, 80);
+}
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.addEventListener('click', ()=>switchTab(b.dataset.tab));
 });
@@ -6910,12 +6882,17 @@ function renderSnapshotList(){
 }
 /* ===== 裝置本地設定（不上雲，僅存 localStorage） ===== */
 const DEVICE_PREFS_KEY = 'device_prefs_v1';
+function suggestLayoutColsByWidth(){
+  // 小於 720px 自動建議 1 欄（適合手機、直立平板），其餘 2 欄
+  try { return (window.innerWidth || 1024) < 720 ? 1 : 2; } catch(e){ return 2; }
+}
 function loadDevicePrefs(){
   try {
     const raw = localStorage.getItem(DEVICE_PREFS_KEY);
     if (raw) return JSON.parse(raw);
   } catch(e){}
-  return { fontSize: 18, layoutCols: 2 };
+  // 首次：依視窗寬度自動建議
+  return { fontSize: 18, layoutCols: suggestLayoutColsByWidth() };
 }
 function saveDevicePrefs(p){
   try { localStorage.setItem(DEVICE_PREFS_KEY, JSON.stringify(p)); } catch(e){}
@@ -7127,20 +7104,26 @@ async function requestNotifyPermission(){
 async function showOSNotification(m){
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
-  if (!_swRegistration) return;
   const lang = getCurrentLang();
   const pri = lang==='id' ? (m.text_id||m.text_zh) : (m.text_zh||m.text_id);
   const sec = lang==='id' ? (m.text_zh||m.text_id) : (m.text_id||m.text_zh);
+  const title = `${m.is_urgent?'🚨 緊急':'💬'} ${m.from_user}`;
+  const opts = {
+    body: pri + (sec && sec !== pri ? '\n' + sec : ''),
+    tag: 'msg-'+m.id,
+    renotify: true,                                  // 同一 tag 也再響
+    requireInteraction: !!m.is_urgent,
+    silent: false,                                   // 強制不靜音
+    vibrate: m.is_urgent ? [400,150,400,150,400,150,400] : [300,100,300],
+    timestamp: Date.now(),
+  };
+  // 優先用 Service Worker 顯示（支援 vibrate + 鎖屏顯示）；退回到 page-level Notification
   try {
-    await _swRegistration.showNotification(
-      `${m.is_urgent?'🚨 緊急':'💬'} ${m.from_user}`,
-      {
-        body: pri + (sec && sec !== pri ? '\n' + sec : ''),
-        tag: 'msg-'+m.id,
-        requireInteraction: !!m.is_urgent,
-        vibrate: m.is_urgent ? [300,150,300,150,300] : [200],
-      }
-    );
+    if (_swRegistration && _swRegistration.showNotification){
+      await _swRegistration.showNotification(title, opts);
+      return;
+    }
+    new Notification(title, opts);
   } catch(e){ console.warn('系統通知失敗：', e); }
 }
 
