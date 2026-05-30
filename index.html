@@ -122,7 +122,8 @@
         </div>
         <div class="flex items-center gap-2 mt-1">
           <span class="text-xs bg-white/70 text-blue-800 px-2 py-1 rounded-full font-semibold">Atika</span>
-          <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="我的薪資與請假">💰</button>
+          <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="出勤紀錄 / Catatan Kehadiran">📆</button>
+          <button onclick="openSuppliesModal()" class="text-amber-900 text-base" title="備品回報 / Stok">📦</button>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="atikaChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
           <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定 / Tampilan">⚙</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
@@ -132,6 +133,18 @@
   </header>
 
   <main class="container-app max-w-3xl mx-auto px-4 py-4 space-y-4">
+    <!-- 本日提醒（移到最上、加強底色） -->
+    <div id="atikaReminder" class="border-4 border-amber-400 bg-amber-50 rounded-2xl p-4 shadow-md hidden">
+      <div class="flex items-start gap-3">
+        <span class="text-3xl">📢</span>
+        <div class="flex-1">
+          <div class="text-sm font-bold text-amber-900 mb-1">本日提醒 / Pengingat Hari Ini</div>
+          <div id="atikaReminderZh" class="text-base font-medium leading-relaxed"></div>
+          <div id="atikaReminderId" class="id-text text-sm text-gray-700 leading-relaxed mt-1"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- 打卡區塊 -->
     <section id="atikaPunchSection" class="bg-white border-2 border-blue-200 rounded-2xl p-3">
       <div class="flex items-center justify-between mb-2">
@@ -148,27 +161,11 @@
     <!-- 假期/家庭事件 banner -->
     <div id="atikaCalendarInfo" class="space-y-2 hidden"></div>
 
-    <!-- 本日提醒 -->
-    <div id="atikaReminder" class="reminder-banner border-2 rounded-2xl p-3 hidden">
-      <div class="flex items-start gap-2">
-        <span class="text-xl">📢</span>
-        <div class="flex-1">
-          <div class="text-xs font-bold text-amber-800 mb-1">本日提醒 / Pengingat Hari Ini</div>
-          <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed"></div>
-          <div id="atikaReminderId" class="id-text text-sm text-gray-700 leading-relaxed mt-1"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- 快速按鈕 -->
-    <div class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-1 gap-2">
       <button onclick="openAddAdhocModal()" class="bg-red-600 text-white py-3 rounded-xl font-semibold text-sm active:scale-95">
         <span class="bi-pri" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">＋ 新增臨時工作</span><br>
         <span class="bi-sec text-xs font-normal opacity-90" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">Tugas Tambahan</span>
-      </button>
-      <button onclick="openSuppliesModal()" class="bg-amber-500 text-white py-3 rounded-xl font-semibold text-sm active:scale-95">
-        <span class="bi-pri" data-zh="📦 備品快用完" data-id="📦 Stok Hampir Habis">📦 備品快用完</span><br>
-        <span class="bi-sec text-xs font-normal opacity-90" data-zh="📦 備品快用完" data-id="📦 Stok Hampir Habis">Stok Hampir Habis</span>
       </button>
     </div>
 
@@ -578,8 +575,8 @@
     <div id="modalMeta" class="space-y-2 text-sm text-gray-600 mb-4"></div>
     <div class="mb-3 border border-gray-200 rounded-xl p-3">
       <div class="text-sm font-semibold mb-2">遇到特殊狀況 / Kondisi Khusus</div>
-      <div class="grid grid-cols-2 gap-2 mb-2">
-        <button onclick="openReasonForAction('skipToday')" class="bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-semibold">
+      <div id="modalActionGrid" class="grid grid-cols-2 gap-2 mb-2">
+        <button id="modalSkipTodayBtn" onclick="openReasonForAction('skipToday')" class="bg-gray-200 text-gray-800 py-2 rounded-lg text-sm font-semibold">
           ⏭ 本日不執行<br><span class="id-text text-xs font-normal">Tidak hari ini</span>
         </button>
         <button onclick="openReasonForAction('postponeTomorrow')" class="bg-amber-500 text-white py-2 rounded-lg text-sm font-semibold">
@@ -663,9 +660,12 @@
     <div id="suppliesListAtika" class="space-y-1"></div>
     <div class="border-t mt-4 pt-3">
       <label class="block text-sm font-semibold mb-1">沒在清單裡？/ Tidak di daftar?</label>
-      <div class="flex gap-2">
-        <input id="customSupplyInput" type="text" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm" placeholder="例如：浴室海綿 / Spons">
-        <button onclick="addCustomSupplyFlag()" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-sm">加入</button>
+      <div class="space-y-2">
+        <select id="customSupplyCat" class="w-full border border-gray-300 rounded-lg p-2 text-sm"></select>
+        <div class="flex gap-2">
+          <input id="customSupplyInput" type="text" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm" placeholder="例如：浴室海綿 / Spons">
+          <button onclick="addCustomSupplyFlag()" class="bg-amber-500 text-white px-3 py-2 rounded-lg text-sm">加入</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1631,7 +1631,7 @@
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">💰 我的薪資 / Gaji Saya</div>
+        <div class="text-xl font-bold">📆 出勤紀錄 / Catatan Kehadiran</div>
         <div id="myPayrollPeriod" class="text-xs text-gray-500"></div>
       </div>
       <button onclick="closeMyPayroll()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -3177,6 +3177,9 @@ function renderTaskCard(t, opts={}){
   const primaryClass=lang==='id'?'id-text':'';
   const secondaryClass=lang==='id'?'':'id-text';
   const parityBadge = parityBadgeHtml(t, 'short');
+  // 本日工作 section（hideMode + hideLastDone）會隱藏冗餘標籤
+  const showMode = !opts.hideMode;
+  const showLastDone = !opts.hideLastDone;
   return `
     <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}" data-tid="${t.id}">
       <span class="drag-handle shrink-0 text-xs mt-2 select-none">⋮⋮</span>
@@ -3185,11 +3188,11 @@ function renderTaskCard(t, opts={}){
       <div class="flex-1 min-w-0" onclick="openTaskModal('${t.id}')">
         <div class="flex items-center gap-1 flex-wrap">
           <span class="task-title font-bold text-base ${primaryClass} leading-tight">${primary}</span>
-          ${modeBadgeTiny(t)}
+          ${showMode ? modeBadgeTiny(t) : ''}
           ${parityBadge}
         </div>
         <div class="${secondaryClass} text-sm text-gray-500 leading-tight">${secondary}</div>
-        <div class="text-xs text-gray-500 mt-1">${done?`✓ 完成於 ${completionStampText(t)}`:`📅 ${lastDoneText(t)}`}</div>
+        ${showLastDone ? `<div class="text-xs text-gray-500 mt-1">${done?`✓ 完成於 ${completionStampText(t)}`:`📅 ${lastDoneText(t)}`}</div>` : (done?`<div class="text-xs text-green-600 mt-1">✓ 完成於 ${completionStampText(t)}</div>`:'')}
         ${t.mode==='flex' && !done ? `<div class="text-xs ${warnClass?'text-red-700':'text-amber-700'} font-semibold">${dueInText(t)}</div>` : ''}
       </div>
     </div>
@@ -3402,9 +3405,9 @@ function renderAtikaView(){
   const tdSplit=splitDone(todays, t=>isDone(t, d));
   document.getElementById('todayCount').textContent=`${tdSplit.don.length}/${todays.length} 完成`;
   document.getElementById('todayIncomplete').innerHTML=tdSplit.inc.length
-    ? tdSplit.inc.map(t=>renderTaskCard(t)).join('')
+    ? tdSplit.inc.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join('')
     : `<div class="text-sm text-gray-400 italic text-center py-3">🎉 全部完成 / Selesai</div>`;
-  renderSectionDone('todayDoneWrap','todayDone','todayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t)));
+  renderSectionDone('todayDoneWrap','todayDone','todayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
 
   // 彈性（依本週/本月/本季列出；mWeek 多週的 → 每週類；單週的 → 每月類）
   const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
@@ -3478,8 +3481,8 @@ function renderManagerView(){
   const todays=todaysTemplates();
   const tdSplit=splitDone(todays, t=>isDone(t,d));
   document.getElementById('mgrTodayCount').textContent=`${tdSplit.don.length}/${todays.length} 完成`;
-  document.getElementById('mgrTodayIncomplete').innerHTML=tdSplit.inc.length?tdSplit.inc.map(t=>renderTaskCard(t)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
-  renderSectionDone('mgrTodayDoneWrap','mgrTodayDone','mgrTodayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t)));
+  document.getElementById('mgrTodayIncomplete').innerHTML=tdSplit.inc.length?tdSplit.inc.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
+  renderSectionDone('mgrTodayDoneWrap','mgrTodayDone','mgrTodayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
 
   // 彈性 - 各週期內各自分未完成/已完成；總「已完成」收合一起
   const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
@@ -3620,49 +3623,80 @@ function renderPunchSection(){
   const lang=getCurrentLang();
   const punches=todayPunches();
   const plan = getPunchPlanForDate();
-  // 動態調整 grid 欄數：4 顆走 4 欄、6 顆走 3 欄、其他走 2 欄
-  grid.className = 'grid gap-2 ' + (plan.length===4 ? 'grid-cols-4' : plan.length===6 ? 'grid-cols-3' : 'grid-cols-2');
-  const html=plan.map((pt,idx)=>{
+
+  // 三群橫向：上班 | 中央 rest 縱向堆疊（縮小） | 下班
+  const workStart = plan.find(p=>p.id==='work_start');
+  const workEnd   = plan.find(p=>p.id==='work_end');
+  const restItems = plan.filter(p=>p.kind==='rest');
+
+  // 大按鈕（上班/下班）
+  const bigBtnHTML = (pt) => {
+    if (!pt) return '';
     const p=getPunch(punches, pt.id);
-    const prev=idx===0 || getPunch(punches, plan[idx-1].id);
+    // 上班 prev 永遠 true（第一步）；下班 prev = workStart 已打
+    const isWorkStart = pt.id==='work_start';
+    const prev = isWorkStart ? true : !!getPunch(punches,'work_start');
     const priLbl = lang==='id'?pt.id_:pt.zh;
     const secLbl = lang==='id'?pt.zh:pt.id_;
-    const rangeHint = pt.range ? `<div class="text-[10px] text-gray-400 leading-tight">${pt.range}</div>` : '';
     if (p){
       const bf = p.isBackfill;
       const cls = bf ? 'bg-amber-50 border-amber-300' : 'bg-gray-50 border-gray-200';
-      return `
-        <button onclick="openPunchEdit('${pt.id}')" class="${cls} border-2 rounded-xl p-2 text-center active:scale-95">
-          <div class="text-xs text-gray-600">${pt.emoji} ${priLbl}</div>
-          <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
-          ${rangeHint}
-          <div class="font-bold text-base tabular-nums mt-1">${p.at}</div>
-          ${bf?'<div class="text-xs text-amber-700 font-bold">⚠️ 補打</div>':'<div class="text-xs text-green-600">✓</div>'}
-        </button>
-      `;
+      return `<button onclick="openPunchEdit('${pt.id}')" class="${cls} border-2 rounded-xl p-3 text-center active:scale-95 w-full">
+        <div class="text-sm text-gray-600">${pt.emoji} ${priLbl}</div>
+        <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
+        <div class="font-bold text-lg tabular-nums mt-1">${p.at}</div>
+        ${bf?'<div class="text-xs text-amber-700 font-bold">⚠️ 補打</div>':'<div class="text-xs text-green-600">✓</div>'}
+      </button>`;
     }
     if (!prev){
-      return `
-        <button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border-2 border-gray-200 rounded-xl p-2 text-center">
-          <div class="text-xs text-gray-400">${pt.emoji} ${priLbl}</div>
-          <div class="text-xs text-gray-300 id-text leading-tight">${secLbl}</div>
-          ${rangeHint}
-          <div class="text-xs text-gray-400 mt-1">待前一步</div>
-          <div class="text-xs text-amber-600 mt-0.5">⚠️ 補打</div>
-        </button>
-      `;
+      return `<button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border-2 border-gray-200 rounded-xl p-3 text-center w-full">
+        <div class="text-sm text-gray-400">${pt.emoji} ${priLbl}</div>
+        <div class="text-xs text-gray-300 id-text leading-tight">${secLbl}</div>
+        <div class="text-xs text-gray-400 mt-1">待前一步</div>
+        <div class="text-xs text-amber-600 mt-0.5">⚠️ 補打</div>
+      </button>`;
     }
-    return `
-      <button onclick="punchNow('${pt.id}')" class="bg-green-50 border-2 border-green-400 rounded-xl p-2 text-center active:scale-95">
-        <div class="text-xs text-gray-600">${pt.emoji} ${priLbl}</div>
-        <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
-        ${rangeHint}
-        <div class="font-bold text-base text-green-700 mt-1">點此打卡</div>
-        <div class="text-xs text-gray-500">${nowHHMM()}</div>
-      </button>
-    `;
-  }).join('');
-  grid.innerHTML=html;
+    return `<button onclick="punchNow('${pt.id}')" class="bg-green-50 border-2 border-green-400 rounded-xl p-3 text-center active:scale-95 w-full">
+      <div class="text-sm text-gray-600">${pt.emoji} ${priLbl}</div>
+      <div class="text-xs text-gray-400 id-text leading-tight">${secLbl}</div>
+      <div class="font-bold text-base text-green-700 mt-1">點此打卡</div>
+      <div class="text-xs text-gray-500">${nowHHMM()}</div>
+    </button>`;
+  };
+  // 小按鈕（rest 區，縮小一半）
+  const smallBtnHTML = (pt) => {
+    const p=getPunch(punches, pt.id);
+    const prev = !!getPunch(punches,'work_start');
+    const priLbl = lang==='id'?pt.id_:pt.zh;
+    const rangeHint = pt.range ? `<span class="text-[10px] text-gray-400 ml-1">${pt.range}</span>` : '';
+    if (p){
+      const bf = p.isBackfill;
+      const cls = bf ? 'bg-amber-50 border-amber-300' : 'bg-gray-50 border-gray-200';
+      return `<button onclick="openPunchEdit('${pt.id}')" class="${cls} border rounded-lg py-1.5 px-2 text-left active:scale-95 w-full flex items-center justify-between">
+        <span class="text-[11px] text-gray-700">${pt.emoji} ${priLbl}${rangeHint}</span>
+        <span class="font-bold text-xs tabular-nums">${p.at}${bf?' ⚠':' ✓'}</span>
+      </button>`;
+    }
+    if (!prev){
+      return `<button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border border-gray-200 rounded-lg py-1.5 px-2 text-left w-full flex items-center justify-between opacity-60">
+        <span class="text-[11px] text-gray-400">${pt.emoji} ${priLbl}${rangeHint}</span>
+        <span class="text-[10px] text-gray-400">待前一步</span>
+      </button>`;
+    }
+    return `<button onclick="punchNow('${pt.id}')" class="bg-green-50 border border-green-400 rounded-lg py-1.5 px-2 text-left active:scale-95 w-full flex items-center justify-between">
+      <span class="text-[11px] text-gray-700">${pt.emoji} ${priLbl}${rangeHint}</span>
+      <span class="font-bold text-xs text-green-700">點此打卡</span>
+    </button>`;
+  };
+
+  grid.className = 'flex items-stretch gap-2';
+  grid.innerHTML = `
+    <div class="flex-1 min-w-0">${bigBtnHTML(workStart)}</div>
+    <div class="flex-[1.4] min-w-0 space-y-1.5">
+      ${restItems.length ? restItems.map(pt=>smallBtnHTML(pt)).join('') : '<div class="text-[11px] text-gray-400 italic text-center py-3">無小憩時段</div>'}
+    </div>
+    <div class="flex-1 min-w-0">${bigBtnHTML(workEnd)}</div>
+  `;
   document.getElementById('punchSummary').textContent = punchSummaryText(punches);
 }
 // 蒐集多段 rest 配對：回傳 [{startType, endType, start, end}]
@@ -4424,6 +4458,12 @@ function populateLeaveDropdowns(){
   }).join('');
 }
 function openLeaveModal(presetDate, editId){
+  // 若 Atika「出勤紀錄」彈窗開著，先收起避免遮擋；關閉請假 modal 時會自動回到 myPayroll
+  const myPayroll = document.getElementById('myPayrollModal');
+  if (myPayroll && !myPayroll.classList.contains('hidden')){
+    myPayroll.classList.add('hidden');
+    window._reopenMyPayrollAfterLeave = true;
+  }
   _editingLeaveId = editId || null;
   populateLeaveDropdowns();
   const isMgr = state.currentUser.role==='manager';
@@ -4460,7 +4500,16 @@ function openLeaveModal(presetDate, editId){
   }
   document.getElementById('leaveModal').classList.remove('hidden');
 }
-function closeLeaveModal(){ document.getElementById('leaveModal').classList.add('hidden'); }
+function closeLeaveModal(){
+  document.getElementById('leaveModal').classList.add('hidden');
+  // 還原原本的出勤紀錄彈窗
+  if (window._reopenMyPayrollAfterLeave){
+    window._reopenMyPayrollAfterLeave = false;
+    if (state.currentUser?.role==='helper'){
+      openMyPayroll();
+    }
+  }
+}
 function openAddLeaveForAtika(){
   // 管理者代 Atika 申請；直接批准
   openLeaveModal(null, null);
@@ -4497,6 +4546,8 @@ function submitLeaveRequest(){
     state.leaveRequests.push(req);
   }
   save();
+  // 避免 closeLeaveModal 重複觸發 reopenMyPayroll
+  window._reopenMyPayrollAfterLeave = false;
   closeLeaveModal();
   if (state.currentUser.role==='helper') {
     openMyPayroll();
@@ -5349,10 +5400,10 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
         <div class="flex-1 min-w-0">
           <div class="font-bold text-orange-800">${chipText}</div>
           ${policy ? `
-            <div class="mt-2 pt-2 border-t border-orange-200">
-              <div class="text-xs font-bold text-amber-800 mb-1">📢 ${lang==='id'?'Catatan Cuti':'請假注意事項'}</div>
-              <div class="text-sm text-gray-700 whitespace-pre-wrap">${policy}</div>
-            </div>
+            <details class="mt-2 pt-2 border-t border-orange-200">
+              <summary class="cursor-pointer text-xs font-bold text-amber-800">📢 ${lang==='id'?'Catatan Cuti':'請假注意事項'}<span class="text-gray-400 font-normal ml-1">（點開檢視）</span></summary>
+              <div class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${policy}</div>
+            </details>
           ` : ''}
         </div>
       </div>
@@ -5755,31 +5806,50 @@ function closeSuppliesModal(){ document.getElementById('suppliesModal').classLis
 function renderSuppliesAtika(){
   const list=document.getElementById('suppliesListAtika');
   const lang=getCurrentLang();
-  // 排序：已購買待補貨 > 已回報 > 暫不補充 > 正常
-  const prio = s => s.handleStatus==='bought'?3 : (s.reportStatus && !s.handleStatus)?2 : s.handleStatus==='paused'?1 : 0;
-  const sorted=state.supplies.slice().sort((a,b)=>{
-    const p=prio(b)-prio(a);
-    if (p) return p;
-    return (a.order||0)-(b.order||0);
-  });
-  // 依分類分組（依使用者主語言調整顯示）
+  // 已回報（含待補貨）：reportStatus 不為空，或 handleStatus 為 bought（已購買待收納）
+  const reported = state.supplies.filter(s=>s.handleStatus==='bought' || (s.reportStatus && s.handleStatus!=='restocked'));
+  // 已回報排序：待補貨 > 已回報未處理
+  const prio = s => s.handleStatus==='bought'?2 : (s.reportStatus && !s.handleStatus)?1 : 0;
+  reported.sort((a,b)=>prio(b)-prio(a) || (a.order||0)-(b.order||0));
+
+  // 其他（未回報）依分類分組
+  const others = state.supplies.filter(s=>!(s.handleStatus==='bought' || (s.reportStatus && s.handleStatus!=='restocked')));
   const byCat = {};
-  sorted.forEach(s=>{
+  others.forEach(s=>{
     const cid=s.catId||'s_other';
     if (!byCat[cid]) byCat[cid]=[];
     byCat[cid].push(s);
   });
   const sortedCats=state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0));
-  list.innerHTML = sortedCats.map(cat=>{
+
+  const reportedHtml = reported.length
+    ? `<div class="mb-3">
+        <div class="text-xs font-bold text-red-700 mb-1 flex items-center gap-1">🔔 已回報 / Sudah Dilaporkan <span class="bg-red-100 text-red-700 text-[10px] px-1.5 rounded-full">${reported.length}</span></div>
+        <div class="space-y-1">${reported.map(s=>renderAtikaSupplyRow(s,lang)).join('')}</div>
+      </div>`
+    : '<div class="text-xs text-gray-400 italic mb-3 text-center py-2">目前無已回報項目 / Belum ada laporan</div>';
+
+  const collapsedHtml = sortedCats.map(cat=>{
     const items=byCat[cat.id]||[];
     if (!items.length) return '';
     return `
-      <div class="mb-3">
-        <div class="text-xs font-bold text-gray-700 mb-1" style="border-left:3px solid ${cat.color};padding-left:8px">${lang==='id'?cat.nameId:cat.nameZh} <span class="text-gray-400 font-normal">${lang==='id'?cat.nameZh:cat.nameId}</span></div>
-        <div class="space-y-1">${items.map(s=>renderAtikaSupplyRow(s,lang)).join('')}</div>
-      </div>
+      <details class="mb-1.5">
+        <summary class="cursor-pointer text-xs font-bold text-gray-700 py-1.5 px-2 bg-gray-50 rounded-lg flex items-center justify-between" style="border-left:3px solid ${cat.color}">
+          <span>${lang==='id'?cat.nameId:cat.nameZh} <span class="text-gray-400 font-normal">${lang==='id'?cat.nameZh:cat.nameId}</span></span>
+          <span class="text-[10px] text-gray-400">(${items.length}) ▼</span>
+        </summary>
+        <div class="space-y-1 mt-1.5 ml-2">${items.map(s=>renderAtikaSupplyRow(s,lang)).join('')}</div>
+      </details>
     `;
   }).join('');
+
+  list.innerHTML = reportedHtml + (collapsedHtml ? `<div class="text-[11px] text-gray-500 mt-2 mb-1">📁 全部備品（點開檢視）</div>` + collapsedHtml : '');
+
+  // 同步更新「沒在清單裡」的分類下拉
+  const sel = document.getElementById('customSupplyCat');
+  if (sel){
+    sel.innerHTML = sortedCats.map(c=>`<option value="${c.id}">${c.nameZh} / ${c.nameId}</option>`).join('');
+  }
 }
 function renderAtikaSupplyRow(s, lang){
   const reported=s.reportStatus && !s.handleStatus;
@@ -5856,8 +5926,10 @@ function setSupplyAmount(level){
 function addCustomSupplyFlag(){
   const v=document.getElementById('customSupplyInput').value.trim();
   if (!v) return;
+  const catId = document.getElementById('customSupplyCat')?.value || (state.supplyCats[0]?.id || '');
   state.supplies.push({
     id:'s'+Date.now(), nameZh:v, nameId:v,
+    catId,
     reportStatus:'low', reportedAt:new Date().toISOString(), reportedBy:state.currentUser.name,
     handleStatus:null, handledAt:null, handledBy:null,
     order:state.supplies.length,
@@ -6226,16 +6298,29 @@ function openTaskModal(tid){
   btn.textContent=done?'取消完成 Batalkan':'✓ 標記完成 Tandai Selesai';
   btn.className=(done?'bg-gray-200 text-gray-700':'bg-green-600 text-white')+' flex-1 py-3 rounded-xl font-semibold';
   btn.onclick=()=>{ toggleDone(t, today(), state.currentUser.name); closeTaskModal(); refreshAll(); };
-  // 本期不執行 按鈕僅 flex 工作顯示
+  // 本期不執行 按鈕僅 flex 工作顯示；本日不執行按鈕在 flex 工作隱藏（主軸用本期）
   const periodBtn=document.getElementById('modalSkipPeriodBtn');
-  if (periodBtn){
-    if (t.mode==='flex'){
+  const skipTodayBtn=document.getElementById('modalSkipTodayBtn');
+  const actionGrid=document.getElementById('modalActionGrid');
+  if (t.mode==='flex'){
+    if (periodBtn){
       const periodDays=getPeriodDays(t)||14;
       const freqLabel=FREQ_ZH[t.freqType]||'本期';
       periodBtn.innerHTML = `⏸ 本期不執行（${freqLabel} ${periodDays} 天）<br><span class="id-text text-xs font-normal">Lewati periode ${periodDays} hari</span>`;
       periodBtn.classList.remove('hidden');
-    } else {
-      periodBtn.classList.add('hidden');
+    }
+    if (skipTodayBtn) skipTodayBtn.classList.add('hidden');
+    // 只剩「移至明天」單顆 → 改成 1 欄
+    if (actionGrid){
+      actionGrid.classList.remove('grid-cols-2');
+      actionGrid.classList.add('grid-cols-1');
+    }
+  } else {
+    if (periodBtn) periodBtn.classList.add('hidden');
+    if (skipTodayBtn) skipTodayBtn.classList.remove('hidden');
+    if (actionGrid){
+      actionGrid.classList.remove('grid-cols-1');
+      actionGrid.classList.add('grid-cols-2');
     }
   }
   document.getElementById('taskModal').classList.remove('hidden');
