@@ -62,12 +62,19 @@
   body[data-layout-cols="1"] .layout-grid {
     grid-template-columns: 1fr !important;
   }
+  /* 登入畫面鎖住捲動，避免按 PIN 時誤拖頁面 */
+  body.pin-locked { overflow: hidden !important; position: fixed; width: 100%; height: 100%; touch-action: none; overscroll-behavior: none; }
+  #loginScreen .pin-key, #loginScreen #pinClear, #loginScreen #pinBack {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 </style>
 </head>
 <body class="min-h-screen">
 
 <!-- ===== 登入 ===== -->
-<section id="loginScreen" class="min-h-screen flex flex-col items-center justify-center px-6">
+<section id="loginScreen" class="min-h-screen flex flex-col items-center justify-center px-6" style="touch-action:none; overscroll-behavior:none;">
   <div class="text-center mb-8">
     <div class="text-5xl mb-3">🏠</div>
     <h1 class="text-2xl font-bold">家務管理</h1>
@@ -111,7 +118,7 @@
   <header class="header-hero border-b-2 border-amber-300 sticky top-0 z-30">
     <div class="container-app max-w-3xl mx-auto px-4 py-4">
       <div class="flex items-start justify-between">
-        <div>
+        <div onclick="goHome()" class="cursor-pointer" title="回首頁 / Ke Beranda">
           <div class="flex items-baseline gap-2 flex-wrap">
             <div id="atikaDateZh" class="text-2xl font-black tracking-tight"></div>
             <div id="atikaClock" class="text-base font-bold text-amber-800 tabular-nums"></div>
@@ -122,9 +129,9 @@
         </div>
         <div class="flex items-center gap-2 mt-1">
           <span class="text-xs bg-white/70 text-blue-800 px-2 py-1 rounded-full font-semibold">Atika</span>
-          <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="出勤紀錄 / Catatan Kehadiran">📆</button>
-          <button onclick="openSuppliesModal()" class="text-amber-900 text-base" title="備品回報 / Stok">📦</button>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="atikaChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
+          <button onclick="openSuppliesModal()" class="text-amber-900 text-base" title="備品回報 / Stok">📦</button>
+          <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="出勤紀錄 / Catatan Kehadiran">📆</button>
           <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定 / Tampilan">🎨</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
         </div>
@@ -161,15 +168,7 @@
     <!-- 假期/家庭事件 banner -->
     <div id="atikaCalendarInfo" class="space-y-2 hidden"></div>
 
-    <!-- 快速按鈕 -->
-    <div class="grid grid-cols-1 gap-2">
-      <button onclick="openAddAdhocModal()" class="bg-red-600 text-white py-3 rounded-xl font-semibold text-sm active:scale-95">
-        <span class="bi-pri" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">＋ 新增臨時工作</span><br>
-        <span class="bi-sec text-xs font-normal opacity-90" data-zh="＋ 新增臨時工作" data-id="＋ Tugas Tambahan">Tugas Tambahan</span>
-      </button>
-    </div>
-
-    <!-- 臨時工作（移到最上方） -->
+    <!-- 臨時工作（含右側 ＋新增 按鈕，與管理者視角同位置） -->
     <section id="adhocSection">
       <div class="flex items-center justify-between mb-2">
         <div>
@@ -179,7 +178,10 @@
           </h2>
           <p class="bi-sec id-text text-xs text-gray-500" data-zh="臨時工作" data-id="Tugas Tambahan">Tugas Tambahan</p>
         </div>
-        <span id="adhocCount" class="text-xs text-gray-500"></span>
+        <div class="flex items-center gap-2">
+          <span id="adhocCount" class="text-xs text-gray-500"></span>
+          <button onclick="openAddAdhocModal()" class="bg-red-600 text-white text-xs px-2 py-1 rounded-lg">＋ 新增</button>
+        </div>
       </div>
       <div id="adhocIncomplete" class="layout-grid grid grid-cols-2 gap-2 sortable-list"></div>
       <details id="adhocDoneWrap" class="mt-2 hidden">
@@ -320,28 +322,28 @@
 
       <!-- 本日提醒 + 今日時間軸（左右並排） -->
       <div class="grid md:grid-cols-2 gap-3 mb-4">
-        <!-- 本日提醒編輯 -->
-        <div class="reminder-banner border-2 rounded-2xl p-3">
-          <div class="flex items-start gap-2">
-            <span class="text-xl">📢</span>
-            <div class="flex-1 min-w-0">
-              <div class="text-xs font-bold text-amber-800 mb-2">本日提醒（給 Atika）/ Pengingat</div>
-              <div class="flex gap-2 items-start mb-2">
-                <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
-                <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文">→ID</button>
-              </div>
-              <div class="flex gap-2 items-start">
-                <textarea id="mgrReminderId" rows="2" data-lang="id" data-pair="mgrReminderZh" class="id-text flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="Misalnya: Kucing ke dokter"></textarea>
-                <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成中文">→ZH</button>
-              </div>
-              <div class="flex justify-end gap-2 mt-2">
-                <button onclick="clearReminder()" class="text-xs text-gray-500 px-3 py-1">清除</button>
-                <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
-              </div>
-              <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
+        <!-- 本日提醒編輯（預設收合） -->
+        <details class="reminder-banner border-2 rounded-2xl">
+          <summary class="cursor-pointer px-3 py-2 text-sm font-bold text-amber-800 flex items-center justify-between">
+            <span>📢 本日提醒（給 Atika）/ Pengingat</span>
+            <span class="text-gray-400 font-normal text-xs">點開編輯 ▼</span>
+          </summary>
+          <div class="px-3 pb-3 pt-1">
+            <div class="flex gap-2 items-start mb-2">
+              <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
+              <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文">→ID</button>
             </div>
+            <div class="flex gap-2 items-start">
+              <textarea id="mgrReminderId" rows="2" data-lang="id" data-pair="mgrReminderZh" class="id-text flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="Misalnya: Kucing ke dokter"></textarea>
+              <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成中文">→ZH</button>
+            </div>
+            <div class="flex justify-end gap-2 mt-2">
+              <button onclick="clearReminder()" class="text-xs text-gray-500 px-3 py-1">清除</button>
+              <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
+            </div>
+            <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
           </div>
-        </div>
+        </details>
 
         <!-- 今日時間軸 -->
         <section>
@@ -946,31 +948,7 @@
 
     <hr class="my-4 border-gray-200">
 
-    <!-- 字體大小 -->
-    <section class="mb-5">
-      <h3 class="font-bold text-base mb-2">🔤 字體大小 / Ukuran Font</h3>
-      <p class="text-xs text-gray-500 mb-3">影響所有畫面的字體與按鈕大小。會即時套用，方便你比較。</p>
-      <div class="grid grid-cols-4 gap-2">
-        <button onclick="setFontSize(16)" class="font-size-btn py-2 rounded-lg border" data-fs="16">
-          <div style="font-size:12px" class="font-semibold">小</div>
-          <div class="text-xs text-gray-500">16px</div>
-        </button>
-        <button onclick="setFontSize(18)" class="font-size-btn py-2 rounded-lg border" data-fs="18">
-          <div style="font-size:14px" class="font-semibold">標準</div>
-          <div class="text-xs text-gray-500">18px</div>
-        </button>
-        <button onclick="setFontSize(20)" class="font-size-btn py-2 rounded-lg border" data-fs="20">
-          <div style="font-size:16px" class="font-semibold">大</div>
-          <div class="text-xs text-gray-500">20px</div>
-        </button>
-        <button onclick="setFontSize(22)" class="font-size-btn py-2 rounded-lg border" data-fs="22">
-          <div style="font-size:18px" class="font-semibold">特大</div>
-          <div class="text-xs text-gray-500">22px</div>
-        </button>
-      </div>
-    </section>
-
-    <hr class="my-4 border-gray-200">
+    <!-- 字體大小已搬到 🎨 顯示設定（每台裝置獨立） -->
 
     <!-- PWA 安裝指引 -->
     <section class="mb-5">
@@ -1335,12 +1313,20 @@
 
 <div id="scheduleOverviewModal" class="hidden fixed inset-0 z-50 flex items-stretch justify-center modal-backdrop overflow-auto">
   <div class="bg-white w-full max-w-6xl sm:rounded-2xl p-4 sm:m-4 self-start">
-    <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
       <div>
         <div class="text-xl font-bold">📅 工作排程總覽</div>
         <div class="id-text text-sm text-gray-500">Ringkasan Jadwal Mingguan</div>
       </div>
-      <button onclick="closeScheduleOverview()" class="text-gray-400 text-2xl leading-none">×</button>
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <div class="flex bg-gray-100 rounded-lg p-0.5 text-xs">
+          <button onclick="setScheduleLang('zh')" class="schedule-lang-btn px-2 py-1 rounded" data-lang="zh">中文</button>
+          <button onclick="setScheduleLang('id')" class="schedule-lang-btn px-2 py-1 rounded" data-lang="id">Indonesia</button>
+          <button onclick="setScheduleLang('both')" class="schedule-lang-btn px-2 py-1 rounded" data-lang="both">雙語</button>
+        </div>
+        <button onclick="printScheduleOverview()" class="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-lg">🖨 列印</button>
+        <button onclick="closeScheduleOverview()" class="text-gray-400 text-2xl leading-none ml-1">×</button>
+      </div>
     </div>
     <div id="scheduleOverviewMeta" class="text-xs text-gray-600 mb-3"></div>
     <div id="scheduleOverviewSections" class="space-y-4"></div>
@@ -2873,9 +2859,11 @@ function logout(){
   document.getElementById('atikaView').classList.add('hidden');
   document.getElementById('managerView').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
+  document.body.classList.add('pin-locked');
 }
 function showMainView(){
   document.getElementById('loginScreen').classList.add('hidden');
+  document.body.classList.remove('pin-locked');
   if (state.currentUser.role==='helper'){
     document.getElementById('atikaView').classList.remove('hidden');
     renderAtikaView();
@@ -3630,39 +3618,62 @@ function renderPunchSection(){
       <div class="text-xs text-gray-500">${nowHHMM()}</div>
     </button>`;
   };
-  // 小按鈕（rest 區，縮小一半）
+  // 小按鈕（rest 區）：縱向標題在上、時間在下，寬度約大按鈕一半
   const smallBtnHTML = (pt) => {
     const p=getPunch(punches, pt.id);
     const prev = !!getPunch(punches,'work_start');
     const priLbl = lang==='id'?pt.id_:pt.zh;
-    const rangeHint = pt.range ? `<span class="text-[10px] text-gray-400 ml-1">${pt.range}</span>` : '';
     if (p){
       const bf = p.isBackfill;
       const cls = bf ? 'bg-amber-50 border-amber-300' : 'bg-gray-50 border-gray-200';
-      return `<button onclick="openPunchEdit('${pt.id}')" class="${cls} border rounded-lg py-1.5 px-2 text-left active:scale-95 w-full flex items-center justify-between">
-        <span class="text-[11px] text-gray-700">${pt.emoji} ${priLbl}${rangeHint}</span>
-        <span class="font-bold text-xs tabular-nums">${p.at}${bf?' ⚠':' ✓'}</span>
+      return `<button onclick="openPunchEdit('${pt.id}')" class="${cls} border rounded-lg py-1.5 px-1.5 text-center active:scale-95 w-full">
+        <div class="text-[10px] text-gray-600 leading-tight">${pt.emoji}<br>${priLbl}</div>
+        <div class="font-bold text-xs tabular-nums mt-0.5">${p.at}</div>
+        <div class="text-[10px] ${bf?'text-amber-700 font-bold':'text-green-600'}">${bf?'⚠':'✓'}</div>
       </button>`;
     }
     if (!prev){
-      return `<button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border border-gray-200 rounded-lg py-1.5 px-2 text-left w-full flex items-center justify-between opacity-60">
-        <span class="text-[11px] text-gray-400">${pt.emoji} ${priLbl}${rangeHint}</span>
-        <span class="text-[10px] text-gray-400">待前一步</span>
+      return `<button onclick="openPunchEdit('${pt.id}')" class="bg-gray-100 border border-gray-200 rounded-lg py-1.5 px-1.5 text-center w-full opacity-60">
+        <div class="text-[10px] text-gray-400 leading-tight">${pt.emoji}<br>${priLbl}</div>
+        <div class="text-[10px] text-gray-400 mt-0.5">待上班</div>
       </button>`;
     }
-    return `<button onclick="punchNow('${pt.id}')" class="bg-green-50 border border-green-400 rounded-lg py-1.5 px-2 text-left active:scale-95 w-full flex items-center justify-between">
-      <span class="text-[11px] text-gray-700">${pt.emoji} ${priLbl}${rangeHint}</span>
-      <span class="font-bold text-xs text-green-700">點此打卡</span>
+    return `<button onclick="punchNow('${pt.id}')" class="bg-green-50 border border-green-400 rounded-lg py-1.5 px-1.5 text-center active:scale-95 w-full">
+      <div class="text-[10px] text-gray-700 leading-tight">${pt.emoji}<br>${priLbl}</div>
+      <div class="text-[10px] text-green-700 font-bold mt-0.5">點此打卡</div>
     </button>`;
   };
 
-  grid.className = 'flex items-stretch gap-2';
+  // 全橫排：[上班大] [起+收 一對] x N [下班大]，窄螢幕自動換行
+  // 把連續的 rest_start/rest_end 兩兩配對
+  const pairs = [];
+  for (let i=0;i<restItems.length;i++){
+    const a = restItems[i];
+    const b = restItems[i+1];
+    if (a && b && a.id.endsWith('_start') && b.id.endsWith('_end') && a.rsId === b.rsId){
+      pairs.push([a,b]); i++;
+    } else if (a){
+      pairs.push([a, null]);
+    }
+  }
+  const pairGroupHTML = (pair) => {
+    const [s, e] = pair;
+    const range = s?.range || e?.range || '';
+    return `<div class="bg-amber-50/40 border border-amber-200 rounded-xl p-1.5 min-w-[170px]">
+      ${range ? `<div class="text-[10px] text-amber-700 font-mono text-center mb-1">${range}</div>` : ''}
+      <div class="flex gap-1">
+        <div class="flex-1">${smallBtnHTML(s)}</div>
+        ${e ? `<div class="flex-1">${smallBtnHTML(e)}</div>` : ''}
+      </div>
+    </div>`;
+  };
+  grid.className = 'flex flex-wrap items-stretch gap-2';
   grid.innerHTML = `
-    <div class="flex-1 min-w-0">${bigBtnHTML(workStart)}</div>
-    <div class="flex-[1.4] min-w-0 space-y-1.5">
-      ${restItems.length ? restItems.map(pt=>smallBtnHTML(pt)).join('') : '<div class="text-[11px] text-gray-400 italic text-center py-3">無小憩時段</div>'}
-    </div>
-    <div class="flex-1 min-w-0">${bigBtnHTML(workEnd)}</div>
+    <div class="flex-[1.2] min-w-[110px]">${bigBtnHTML(workStart)}</div>
+    ${pairs.length
+      ? pairs.map(p=>pairGroupHTML(p)).join('')
+      : '<div class="flex-1 min-w-0 text-[11px] text-gray-400 italic text-center self-center">無小憩時段</div>'}
+    <div class="flex-[1.2] min-w-[110px]">${bigBtnHTML(workEnd)}</div>
   `;
   document.getElementById('punchSummary').textContent = punchSummaryText(punches);
 }
@@ -5367,8 +5378,8 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
         <div class="flex-1 min-w-0">
           <div class="font-bold text-orange-800">${chipText}</div>
           ${policy ? `
-            <details class="mt-2 pt-2 border-t border-orange-200">
-              <summary class="cursor-pointer text-xs font-bold text-amber-800">📢 ${lang==='id'?'Catatan Cuti':'請假注意事項'}<span class="text-gray-400 font-normal ml-1">（點開檢視）</span></summary>
+            <details open class="mt-2 pt-2 border-t border-orange-200">
+              <summary class="cursor-pointer text-xs font-bold text-amber-800">📢 ${lang==='id'?'Catatan Cuti':'請假注意事項'}</summary>
               <div class="text-sm text-gray-700 whitespace-pre-wrap mt-1">${policy}</div>
             </details>
           ` : ''}
@@ -5378,7 +5389,11 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
   }
 }
 function renderAtikaTomorrowOff(){
-  _renderTomorrowOffInto('atikaTomorrowOff', 'atikaTomorrowOffBanner', false);
+  // 明日休假 header chip 不顯示（保留 banner 在內文）
+  _renderTomorrowOffInto(null, 'atikaTomorrowOffBanner', false);
+  // 強制隱藏 chip（防止舊狀態殘留）
+  const c = document.getElementById('atikaTomorrowOff');
+  if (c){ c.classList.add('hidden'); c.textContent=''; }
   renderTodayOffChip('atikaTodayOff', false);
 }
 function renderMgrTomorrowOff(){
@@ -5522,12 +5537,38 @@ function openCategoryManageModal(){
 function closeCategoryManageModal(){
   document.getElementById('categoryManageModal').classList.add('hidden');
 }
+window._scheduleLang = 'zh';  // zh / id / both
+function setScheduleLang(lang){
+  window._scheduleLang = lang;
+  document.querySelectorAll('.schedule-lang-btn').forEach(b=>{
+    if (b.dataset.lang===lang){
+      b.classList.add('bg-white','shadow','font-bold','text-gray-900');
+      b.classList.remove('text-gray-500');
+    } else {
+      b.classList.remove('bg-white','shadow','font-bold','text-gray-900');
+      b.classList.add('text-gray-500');
+    }
+  });
+  renderScheduleOverview();
+}
 function openScheduleOverview(){
   renderScheduleOverview();
+  // 預設選中當前語言（zh）
+  setScheduleLang(window._scheduleLang || 'zh');
   document.getElementById('scheduleOverviewModal').classList.remove('hidden');
 }
 function closeScheduleOverview(){
   document.getElementById('scheduleOverviewModal').classList.add('hidden');
+}
+function printScheduleOverview(){
+  // 開新分頁列印當前語言版本
+  const lang = window._scheduleLang || 'zh';
+  const html = buildScheduleOverviewPrintHTML(lang);
+  const w = window.open('', '_blank');
+  if (!w){ alert('請允許彈出視窗才能列印'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(), 500);
 }
 function renderScheduleOverview(){
   const all = state.templates.filter(t=>t.active!==false);
@@ -5538,15 +5579,18 @@ function renderScheduleOverview(){
   const mWeekTasks     = all.filter(t=>t.mode==='flex' && t.freqType==='mWeek');
   const mMonthTasks    = all.filter(t=>t.mode==='flex' && (t.freqType==='mMonth' || t.freqType==='quarterly'));
 
+  const lang = window._scheduleLang || 'zh';
   const chipFor = (t, opts={}) => {
     const cat = getCat(t.catId);
     const inactive = opts.muted;
-    const lang = getCurrentLang();
-    const primary = lang==='id' ? t.nameId : t.nameZh;
+    let display;
+    if (lang==='both') display = `${t.nameZh}<div class="text-[9px] text-gray-500 leading-none">${t.nameId}</div>`;
+    else if (lang==='id') display = t.nameId;
+    else display = t.nameZh;
     return `<div class="schedule-chip text-[10px] leading-tight rounded px-1.5 py-0.5 mb-0.5 cursor-pointer hover:opacity-80 ${inactive?'opacity-50':''}"
       style="background:${cat.color}22; border-left:3px solid ${cat.color};"
       onclick="closeScheduleOverview(); openTaskModal('${t.id}')"
-      title="${t.nameZh} / ${t.nameId}">${primary}</div>`;
+      title="${t.nameZh} / ${t.nameId}">${display}</div>`;
   };
   const emptyCell = '<span class="text-gray-300">·</span>';
 
@@ -5629,6 +5673,107 @@ function renderScheduleOverview(){
   document.getElementById('scheduleOverviewSections').innerHTML = tableA + tableB + tableC;
 }
 
+/* 列印版：採用當前 _scheduleLang，輸出乾淨 HTML 表格 */
+function buildScheduleOverviewPrintHTML(lang){
+  const all = state.templates.filter(t=>t.active!==false);
+  const d0 = today();
+  const dailyFixedAll7 = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length===7);
+  const fixedSomeDays  = all.filter(t=>t.mode==='fixed' && Array.isArray(t.weekdays) && t.weekdays.length<7 && t.weekdays.length>0);
+  const mWeekTasks     = all.filter(t=>t.mode==='flex' && t.freqType==='mWeek');
+  const mMonthTasks    = all.filter(t=>t.mode==='flex' && (t.freqType==='mMonth' || t.freqType==='quarterly'));
+  const nameOf = t => {
+    if (lang==='both') return `${t.nameZh}<br><span style="color:#666;font-size:10px">${t.nameId}</span>`;
+    if (lang==='id') return t.nameId;
+    return t.nameZh;
+  };
+  const chipP = t => {
+    const cat = getCat(t.catId);
+    return `<div style="background:${cat.color}22;border-left:3px solid ${cat.color};padding:2px 4px;margin-bottom:2px;font-size:10px;border-radius:3px;">${nameOf(t)}</div>`;
+  };
+  const empty = '<span style="color:#ccc">·</span>';
+  const dows = [1,2,3,4,5,6,0];
+  const wMonNow = weekOfMonth(d0);
+  const mNow = d0.getMonth()+1;
+  const MN = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dowH = (lang==='both')
+    ? ['週一<br>Sen','週二<br>Sel','週三<br>Rab','週四<br>Kam','週五<br>Jum','週六<br>Sab','週日<br>Min']
+    : (lang==='id') ? ['Sen','Sel','Rab','Kam','Jum','Sab','Min']
+    : ['週一','週二','週三','週四','週五','週六','週日'];
+  const title = lang==='id' ? 'Ringkasan Jadwal' : (lang==='both' ? '工作排程總覽 / Ringkasan Jadwal' : '工作排程總覽');
+  const today_ymd = ymd(d0);
+  // 表 A
+  const tableA = `
+    <h3 style="margin-top:16px;">🔵 每週固定（每日 + 指定週幾）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <thead><tr style="background:#f3f4f6;">
+        <th style="border:1px solid #ddd;padding:4px;width:80px;">頻率</th>
+        ${dowH.map(h=>`<th style="border:1px solid #ddd;padding:4px;">${h}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td style="border:1px solid #ddd;padding:4px;font-weight:bold;">每日</td>
+          ${dows.map(()=>`<td style="border:1px solid #ddd;padding:4px;vertical-align:top;">${dailyFixedAll7.map(chipP).join('')||empty}</td>`).join('')}
+        </tr>
+        <tr>
+          <td style="border:1px solid #ddd;padding:4px;font-weight:bold;">固定週幾</td>
+          ${dows.map(dow=>`<td style="border:1px solid #ddd;padding:4px;vertical-align:top;">${fixedSomeDays.filter(t=>(t.weekdays||[]).includes(dow)).map(chipP).join('')||empty}</td>`).join('')}
+        </tr>
+      </tbody>
+    </table>
+  `;
+  // 表 B: 月內 N 週
+  const tableB = `
+    <h3 style="margin-top:16px;">🟣 月內第 N 週 <span style="font-size:11px;color:#666">（本週 = 第 ${wMonNow} 週）</span></h3>
+    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+      <thead><tr style="background:#f3e8ff;">
+        ${[1,2,3,4].map(w=>`<th style="border:1px solid #ddd;padding:4px;${w===wMonNow?'background:#e9d5ff;font-weight:bold;':''}">第 ${w} 週</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        <tr>
+          ${[1,2,3,4].map(w=>{
+            const ts = mWeekTasks.filter(t=>(t.weekFlags||[]).includes(w));
+            return `<td style="border:1px solid #ddd;padding:4px;vertical-align:top;">${ts.map(chipP).join('')||empty}</td>`;
+          }).join('')}
+        </tr>
+      </tbody>
+    </table>
+  `;
+  // 表 C: 12 月
+  const tableC = `
+    <h3 style="margin-top:16px;">🟢 指定月份 <span style="font-size:11px;color:#666">（本月 = ${mNow} 月）</span></h3>
+    <table style="width:100%;border-collapse:collapse;font-size:10px;">
+      <thead><tr style="background:#dcfce7;">
+        ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<th style="border:1px solid #ddd;padding:3px;${m===mNow?'background:#bbf7d0;font-weight:bold;':''}">${MN[m]}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        <tr>
+          ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>{
+            const ts = mMonthTasks.filter(t=>{
+              if (t.freqType==='mMonth') return (t.monthFlags||[]).includes(m);
+              return [1,4,7,10].includes(m);
+            });
+            return `<td style="border:1px solid #ddd;padding:2px;vertical-align:top;">${ts.map(chipP).join('')||empty}</td>`;
+          }).join('')}
+        </tr>
+      </tbody>
+    </table>
+  `;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+    <style>
+      body { font-family:-apple-system,'Helvetica Neue',Arial,sans-serif; padding:20px; color:#1F2937; }
+      h1 { margin:0 0 4px 0; font-size:20px; }
+      h3 { font-size:14px; margin-bottom:6px; }
+      .meta { color:#666; font-size:11px; margin-bottom:10px; }
+      @media print { body { padding:0; } }
+    </style>
+  </head><body>
+    <h1>${title}</h1>
+    <div class="meta">列印日期：${today_ymd} · 啟用工作 ${all.length} 個</div>
+    ${tableA}${tableB}${tableC}
+    <div style="margin-top:14px;font-size:9px;color:#999;">— 家務管理 —</div>
+  </body></html>`;
+}
+
 function renderCatFilters(){
   // 防護網 #3：若篩選的分類已被刪除，自動重置為「全部」
   if (state.catFilter !== 'all' && !state.categories.find(c=>c.id===state.catFilter)){
@@ -5640,16 +5785,38 @@ function renderCatFilters(){
   wrap.appendChild(allBtn);
   state.categories.sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
-    b.className=(state.catFilter===c.id?'bg-gray-900 text-white':'bg-gray-200')+' cat-filter px-3 py-1 rounded-full whitespace-nowrap';
+    const active=state.catFilter===c.id;
+    b.className='cat-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
+    // 用該分類顏色當底（淺底）；選中時加粗邊框
+    b.style.background = active ? c.color : c.color+'22';
+    b.style.color = active ? '#fff' : c.color;
+    b.style.borderColor = c.color;
+    b.style.borderWidth = active ? '2px' : '1px';
     b.dataset.cat=c.id;
+    b.dataset.catcolor=c.color;
     b.textContent=c.nameZh;
     wrap.appendChild(b);
   });
   wrap.querySelectorAll('.cat-filter').forEach(b=>{
     b.onclick=()=>{
       state.catFilter=b.dataset.cat;
-      wrap.querySelectorAll('.cat-filter').forEach(x=>{ x.classList.remove('bg-gray-900','text-white'); x.classList.add('bg-gray-200'); });
-      b.classList.remove('bg-gray-200'); b.classList.add('bg-gray-900','text-white');
+      // 取消其它按鈕的選中態
+      wrap.querySelectorAll('.cat-filter').forEach(x=>{
+        if (x.dataset.cat==='all'){
+          x.classList.remove('bg-gray-900','text-white');
+          x.classList.add('bg-gray-200');
+        } else {
+          const col = x.dataset.catcolor;
+          if (col){ x.style.background = col+'22'; x.style.color = col; x.style.borderWidth='1px'; }
+        }
+      });
+      if (b.dataset.cat==='all'){
+        b.classList.remove('bg-gray-200');
+        b.classList.add('bg-gray-900','text-white');
+      } else {
+        const col = b.dataset.catcolor;
+        b.style.background = col; b.style.color='#fff'; b.style.borderWidth='2px';
+      }
       renderTemplates();
     };
   });
@@ -7189,6 +7356,8 @@ async function init(){
   if (saved){
     state.currentUser=JSON.parse(saved);
     showMainView();
+  } else {
+    document.body.classList.add('pin-locked');
   }
   updateChatBadge();
   startMinuteTicker();
