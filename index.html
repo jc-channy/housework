@@ -125,7 +125,7 @@
           <button onclick="openMyPayroll()" class="text-amber-900 text-base" title="出勤紀錄 / Catatan Kehadiran">📆</button>
           <button onclick="openSuppliesModal()" class="text-amber-900 text-base" title="備品回報 / Stok">📦</button>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="atikaChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
-          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定 / Tampilan">⚙</button>
+          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定 / Tampilan">🎨</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
         </div>
       </div>
@@ -279,7 +279,7 @@
         <div class="flex items-center gap-2 mt-1">
           <span id="mgrRoleTag" class="text-xs bg-white/70 text-purple-800 px-2 py-1 rounded-full font-semibold">管理者</span>
           <button onclick="openChatPanel()" class="relative text-amber-900 text-base" title="訊息">💬<span id="mgrChatBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full hidden"></span></button>
-          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定（此裝置）">⚙</button>
+          <button onclick="openDevicePrefsModal()" class="text-amber-900 text-base" title="顯示設定（此裝置）">🎨</button>
           <button onclick="openSettingsModal()" class="text-amber-900 text-base" title="系統設定">⚙️</button>
           <button onclick="logout()" class="text-amber-900 text-sm">登出</button>
         </div>
@@ -1026,7 +1026,7 @@
 </div>
 
 <!-- ===== 分類編輯 Modal ===== -->
-<div id="catModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
+<div id="catModal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div id="catModalTitle" class="text-xl font-bold">新增分類</div>
