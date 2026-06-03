@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Homii Care 幫傭家務管理平台</title>
+<title>家務管理 / Manajemen Rumah Tangga</title>
 <!-- PWA -->
 <meta name="theme-color" content="#FBBF24">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -77,7 +77,7 @@
 <section id="loginScreen" class="min-h-screen flex flex-col items-center justify-center px-6" style="touch-action:none; overscroll-behavior:none;">
   <div class="text-center mb-8">
     <div class="text-5xl mb-3">🏠</div>
-    <h1 class="text-2xl font-bold">Homii Care 幫傭家務管理平台</h1>
+    <h1 class="text-2xl font-bold">家務管理</h1>
     <p class="id-text text-sm text-gray-500 mt-1">Manajemen Rumah Tangga</p>
   </div>
   <div class="w-full max-w-xs bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
@@ -439,19 +439,13 @@
 
     <!-- 備品 -->
     <div id="tab-supplies" class="tab-content hidden">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-bold">備品狀態 / Status Perlengkapan</h3>
-        <div class="flex gap-2">
-          <button onclick="openAddSupplyCatModal()" class="bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg">＋ 分類</button>
-          <button onclick="openAddSupplyModal()" class="bg-blue-600 text-white text-sm px-3 py-2 rounded-lg">＋ 備品</button>
+      <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <h3 class="font-bold">📦 備品狀態 / Status Perlengkapan</h3>
+        <div class="flex gap-1.5 flex-wrap justify-end">
+          <button onclick="openSupplyCategoryManageModal()" class="bg-gray-200 text-gray-700 text-sm px-3 py-1.5 rounded-lg">📁 管理分類 <span id="supplyCatCount" class="text-xs text-gray-500"></span></button>
+          <button onclick="openAddSupplyModal()" class="bg-blue-600 text-white text-sm px-3 py-1.5 rounded-lg">＋ 新增備品</button>
         </div>
       </div>
-
-      <!-- 分類管理 -->
-      <details class="mb-3">
-        <summary class="text-sm font-semibold text-gray-600 cursor-pointer py-1">📁 管理備品分類 <span id="supplyCatCount" class="text-xs text-gray-400"></span></summary>
-        <div id="supplyCatList" class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2"></div>
-      </details>
 
       <!-- 篩選器 -->
       <div id="supplyCatFilters" class="flex gap-2 mb-3 text-xs overflow-x-auto scrollbar-thin">
@@ -745,7 +739,7 @@
 </div>
 
 <!-- ===== 備品分類編輯 Modal ===== -->
-<div id="supplyCatModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
+<div id="supplyCatModal" class="hidden fixed inset-0 z-[60] flex items-end sm:items-center justify-center modal-backdrop">
   <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div id="supplyCatModalTitle" class="text-xl font-bold">新增備品分類</div>
@@ -1242,10 +1236,9 @@
         <p class="text-[10px] text-gray-400 mt-0.5">💡 中印任一格輸入完按 Tab，會自動翻譯</p>
       </div>
       <p class="text-xs text-amber-700">⚠️ 依假別的扣薪比例計算。例休/特休通常不扣薪。</p>
-      <!-- 請假注意事項（給 Atika 看，從設定讀） -->
-      <div id="leavePolicyNoteBox" class="hidden border-t pt-3">
-        <div class="text-sm font-bold text-amber-800 mb-1">📢 請假注意事項</div>
-        <div id="leavePolicyNoteText" class="text-sm text-gray-700 whitespace-pre-wrap bg-amber-50 border border-amber-200 rounded-lg p-2"></div>
+      <!-- 注意事項已搬到出勤紀錄主畫面 -->
+      <div id="leavePolicyNoteBox" class="hidden">
+        <div id="leavePolicyNoteText"></div>
       </div>
     </div>
     <div class="flex gap-2 mt-4">
@@ -1308,6 +1301,22 @@
     <button onclick="openAddCatModal()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold mb-3">＋ 新增分類</button>
     <div class="text-xs text-gray-500 mb-2">點分類可編輯名稱與顏色。拖移可調整順序。</div>
     <div id="catList" class="grid grid-cols-2 gap-2 sortable-list"></div>
+  </div>
+</div>
+
+<!-- ===== 管理備品分類 Modal ===== -->
+<div id="supplyCategoryManageModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center modal-backdrop">
+  <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl p-5 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div class="text-xl font-bold">📁 管理備品分類</div>
+        <div class="id-text text-sm text-gray-500">Kategori Perlengkapan</div>
+      </div>
+      <button onclick="closeSupplyCategoryManageModal()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <button onclick="openAddSupplyCatModal()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold mb-3">＋ 新增分類</button>
+    <div class="text-xs text-gray-500 mb-2">點分類可編輯名稱與顏色。</div>
+    <div id="supplyCatList" class="grid grid-cols-2 gap-2"></div>
   </div>
 </div>
 
@@ -1563,6 +1572,11 @@
     </div>
     <div id="myPayrollContent" class="space-y-3"></div>
     <button onclick="openLeaveModal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mt-4">📝 新增請假申請</button>
+    <!-- 請假注意事項（從設定讀，預設展開） -->
+    <details id="myPayrollPolicyBox" open class="hidden mt-3 border-2 border-amber-300 bg-amber-50 rounded-xl">
+      <summary class="cursor-pointer px-3 py-2 text-sm font-bold text-amber-800">📢 <span id="myPayrollPolicyTitle">請假注意事項</span></summary>
+      <div id="myPayrollPolicyText" class="text-sm text-gray-700 whitespace-pre-wrap px-3 pb-3"></div>
+    </details>
     <div class="mt-4">
       <h4 class="font-semibold text-sm mb-2">我的請假紀錄</h4>
       <div id="myLeaveList" class="space-y-2"></div>
@@ -1902,6 +1916,12 @@ function load() {
   // 遷移：舊的 weekly/biweekly/monthly → mWeek + weekFlags
   (state.templates||[]).forEach(migrateTemplateFreq);
   if (!state.categories.length) state.categories = DEFAULT_CATS.map((c,i)=>({...c, order:i}));
+  // 遷移：育兒分類顏色從舊淡黃 → 新粉色（一次性）
+  if (!state.babyColorMigrated){
+    const babyCat = state.categories.find(c=>c.id==='baby');
+    if (babyCat && babyCat.color !== '#F2A2C0') babyCat.color = '#F2A2C0';
+    state.babyColorMigrated = true;
+  }
   if (!state.templates.length) {
     state.templates = DEFAULT_TEMPLATES.map((t,i)=>({
       id:'t'+i, catId:t[0], nameZh:t[1], nameId:t[2],
@@ -3644,7 +3664,7 @@ function renderPunchSection(){
     </button>`;
   };
 
-  // 全橫排：[上班大] [起+收 一對] x N [下班大]，窄螢幕自動換行
+  // 三直欄並排（依照片）：[上班大] | 每段休憩(起在上、收在下) | [下班大]
   // 把連續的 rest_start/rest_end 兩兩配對
   const pairs = [];
   for (let i=0;i<restItems.length;i++){
@@ -3656,24 +3676,23 @@ function renderPunchSection(){
       pairs.push([a, null]);
     }
   }
-  const pairGroupHTML = (pair) => {
+  // 每段休憩 = 一欄；內部「起」在上、「收」在下直向堆疊
+  const restColHTML = (pair) => {
     const [s, e] = pair;
     const range = s?.range || e?.range || '';
-    return `<div class="bg-amber-50/40 border border-amber-200 rounded-xl p-1.5 min-w-[170px]">
-      ${range ? `<div class="text-[10px] text-amber-700 font-mono text-center mb-1">${range}</div>` : ''}
-      <div class="flex gap-1">
-        <div class="flex-1">${smallBtnHTML(s)}</div>
-        ${e ? `<div class="flex-1">${smallBtnHTML(e)}</div>` : ''}
-      </div>
+    return `<div class="flex-1 min-w-[78px] flex flex-col gap-1">
+      ${range ? `<div class="text-[10px] text-amber-700 font-mono text-center leading-tight">${range}</div>` : ''}
+      <div class="flex-1">${smallBtnHTML(s)}</div>
+      ${e ? `<div class="flex-1">${smallBtnHTML(e)}</div>` : ''}
     </div>`;
   };
-  grid.className = 'flex flex-wrap items-stretch gap-2';
+  grid.className = 'flex items-stretch gap-2';
   grid.innerHTML = `
-    <div class="flex-[1.2] min-w-[110px]">${bigBtnHTML(workStart)}</div>
+    <div class="flex-[1.2] min-w-[100px] flex flex-col">${bigBtnHTML(workStart)}</div>
     ${pairs.length
-      ? pairs.map(p=>pairGroupHTML(p)).join('')
+      ? pairs.map(p=>restColHTML(p)).join('')
       : '<div class="flex-1 min-w-0 text-[11px] text-gray-400 italic text-center self-center">無小憩時段</div>'}
-    <div class="flex-[1.2] min-w-[110px]">${bigBtnHTML(workEnd)}</div>
+    <div class="flex-[1.2] min-w-[100px] flex flex-col">${bigBtnHTML(workEnd)}</div>
   `;
   document.getElementById('punchSummary').textContent = punchSummaryText(punches);
 }
@@ -4576,6 +4595,22 @@ function openMyPayroll(){
       </div>
     `;
   }).join('') : '<div class="text-xs text-gray-400 italic">無紀錄</div>';
+  // 注意事項區（從設定讀，依語言切換顯示）
+  const policyZh = state.payrollConfig?.leavePolicyNote || '';
+  const policyId = state.payrollConfig?.leavePolicyNoteId || '';
+  const lang = getCurrentLang();
+  const policy = lang==='id' ? (policyId || policyZh) : (policyZh || policyId);
+  const polBox = document.getElementById('myPayrollPolicyBox');
+  if (polBox){
+    if (policy){
+      polBox.classList.remove('hidden');
+      polBox.open = true;
+      document.getElementById('myPayrollPolicyText').textContent = policy;
+      document.getElementById('myPayrollPolicyTitle').textContent = lang==='id'?'Catatan Cuti':'請假注意事項';
+    } else {
+      polBox.classList.add('hidden');
+    }
+  }
   document.getElementById('myPayrollModal').classList.remove('hidden');
 }
 function closeMyPayroll(){ document.getElementById('myPayrollModal').classList.add('hidden'); }
@@ -5536,6 +5571,13 @@ function openCategoryManageModal(){
 }
 function closeCategoryManageModal(){
   document.getElementById('categoryManageModal').classList.add('hidden');
+}
+function openSupplyCategoryManageModal(){
+  renderSupplyCatManager();
+  document.getElementById('supplyCategoryManageModal').classList.remove('hidden');
+}
+function closeSupplyCategoryManageModal(){
+  document.getElementById('supplyCategoryManageModal').classList.add('hidden');
 }
 window._scheduleLang = 'zh';  // zh / id / both
 function setScheduleLang(lang){
