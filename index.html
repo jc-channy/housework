@@ -3639,6 +3639,23 @@ function toggleMenuCycle(){
 // dow: 0=日,1=一...6=六
 function getMenuKey(dow, mealId){ return dow + '_' + mealId; }
 
+// 依循環週數取得「本週應顯示的菜單」（給 Atika 用）
+function getCurrentCycleMenu(){
+  const sets = state.weekMenuSets || [];
+  if (!sets.length) return state.weekMenu || {};
+  const cycleSets = sets.filter(s => s.cycleOn);
+  if (cycleSets.length <= 1) {
+    // 沒有循環或只有一組：用 active set
+    const active = sets.find(s => s.id === state.activeWeekMenuSetId);
+    return (active ? active.menu : sets[0].menu) || {};
+  }
+  // 多組循環：按 ISO 週數決定本週用哪一組
+  const d = today();
+  const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
+  const isoWeek = Math.round((t - new Date(t.getFullYear(),0,4)) / (7*86400000));
+  return cycleSets[isoWeek % cycleSets.length].menu || {};
+}
+
 // ── 渲染 Tab ──
 function renderMenuTab(){
   renderMenuSetSelector();
@@ -4155,11 +4172,12 @@ function renderTodayMenuCard(){
   const dow = today().getDay();
   const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
   if (!meals.length){ el.classList.add('hidden'); return; }
+  const cycleMenu = getCurrentCycleMenu();
   let hasAny = false;
   let html = '';
   meals.forEach(meal=>{
     const key = getMenuKey(dow, meal.id);
-    const cell = state.weekMenu[key];
+    const cell = cycleMenu[key];
     if (!cell) return;
     hasAny = true;
     if (cell.type==='skip'){
