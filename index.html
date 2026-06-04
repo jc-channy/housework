@@ -274,7 +274,7 @@
   #atikaView > header .hdr-dropdown button { color: var(--ic-chocolate) !important; }
   /* 時間分區 */
   .atika-time-hdr { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
-  .atika-time-label { font-size:12px; font-weight:700; color:var(--ic-choc-mid); }
+  .atika-time-label { font-size:15px; font-weight:800; color:var(--ic-chocolate); letter-spacing:-0.01em; }
   .atika-time-line { flex:1; height:1px; background:var(--ic-vanilla); }
   .atika-time-badge { font-size:10px; background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
   .atika-slot-section { padding:12px 16px; }
@@ -726,10 +726,21 @@
         <div class="text-xs px-4 py-2 rounded-full inline-block" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">好好休息，辛苦了 ☕</div>
       </div>
 
+      <!-- 彈性（優先顯示在最上方） -->
+      <div id="atikaFlexSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <div class="atika-time-hdr">
+          <i class="ti ti-arrows-shuffle" style="font-size:14px;color:var(--ic-choc-mid);" aria-hidden="true"></i>
+          <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性任務 / Fleksibel</span>
+          <div class="atika-time-line"></div>
+          <span class="atika-time-badge" style="color:var(--ic-choc-mid);background:var(--ic-vanilla);">空檔安排</span>
+        </div>
+        <div id="atikaFlexTasks" class="space-y-2 sortable-list"></div>
+      </div>
+
       <!-- 早上 -->
       <div id="atikaMorningSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
         <div class="atika-time-hdr">
-          <i class="ti ti-sunrise" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <i class="ti ti-sunrise" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">早上 / Pagi</span>
           <div class="atika-time-line"></div>
           <span id="atikaMorningBadge" class="atika-time-badge"></span>
@@ -740,7 +751,7 @@
       <!-- 下午 -->
       <div id="atikaAfternoonSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
         <div class="atika-time-hdr">
-          <i class="ti ti-sun" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <i class="ti ti-sun" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">下午 / Siang</span>
           <div class="atika-time-line"></div>
           <span id="atikaAfternoonBadge" class="atika-time-badge"></span>
@@ -751,23 +762,12 @@
       <!-- 晚上 -->
       <div id="atikaEveningSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
         <div class="atika-time-hdr">
-          <i class="ti ti-moon" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <i class="ti ti-moon" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">晚上 / Malam</span>
           <div class="atika-time-line"></div>
           <span id="atikaEveningBadge" class="atika-time-badge"></span>
         </div>
         <div id="atikaEveningTasks" class="space-y-2 sortable-list"></div>
-      </div>
-
-      <!-- 彈性 -->
-      <div id="atikaFlexSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
-        <div class="atika-time-hdr">
-          <i class="ti ti-arrows-shuffle" style="font-size:13px;color:var(--ic-choc-mid);" aria-hidden="true"></i>
-          <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性任務 / Fleksibel</span>
-          <div class="atika-time-line"></div>
-          <span class="atika-time-badge" style="color:var(--ic-choc-mid);background:var(--ic-vanilla);">空檔安排</span>
-        </div>
-        <div id="atikaFlexTasks" class="space-y-2 sortable-list"></div>
       </div>
 
       <!-- 已完成（折疊） -->
@@ -5259,11 +5259,8 @@ function renderAtikaView(){
     return total ? `${doneCount}/${total} 完成` : '';
   }
 
-  // 哪些 slot 有任務（inc 或 done）
-  function slotHasAny(slot){
-    const hasDone = adDone.some(a=>getSlot(a)===slot) || tdDone.some(t=>getSlot(t)===slot) || (slot==='flexible'&&fxDone.length>0);
-    return bySlot[slot].length > 0 || hasDone;
-  }
+  // 只要該 slot 有未完成任務才顯示（完成後自動隱藏整個時段）
+  function slotHasAny(slot){ return bySlot[slot].length > 0; }
 
   // 渲染各分區
   ['morning','afternoon','evening','flexible'].forEach(slot=>{
@@ -5770,9 +5767,9 @@ function renderPunchSection(){
         ? 'background:var(--ic-straw-lt);border:1px solid var(--ic-strawberry);'
         : 'background:var(--ic-mint-lt);border:1px solid var(--ic-mint);';
       return `<button onclick="openPunchEdit('${pt.id}')"
-        style="${chipStyle}border-radius:10px;padding:4px 10px;display:inline-flex;flex-direction:column;align-items:center;min-width:56px;"
+        style="${chipStyle}border-radius:10px;padding:4px 8px;display:inline-flex;flex-direction:column;align-items:center;width:68px;box-sizing:border-box;"
         class="active:scale-95 transition-transform">
-        <span class="text-[10px]" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
+        <span class="text-[10px] truncate w-full text-center" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
         <span class="font-bold tabular-nums text-sm" style="color:var(--ic-chocolate)">${p.at}</span>
         ${bf ? '<span class="text-[9px] font-bold" style="color:#A85550">補打</span>' : ''}
       </button>`;
@@ -5800,13 +5797,14 @@ function renderPunchSection(){
     }, 30000);
   }
 
-  document.getElementById('punchSummary').innerHTML = punchSummaryText(punches);
-
   // ── 收合邏輯 ──
   const expandBtn = document.getElementById('punchExpandBtn');
   const collapsible = document.getElementById('punchCollapsible');
   const compactStatus = document.getElementById('punchCompactStatus');
   const hasPunched = punches.length > 0;
+
+  // punchSummary (右側) 只在未打卡時顯示，避免與左側 compactStatus 重複
+  document.getElementById('punchSummary').innerHTML = hasPunched ? '' : '';
 
   if (!hasPunched) {
     // 尚未打卡：全展開，不顯示收合按鈕
