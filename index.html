@@ -201,6 +201,31 @@
   input::placeholder, textarea::placeholder { color: var(--ic-choc-mid) !important; opacity: 0.6; }
 
   /* 備品 Kanban 欄位 */
+  /* 手機橫向滑動 */
+  .supply-kanban {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+  }
+  .supply-kanban::-webkit-scrollbar { display: none; }
+  .supply-kanban > div {
+    scroll-snap-align: start;
+    min-width: min(78vw, 260px);
+    flex-shrink: 0;
+  }
+  @media (min-width: 768px) {
+    .supply-kanban {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow-x: visible;
+      scroll-snap-type: none;
+    }
+    .supply-kanban > div { min-width: auto; }
+  }
   .bg-red-50.border-red-200    { background-color: var(--ic-straw-lt) !important; border-color: var(--ic-strawberry) !important; }
   .bg-blue-50.border-blue-200  { background-color: #EEF4F8 !important; border-color: #A8C8D8 !important; }
   .bg-gray-50.border-gray-200  { background-color: var(--ic-lemon) !important; border-color: var(--ic-vanilla) !important; }
@@ -214,6 +239,21 @@
   #undoToast { background-color: var(--ic-choc-dk) !important; }
 
   /* ── Atika 首頁任務分類標題（A+B 合體） ── */
+  /* 慶祝 empty state */
+  @keyframes celebFloat {
+    0%,100% { transform: translateY(0px); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes celebFadeIn {
+    from { opacity:0; transform:scale(0.92); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  #atikaAllDoneState {
+    animation: celebFadeIn 0.45s ease both;
+  }
+  #atikaAllDoneState .celeb-icon {
+    animation: celebFloat 2.4s ease-in-out infinite;
+  }
   .task-sec-hdr {
     border-left: 4px solid var(--ic-strawberry);
     background: var(--ic-straw-lt);
@@ -601,6 +641,16 @@
         </div>
       </div>
 
+      <!-- 全部完成慶祝 empty state（JS 控制顯示） -->
+      <div id="atikaAllDoneState" class="hidden text-center py-6 px-4">
+        <div class="celeb-icon inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background:var(--ic-lemon);">
+          <i class="ti ti-trophy" style="font-size:32px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+        </div>
+        <div class="text-lg font-black mb-1" style="color:var(--ic-chocolate);">今日工作全部完成！</div>
+        <div class="text-sm mb-3" style="color:var(--ic-choc-mid);">Semua tugas hari ini selesai 🎉</div>
+        <div class="text-xs px-4 py-2 rounded-full inline-block" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">好好休息，辛苦了 ☕</div>
+      </div>
+
       <!-- 分類 A+B：臨時工作 -->
       <div class="task-sec-hdr" id="adhocSection">
         <div class="tsh-pri">Tugas Tambahan</div>
@@ -758,13 +808,13 @@
 
       <!-- 本日提醒 + 今日時間軸（左右並排） -->
       <div class="grid md:grid-cols-2 gap-3 mb-4">
-        <!-- 本日提醒編輯（預設收合） -->
-        <details class="reminder-banner border-2 rounded-2xl">
-          <summary class="cursor-pointer px-3 py-2 text-sm font-bold text-amber-800 flex items-center justify-between">
-            <span><i class="ti ti-speakerphone" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 本日提醒（給 Atika）/ Pengingat</span>
-            <span class="text-gray-400 font-normal text-xs">點開編輯 ▼</span>
-          </summary>
-          <div class="px-3 pb-3 pt-1">
+        <!-- 本日提醒編輯（始終展開） -->
+        <div class="reminder-banner border-2 rounded-2xl overflow-hidden">
+          <div class="px-3 py-2 flex items-center gap-2" style="background:#FFFBEB;border-bottom:1px solid #FCD34D;">
+            <i class="ti ti-speakerphone" style="font-size:14px;color:#92400E;" aria-hidden="true"></i>
+            <span class="text-sm font-bold text-amber-800">本日提醒（給 Atika）/ Pengingat</span>
+          </div>
+          <div class="px-3 pb-3 pt-2">
             <div class="flex gap-2 items-start mb-2">
               <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
               <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文">→ID</button>
@@ -779,7 +829,7 @@
             </div>
             <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
           </div>
-        </details>
+        </div>
 
         <!-- 今日時間軸 -->
         <section>
@@ -890,7 +940,10 @@
 
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成（暫不補充為支線） -->
       <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成　｜　<i class="ti ti-player-pause" style="font-size:13px;vertical-align:-2px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="md:hidden text-xs mb-1 flex items-center gap-1" style="color:var(--ic-choc-mid);">
+        <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
+      </div>
+      <div class="supply-kanban">
 
         <!-- Col 1: Atika 已回報 -->
         <div class="bg-red-50 border-2 border-red-200 rounded-xl p-3">
@@ -5027,7 +5080,7 @@ function renderAtikaView(){
     if (allFinished) {
       progLabel.innerHTML = lang==='id'
         ? '<i class="ti ti-confetti" style="font-size:13px;vertical-align:-1px;color:var(--ic-strawberry);"></i> Semua selesai!'
-        : '<i class="ti ti-confetti" style="font-size:13px;vertical-align:-1px;color:var(--ic-strawberry);"></i> 全部完成！太棒了 🎉';
+        : '<i class="ti ti-confetti" style="font-size:13px;vertical-align:-1px;color:var(--ic-strawberry);"></i> 全部完成！太棒了';
       progBar.style.background = 'var(--ic-mint)';
     } else {
       progLabel.textContent = lang==='id'
@@ -5037,6 +5090,34 @@ function renderAtikaView(){
     }
     progPct.textContent = `${pct}%`;
     progBar.style.width = `${pct}%`;
+  }
+  // 慶祝 empty state：全部完成時顯示，並收起任務區塊
+  const celebEl = document.getElementById('atikaAllDoneState');
+  const adhocSecEl = document.getElementById('adhocSection');
+  const dividerEl = celebEl?.nextElementSibling;
+  // 找出分隔線（border-t my-3 那個 div）和 regular section header
+  const taskCard = document.querySelector('#atikaView section:last-of-type') || celebEl?.closest('section');
+  const regularHdr = taskCard?.querySelector('.task-sec-hdr.regular');
+  if (celebEl) {
+    if (allFinished && totalAll > 0) {
+      celebEl.classList.remove('hidden');
+      if (adhocSecEl) adhocSecEl.style.display='none';
+      if (regularHdr) regularHdr.style.display='none';
+      // 隱藏各 incomplete 區（只保留 done 折疊）
+      ['adhocIncomplete','adhocEmpty','todayIncomplete','flexWeekIncomplete','flexMonthIncomplete','flexQuarterIncomplete'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+      });
+      // 隱藏分隔線
+      const sep = taskCard?.querySelector('.border-t.my-3'); if(sep) sep.style.display='none';
+    } else {
+      celebEl.classList.add('hidden');
+      if (adhocSecEl) adhocSecEl.style.display='';
+      if (regularHdr) regularHdr.style.display='';
+      ['adhocIncomplete','adhocEmpty','todayIncomplete','flexWeekIncomplete','flexMonthIncomplete','flexQuarterIncomplete'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='';
+      });
+      const sep = taskCard?.querySelector('.border-t.my-3'); if(sep) sep.style.display='';
+    }
   }
 
   initSortable();
