@@ -5857,14 +5857,18 @@ function renderPayrollTab(){
       // 判斷狀態（優先順序：請假 > 出勤 > 假日/例休 > 未打卡/未來）
       let bg, label, txtColor='#9A7A58';
       const leavePeriod = d.leave?.period; // 'full' | 'half' | undefined
-      if (leavePeriod === 'full'){
+      if (d.isHoliday && d.punched){
+        // 假日加班
+        bg='var(--ic-caramel)'; label='班'; txtColor='#FAF7F2';
+      } else if (d.isHoliday){
+        // 例休（不論有無請假單，例休優先顯示）
+        bg='#D8D7B2'; label='休';
+      } else if (leavePeriod === 'full'){
         bg='#E5ADA8'; label='假'; txtColor='#7A2020';
       } else if (leavePeriod === 'half'){
         bg='#F5D0CC'; label='½'; txtColor='#7A2020';
       } else if (d.punched){
         bg='var(--ic-caramel)'; label='✓'; txtColor='#FAF7F2';
-      } else if (d.isHoliday){
-        bg='#D8D7B2'; label='休';
       } else if (isToday){
         bg='var(--ic-vanilla)'; label='今';
       } else if (isFuture && d.isWorkday){
