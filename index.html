@@ -706,6 +706,31 @@
 
     <!-- 本週概覽 -->
     <div id="tab-week" class="tab-content hidden">
+      <!-- Atika 今日進度 -->
+      <div id="mgrAtikaDayCard" class="hidden mb-4 rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+            <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+          </div>
+          <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+        </div>
+        <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
+          <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+        </div>
+        <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
+      </div>
+
+      <!-- 需要你處理 -->
+      <div id="mgrActionBlock" class="hidden mb-4 rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
+        <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
+          <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
+          <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
+          <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
+        </div>
+        <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
+      </div>
+
       <!-- 發薪日提醒 Banner -->
       <div id="paydayBanner" class="hidden mb-4 rounded-2xl p-4 flex items-start gap-3" style="background:#FFFBEB;border:1px solid #FCD34D;">
         <i class="ti ti-cash" style="font-size:22px;color:#B45309;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
@@ -771,7 +796,7 @@
         <div>
           <section class="mb-4">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-red-500"></span>臨時工作 / Tugas Tambahan</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-bolt" style="font-size:14px;color:#EF4444;vertical-align:-1px;" aria-hidden="true"></i>臨時工作 / Tugas Tambahan</h3>
               <div class="flex items-center gap-2">
                 <span id="mgrAdhocCount" class="text-xs text-gray-500"></span>
                 <button onclick="openAddAdhocModal()" class="btn-sm-danger">＋ 新增</button>
@@ -787,7 +812,7 @@
           </section>
           <section>
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-blue-600"></span>本日工作 / Tugas Hari Ini</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-calendar-day" style="font-size:14px;color:#2563EB;vertical-align:-1px;" aria-hidden="true"></i>本日工作 / Tugas Hari Ini</h3>
               <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
             </div>
             <div id="mgrTodayIncomplete" class="space-y-2"></div>
@@ -802,7 +827,7 @@
         <div>
           <section>
             <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-amber-500"></span>彈性工作 / Tugas Fleksibel</h3>
+              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-repeat" style="font-size:14px;color:#F59E0B;vertical-align:-1px;" aria-hidden="true"></i>彈性工作 / Tugas Fleksibel</h3>
               <span id="mgrFlexCount" class="text-xs text-gray-500"></span>
             </div>
             <div class="text-sm text-amber-800 font-semibold mt-2 mb-1">本週 / Minggu Ini</div>
@@ -864,13 +889,13 @@
       </div>
 
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成（暫不補充為支線） -->
-      <div class="text-xs text-gray-500 mb-2">流程：🔴 已回報 → 🛒 已購買 → <i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成（回到正常）　｜　⏸ 暫不補充 為暫存區</div>
+      <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成　｜　<i class="ti ti-player-pause" style="font-size:13px;vertical-align:-2px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
 
         <!-- Col 1: Atika 已回報 -->
         <div class="bg-red-50 border-2 border-red-200 rounded-xl p-3">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold" style="color:#8A4A46;">🔴 已回報</h4>
+            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:#8A4A46;"><i class="ti ti-alert-circle" style="font-size:15px;" aria-hidden="true"></i> 已回報</h4>
             <span id="cntReported" class="text-xs bg-red-200 text-red-700 px-2 rounded-full font-bold"></span>
           </div>
           <div class="text-xs text-red-600 mb-2">Atika 標記待補充</div>
@@ -880,7 +905,7 @@
         <!-- Col 2: 已購買待補貨 -->
         <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-3">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold" style="color:#3A6A7A;">🛒 已購買</h4>
+            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:#3A6A7A;"><i class="ti ti-shopping-cart" style="font-size:15px;" aria-hidden="true"></i> 已購買</h4>
             <span id="cntBought" class="text-xs bg-blue-200 text-blue-700 px-2 rounded-full font-bold"></span>
           </div>
           <div class="text-xs text-blue-600 mb-2">待 Atika 收納</div>
@@ -890,7 +915,7 @@
         <!-- Col 3: 暫不補充 -->
         <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold text-gray-700">⏸ 暫不補充</h4>
+            <h4 class="text-sm font-bold flex items-center gap-1.5 text-gray-700"><i class="ti ti-player-pause" style="font-size:15px;" aria-hidden="true"></i> 暫不補充</h4>
             <span id="cntPaused" class="text-xs bg-gray-300 text-gray-700 px-2 rounded-full font-bold"></span>
           </div>
           <div class="text-xs text-gray-500 mb-2">暫時擱置</div>
@@ -936,6 +961,9 @@
       <!-- 摘要（緊湊一行） -->
       <div id="payrollSummary" class="mb-2"></div>
 
+      <!-- 出勤熱力圖 -->
+      <div id="payrollHeatmap" class="mb-3 hidden rounded-2xl p-3" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);"></div>
+
       <!-- 請假申請待審核（不收合，最重要） -->
       <section class="mb-2" id="payrollLeavePending">
         <div id="leavePendingList" class="space-y-1"></div>
@@ -944,7 +972,7 @@
       <!-- 詳情區（全部 details 摺疊） -->
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
         <summary class="cursor-pointer px-3 py-2 text-sm font-semibold flex items-center justify-between">
-          <span>💵 額外項目 / Tambahan</span>
+          <span class="flex items-center gap-1.5"><i class="ti ti-receipt" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 額外項目 / Tambahan</span>
           <button onclick="event.preventDefault(); event.stopPropagation(); openAddAdjustment();" class="btn-sm-primary">＋ 新增</button>
         </summary>
         <div id="payrollAdjList" class="space-y-1 px-3 pb-3"></div>
@@ -1315,7 +1343,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">📜 備品歷史</div>
+        <div class="text-xl font-bold flex items-center gap-2"><i class="ti ti-history" style="font-size:18px;vertical-align:-2px;" aria-hidden="true"></i> 備品歷史</div>
         <div id="supHistName" class="text-sm text-gray-500 mt-1"></div>
       </div>
       <button onclick="closeSupplyHistory()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -5058,6 +5086,86 @@ function renderManagerView(){
   document.getElementById('stWeekDone').textContent=done;
   document.getElementById('stWeekPct').textContent=total?Math.round(done*100/total)+'%':'0%';
 
+  // ── Atika 今日進度卡 ──────────────────────────────────
+  (function(){
+    const ad2=adhocForToday();
+    const td2=todaysTemplates();
+    const adDone=ad2.filter(a=>a.completed).length;
+    const tdDone=td2.filter(t=>isDone(t,d)).length;
+    const tot2=ad2.length+td2.length;
+    const don2=adDone+tdDone;
+    const pct=tot2?Math.round(don2*100/tot2):0;
+    const card=document.getElementById('mgrAtikaDayCard');
+    const bar=document.getElementById('mgrAtikaDayBar');
+    const pctEl=document.getElementById('mgrAtikaDayPct');
+    const lblEl=document.getElementById('mgrAtikaDayLabel');
+    if (!card) return;
+    if (tot2===0){ card.classList.add('hidden'); return; }
+    card.classList.remove('hidden');
+    bar.style.width=pct+'%';
+    pctEl.textContent=pct+'%';
+    const helperName=state.users?.find(u=>u.role==='helper')?.name||'Atika';
+    lblEl.textContent=`${helperName}：今日已完成 ${don2} / ${tot2} 項工作`;
+  })();
+
+  // ── 需要你處理 ────────────────────────────────────────
+  (function(){
+    const block=document.getElementById('mgrActionBlock');
+    const list=document.getElementById('mgrActionItems');
+    const countEl=document.getElementById('mgrActionCount');
+    if (!block||!list) return;
+    const items=[];
+    // 待審請假
+    const pendingLeaves=(state.leaves||[]).filter(l=>l.status==='pending');
+    pendingLeaves.forEach(l=>{
+      const helperName=state.users?.find(u=>u.id===l.userId)?.name||'幫傭';
+      items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <i class="ti ti-calendar-off shrink-0" style="font-size:15px;color:#A85550;" aria-hidden="true"></i>
+          <div class="min-w-0">
+            <div class="text-xs font-semibold" style="color:#A85550;">${helperName} 申請請假</div>
+            <div class="text-[11px] text-gray-600">${l.dateStr}（${l.type==='half'?'半天':'全天'}）${l.reason?'・'+l.reason:''}</div>
+          </div>
+        </div>
+        <div class="flex gap-1 shrink-0">
+          <button onclick="approveLeave('${l.id}',true)" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#6A7840;color:#fff;">核准</button>
+          <button onclick="approveLeave('${l.id}',false)" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#fff;color:#A85550;border:1px solid #E5ADA8;">拒絕</button>
+        </div>
+      </div>`);
+    });
+    // 待補品（已回報 + 已購買 兩類）
+    const reported=(state.supplies||[]).filter(s=>s.reportStatus&&!s.handleStatus);
+    const bought=(state.supplies||[]).filter(s=>s.handleStatus==='bought');
+    if (reported.length){
+      items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <i class="ti ti-package shrink-0" style="font-size:15px;color:#A85550;" aria-hidden="true"></i>
+          <div class="min-w-0">
+            <div class="text-xs font-semibold" style="color:#A85550;">${reported.length} 項備品待補充</div>
+            <div class="text-[11px] text-gray-600">${reported.slice(0,3).map(s=>s.name).join('、')}${reported.length>3?'…':''}</div>
+          </div>
+        </div>
+        <button onclick="switchTab('supplies')" class="text-[11px] px-2 py-1 rounded-lg font-semibold shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">查看</button>
+      </div>`);
+    }
+    if (bought.length){
+      items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <i class="ti ti-shopping-cart shrink-0" style="font-size:15px;color:#3A6A7A;" aria-hidden="true"></i>
+          <div class="min-w-0">
+            <div class="text-xs font-semibold" style="color:#3A6A7A;">${bought.length} 項已購買待收納</div>
+            <div class="text-[11px] text-gray-600">${bought.slice(0,3).map(s=>s.name).join('、')}${bought.length>3?'…':''}</div>
+          </div>
+        </div>
+        <button onclick="switchTab('supplies')" class="text-[11px] px-2 py-1 rounded-lg font-semibold shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">查看</button>
+      </div>`);
+    }
+    if (items.length===0){ block.classList.add('hidden'); return; }
+    block.classList.remove('hidden');
+    countEl.textContent=items.length;
+    list.innerHTML=items.join('');
+  })();
+
   // 發薪日提醒 Banner
   (function(){
     const paydayDay = state.payrollConfig?.paydayReminderDay;
@@ -5721,24 +5829,60 @@ function renderPayrollTab(){
   // 摘要（緊湊版：一行顯示關鍵數字 + details 收合詳細）
   const fmt$=n=>'$'+(n||0).toLocaleString();
   document.getElementById('payrollSummary').innerHTML = `
-    <div class="bg-white border border-gray-200 rounded-xl px-3 py-2">
-      <div class="flex items-center justify-between gap-2 flex-wrap">
-        <div class="flex items-baseline gap-2">
-          <span class="text-xs text-gray-500">預估實領</span>
-          <span class="text-2xl font-black text-blue-700">${fmt$(p.netSalary)}</span>
-        </div>
-        <div class="flex items-center gap-1 text-[11px] flex-wrap">
-          <span class="bg-gray-100 px-1.5 py-0.5 rounded">底薪 ${fmt$(p.baseSalary)}</span>
-          <span class="bg-gray-100 px-1.5 py-0.5 rounded">日薪 ${fmt$(p.dailyRate)}</span>
-          <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded">出 ${p.actualWorkdays}/${p.scheduledWorkdays}</span>
-          ${p.leavePay?`<span class="bg-red-100 text-red-700 px-1.5 py-0.5 rounded">請假 -${p.leavePay.toLocaleString()} (${p.leaveDays}日)</span>`:''}
-          ${p.overtimePay?`<span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded">加班 +${p.overtimePay.toLocaleString()} (${p.overtimeDays}日)</span>`:''}
-          ${p.adjAdd?`<span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">加項 +${p.adjAdd.toLocaleString()}</span>`:''}
-          ${p.adjDeduct?`<span class="bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">扣項 -${p.adjDeduct.toLocaleString()}</span>`:''}
-        </div>
+    <div class="rounded-2xl p-4 mb-3" style="background:var(--ic-choc-dk);color:var(--ic-lemon);">
+      <div class="text-xs mb-0.5" style="color:var(--ic-vanilla);opacity:0.7;">預估實領薪資</div>
+      <div class="text-4xl font-black tabular-nums tracking-tight mb-3">${fmt$(p.netSalary)}</div>
+      <div class="flex flex-wrap gap-1.5">
+        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.12);color:var(--ic-lemon);">底薪 ${fmt$(p.baseSalary)}</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.12);color:var(--ic-lemon);">日薪 ${fmt$(p.dailyRate)}</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(107,175,107,0.3);color:#B7F0B7;">出勤 ${p.actualWorkdays}/${p.scheduledWorkdays} 天</span>
+        ${p.leavePay?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(229,100,90,0.3);color:#FFCCC9;">請假 -${p.leavePay.toLocaleString()} (${p.leaveDays}日)</span>`:''}
+        ${p.overtimePay?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(107,175,107,0.3);color:#B7F0B7;">加班 +${p.overtimePay.toLocaleString()} (${p.overtimeDays}日)</span>`:''}
+        ${p.adjAdd?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(100,160,220,0.3);color:#CCE8FF;">加項 +${p.adjAdd.toLocaleString()}</span>`:''}
+        ${p.adjDeduct?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(229,100,90,0.3);color:#FFCCC9;">扣項 -${p.adjDeduct.toLocaleString()}</span>`:''}
       </div>
     </div>
   `;
+  // ── 出勤熱力圖 ────────────────────────────────────────
+  (function(){
+    const hm = document.getElementById('payrollHeatmap');
+    if (!hm) return;
+    const days = p.days || [];
+    if (!days.length){ hm.classList.add('hidden'); return; }
+    hm.classList.remove('hidden');
+    const todayStr = ymd(today());
+    const cells = days.map(d=>{
+      const isFuture = d.dateStr > todayStr;
+      const isSun = d.dow === 0;
+      const isHol = d.isHoliday;
+      // status
+      let bg, label, title;
+      if (isFuture){ bg='#EDE8E0'; label=''; }
+      else if (d.leaveType==='full'){ bg='#E5ADA8'; label='假'; title=d.leaveType; }
+      else if (d.leaveType==='half'){ bg='#F5D0CC'; label='½'; }
+      else if (d.worked){ bg='var(--ic-caramel)'; label='✓'; }
+      else if (isHol||isSun){ bg='#D8D7B2'; label='休'; }
+      else { bg='#E0D8CC'; label=''; }
+      const [,mm2,dd2] = d.dateStr.split('-');
+      const isToday = d.dateStr===todayStr;
+      const ring = isToday ? 'outline:2px solid var(--ic-caramel-dk);outline-offset:1px;' : '';
+      return `<div title="${d.dateStr}" style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+        <div style="width:30px;height:30px;border-radius:8px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${d.worked?'#FAF7F2':'#9A7A58'};">${label}</div>
+        <div style="font-size:9px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
+      </div>`;
+    }).join('');
+    const [yy3,mm3] = days[0].dateStr.split('-');
+    hm.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold" style="color:var(--ic-chocolate);">出勤日曆</span>
+        <div class="flex items-center gap-2 text-[10px]" style="color:var(--ic-choc-mid);">
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--ic-caramel);display:inline-block;"></span>出勤</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#E5ADA8;display:inline-block;"></span>請假</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#D8D7B2;display:inline-block;"></span>假日</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${cells}</div>`;
+  })();
   // 額外項目清單
   renderAdjustments(p);
   // 簽收區
@@ -8040,7 +8184,7 @@ function renderManagerSupplyCard(s, group){
           <div class="id-text text-xs text-gray-600">${s.nameId}</div>
         </div>
         <div class="flex gap-1 shrink-0">
-          <button onclick="openSupplyHistory('${s.id}')" class="text-xs text-gray-500 hover:text-blue-600" title="歷史">📜</button>
+          <button onclick="openSupplyHistory('${s.id}')" class="text-xs text-gray-400 hover:text-gray-700" title="歷史"><i class="ti ti-history" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
           <button onclick="openEditSupplyModal('${s.id}')" class="text-xs text-blue-600" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
         </div>
       </div>
