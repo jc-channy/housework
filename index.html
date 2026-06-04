@@ -109,7 +109,7 @@
 
   /* 管理者視角印尼文 */
   #managerView .id-text {
-    font-size: 0.72em !important;
+    font-size: 0.80em !important;
     line-height: 1.3 !important;
   }
 
@@ -184,7 +184,12 @@
   .border-amber-300 { border-color: var(--ic-vanilla) !important; }
   .border-amber-400 { border-color: var(--ic-caramel) !important; }
   .bg-amber-50   { background-color: var(--ic-mint-lt) !important; }
-  .text-amber-600, .text-amber-700, .text-amber-800, .text-amber-900 { color: var(--ic-choc-mid) !important; }
+  .text-amber-500, .text-amber-600, .text-amber-700, .text-amber-800, .text-amber-900 { color: var(--ic-choc-mid) !important; }
+  .text-amber-400, .text-amber-300 { color: var(--ic-caramel) !important; }
+  .border-amber-200 { border-color: var(--ic-vanilla) !important; }
+  .border-amber-100 { border-color: var(--ic-lemon) !important; }
+  .accent-amber-600 { accent-color: var(--ic-caramel-dk) !important; }
+  .hover\:bg-amber-50:hover { background-color: var(--ic-lemon) !important; }
   .bg-amber-100  { background-color: var(--ic-vanilla) !important; }
 
   /* 紫色（本期不執行按鈕）→ 焦糖深色 */
@@ -576,6 +581,16 @@
 
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
+    <!-- ═══ 本日提醒（獨立區塊，打卡上方）═══ -->
+    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
+      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
+      <div class="flex-1">
+        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
+        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
+        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+      </div>
+    </div>
+
     <!-- ═══ 卡片 1：出勤 ═══ -->
     <section id="atikaPunchSection" class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
       <!-- 標題行（常駐） -->
@@ -601,14 +616,7 @@
         <div id="punchGrid"></div>
         <div id="atikaRestSchedules" class="hidden mt-2"></div>
       </div><!-- /punchCollapsible -->
-      <!-- 今日提醒（有內容才顯示） -->
-      <div id="atikaReminder" class="hidden mt-3 rounded-xl p-3 flex items-start gap-2" style="border-left:3px solid var(--ic-strawberry);background:var(--ic-straw-lt);">
-        <i class="ti ti-bell-ringing" style="font-size:16px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
-        <div class="flex-1">
-          <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
-          <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-0.5" style="color:var(--ic-choc-mid);"></div>
-        </div>
-      </div>
+
       <!-- 明日休假提醒 -->
       <div id="atikaTomorrowOffBanner" class="hidden mt-3 rounded-xl p-3" style="background:#FFF7ED;border:1px solid #FDBA74;"></div>
       <!-- 行事曆事件 -->
@@ -880,11 +888,11 @@
               <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-repeat" style="font-size:14px;color:#F59E0B;vertical-align:-1px;" aria-hidden="true"></i>彈性工作 / Tugas Fleksibel</h3>
               <span id="mgrFlexCount" class="text-xs text-gray-500"></span>
             </div>
-            <div class="text-sm text-amber-800 font-semibold mt-2 mb-1">本週 / Minggu Ini</div>
+            <div class="flex items-center gap-1.5 mt-2 mb-1"><i class="ti ti-calendar-week" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本週 / Minggu Ini</span></div>
             <div id="mgrFlexWeekIncomplete" class="space-y-2"></div>
-            <div class="text-sm text-amber-800 font-semibold mt-3 mb-1">本月 / Bulan Ini</div>
+            <div class="flex items-center gap-1.5 mt-3 mb-1"><i class="ti ti-calendar-month" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本月 / Bulan Ini</span></div>
             <div id="mgrFlexMonthIncomplete" class="space-y-2"></div>
-            <div class="text-sm text-amber-800 font-semibold mt-3 mb-1">本季 / Triwulan</div>
+            <div class="flex items-center gap-1.5 mt-3 mb-1"><i class="ti ti-calendar" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本季 / Triwulan</span></div>
             <div id="mgrFlexQuarterIncomplete" class="space-y-2"></div>
             <details id="mgrFlexDoneWrap" class="mt-2 hidden">
               <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
@@ -940,8 +948,22 @@
 
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成（暫不補充為支線） -->
       <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成　｜　<i class="ti ti-player-pause" style="font-size:13px;vertical-align:-2px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
-      <div class="md:hidden text-xs mb-1 flex items-center gap-1" style="color:var(--ic-choc-mid);">
-        <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
+      <div class="flex items-center justify-between mb-2">
+        <div class="md:hidden text-xs flex items-center gap-1" style="color:var(--ic-choc-mid);">
+          <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
+        </div>
+        <div class="relative ml-auto" id="supplyFlowTooltipWrap">
+          <button onclick="document.getElementById('supplyFlowTooltip').classList.toggle('hidden')" class="flex items-center gap-1 text-xs" style="color:var(--ic-choc-mid);" aria-label="流程說明">
+            <i class="ti ti-info-circle" style="font-size:14px;" aria-hidden="true"></i> 流程說明
+          </button>
+          <div id="supplyFlowTooltip" class="hidden absolute right-0 top-6 z-20 rounded-xl p-3 text-xs shadow-lg w-64" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);color:var(--ic-choc-mid);">
+            <div class="flex items-center gap-1.5 mb-1.5 font-semibold" style="color:var(--ic-chocolate);">備品處理流程</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:12px;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:12px;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:12px;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
+            <div class="flex items-center gap-1.5"><i class="ti ti-player-pause" style="font-size:12px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
+          </div>
+        </div>
       </div>
       <div class="supply-kanban">
 
@@ -4289,7 +4311,7 @@ function renderTodayMenuCard(){
     hasAny = true;
     if (cell.type==='skip'){
       html += `<div class="flex items-center gap-2 py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
-        <span class="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">${meal.name}${meal.mealTime?` ${meal.mealTime}`:''}</span>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">${meal.name}${meal.mealTime?` <i class='ti ti-clock' style='font-size:10px;' aria-hidden='true'></i> ${meal.mealTime}`:''}</span>
         <span class="text-xs" style="color:#9CA3AF;"><i class="ti ti-moon" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${cell.skipReason||'今天不煮'}</span>
       </div>`;
     } else {
@@ -4299,7 +4321,7 @@ function renderTodayMenuCard(){
         <div class="flex items-center gap-1.5 mb-2">
           <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="text-xs font-bold" style="color:var(--ic-caramel);">${meal.name}</span>
-          ${meal.mealTime?`<span class="text-[10px]" style="color:var(--ic-choc-mid);">${meal.mealTime}</span>`:''}
+          ${meal.mealTime?`<span class="flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full" style="background:var(--ic-vanilla);color:var(--ic-caramel-dk);"><i class='ti ti-clock' style='font-size:10px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
         </div>
         <div class="space-y-2 pl-1">
         ${dishes.map(d=>{
@@ -7086,8 +7108,12 @@ function _legacy_renderCalendar(){
     if (events.length) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-pink-500"></span>');
     if (holidays.length){
       const h=holidays[0];
-      const dotColor = h.type==='outing'?'bg-orange-500':h.type==='leave'?'bg-gray-500':'bg-purple-500';
-      dots.push(`<span class="w-1.5 h-1.5 rounded-full ${dotColor}"></span>`);
+      const _DOT_ICON = h.type==='outing'
+        ? '<i class="ti ti-walk" style="font-size:10px;color:#F97316;" aria-hidden="true"></i>'
+        : h.type==='leave'
+        ? '<i class="ti ti-moon" style="font-size:10px;color:#6B7280;" aria-hidden="true"></i>'
+        : '<i class="ti ti-calendar-event" style="font-size:10px;color:#8B5CF6;" aria-hidden="true"></i>';
+      dots.push(_DOT_ICON);
     }
     if (scenarioActs.length) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>');
     const sundayCls = d.getDay()===0 ? 'text-red-500' : '';
@@ -8087,7 +8113,15 @@ function renderSuppliesAtika(){
 function renderAtikaSupplyRow(s, lang){
   const reported=s.reportStatus && !s.handleStatus;
   const bought=s.handleStatus==='bought';
-  const dotColor = bought?'🛒' : s.reportStatus==='out'?'⚫':s.reportStatus==='low'?'🔴':s.reportStatus==='third'?'🟠':s.reportStatus==='half'?'🟡':'⚪';
+  const _STATUS_ICON = {
+    out:   '<i class="ti ti-circle" style="font-size:20px;color:#A85550;" aria-hidden="true"></i>',
+    low:   '<i class="ti ti-alert-circle" style="font-size:20px;color:#C0624A;" aria-hidden="true"></i>',
+    third: '<i class="ti ti-alert-triangle" style="font-size:20px;color:#C09050;" aria-hidden="true"></i>',
+    half:  '<i class="ti ti-circle-half" style="font-size:20px;color:#B8A050;" aria-hidden="true"></i>',
+  };
+  const dotColor = bought
+    ? '<i class="ti ti-shopping-cart" style="font-size:20px;color:#3A6A7A;" aria-hidden="true"></i>'
+    : (_STATUS_ICON[s.reportStatus] || '<i class="ti ti-circle-check" style="font-size:20px;color:var(--ic-caramel);" aria-hidden="true"></i>');
   const priName = lang==='id'?s.nameId:s.nameZh;
   const secName = lang==='id'?s.nameZh:s.nameId;
   const priClass = lang==='id'?'id-text':'';
@@ -8097,7 +8131,7 @@ function renderAtikaSupplyRow(s, lang){
     return `
       <div class="supply-handled border rounded-xl p-3">
         <div class="flex items-center gap-2">
-          <span class="text-xl shrink-0">🛒</span>
+          <span class="shrink-0"><i class="ti ti-shopping-cart" style="font-size:20px;color:#3A6A7A;" aria-hidden="true"></i></span>
           <div class="flex-1 min-w-0">
             <div class="font-bold text-base ${priClass}">${priName}</div>
             <div class="${secClass} text-sm text-gray-500">${secName}</div>
@@ -8113,7 +8147,7 @@ function renderAtikaSupplyRow(s, lang){
   return `
     <button onclick="openAmountModal('${s.id}')"
             class="w-full text-left ${reported?'supply-low':'bg-white'} border rounded-xl p-3 flex items-center gap-3 active:scale-[.99]">
-      <span class="text-xl shrink-0">${dotColor}</span>
+      <span class="shrink-0">${dotColor}</span>
       <div class="flex-1 min-w-0">
         <div class="font-bold text-base ${priClass}">${priName}</div>
         <div class="${secClass} text-sm text-gray-500">${secName}</div>
