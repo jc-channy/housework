@@ -716,7 +716,7 @@
     <div id="mgrTomorrowOffBanner" class="hidden" style="display:none !important"></div>
 
     <!-- 本週概覽 -->
-    <div id="tab-week" class="tab-content">
+    <div id="tab-week" class="tab-content hidden">
       <!-- 發薪日提醒 Banner -->
       <div id="paydayBanner" class="hidden mb-4 rounded-2xl p-4 flex items-start gap-3" style="background:#FFFBEB;border:1px solid #FCD34D;">
         <i class="ti ti-cash" style="font-size:22px;color:#B45309;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
@@ -3705,7 +3705,10 @@ function renderMenuCell(key, cell, isToday){
   }
   // cook
   const dishes = cell.dishes||[];
-  const dishHtml = dishes.slice(0,2).map(d=>`<div class="truncate" style="font-size:10px;font-weight:500;color:var(--ic-chocolate);">${d.dishName}</div>`).join('');
+  const dishHtml = dishes.slice(0,2).map(d=>{
+    const method = d.cookMethod ? `<div class="truncate" style="font-size:9px;color:var(--ic-caramel);margin-top:1px;">　${d.cookMethod}</div>` : '';
+    return `<div><div class="truncate" style="font-size:10px;font-weight:500;color:var(--ic-chocolate);">・${d.dishName||'未命名'}</div>${method}</div>`;
+  }).join('');
   const more = dishes.length>2 ? `<div style="font-size:9px;color:var(--ic-caramel);">+${dishes.length-2} 道</div>` : '';
   return `<div onclick="openMenuCellModal('${key}')" class="rounded-xl cursor-pointer p-2 min-h-[72px] hover:opacity-80 transition-opacity" style="background:var(--ic-lemon);${border}">
     ${dishHtml}${more}
@@ -3797,13 +3800,15 @@ function _rebuildDishListUI(){
     const selTags = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-2 py-0.5 rounded-full" style="background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`; }).join('');
     // 自動菜名提示
     const autoName = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
+    const ingPickerId = `ingPicker_${i}`;
     return `<div class="rounded-xl p-3 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
       <div class="flex items-center gap-2 mb-2">
         <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="${autoName||'菜色名稱（選填，預設用食材名）'}" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;">
         <button onclick="_removeDish(${i})" class="text-red-400 shrink-0"><i class="ti ti-x" style="font-size:14px;" aria-hidden="true"></i></button>
       </div>
-      <div class="mb-2 max-h-40 overflow-y-auto pr-1">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
-      ${selTags?`<div class="flex flex-wrap gap-1 mb-2">${selTags}</div>`:''}
+      ${selTags?`<div class="mb-2"><div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">已選食材</div><div class="flex flex-wrap gap-1">${selTags}</div></div>`:''}
+      <button type="button" onclick="document.getElementById('${ingPickerId}').classList.toggle('hidden')" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
+      <div id="${ingPickerId}" class="hidden mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
       <div class="mb-1">
         <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式</div>
         <div class="flex flex-wrap gap-1 mb-1">${(state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${(d.cookMethod||'').includes(m)?' cm-active':''}" style="${(d.cookMethod||'').includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')}</div>
@@ -4089,13 +4094,6 @@ function renderTodayMenuCard(){
   document.getElementById('atikaTodayMenuBody').innerHTML = html;
 }
 
-// 在 switchTab 切到 menu 時 render
-// menu tab 切換時自動 render
-document.addEventListener('DOMContentLoaded', ()=>{
-  const menuTabBtn = document.querySelector('.tab-btn[data-tab="menu"]');
-  if (menuTabBtn) menuTabBtn.addEventListener('click', ()=>{ setTimeout(renderMenuTab, 0); });
-});
-
 /* ========== 日期 ========== */
 const WD_ZH = ['日','一','二','三','四','五','六'];
 const WD_ID = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -4245,6 +4243,7 @@ function showMainView(){
   } else {
     document.getElementById('managerView').classList.remove('hidden');
     const _rt1=document.getElementById('mgrRoleTag'); if(_rt1) _rt1.textContent=state.currentUser.name+'（管理者）';
+    switchTab('week');
     renderManagerView();
     const onboardKey='housework_onboarded_v1';
     if(!localStorage.getItem(onboardKey)) setTimeout(()=>showOnboarding(),600);
