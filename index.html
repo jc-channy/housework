@@ -301,6 +301,8 @@
   .tmpl-menu-item:hover { background:var(--ic-lemon); }
   details[open] .kanban-chevron { transform:rotate(180deg); }
   details[open] .ok-chevron { transform:rotate(180deg); }
+  details[open] .reminder-chevron { transform:rotate(180deg); }
+  details[open] .done-chevron { transform:rotate(180deg); }
   details[open] .ok-hint-open { display:none !important; }
   details[open] .ok-hint-close { display:inline !important; }
   details[open] .kanban-hint-open { display:none !important; }
@@ -470,7 +472,7 @@
   /* Small Danger：工具列危險小按鈕 */
   .btn-sm-danger {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 0 12px; height: 30px;
+    padding: 0 12px; height: 36px;
     background: var(--ic-straw-lt); color: #A85550;
     font-size: 12px; font-weight: 500;
     border: 1px solid var(--ic-strawberry); border-radius: 8px; cursor: pointer;
@@ -898,32 +900,34 @@
       </div>
 
       <!-- 發薪日提醒 Banner -->
-      <div id="paydayBanner" class="hidden mb-4 rounded-2xl p-4 flex items-start gap-3" style="background:#FFFBEB;border:1px solid #FCD34D;">
-        <i class="ti ti-cash" style="font-size:22px;color:#B45309;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+      <div id="paydayBanner" class="hidden mb-4 rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-lemon);border:1px solid var(--ic-caramel);">
+        <i class="ti ti-cash" style="font-size:22px;color:var(--ic-caramel-dk);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
         <div class="flex-1 min-w-0">
-          <div id="paydayBannerText" class="text-sm font-semibold" style="color:#92400E;"></div>
-          <button onclick="switchTab('payroll')" class="text-xs mt-1 font-semibold" style="color:#B45309;">查看薪資報表 →</button>
+          <div id="paydayBannerText" class="text-sm font-semibold" style="color:var(--ic-chocolate);"></div>
+          <button onclick="switchTab('payroll')" class="text-xs mt-1 font-semibold" style="color:var(--ic-caramel-dk);">查看薪資報表 →</button>
         </div>
-        <button onclick="document.getElementById('paydayBanner').classList.add('hidden')" class="text-lg leading-none" style="color:#B45309;opacity:0.5;">×</button>
+        <button onclick="document.getElementById('paydayBanner').classList.add('hidden')" class="text-lg leading-none" style="color:var(--ic-choc-mid);opacity:0.6;">×</button>
       </div>
 
 
       <!-- 本日提醒 + 今日時間軸（左右並排） -->
       <div class="grid md:grid-cols-2 gap-3 mb-4">
-        <!-- 本日提醒編輯（始終展開） -->
-        <div class="reminder-banner border-2 rounded-2xl overflow-hidden">
-          <div class="px-3 py-2 flex items-center gap-2" style="background:#FFFBEB;border-bottom:1px solid #FCD34D;">
-            <i class="ti ti-speakerphone" style="font-size:14px;color:#92400E;" aria-hidden="true"></i>
-            <span class="text-sm font-bold text-amber-800">本日提醒（給 Atika）/ Pengingat</span>
-          </div>
-          <div class="px-3 pb-3 pt-2">
+        <!-- 本日提醒（折疊式）H-01 -->
+        <details id="reminderDetails" class="reminder-banner rounded-2xl overflow-hidden" style="border:2px solid var(--ic-caramel);">
+          <summary class="px-3 py-2.5 flex items-center gap-2 cursor-pointer select-none" style="background:var(--ic-lemon);list-style:none;">
+            <i class="ti ti-speakerphone" style="font-size:14px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+            <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日提醒</span>
+            <span id="reminderPreview" class="text-xs truncate flex-1 ml-1" style="color:var(--ic-choc-mid);"></span>
+            <i class="ti ti-chevron-down reminder-chevron" style="font-size:12px;color:var(--ic-choc-mid);transition:transform .2s;" aria-hidden="true"></i>
+          </summary>
+          <div class="px-3 pb-3 pt-2" style="border-top:1px solid var(--ic-vanilla);">
             <div class="flex gap-2 items-start mb-2">
               <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
-              <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文">→ID</button>
+              <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
             </div>
             <div class="flex gap-2 items-start">
               <textarea id="mgrReminderId" rows="2" data-lang="id" data-pair="mgrReminderZh" class="id-text flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="Misalnya: Kucing ke dokter"></textarea>
-              <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2 bg-white border border-blue-200 rounded-lg" title="翻譯成中文">→ZH</button>
+              <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
             </div>
             <div class="flex justify-end gap-2 mt-2">
               <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
@@ -931,12 +935,12 @@
             </div>
             <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
           </div>
-        </div>
+        </details>
 
         <!-- 今日時間軸 -->
         <section>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日時間軸</h3>
+            <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日時間軸</h3>
             <span id="timelineCount" class="text-xs text-gray-500"></span>
           </div>
           <div id="todayTimeline" class="bg-white border border-gray-200 rounded-xl p-3 max-h-60 overflow-y-auto"></div>
@@ -946,7 +950,7 @@
       <!-- 臨時工作 -->
       <section class="mb-3">
         <div class="flex items-center justify-between mb-2">
-          <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-bolt" style="font-size:14px;color:#EF4444;vertical-align:-1px;" aria-hidden="true"></i>臨時工作</h3>
+          <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-bolt" style="font-size:14px;color:var(--ic-strawberry);vertical-align:-1px;" aria-hidden="true"></i>臨時工作</h3>
           <div class="flex items-center gap-2">
             <span id="mgrAdhocCount" class="text-xs text-gray-500"></span>
             <button onclick="openAddAdhocModal()" class="btn-sm-danger">＋ 新增</button>
@@ -954,8 +958,9 @@
         </div>
         <div id="mgrAdhocIncomplete" class="space-y-2"></div>
         <details id="mgrAdhocDoneWrap" class="mt-2 hidden">
-          <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
-            <span id="mgrAdhocDoneLabel"></span><span class="text-gray-400">▼</span>
+          <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
+            <span id="mgrAdhocDoneLabel"></span>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrAdhocDone" class="space-y-2 mt-2"></div>
         </details>
@@ -964,13 +969,14 @@
       <!-- 本日工作（時間分段） -->
       <section>
         <div class="flex items-center justify-between mb-2">
-          <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-calendar-day" style="font-size:14px;color:#2563EB;vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
+          <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-day" style="font-size:14px;color:var(--ic-caramel);vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
           <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
         </div>
         <div id="mgrSlotView" class="space-y-3"></div>
         <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
-          <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
-            <span id="mgrTodayAllDoneLabel"></span><span class="text-gray-400">▼</span>
+          <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
+            <span id="mgrTodayAllDoneLabel"></span>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrTodayAllDone" class="space-y-2 mt-2"></div>
         </details>
@@ -5737,7 +5743,7 @@ function renderManagerView(){
   const riEl=document.getElementById('mgrReminderId');
   rzEl.value=r.zh||''; rzEl.dataset.orig=rzEl.value;
   riEl.value=r.id||''; riEl.dataset.orig=riEl.value;
-  document.getElementById('reminderMeta').textContent=(r.by&&r.at)?`最後更新：${r.by} 於 ${new Date(r.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`:'';
+  document.getElementById('reminderMeta').textContent=(r.by&&r.at)?`最後更新：${r.by} 於 ${new Date(r.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`:'';  updateReminderPreview();
 
   // 統計
   let total=0, done=0;
@@ -8613,12 +8619,28 @@ function noteTypeLabel(t){
 }
 
 /* ========== 本日提醒 ========== */
+function updateReminderPreview(){
+  const r=state.reminders[ymd(today())]||{};
+  const p=document.getElementById('reminderPreview');
+  if(!p) return;
+  const text=r.zh||r.id||'';
+  if(text){
+    p.textContent=text.length>35?text.slice(0,35)+'…':text;
+    p.style.color='var(--ic-chocolate)';
+  } else {
+    p.textContent='點此新增今日提醒';
+    p.style.color='var(--ic-choc-mid)';
+  }
+}
 function saveReminder(){
   const zh=document.getElementById('mgrReminderZh').value.trim();
   const id=document.getElementById('mgrReminderId').value.trim();
   if (!zh && !id){ clearReminder(); return; }
   state.reminders[ymd(today())]={zh, id, by:state.currentUser.name, at:new Date().toISOString()};
   save(); renderManagerView();
+  // 儲存後自動收合提醒區塊
+  const d=document.getElementById('reminderDetails');
+  if(d) d.removeAttribute('open');
   alert('已儲存 / Tersimpan');
 }
 function clearReminder(){
@@ -8627,6 +8649,7 @@ function clearReminder(){
   document.getElementById('mgrReminderZh').value='';
   document.getElementById('mgrReminderId').value='';
   document.getElementById('reminderMeta').textContent='';
+  updateReminderPreview();
 }
 
 /* ========== 備品 ========== */
