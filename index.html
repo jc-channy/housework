@@ -300,6 +300,9 @@
   }
   .tmpl-menu-item:hover { background:var(--ic-lemon); }
   details[open] .kanban-chevron { transform:rotate(180deg); }
+  details[open] .ok-chevron { transform:rotate(180deg); }
+  details[open] .ok-hint-open { display:none !important; }
+  details[open] .ok-hint-close { display:inline !important; }
   details[open] .kanban-hint-open { display:none !important; }
   details[open] .kanban-hint-close { display:inline !important; }
   .ts-kanban-wrap { position:relative; }
@@ -1133,17 +1136,25 @@
           <div id="suppliesPaused" class="hidden"></div>
         </div>
 
-        <!-- Col 4: 庫存正常 -->
-        <div class="rounded-xl p-3" style="background:var(--ic-mint-lt);border:2px solid var(--ic-mint);">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold" style="color:var(--ic-chocolate);"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 庫存正常</h4>
-            <span id="cntOk" class="text-xs px-2 rounded-full font-bold" style="background:var(--ic-mint);color:var(--ic-choc-dk);"></span>
-          </div>
-          <div class="text-xs mb-2" style="color:var(--ic-choc-mid);">無需處理</div>
-          <div id="suppliesOk" class="space-y-2"></div>
-        </div>
-
       </div></div>
+
+      <!-- 庫存正常（摺疊區塊） -->
+      <details id="okStockDetails" class="mt-3 rounded-xl overflow-hidden" style="border:1px solid var(--ic-mint);">
+        <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer select-none" style="background:var(--ic-mint-lt);list-style:none;">
+          <span class="text-sm font-bold flex items-center gap-2" style="color:var(--ic-chocolate);">
+            <i class="ti ti-circle-check" style="font-size:15px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 庫存正常
+            <span id="cntOk" class="text-xs px-2 rounded-full font-bold" style="background:var(--ic-mint);color:var(--ic-choc-dk);"></span>
+          </span>
+          <span class="text-xs flex items-center gap-1.5" style="color:var(--ic-choc-mid);">
+            <span class="ok-hint-open">無需處理 · 點此展開</span>
+            <span class="ok-hint-close" style="display:none;">點此收合</span>
+            <i class="ti ti-chevron-down ok-chevron" style="font-size:12px;transition:transform .2s;"></i>
+          </span>
+        </summary>
+        <div class="p-3" style="background:var(--ic-surface);">
+          <div id="suppliesOk" class="grid grid-cols-2 gap-1.5"></div>
+        </div>
+      </details>
     </div>
 
     <!-- 出勤與薪資（緊湊版） -->
@@ -2152,7 +2163,7 @@
       <button onclick="closeSupplyCategoryManageModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <button onclick="openAddSupplyCatModal()" class="btn-primary w-full mb-3">＋ 新增分類</button>
-    <div class="text-xs text-gray-500 mb-2">點分類可編輯名稱與顏色。</div>
+    <div class="text-xs mb-2" style="color:var(--ic-choc-mid);">點分類可編輯名稱。</div>
     <div id="supplyCatList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
   </div>
 </div>
@@ -8837,13 +8848,13 @@ function renderSupplyCatManager(){
   const el=document.getElementById('supplyCatList');
   if (!el) return;
   el.innerHTML=state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).map(c=>`
-    <div class="bg-white border border-gray-200 rounded-lg p-2 flex items-center gap-2 cursor-pointer hover:border-blue-400" onclick="openEditSupplyCat('${c.id}')">
-      <div class="w-4 h-4 rounded-full shrink-0" style="background:${c.color}"></div>
+    <div class="rounded-xl p-2.5 flex items-center gap-2 cursor-pointer" style="background:var(--ic-lemon);border:1px solid var(--ic-vanilla);" onmouseenter="this.style.borderColor='var(--ic-caramel)'" onmouseleave="this.style.borderColor='var(--ic-vanilla)'" onclick="openEditSupplyCat('${c.id}')">
+      <i class="ti ti-folder" style="font-size:15px;color:var(--ic-caramel);" aria-hidden="true"></i>
       <div class="flex-1 min-w-0">
-        <div class="font-semibold text-sm">${c.nameZh}</div>
-        <div class="id-text text-xs text-gray-500">${c.nameId}</div>
+        <div class="font-semibold text-sm" style="color:var(--ic-chocolate);">${c.nameZh}</div>
+        <div class="id-text text-xs" style="color:var(--ic-choc-mid);">${c.nameId}</div>
       </div>
-      <span class="text-xs text-blue-600">編輯</span>
+      <span class="text-xs" style="color:var(--ic-choc-mid);">編輯</span>
     </div>
   `).join('');
 }
@@ -8878,7 +8889,16 @@ function renderSuppliesManager(){
   document.getElementById('suppliesReported').innerHTML=reported.length ? reported.map(s=>renderManagerSupplyCard(s,'reported')).join('') : '<div class="text-sm italic" style="color:var(--ic-choc-mid);">目前沒有待補充的備品 ✓</div>';
   document.getElementById('suppliesBought').innerHTML=bought.length ? bought.map(s=>renderManagerSupplyCard(s,'bought')).join('') : '<div class="text-sm text-gray-400 italic col-span-2">無</div>';
   document.getElementById('suppliesPaused').innerHTML=paused.length ? paused.map(s=>renderManagerSupplyCard(s,'paused')).join('') : '<div class="text-sm text-gray-400 italic col-span-2">無</div>';
-  document.getElementById('suppliesOk').innerHTML=ok.map(s=>renderManagerSupplyCard(s,'ok')).join('');
+  document.getElementById('suppliesOk').innerHTML=ok.length
+    ? ok.map(s=>{
+        const cat=getSupplyCat(s.catId);
+        return `<div class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style="background:var(--ic-lemon);border:1px solid var(--ic-vanilla);">
+          <span class="text-[10px] px-1.5 py-0.5 rounded-full" style="background:var(--ic-mint-lt);color:var(--ic-choc-mid);">${cat.nameZh}</span>
+          <span class="text-xs font-medium truncate" style="color:var(--ic-chocolate);">${s.nameZh}</span>
+          <button onclick="openEditSupplyModal('${s.id}')" class="ml-auto text-[10px]" style="color:var(--ic-choc-mid);" title="編輯"><i class="ti ti-pencil" style="font-size:11px;"></i></button>
+        </div>`;
+      }).join('')
+    : '<div class="text-sm col-span-2" style="color:var(--ic-choc-mid);">目前無庫存品項</div>';
 }
 function renderManagerSupplyCard(s, group){
   // Kanban 內部，使用統一的白底卡片配中性邊框（背景色由外圍 column 提供）
