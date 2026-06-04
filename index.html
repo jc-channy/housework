@@ -297,11 +297,6 @@
   .ts-card.ts-done span { text-decoration:line-through; }
   .ts-empty { font-size:10px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
   /* 底部導航 */
-  #atikaBottomNav { position:fixed; bottom:0; left:0; right:0; z-index:40; background:var(--ic-surface); border-top:1px solid var(--ic-vanilla); display:none; flex-direction:row; padding-bottom:env(safe-area-inset-bottom,0px); }
-  #atikaView.active-view #atikaBottomNav { display:flex; }
-  .atika-nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-size:9px; color:var(--ic-choc-mid); cursor:pointer; padding:7px 0 5px; }
-  .atika-nav-item.active { color:var(--ic-caramel-dk); font-weight:700; }
-  #atikaView.active-view main { padding-bottom: calc(72px + env(safe-area-inset-bottom,0px)) !important; }
 
   .task-sec-hdr {
     border-left: 4px solid var(--ic-strawberry);
@@ -790,29 +785,6 @@
 
   </main>
 
-  <!-- ═══ 底部導航欄 ═══ -->
-  <div id="atikaBottomNav">
-    <div class="atika-nav-item active">
-      <i class="ti ti-home" style="font-size:20px;" aria-hidden="true"></i>
-      <span>首頁</span>
-    </div>
-    <div class="atika-nav-item" onclick="document.getElementById('atikaPunchSection').scrollIntoView({behavior:'smooth'})">
-      <i class="ti ti-circle-check" style="font-size:20px;" aria-hidden="true"></i>
-      <span>打卡</span>
-    </div>
-    <div class="atika-nav-item" onclick="openAddAdhocModal()">
-      <i class="ti ti-plus" style="font-size:20px;" aria-hidden="true"></i>
-      <span>新增</span>
-    </div>
-    <div class="atika-nav-item" onclick="openSuppliesModal()">
-      <i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i>
-      <span>備品</span>
-    </div>
-    <div class="atika-nav-item" onclick="openMyPayroll()">
-      <i class="ti ti-calendar-off" style="font-size:20px;" aria-hidden="true"></i>
-      <span>請假</span>
-    </div>
-  </div>
 
 </section>
 
@@ -5347,10 +5319,12 @@ function renderAtikaView(){
   const celebEl = document.getElementById('atikaAllDoneState');
   if (celebEl) {
     celebEl.classList.toggle('hidden', !(allFinished && totalAll > 0));
-    ['atikaMorningSection','atikaAfternoonSection','atikaEveningSection','atikaFlexSection'].forEach(id=>{
-      const el=document.getElementById(id);
-      if (el) el.style.display = (allFinished && totalAll > 0) ? 'none' : '';
-    });
+    if (allFinished && totalAll > 0) {
+      ['atikaMorningSection','atikaAfternoonSection','atikaEveningSection','atikaFlexSection'].forEach(id=>{
+        const el=document.getElementById(id); if (el) el.style.display='none';
+      });
+    }
+    // 非慶祝狀態：各 slot 的顯隱已由上方 slotHasAny 決定，不在此重設
   }
 
   initSortable();
