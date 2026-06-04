@@ -286,6 +286,18 @@
   .hide-id-text .id-text { display: none !important; }
 
   /* 時間分配 Kanban */
+  .tmpl-menu-item {
+    display:flex; align-items:center; gap:8px;
+    width:100%; padding:9px 16px;
+    font-size:13px; font-family:inherit;
+    color:var(--ic-chocolate); background:none; border:none;
+    cursor:pointer; text-align:left; white-space:nowrap;
+    transition:background .15s;
+  }
+  .tmpl-menu-item:hover { background:var(--ic-lemon); }
+  details[open] .kanban-chevron { transform:rotate(180deg); }
+  details[open] .kanban-hint-open { display:none !important; }
+  details[open] .kanban-hint-close { display:inline !important; }
   .ts-kanban { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .ts-kanban::-webkit-scrollbar { display:none; }
   .ts-col { scroll-snap-align:start; min-width:min(70vw,200px); flex-shrink:0; border-right:1px solid var(--ic-vanilla); display:flex; flex-direction:column; }
@@ -970,14 +982,18 @@
 
     <!-- 工作排程（模板） -->
     <div id="tab-templates" class="tab-content hidden">
-      <!-- 工作時段分配 Kanban -->
-      <div class="rounded-2xl border overflow-hidden mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-        <div class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ic-vanilla);background:var(--ic-lemon);">
-          <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);">
+      <!-- 工作時段分配 Kanban（預設收合） -->
+      <details id="kanbanDetails" class="rounded-2xl border overflow-hidden mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+        <summary class="flex items-center justify-between px-4 py-2.5 cursor-pointer select-none" style="border-bottom:1px solid var(--ic-vanilla);background:var(--ic-lemon);list-style:none;">
+          <span class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);">
             <i class="ti ti-clock-hour-4" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 工作時段分配
-          </h3>
-          <span class="text-xs" style="color:var(--ic-choc-mid);">左右滑動 · 拖曳分配永久套用</span>
-        </div>
+          </span>
+          <span class="text-xs flex items-center gap-2" style="color:var(--ic-choc-mid);">
+            <span class="kanban-hint-open">拖曳分配時段 · 點此展開</span>
+            <span class="kanban-hint-close" style="display:none;">點此收合</span>
+            <i class="ti ti-chevron-down kanban-chevron" style="font-size:12px;transition:transform .2s;"></i>
+          </span>
+        </summary>
         <div class="ts-kanban">
           <div class="ts-col" data-slot="morning">
             <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:12px;color:var(--ic-caramel);" aria-hidden="true"></i> 早上</div>
@@ -996,22 +1012,45 @@
             <div id="mgrSlotFlexible" class="ts-list"></div>
           </div>
         </div>
-      </div>
-      <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <h3 class="font-bold"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程 / Kartu Tugas</h3>
-        <div class="flex gap-1.5 flex-wrap justify-end">
-          <button onclick="openScheduleOverview()" class="btn-sm-primary"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽</button>
-          <button onclick="openCategoryManageModal()" class="btn-sm-secondary"><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> 管理分類 <span id="catManageCount" class="text-xs text-gray-500"></span></button>
-          <button onclick="openTaskLibrary()" class="btn-sm-secondary"><i class="ti ti-books" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作庫</button>
-          <button onclick="exportTemplatesXlsx()" class="btn-sm-secondary"><i class="ti ti-file-download" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 匯出</button>
-          <label class="btn-sm-secondary cursor-pointer"><i class="ti ti-file-upload" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 匯入<input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importTemplatesXlsx(this)"></label>
-          <button onclick="openAddTemplateModal()" class="btn-sm-primary">＋ 新增工作</button>
+      </details>
+      <div class="flex items-center justify-between mb-3 gap-2">
+        <h3 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程</h3>
+        <div class="flex gap-2 items-center">
+          <!-- 更多選單 -->
+          <div class="relative" id="tmplMoreWrap">
+            <button onclick="toggleTmplMore()" class="btn-sm-secondary flex items-center gap-1">
+              <i class="ti ti-dots" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 更多
+            </button>
+            <div id="tmplMoreMenu" class="hidden absolute right-0 top-8 z-50 rounded-xl shadow-lg py-1 min-w-max"
+                 style="background:var(--ic-surface);border:1px solid var(--ic-vanilla);">
+              <button onclick="openScheduleOverview();toggleTmplMore()" class="tmpl-menu-item">
+                <i class="ti ti-calendar-event" style="font-size:13px;" aria-hidden="true"></i> 工作排程總覽
+              </button>
+              <button onclick="openCategoryManageModal();toggleTmplMore()" class="tmpl-menu-item">
+                <i class="ti ti-folder" style="font-size:13px;" aria-hidden="true"></i> 管理分類 <span id="catManageCount" class="text-xs" style="color:var(--ic-choc-mid);"></span>
+              </button>
+              <button onclick="openTaskLibrary();toggleTmplMore()" class="tmpl-menu-item">
+                <i class="ti ti-books" style="font-size:13px;" aria-hidden="true"></i> 工作庫
+              </button>
+              <button onclick="exportTemplatesXlsx();toggleTmplMore()" class="tmpl-menu-item">
+                <i class="ti ti-file-download" style="font-size:13px;" aria-hidden="true"></i> 匯出 Excel
+              </button>
+              <label class="tmpl-menu-item cursor-pointer">
+                <i class="ti ti-file-upload" style="font-size:13px;" aria-hidden="true"></i> 匯入 Excel
+                <input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importTemplatesXlsx(this);toggleTmplMore()">
+              </label>
+            </div>
+          </div>
+          <!-- 主 CTA -->
+          <button onclick="openAddTemplateModal()" class="btn-sm-primary flex items-center gap-1" style="height:36px;padding:0 14px;">
+            <i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增工作
+          </button>
         </div>
       </div>
 
       <!-- 篩選器 -->
       <div id="catFilters" class="flex gap-2 mb-3 text-xs overflow-x-auto scrollbar-thin">
-        <button class="cat-filter px-3 py-1 rounded-full bg-gray-900 text-white whitespace-nowrap" data-cat="all">全部</button>
+        <button class="cat-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
       </div>
       <div class="text-xs text-gray-500 mb-2">提示：拖移卡片左側 ⠿ 可調整順序</div>
       <div id="templateList" class="space-y-2 sortable-list"></div>
@@ -5474,6 +5513,18 @@ const TASK_LIBRARY = [
 let _libFilter = 'all';
 let _libSelected = new Set();
 
+function toggleTmplMore(){
+  const menu=document.getElementById('tmplMoreMenu');
+  if(!menu) return;
+  menu.classList.toggle('hidden');
+}
+document.addEventListener('click', function(e){
+  const wrap=document.getElementById('tmplMoreWrap');
+  if(wrap && !wrap.contains(e.target)){
+    const menu=document.getElementById('tmplMoreMenu');
+    if(menu) menu.classList.add('hidden');
+  }
+});
 function openTaskLibrary(){
   _libFilter = 'all';
   _libSelected = new Set();
@@ -8446,9 +8497,9 @@ function renderCatFilters(){
       state.catFilter=b.dataset.cat;
       wrap.querySelectorAll('.cat-filter').forEach(x=>{
         if (x.dataset.cat==='all'){
-          x.classList.remove('bg-gray-900','text-white');
-          x.classList.add('bg-gray-200');
-          x.style.background=''; x.style.color=''; x.style.borderColor='';
+          x.style.background='var(--ic-lemon)';
+          x.style.color='var(--ic-chocolate)';
+          x.style.borderColor='var(--ic-vanilla)';
         } else {
           x.style.background='var(--ic-lemon)';
           x.style.color='var(--ic-chocolate)';
@@ -8456,8 +8507,9 @@ function renderCatFilters(){
         }
       });
       if (b.dataset.cat==='all'){
-        b.classList.remove('bg-gray-200');
-        b.classList.add('bg-gray-900','text-white');
+        b.style.background='var(--ic-chocolate)';
+        b.style.color='var(--ic-surface)';
+        b.style.borderColor='var(--ic-chocolate)';
       } else {
         b.style.background='var(--ic-caramel)';
         b.style.color='#FAF7F2';
