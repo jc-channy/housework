@@ -208,6 +208,8 @@
 
   /* 備品 Kanban 欄位 */
   /* 手機橫向滑動 */
+  .supply-kanban-wrap { position:relative; }
+  @media(max-width:767px){ .supply-kanban-wrap::after { content:""; position:absolute; top:0; right:0; width:36px; height:100%; background:linear-gradient(to right, transparent, rgba(250,247,242,.85)); pointer-events:none; z-index:1; } }
   .supply-kanban {
     display: flex;
     overflow-x: auto;
@@ -1073,7 +1075,7 @@
     <!-- 備品 -->
     <div id="tab-supplies" class="tab-content hidden">
       <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
-        <h3 class="font-bold"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品狀態 / Status Perlengkapan</h3>
+        <div><h3 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品管理</h3><div class="id-text text-xs" style="color:var(--ic-choc-mid);margin-top:1px;">Status Perlengkapan</div></div>
         <div class="flex gap-1.5 flex-wrap justify-end">
           <button onclick="openSupplyCategoryManageModal()" class="btn-sm-secondary"><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> 管理分類 <span id="supplyCatCount" class="text-xs text-gray-500"></span></button>
           <button onclick="openAddSupplyModal()" class="btn-sm-primary">＋ 新增備品</button>
@@ -1082,11 +1084,10 @@
 
       <!-- 篩選器 -->
       <div id="supplyCatFilters" class="flex gap-2 mb-3 text-xs overflow-x-auto scrollbar-thin">
-        <button class="sc-filter px-3 py-1 rounded-full bg-gray-900 text-white whitespace-nowrap" data-cat="all">全部</button>
+        <button class="sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
       </div>
 
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成 -->
-      <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成</div>
       <div class="flex items-center justify-between mb-2">
         <div class="md:hidden text-xs flex items-center gap-1" style="color:var(--ic-choc-mid);">
           <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
@@ -1104,25 +1105,25 @@
           </div>
         </div>
       </div>
-      <div class="supply-kanban">
+      <div class="supply-kanban-wrap"><div class="supply-kanban">
 
-        <!-- Col 1: Atika 已回報 -->
-        <div class="bg-red-50 border-2 border-red-200 rounded-xl p-3">
+        <!-- Col 1: 待購買 -->
+        <div class="rounded-xl p-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:#8A4A46;"><i class="ti ti-alert-circle" style="font-size:15px;" aria-hidden="true"></i> 已回報</h4>
-            <span id="cntReported" class="text-xs bg-red-200 text-red-700 px-2 rounded-full font-bold"></span>
+            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:var(--ic-caramel-dk);"><i class="ti ti-shopping-bag" style="font-size:15px;" aria-hidden="true"></i> 待購買</h4>
+            <span id="cntReported" class="text-xs px-2 rounded-full font-bold" style="background:var(--ic-strawberry);color:#FAF7F2;"></span>
           </div>
-          <div class="text-xs text-red-600 mb-2">Atika 標記待補充</div>
+          <div class="text-xs mb-2" id="subtitleReported" style="color:var(--ic-choc-mid);">幫傭標記待補充</div>
           <div id="suppliesReported" class="space-y-2"></div>
         </div>
 
-        <!-- Col 2: 已購買待補貨 -->
-        <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-3">
+        <!-- Col 2: 已購買待收納 -->
+        <div class="rounded-xl p-3" style="background:var(--ic-lemon);border:2px solid var(--ic-caramel);">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:#3A6A7A;"><i class="ti ti-shopping-cart" style="font-size:15px;" aria-hidden="true"></i> 已購買</h4>
-            <span id="cntBought" class="text-xs bg-blue-200 text-blue-700 px-2 rounded-full font-bold"></span>
+            <h4 class="text-sm font-bold flex items-center gap-1.5" style="color:var(--ic-caramel-dk);"><i class="ti ti-shopping-cart" style="font-size:15px;" aria-hidden="true"></i> 已購買</h4>
+            <span id="cntBought" class="text-xs px-2 rounded-full font-bold" style="background:var(--ic-caramel);color:#FAF7F2;"></span>
           </div>
-          <div class="text-xs text-blue-600 mb-2">待 Atika 收納</div>
+          <div class="text-xs mb-2" id="subtitleBought" style="color:var(--ic-choc-mid);">待幫傭收納</div>
           <div id="suppliesBought" class="space-y-2"></div>
         </div>
 
@@ -1133,16 +1134,16 @@
         </div>
 
         <!-- Col 4: 庫存正常 -->
-        <div class="bg-green-50 border-2 border-green-200 rounded-xl p-3">
+        <div class="rounded-xl p-3" style="background:var(--ic-mint-lt);border:2px solid var(--ic-mint);">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold" style="color:#4A5828;"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 庫存正常</h4>
-            <span id="cntOk" class="text-xs bg-green-200 text-green-700 px-2 rounded-full font-bold"></span>
+            <h4 class="text-sm font-bold" style="color:var(--ic-chocolate);"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 庫存正常</h4>
+            <span id="cntOk" class="text-xs px-2 rounded-full font-bold" style="background:var(--ic-mint);color:var(--ic-choc-dk);"></span>
           </div>
-          <div class="text-xs text-green-600 mb-2">無需處理</div>
-          <div id="suppliesOk" class="space-y-2 max-h-96 overflow-y-auto"></div>
+          <div class="text-xs mb-2" style="color:var(--ic-choc-mid);">無需處理</div>
+          <div id="suppliesOk" class="space-y-2"></div>
         </div>
 
-      </div>
+      </div></div>
     </div>
 
     <!-- 出勤與薪資（緊湊版） -->
@@ -8815,7 +8816,8 @@ function renderSupplyCatFilters(){
   wrap.appendChild(allBtn);
   state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
-    b.className=(state.supplyCatFilter===c.id?'bg-gray-900 text-white':'bg-gray-200')+' sc-filter px-3 py-1 rounded-full whitespace-nowrap';
+    b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
+    if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='var(--ic-lemon)'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='var(--ic-vanilla)'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
     wrap.appendChild(b);
@@ -8823,7 +8825,7 @@ function renderSupplyCatFilters(){
   wrap.querySelectorAll('.sc-filter').forEach(b=>{
     b.onclick=()=>{
       state.supplyCatFilter=b.dataset.cat;
-      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.classList.remove('bg-gray-900','text-white'); x.classList.add('bg-gray-200'); });
+      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='var(--ic-lemon)'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='var(--ic-vanilla)'; });
       b.classList.remove('bg-gray-200'); b.classList.add('bg-gray-900','text-white');
       renderSuppliesManager();
     };
@@ -8868,7 +8870,12 @@ function renderSuppliesManager(){
   const cntP=document.getElementById('cntPaused');   if (cntP) cntP.textContent=paused.length;
   const cntO=document.getElementById('cntOk');       if (cntO) cntO.textContent=ok.length;
 
-  document.getElementById('suppliesReported').innerHTML=reported.length ? reported.map(s=>renderManagerSupplyCard(s,'reported')).join('') : '<div class="text-sm text-gray-400 italic col-span-2">目前無回報 🎉</div>';
+  const helperLabel = (state.users?.find(u=>u.role==='helper')?.name) || '幫傭';
+  const subR = document.getElementById('subtitleReported');
+  if(subR) subR.textContent = helperLabel + ' 標記待補充';
+  const subB = document.getElementById('subtitleBought');
+  if(subB) subB.textContent = '待 ' + helperLabel + ' 收納';
+  document.getElementById('suppliesReported').innerHTML=reported.length ? reported.map(s=>renderManagerSupplyCard(s,'reported')).join('') : '<div class="text-sm italic" style="color:var(--ic-choc-mid);">目前沒有待補充的備品 ✓</div>';
   document.getElementById('suppliesBought').innerHTML=bought.length ? bought.map(s=>renderManagerSupplyCard(s,'bought')).join('') : '<div class="text-sm text-gray-400 italic col-span-2">無</div>';
   document.getElementById('suppliesPaused').innerHTML=paused.length ? paused.map(s=>renderManagerSupplyCard(s,'paused')).join('') : '<div class="text-sm text-gray-400 italic col-span-2">無</div>';
   document.getElementById('suppliesOk').innerHTML=ok.map(s=>renderManagerSupplyCard(s,'ok')).join('');
@@ -8886,20 +8893,20 @@ function renderManagerSupplyCard(s, group){
       <div class="flex flex-wrap gap-1 mt-2">
         <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary"><i class="ti ti-player-pause" style="font-size:12px;vertical-align:-1px;"></i> 暫不補充</button>
         <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary"><i class="ti ti-shopping-cart" style="font-size:12px;vertical-align:-1px;"></i> 已購買</button>
-        <button onclick="handleSupply('${s.id}','restocked')" class="text-xs px-2 py-1 rounded-lg" style="background:#6A7840;color:#FAF7F2;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;color:#FAF7F2;"></i> 已補貨</button>
+        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="background:var(--ic-mint-lt);color:var(--ic-choc-dk);border-color:var(--ic-mint);"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 已補貨</button>
       </div>`;
   } else if (group==='bought'){
     actions=`
       <div class="flex gap-1 mt-2">
         <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary text-xs"><i class="ti ti-arrow-back-up" style="font-size:12px;vertical-align:-1px;"></i> 撤銷</button>
-        <button onclick="handleSupply('${s.id}','restocked')" class="text-xs px-2 py-1 rounded-lg" style="background:#6A7840;color:#FAF7F2;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;color:#FAF7F2;"></i> 已補貨</button>
+        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="background:var(--ic-mint-lt);color:var(--ic-choc-dk);border-color:var(--ic-mint);"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 已補貨</button>
       </div>`;
   } else if (group==='paused'){
     actions=`
       <div class="flex gap-1 mt-2">
         <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary text-xs"><i class="ti ti-arrow-back-up" style="font-size:12px;vertical-align:-1px;"></i> 撤銷</button>
         <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary"><i class="ti ti-shopping-cart" style="font-size:12px;vertical-align:-1px;"></i> 已購買</button>
-        <button onclick="handleSupply('${s.id}','restocked')" class="text-xs px-2 py-1 rounded-lg" style="background:#6A7840;color:#FAF7F2;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;color:#FAF7F2;"></i> 已補貨</button>
+        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="background:var(--ic-mint-lt);color:var(--ic-choc-dk);border-color:var(--ic-mint);"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 已補貨</button>
       </div>`;
   } else {
     actions='';
@@ -8916,11 +8923,11 @@ function renderManagerSupplyCard(s, group){
         </div>
         <div class="flex gap-1 shrink-0">
           <button onclick="openSupplyHistory('${s.id}')" class="text-xs text-gray-400 hover:text-gray-700" title="歷史"><i class="ti ti-history" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
-          <button onclick="openEditSupplyModal('${s.id}')" class="text-xs text-blue-600" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <button onclick="openEditSupplyModal('${s.id}')" class="text-xs" style="color:var(--ic-choc-mid);" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
         </div>
       </div>
       ${s.notes?`<div class="text-[10px] text-gray-500 mt-1 italic">${s.notes}</div>`:''}${s.reportStatus?`<div class="text-xs text-red-700 mt-1">${REPORT_LABEL[s.reportStatus]}</div>`:''}
-      ${repAt?`<div class="text-xs text-gray-500">📩 回報：${s.reportedBy} · ${repAt}</div>`:''}
+      ${repAt?`<div class="text-xs" style="color:var(--ic-choc-mid);"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${s.reportedBy} 回報 · ${repAt}</div>`:''}
       ${s.handleStatus?`<div class="text-xs text-blue-700">${HANDLE_LABEL[s.handleStatus]}：${s.handledBy} · ${hdAt}</div>`:''}
       ${actions}
     </div>
