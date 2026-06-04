@@ -977,10 +977,6 @@
       </details>
     </div>
 
-  </main>
-</section>
-
-
     <div id="tab-menu" class="tab-content hidden">
 
         <!-- 餐次設定 + 控制列 -->
@@ -1021,6 +1017,9 @@
           <div id="ingredientList" class="px-4 pb-4"></div>
         </div>
     </div>
+
+  </main>
+</section>
 
 <!-- ===== 工作詳細 Modal ===== -->
 <!-- ===== 菜單 Cell Edit Modal ===== -->
@@ -3705,9 +3704,13 @@ function renderMenuCell(key, cell, isToday){
   }
   // cook
   const dishes = cell.dishes||[];
+  const catColors = state.mealConfig?.ingCategoryColors||{};
+  const allIngs = state.ingredients||[];
   const dishHtml = dishes.slice(0,2).map(d=>{
-    const method = d.cookMethod ? `<div class="truncate" style="font-size:9px;color:var(--ic-caramel);margin-top:1px;">　${d.cookMethod}</div>` : '';
-    return `<div><div class="truncate" style="font-size:10px;font-weight:500;color:var(--ic-chocolate);">・${d.dishName||'未命名'}</div>${method}</div>`;
+    const methodChip = d.cookMethod ? `<span class="inline-block rounded-full px-1.5 mr-1 flex-shrink-0" style="font-size:9px;font-weight:600;background:var(--ic-caramel);color:#FAF7F2;line-height:16px;">${d.cookMethod}</span>` : '';
+    const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
+    const label = d.dishName || ingNames || '未命名';
+    return `<div class="flex items-start gap-0.5 mb-0.5">${methodChip}<span class="truncate" style="font-size:10px;font-weight:500;color:var(--ic-chocolate);">・${label}</span></div>`;
   }).join('');
   const more = dishes.length>2 ? `<div style="font-size:9px;color:var(--ic-caramel);">+${dishes.length-2} 道</div>` : '';
   return `<div onclick="openMenuCellModal('${key}')" class="rounded-xl cursor-pointer p-2 min-h-[72px] hover:opacity-80 transition-opacity" style="background:var(--ic-lemon);${border}">
