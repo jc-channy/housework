@@ -5226,7 +5226,7 @@ function renderAtikaView(){
   fxInc.forEach(t => { (bySlot.flexible).push({_type:'flex', item:t}); }); // flex templates → always flexible
 
   function renderSlotItems(slotArr){
-    if (!slotArr.length) return '<div class="text-xs italic" style="color:var(--ic-choc-mid);padding:4px 0;">沒有任務 / Tidak ada</div>';
+    if (!slotArr.length) return '';
     return slotArr.map(({_type, item})=>
       _type==='adhoc' ? renderAdhocCard(item)
       : renderTaskCard(item,{hideMode:true,hideLastDone:true})
@@ -5259,7 +5259,7 @@ function renderAtikaView(){
     const tasksEl = document.getElementById(tasksId);
     const badgeEl = badgeId ? document.getElementById(badgeId) : null;
     if (!sec || !tasksEl) return;
-    const show = slotHasAny(slot) || slot==='flexible';
+    const show = slotHasAny(slot);
     sec.style.display = show ? '' : 'none';
     tasksEl.innerHTML = renderSlotItems(bySlot[slot]);
     if (badgeEl) badgeEl.textContent = slotProgress(slot, bySlot[slot]);
