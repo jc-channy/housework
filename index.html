@@ -83,7 +83,7 @@
   #pinDots .pin-dot.success { animation: pinPop 0.35s ease forwards; }
 
   /* Tab active 狀態 */
-  .tab-active { background: var(--ic-surface); color: var(--ic-chocolate); box-shadow: 0 1px 4px rgba(114,92,63,.12); }
+  .tab-active { background: var(--ic-chocolate); color: var(--ic-surface); box-shadow: 0 2px 8px rgba(74,56,40,.20); }
 
   details > summary { list-style: none; cursor: pointer; }
   details > summary::-webkit-details-marker { display: none; }
@@ -439,7 +439,7 @@
   /* Small Primary：工具列小按鈕（＋新增、管理分類）*/
   .btn-sm-primary {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 0 12px; height: 30px;
+    padding: 0 14px; height: 36px;
     background: var(--ic-caramel); color: #FAF7F2;
     font-size: 12px; font-weight: 500;
     border: none; border-radius: 8px; cursor: pointer;
@@ -452,7 +452,7 @@
   /* Small Secondary：工具列次要小按鈕（管理分類、列印）*/
   .btn-sm-secondary {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 0 12px; height: 30px;
+    padding: 0 12px; height: 36px;
     background: var(--ic-surface); color: var(--ic-chocolate);
     font-size: 12px; font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 8px; cursor: pointer;
@@ -849,11 +849,11 @@
     <nav class="container-app max-w-5xl mx-auto px-4 pb-2 -mt-1">
       <div class="relative">
         <div class="flex gap-1 backdrop-blur rounded-xl p-1 overflow-x-auto scrollbar-thin" id="mgrTabBar" style="background:rgba(239,232,216,0.6);">
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week"><i class="ti ti-home" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 首頁</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="menu"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 菜單</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品<span id="suppliesBadge" class="ml-1"></span></button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 出勤<span id="leaveBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week"><i class="ti ti-home" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 首頁</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="menu"><i class="ti ti-chef-hat" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 菜單</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 工作</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 備品<span id="suppliesBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤<span id="leaveBadge" class="ml-1"></span></button>
         </div>
         <div id="mgrTabFade" class="pointer-events-none absolute right-0 top-0 h-full w-10 rounded-r-xl transition-opacity duration-300" style="background:linear-gradient(to right, transparent, rgba(239,232,216,0.95));opacity:0;"></div>
       </div>
@@ -1062,10 +1062,11 @@
       </div>
 
       <!-- 篩選器 -->
-      <div id="catFilters" class="flex gap-2 mb-3 text-xs overflow-x-auto scrollbar-thin">
+      <div id="catFiltersWrap" style="position:relative;margin-bottom:12px;"><div id="catFilters" class="flex gap-2 text-xs overflow-x-auto scrollbar-thin pb-1" style="mask-image:linear-gradient(to right,black 85%,transparent);-webkit-mask-image:linear-gradient(to right,black 85%,transparent);">
         <button class="cat-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
       </div>
-      <div class="text-xs text-gray-500 mb-2">提示：拖移卡片左側 ⠿ 可調整順序</div>
+      </div>
+      <div class="text-xs mb-2 flex items-center gap-1.5" style="color:var(--ic-choc-mid);"><i class="ti ti-grip-vertical" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 長按左側拖移可調整順序</div>
       <div id="templateList" class="space-y-2 sortable-list"></div>
     </div>
 
@@ -8544,7 +8545,7 @@ function renderTemplates(){
     const cat=getCat(t.catId);
     const catColor = cat.color || 'var(--ic-caramel)';
     return `
-      <div data-tid="${t.id}" class="${t.active===false?'opacity-50':''} rounded-xl p-3 flex items-start gap-3 tmpl-card" style="background:${t.active===false?'var(--ic-lemon)':'var(--ic-surface)'};border:1px solid var(--ic-vanilla);border-left:5px solid ${catColor};">
+      <div data-tid="${t.id}" class="${t.active===false?'opacity-50':''} rounded-2xl p-3 flex items-start gap-3 tmpl-card" style="background:${t.active===false?'var(--ic-lemon)':'var(--ic-surface)'};border:1px solid var(--ic-vanilla);border-left:5px solid ${catColor};">
         <span class="drag-handle select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
         <div class="flex-1 cursor-pointer min-w-0" onclick="openEditTemplate('${t.id}')">
           <div class="flex items-center gap-2 flex-wrap">
