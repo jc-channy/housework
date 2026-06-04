@@ -215,18 +215,18 @@
 
   /* ── Atika 首頁任務分類標題（A+B 合體） ── */
   .task-sec-hdr {
-    border-left: 3px solid var(--ic-strawberry);
+    border-left: 4px solid var(--ic-strawberry);
     background: var(--ic-straw-lt);
-    border-radius: 0 8px 8px 0;
-    padding: 5px 10px;
-    margin-bottom: 8px;
+    border-radius: 0 10px 10px 0;
+    padding: 8px 12px;
+    margin-bottom: 10px;
   }
   .task-sec-hdr.regular {
     border-left-color: var(--ic-caramel);
     background: #F5F0E8;
   }
-  .task-sec-hdr .tsh-pri { font-size: 11px; font-weight: 700; color: #A85550; }
-  .task-sec-hdr .tsh-sec { font-size: 9px; color: #C48080; margin-top: 1px; }
+  .task-sec-hdr .tsh-pri { font-size: 14px; font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
+  .task-sec-hdr .tsh-sec { font-size: 11px; color: #C48080; margin-top: 2px; }
   .task-sec-hdr.regular .tsh-pri { color: var(--ic-chocolate); }
   .task-sec-hdr.regular .tsh-sec { color: var(--ic-choc-mid); }
 
@@ -518,7 +518,7 @@
           <div id="atikaDateId" class="id-text text-sm font-medium mt-0.5" style="color:var(--ic-choc-mid);"></div>
         </div>
         <div class="flex items-center gap-2 mt-1">
-          <div id="atikaGreetingHdr" class="text-xs font-medium hidden sm:block" style="color:var(--ic-caramel-dk);max-width:120px;line-clamp:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"></div>
+          <div id="atikaGreetingHdr" class="text-sm font-semibold" style="color:var(--ic-caramel-dk);"></div>
           <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="atikaChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
           <button onclick="openSuppliesModal()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="備品回報 / Stok" aria-label="備品回報"><i class="ti ti-package"></i><span id="atikaSupplyBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
           <div class="hdr-menu-wrap">
@@ -576,34 +576,28 @@
     </section>
 
     <!-- ═══ 卡片 1.5：今日菜單 ═══ -->
-    <section id="atikaTodayMenu" class="hidden rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日料理 / Masakan Hari Ini</h2>
-      </div>
-      <div id="atikaTodayMenuBody" class="space-y-2"></div>
+    <section id="atikaTodayMenu" class="hidden rounded-2xl border overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+      <button onclick="toggleTodayMenu()" class="w-full flex items-center justify-between px-4 py-3" style="background:var(--ic-surface);">
+        <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日料理 / Masakan Hari Ini</h2>
+        <i id="todayMenuChevron" class="ti ti-chevron-down" style="font-size:16px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
+      </button>
+      <div id="atikaTodayMenuBody" class="space-y-2 px-4 pb-4"></div>
     </section>
 
     <!-- ═══ 卡片 2：今日任務 ═══ -->
     <section class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-      <!-- 卡片標題 + 總進度 -->
-      <div class="flex items-center justify-between mb-2">
-        <div>
-          <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);">Tugas Hari Ini</h2>
-          <p class="text-xs" style="color:var(--ic-choc-mid);">今日任務</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <span id="adhocCount" class="text-xs" style="color:var(--ic-choc-mid);"></span>
-          <button onclick="openAddAdhocModal()" class="btn-sm-danger">＋ 新增</button>
-        </div>
+      <!-- 進度 + 新增按鈕 -->
+      <div class="flex items-center justify-end mb-2">
+        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增臨時工作</button>
       </div>
       <!-- 今日總進度條 -->
-      <div class="mb-3">
-        <div class="flex items-center justify-between mb-1">
-          <span id="totalProgressLabel" class="text-xs font-semibold" style="color:var(--ic-caramel-dk);"></span>
-          <span id="totalProgressPct" class="text-xs" style="color:var(--ic-choc-mid);"></span>
+      <div class="mb-4 rounded-xl p-3" style="background:var(--ic-lemon);">
+        <div class="flex items-center justify-between mb-2">
+          <span id="totalProgressLabel" class="text-sm font-bold" style="color:var(--ic-caramel-dk);"></span>
+          <span id="totalProgressPct" class="text-lg font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
         </div>
-        <div class="rounded-full overflow-hidden" style="height:10px;background:var(--ic-vanilla);">
-          <div id="totalProgressBar" class="h-full rounded-full transition-all duration-500" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 1px 4px rgba(160,100,40,0.35);"></div>
+        <div class="rounded-full overflow-hidden" style="height:14px;background:var(--ic-vanilla);">
+          <div id="totalProgressBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 6px rgba(160,100,40,0.4);"></div>
         </div>
       </div>
 
@@ -632,10 +626,6 @@
       </div>
 
       <!-- 本日工作 -->
-      <div class="flex items-center justify-between mb-1">
-        <span class="text-xs font-semibold" style="color:var(--ic-choc-mid);">Tugas Hari Ini <span class="font-normal">/ 本日</span></span>
-        <span id="todayCount" class="text-xs" style="color:var(--ic-choc-mid);"></span>
-      </div>
       <div id="todayIncomplete" class="space-y-2 sortable-list"></div>
       <details id="todayDoneWrap" class="mt-1 mb-3 hidden">
         <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer" style="color:var(--ic-choc-mid);background:var(--ic-lemon);">
@@ -646,10 +636,6 @@
       </details>
 
       <!-- 彈性工作 -->
-      <div class="flex items-center justify-between mb-1 mt-3">
-        <span class="text-xs font-semibold" style="color:var(--ic-choc-mid);">Tugas Fleksibel <span class="font-normal">/ 彈性</span></span>
-        <span id="flexCount" class="text-xs" style="color:var(--ic-choc-mid);"></span>
-      </div>
       <div id="flexWeekIncomplete" class="space-y-2 sortable-list"></div>
       <div id="flexMonthIncomplete" class="space-y-2 sortable-list mt-1"></div>
       <div id="flexQuarterIncomplete" class="space-y-2 sortable-list mt-1"></div>
@@ -686,7 +672,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2 mt-1">
-          <div id="mgrGreetingHdr" class="text-xs font-medium hidden sm:block" style="color:var(--ic-caramel-dk);max-width:120px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"></div>
+          <div id="mgrGreetingHdr" class="text-sm font-semibold" style="color:var(--ic-caramel-dk);"></div>
           <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="mgrChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
           <div class="hdr-menu-wrap">
             <button class="hdr-menu-btn" onclick="toggleHdrMenu('mgrMenu')" title="更多" aria-label="更多選項"><i class="ti ti-dots-vertical"></i></button>
@@ -4900,12 +4886,20 @@ function getGreeting(name, lang){
     const icon = h < 11 ? 'ti ti-sun' : h < 15 ? 'ti ti-sun-high' : h < 19 ? 'ti ti-sunset' : 'ti ti-moon';
     return `<i class="ti ${icon}" style="font-size:12px;vertical-align:-1px;"></i> ${salut}, ${name}!`;
   } else {
-    const salut = h < 11 ? '早安' : h < 13 ? '午安' : h < 18 ? '下午好' : '晚安';
+    const salut = h < 11 ? '早安' : h < 13 ? '午安' : h < 18 ? '午安' : '晚安';
     const icon = h < 11 ? 'ti ti-sun' : h < 13 ? 'ti ti-sun-high' : h < 18 ? 'ti ti-sunset' : 'ti ti-moon';
     return `<i class="ti ${icon}" style="font-size:12px;vertical-align:-1px;"></i> ${salut}，${name}！`;
   }
 }
 
+function toggleTodayMenu(){
+  const body = document.getElementById('atikaTodayMenuBody');
+  const chevron = document.getElementById('todayMenuChevron');
+  if (!body) return;
+  const isHidden = body.style.display === 'none';
+  body.style.display = isHidden ? '' : 'none';
+  if (chevron) chevron.style.transform = isHidden ? '' : 'rotate(-90deg)';
+}
 function renderAtikaView(){
   const d=today();
   const lang=getCurrentLang();
