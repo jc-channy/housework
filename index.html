@@ -5364,7 +5364,7 @@ function renderMgrSlotView(){
       <div class="space-y-2">${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div class="text-xs text-gray-400 italic py-1">全部完成</div>'}</div>
     </div>`;
   });
-  if (!html) html='<div class="text-sm text-gray-400 italic py-2 text-center">今日工作全部完成 🎉</div>';
+  if (!html) html= totalAll===0 ? '<div class="text-sm text-gray-400 italic py-2 text-center">今日無排定工作</div>' : '<div class="text-sm text-gray-400 italic py-2 text-center">今日工作全部完成 🎉</div>';
   container.innerHTML=html;
   const allDone=[...tdDone,...fxDone];
   renderSectionDone('mgrTodayAllDoneWrap','mgrTodayAllDone','mgrTodayAllDoneLabel',allDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
@@ -5465,9 +5465,6 @@ function renderManagerView(){
   });
   total+=adInWeek.length;
   done+=adInWeek.filter(a=>a.completed).length;
-  document.getElementById('stWeekTotal').textContent=total;
-  document.getElementById('stWeekDone').textContent=done;
-  document.getElementById('stWeekPct').textContent=total?Math.round(done*100/total)+'%':'0%';
 
   // ── Atika 今日進度卡 ──────────────────────────────────
   (function(){
