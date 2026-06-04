@@ -671,14 +671,15 @@
     <div class="container-app max-w-5xl mx-auto px-4 py-4">
       <div class="flex items-start justify-between">
         <div onclick="goHome()" class="cursor-pointer" title="回首頁 / Ke Beranda">
-          <div class="flex items-baseline gap-2 flex-wrap">
-            <div id="mgrDateZh" class="text-2xl font-black tracking-tight" style="color:var(--ic-choc-dk);"></div>
-            <div id="mgrClock" class="text-base font-bold tabular-nums" style="color:var(--ic-choc-mid);"></div>
+          <!-- 家庭名稱：有設定才顯示，最顯眼 -->
+          <div id="mgrFamilyNameTag" class="hidden text-2xl font-black tracking-tight leading-tight" style="color:var(--ic-choc-dk);"></div>
+          <div class="flex items-baseline gap-2 flex-wrap" id="mgrDateRow">
+            <div id="mgrDateZh" class="font-bold tracking-tight" style="color:var(--ic-choc-dk);font-size:1rem;"></div>
+            <div id="mgrClock" class="font-bold tabular-nums text-sm" style="color:var(--ic-choc-mid);"></div>
           </div>
-          <div class="flex items-center gap-2 flex-wrap mt-1">
+          <div class="flex items-center gap-2 flex-wrap mt-0.5">
             <div id="mgrDateId" class="id-text text-xs font-medium" style="color:var(--ic-choc-mid);"></div>
-            <div id="mgrFamilyNameTag" class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:var(--ic-lemon);color:var(--ic-choc-dk);display:none;"></div>
-            <div id="mgrRoleTag" class="text-xs font-medium" style="color:var(--ic-caramel-dk);"></div>
+            <div id="mgrRoleTag" class="hidden"></div>
             <div id="mgrPunchStatus" class="text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full"></div>
             <div id="mgrTodayOff" class="hidden text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-300"></div>
             <div id="mgrTomorrowOff" class="hidden text-xs font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-300"></div>
@@ -8753,10 +8754,19 @@ function saveFamilyName(){
 }
 function renderFamilyNameTag(){
   const tag = document.getElementById('mgrFamilyNameTag');
+  const dateZh = document.getElementById('mgrDateZh');
   if (!tag) return;
   const n = state.preferences?.familyName||'';
-  if (n){ tag.textContent = n; tag.style.display=''; }
-  else { tag.style.display='none'; }
+  if (n){
+    tag.textContent = n;
+    tag.classList.remove('hidden');
+    // 有家庭名稱時日期縮小
+    if (dateZh){ dateZh.style.fontSize='0.9rem'; dateZh.style.fontWeight='500'; }
+  } else {
+    tag.classList.add('hidden');
+    // 無家庭名稱時日期恢復大字
+    if (dateZh){ dateZh.style.fontSize='1.5rem'; dateZh.style.fontWeight='900'; }
+  }
 }
 function openSettingsModal(){
   renderUserList();
