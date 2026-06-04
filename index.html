@@ -987,7 +987,7 @@
         <div class="rounded-2xl p-4 mb-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
           <div class="flex items-center justify-between mb-3">
             <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 菜單設定</h2>
-            <button onclick="openMealConfigModal()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-vanilla);color:var(--ic-chocolate);"><i class="ti ti-settings" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 餐次 / 不煮原因</button>
+            <button onclick="openMealConfigModal()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-vanilla);color:var(--ic-chocolate);"><i class="ti ti-settings" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 基本設定</button>
           </div>
           <div class="flex items-center gap-3 flex-wrap">
             <div id="mealChips" class="flex gap-2 flex-wrap flex-1"></div>
@@ -2480,12 +2480,16 @@ let state = {
   restSchedules: [],
   mealConfig: {
     meals: [
-      { id: 'lunch',  name: '午餐', nameId: 'Makan Siang',       enabled: true  },
-      { id: 'dinner', name: '晚餐', nameId: 'Makan Malam',       enabled: true  },
+      { id: 'lunch',  name: '午餐', nameId: 'Makan Siang',  mealTime: '12:00', enabled: true  },
+      { id: 'dinner', name: '晚餐', nameId: 'Makan Malam',  mealTime: '18:00', enabled: true  },
     ],
     cycleEnabled: true,
     skipReasons: ['叫外送', '阿嬤帶來', '外食', '不在家'],
     ingCategories: ['肉類', '蔬菜', '海鮮', '辛香料', '調味料', '其他'],
+    ingCategoryColors: {
+      '肉類': '#C4706A', '蔬菜': '#7A9A50', '海鮮': '#5B8DB8',
+      '辛香料': '#D4956A', '調味料': '#9A7A58', '其他': '#A89880',
+    },
     cookMethods: ['大火快炒', '清蒸', '紅燒', '滷', '煮湯', '炸', '烤', '涼拌', '生食'],
   },
   ingredients: [],
@@ -2574,6 +2578,10 @@ function load() {
   }
   // mealConfig 補齊缺欄（舊版資料無 ingCategories/cookMethods）
   if (!state.mealConfig.ingCategories) state.mealConfig.ingCategories = ['肉類','蔬菜','海鮮','辛香料','調味料','其他'];
+  if (!state.mealConfig.ingCategoryColors) state.mealConfig.ingCategoryColors = {
+    '肉類':'#C4706A','蔬菜':'#7A9A50','海鮮':'#5B8DB8',
+    '辛香料':'#D4956A','調味料':'#9A7A58','其他':'#A89880'
+  };
   if (!state.mealConfig.cookMethods)   state.mealConfig.cookMethods   = ['大火快炒','清蒸','紅燒','滷','煮湯','炸','烤','涼拌','生食'];
   if (!state.templates.length) {
     state.templates = DEFAULT_TEMPLATES.map((t,i)=>({
@@ -2853,6 +2861,10 @@ async function cloudPull(){
         if (d.mealConfig         !== undefined) state.mealConfig = Object.assign({}, state.mealConfig, d.mealConfig);
         // 補齊舊版雲端資料缺少的 mealConfig 欄位
         if (!state.mealConfig.ingCategories) state.mealConfig.ingCategories = ['肉類','蔬菜','海鮮','辛香料','調味料','其他'];
+        if (!state.mealConfig.ingCategoryColors) state.mealConfig.ingCategoryColors = {
+          '肉類':'#C4706A','蔬菜':'#7A9A50','海鮮':'#5B8DB8',
+          '辛香料':'#D4956A','調味料':'#9A7A58','其他':'#A89880'
+        };
         if (!state.mealConfig.cookMethods)   state.mealConfig.cookMethods   = ['大火快炒','清蒸','紅燒','滷','煮湯','炸','烤','涼拌','生食'];
         if (!state.ingredients.length) state.ingredients = [
           {id:'ing_beef',name:'牛肉',nameId:'Daging Sapi',category:'肉類'},
@@ -3663,7 +3675,10 @@ function renderMenuGrid(){
   }
   // meal rows
   meals.forEach(meal=>{
-    html += `<div class="flex items-center justify-center text-xs font-semibold rounded-lg py-1" style="background:var(--ic-lemon);color:var(--ic-chocolate);">${meal.name}</div>`;
+    html += `<div class="flex flex-col items-center justify-center rounded-lg py-1 px-0.5" style="background:var(--ic-lemon);color:var(--ic-chocolate);">
+      <span class="text-xs font-semibold">${meal.name}</span>
+      ${meal.mealTime?`<span class="text-[9px] opacity-60">${meal.mealTime}</span>`:''}
+    </div>`;
     for (let d=1;d<=7;d++){
       const dow = d%7;
       const key = getMenuKey(dow, meal.id);
@@ -3756,22 +3771,39 @@ function renderDishList(dishes){
 function _rebuildDishListUI(){
   const el = document.getElementById('dishList');
   if (!el) return;
+  const allIngs = state.ingredients||[];
+  const cats = state.mealConfig.ingCategories||[];
+  const catColors = state.mealConfig.ingCategoryColors||{};
   el.innerHTML = _cellDishes.map((d,i)=>{
-    const ingOptions = (state.ingredients||[]).map(ing=>`<option value="${ing.id}" ${d.ingredientIds&&d.ingredientIds.includes(ing.id)?'selected':''}>${ing.name}${ing.nameId?' / '+ing.nameId:''}</option>`).join('');
-    const selTags = (d.ingredientIds||[]).map(id=>{
-      const ing = (state.ingredients||[]).find(x=>x.id===id);
-      return ing ? `<span class="text-xs px-2 py-0.5 rounded" style="background:var(--ic-lemon);color:var(--ic-chocolate);">${ing.name}</span>` : '';
-    }).join('');
+    const selIds = d.ingredientIds||[];
+    // 按分類分組的 chip 選擇器
+    let chipGroups = '';
+    cats.forEach(cat=>{
+      const group = allIngs.filter(ing=>ing.category===cat);
+      if (!group.length) return;
+      const cc = catColors[cat]||'#A89880';
+      chipGroups += `<div class="mb-1.5">
+        <div class="text-[10px] font-semibold mb-1" style="color:${cc};">${cat}</div>
+        <div class="flex flex-wrap gap-1">${group.map(ing=>{
+          const on = selIds.includes(ing.id);
+          return `<button type="button" onclick="_toggleIngredient(${i},'${ing.id}')" class="text-xs px-2 py-0.5 rounded-full border transition-colors" style="${on?`background:${cc};color:#fff;border-color:${cc};`:`background:${cc}22;color:${cc};border-color:${cc};`}">${ing.name}</button>`;
+        }).join('')}</div>
+      </div>`;
+    });
+    // 未分類食材
+    const uncat = allIngs.filter(ing=>!cats.includes(ing.category));
+    if (uncat.length) chipGroups += `<div class="flex flex-wrap gap-1 mb-1">${uncat.map(ing=>{const on=selIds.includes(ing.id);return`<button type="button" onclick="_toggleIngredient(${i},'${ing.id}')" class="text-xs px-2 py-0.5 rounded-full border" style="${on?'background:#888;color:#fff;border-color:#888;':'background:#eee;color:#555;border-color:#ccc;'}">${ing.name}</button>`;}).join('')}</div>`;
+    // 已選標籤（摘要顯示）
+    const selTags = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-2 py-0.5 rounded-full" style="background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`; }).join('');
+    // 自動菜名提示
+    const autoName = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
     return `<div class="rounded-xl p-3 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
       <div class="flex items-center gap-2 mb-2">
-        <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="菜色名稱" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;">
+        <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="${autoName||'菜色名稱（選填，預設用食材名）'}" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;">
         <button onclick="_removeDish(${i})" class="text-red-400 shrink-0"><i class="ti ti-x" style="font-size:14px;" aria-hidden="true"></i></button>
       </div>
-      <div class="mb-2">
-        <select multiple onchange="_updateDishIng(${i},this)" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs" size="3" style="min-width:0;">${ingOptions}</select>
-        ${ingOptions.length===0?'<p class="text-xs text-amber-600 mt-1">先到食材庫新增食材才能選擇</p>':''}
-      </div>
-      <div class="flex flex-wrap gap-1 mb-2">${selTags}</div>
+      <div class="mb-2 max-h-40 overflow-y-auto pr-1">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
+      ${selTags?`<div class="flex flex-wrap gap-1 mb-2">${selTags}</div>`:''}
       <div class="mb-1">
         <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式</div>
         <div class="flex flex-wrap gap-1 mb-1">${(state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${(d.cookMethod||'').includes(m)?' cm-active':''}" style="${(d.cookMethod||'').includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')}</div>
@@ -3781,6 +3813,13 @@ function _rebuildDishListUI(){
   }).join('');
 }
 function _removeDish(i){ _cellDishes.splice(i,1); _rebuildDishListUI(); }
+function _toggleIngredient(dishIdx, ingId){
+  if (!_cellDishes[dishIdx].ingredientIds) _cellDishes[dishIdx].ingredientIds=[];
+  const ids = _cellDishes[dishIdx].ingredientIds;
+  const idx = ids.indexOf(ingId);
+  if (idx>=0) ids.splice(idx,1); else ids.push(ingId);
+  _rebuildDishListUI();
+}
 function _updateDishIng(i, sel){ _cellDishes[i].ingredientIds = Array.from(sel.selectedOptions).map(o=>o.value); _rebuildDishListUI(); }
 function _setCookMethod(i, m, btn){
   const inp = document.getElementById('cm_input_'+i);
@@ -3821,7 +3860,13 @@ function saveMenuCell(){
     const reason = document.getElementById('skipReasonCustom').value.trim();
     state.weekMenu[_menuCellKey] = { type:'skip', skipReason: reason };
   } else {
-    const dishes = _cellDishes.filter(d=>d.dishName.trim());
+    // 若沒填菜名，自動用食材名稱組合
+    _cellDishes.forEach(d=>{
+      if (!d.dishName.trim() && d.ingredientIds && d.ingredientIds.length) {
+        d.dishName = d.ingredientIds.map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
+      }
+    });
+    const dishes = _cellDishes.filter(d=>d.dishName.trim()||((d.ingredientIds||[]).length));
     state.weekMenu[_menuCellKey] = { type:'cook', dishes };
   }
   save(); closeMenuCellModal(); renderMenuGrid();
@@ -3839,13 +3884,20 @@ function renderMealConfigList(){
   const el = document.getElementById('mealConfigList');
   if (!el) return;
   el.innerHTML = (state.mealConfig.meals||[]).map((m,i)=>`
-    <div class="flex items-center gap-2 p-2 border rounded-xl" style="border-color:var(--ic-vanilla);background:var(--ic-surface);">
-      <input type="text" value="${m.name}" oninput="state.mealConfig.meals[${i}].name=this.value" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;">
-      <label class="flex items-center gap-1 text-xs shrink-0" style="color:var(--ic-choc-mid);">
-        <input type="checkbox" ${m.enabled?'checked':''} onchange="state.mealConfig.meals[${i}].enabled=this.checked;save();renderMenuTab();">
-        啟用
-      </label>
-      <button onclick="_deleteMeal(${i})" class="text-red-400 shrink-0"><i class="ti ti-trash" style="font-size:14px;" aria-hidden="true"></i></button>
+    <div class="p-2 border rounded-xl" style="border-color:var(--ic-vanilla);background:var(--ic-surface);">
+      <div class="flex items-center gap-2 mb-1.5">
+        <input type="text" value="${m.name}" oninput="state.mealConfig.meals[${i}].name=this.value" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;" placeholder="餐次名稱">
+        <label class="flex items-center gap-1 text-xs shrink-0" style="color:var(--ic-choc-mid);">
+          <input type="checkbox" ${m.enabled?'checked':''} onchange="state.mealConfig.meals[${i}].enabled=this.checked;save();renderMenuTab();">
+          啟用
+        </label>
+        <button onclick="_deleteMeal(${i})" class="text-red-400 shrink-0"><i class="ti ti-trash" style="font-size:14px;" aria-hidden="true"></i></button>
+      </div>
+      <div class="flex items-center gap-2">
+        <i class="ti ti-clock" style="font-size:13px;color:var(--ic-choc-mid);"></i>
+        <input type="time" value="${m.mealTime||''}" oninput="state.mealConfig.meals[${i}].mealTime=this.value;save();renderMenuTab();" class="border border-gray-200 rounded-lg px-2 py-0.5 text-xs" style="color:var(--ic-choc-mid);">
+        <span class="text-xs" style="color:var(--ic-choc-mid);">預計用餐時間</span>
+      </div>
     </div>
   `).join('');
 }
@@ -3863,6 +3915,11 @@ function renderSkipReasonListInConfig(){
       <button onclick="state.mealConfig.skipReasons.splice(${i},1);save();renderSkipReasonListInConfig()" class="text-red-400"><i class="ti ti-x" style="font-size:14px;" aria-hidden="true"></i></button>
     </div>
   `).join('');
+}
+function setIngCatColor(cat, color){
+  if (!state.mealConfig.ingCategoryColors) state.mealConfig.ingCategoryColors={};
+  state.mealConfig.ingCategoryColors[cat] = color;
+  save(); renderIngredientList();
 }
 function renderIngCatList(){
   const el = document.getElementById('ingCatList');
@@ -3931,8 +3988,14 @@ function renderIngredientList(){
   cats.forEach(cat=>{
     const group = ings.filter(i=>i.category===cat);
     if (!group.length) return;
-    html+=`<div class="mb-3"><div class="text-xs font-semibold mb-1.5" style="color:var(--ic-choc-mid);">${cat}</div>
-      <div class="flex flex-wrap gap-2">${group.map(i=>`<button onclick="openIngredientModal('${i.id}')" class="text-xs px-3 py-1.5 rounded-full border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">${i.name}${i.nameId?` <span style="opacity:.6">/ ${i.nameId}</span>`:''}</button>`).join('')}</div></div>`;
+    const catColor = (state.mealConfig.ingCategoryColors||{})[cat] || '#A89880';
+    const catBg = catColor+'22';
+    html+=`<div class="mb-3">
+      <div class="flex items-center gap-2 mb-1.5">
+        <div class="text-xs font-semibold" style="color:${catColor};">${cat}</div>
+        <input type="color" value="${catColor}" onchange="setIngCatColor('${cat}',this.value)" title="更改分類顏色" class="w-5 h-5 rounded cursor-pointer border-0 p-0" style="background:none;">
+      </div>
+      <div class="flex flex-wrap gap-2">${group.map(i=>`<button onclick="openIngredientModal('${i.id}')" class="text-xs px-3 py-1.5 rounded-full border" style="background:${catBg};border-color:${catColor};color:${catColor};">${i.name}${i.nameId?` <span style="opacity:.7">/ ${i.nameId}</span>`:''}</button>`).join('')}</div></div>`;
   });
   // 未分類的食材（分類已被刪除）
   const uncatGroup = ings.filter(i=>!cats.includes(i.category));
@@ -8033,7 +8096,7 @@ function switchTab(tabName){
   document.querySelectorAll('.tab-content').forEach(x=>x.classList.add('hidden'));
   const tabEl = document.getElementById('tab-'+tabName);
   if (tabEl) tabEl.classList.remove('hidden');
-  if (tabName === 'menu') setTimeout(renderMenuTab, 0);
+  if (tabName === 'menu') renderMenuTab();
   // 切到頂端（instant 避免縮頁後卡在半空白畫面）
   window.scrollTo({ top:0, behavior:'instant' });
 }
