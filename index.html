@@ -4952,7 +4952,7 @@ function renderAtikaView(){
   // 臨時
   const ad=adhocForToday();
   const adSplit=splitDone(ad, a=>a.completed);
-  document.getElementById('adhocCount').textContent=`${adSplit.don.length}/${ad.length} 完成`;
+  const _ac=document.getElementById('adhocCount'); if(_ac) _ac.textContent=`${adSplit.don.length}/${ad.length} 完成`;
   document.getElementById('adhocEmpty').style.display=ad.length===0?'block':'none';
   document.getElementById('adhocIncomplete').innerHTML=adSplit.inc.map(a=>renderAdhocCard(a)).join('');
   renderSectionDone('adhocDoneWrap','adhocDone','adhocDoneLabel', adSplit.don.map(a=>renderAdhocCard(a)));
@@ -4960,7 +4960,7 @@ function renderAtikaView(){
   // 本日
   const todays=todaysTemplates();
   const tdSplit=splitDone(todays, t=>isDone(t, d));
-  document.getElementById('todayCount').textContent=`${tdSplit.don.length}/${todays.length} 完成`;
+  const _tc=document.getElementById('todayCount'); if(_tc) _tc.textContent=`${tdSplit.don.length}/${todays.length} 完成`;
   document.getElementById('todayIncomplete').innerHTML=tdSplit.inc.length
     ? tdSplit.inc.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join('')
     : `<div class="text-sm text-gray-400 italic text-center py-3">🎉 全部完成 / Selesai</div>`;
@@ -4975,7 +4975,7 @@ function renderAtikaView(){
   const qSplit=splitDone(fxQuarter, t=>isDone(t,d));
   const allDone=[...wSplit.don, ...mSplit.don, ...qSplit.don];
   const totalFx=fxWeek.length+fxMonth.length+fxQuarter.length;
-  document.getElementById('flexCount').textContent=`${allDone.length}/${totalFx} 完成`;
+  const _fc=document.getElementById('flexCount'); if(_fc) _fc.textContent=`${allDone.length}/${totalFx} 完成`;
   document.getElementById('flexWeekIncomplete').innerHTML = wSplit.inc.length
     ? wSplit.inc.map(t=>renderTaskCard(t)).join('')
     : `<div class="text-xs text-gray-400 italic">無 / Tidak ada</div>`;
