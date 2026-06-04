@@ -281,6 +281,21 @@
   .atika-slot-section + .atika-slot-section { border-top:1px solid var(--ic-vanilla); }
   /* 彈性任務虛線左邊框 */
   .atika-flex-task-card { border-left:2px dashed var(--ic-vanilla) !important; border-radius:0 10px 10px 0 !important; }
+  /* 時間分配 Kanban */
+  .ts-kanban { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .ts-kanban::-webkit-scrollbar { display:none; }
+  .ts-col { scroll-snap-align:start; min-width:min(70vw,200px); flex-shrink:0; border-right:1px solid var(--ic-vanilla); display:flex; flex-direction:column; }
+  .ts-col:last-child { border-right:none; }
+  @media(min-width:640px){ .ts-kanban { display:grid; grid-template-columns:repeat(4,1fr); overflow-x:visible; } .ts-col { min-width:auto; } }
+  .ts-col-hdr { padding:7px 10px; font-size:11px; font-weight:700; color:var(--ic-choc-mid); display:flex; align-items:center; gap:5px; background:var(--ic-lemon); border-bottom:1px solid var(--ic-vanilla); }
+  .ts-list { min-height:48px; padding:7px; flex:1; }
+  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:11px; color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
+  .ts-card:active { cursor:grabbing; }
+  .ts-card .ts-dot { width:7px; height:7px; border-radius:50%; background:var(--ic-caramel); flex-shrink:0; margin-top:2px; }
+  .ts-card.ts-adhoc .ts-dot { background:var(--ic-strawberry); }
+  .ts-card.ts-done { opacity:0.45; }
+  .ts-card.ts-done span { text-decoration:line-through; }
+  .ts-empty { font-size:10px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
   /* 底部導航 */
   #atikaBottomNav { position:fixed; bottom:0; left:0; right:0; z-index:40; background:var(--ic-surface); border-top:1px solid var(--ic-vanilla); display:none; flex-direction:row; padding-bottom:env(safe-area-inset-bottom,0px); }
   #atikaView.active-view #atikaBottomNav { display:flex; }
@@ -993,6 +1008,34 @@
               <div id="mgrFlexDone" class="space-y-2 mt-2"></div>
             </details>
           </section>
+        </div>
+      </div>
+
+      <!-- 今日時間分配 Kanban -->
+      <div class="rounded-2xl border overflow-hidden mt-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+        <div class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ic-vanilla);background:var(--ic-lemon);">
+          <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);">
+            <i class="ti ti-clock-hour-4" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日時間分配
+          </h3>
+          <span class="text-xs" style="color:var(--ic-choc-mid);">左右滑動 · 拖曳任務到時段</span>
+        </div>
+        <div class="ts-kanban">
+          <div class="ts-col" data-slot="morning">
+            <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:12px;color:var(--ic-caramel);" aria-hidden="true"></i> 早上</div>
+            <div id="mgrSlotMorning" class="ts-list"></div>
+          </div>
+          <div class="ts-col" data-slot="afternoon">
+            <div class="ts-col-hdr"><i class="ti ti-sun" style="font-size:12px;color:var(--ic-caramel);" aria-hidden="true"></i> 下午</div>
+            <div id="mgrSlotAfternoon" class="ts-list"></div>
+          </div>
+          <div class="ts-col" data-slot="evening">
+            <div class="ts-col-hdr"><i class="ti ti-moon" style="font-size:12px;color:var(--ic-caramel);" aria-hidden="true"></i> 晚上</div>
+            <div id="mgrSlotEvening" class="ts-list"></div>
+          </div>
+          <div class="ts-col" data-slot="flexible">
+            <div class="ts-col-hdr"><i class="ti ti-arrows-shuffle" style="font-size:12px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 彈性</div>
+            <div id="mgrSlotFlexible" class="ts-list"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -5331,6 +5374,88 @@ function completeFocusTask(){
   saveGuarded(); setTimeout(()=>{ refreshAll(); }, 300);
 }
 
+/* ========== 管理者時間分配 Kanban ========== */
+function renderMgrTimeSlotKanban(){
+  const d = today();
+  const lang = getCurrentLang();
+  const ad = adhocForToday();
+  const todays = todaysTemplates();
+  const fxAll = flexTemplatesByPeriod('mWeek-weekly')
+    .concat(flexTemplatesByPeriod('mWeek-biweekly'))
+    .concat(flexTemplatesByPeriod('mWeek-monthly'))
+    .concat(flexTemplatesByPeriod('quarterly'));
+
+  // 組合全部任務（adhoc 和 template）
+  const allItems = [
+    ...ad.map(a => ({
+      id: a.id, type: 'adhoc',
+      slot: a.timeSlot || 'flexible',
+      deadline: a.deadline || null,
+      nameZh: a.textZh || a.textId || '',
+      nameId: a.textId || a.textZh || '',
+      done: !!a.completed,
+    })),
+    ...todays.map(t => ({
+      id: t.id, type: 'tmpl',
+      slot: t.timeSlot || 'flexible',
+      deadline: t.deadline || null,
+      nameZh: t.nameZh || t.nameId || '',
+      nameId: t.nameId || t.nameZh || '',
+      done: isDone(t, d),
+    })),
+    ...fxAll.map(t => ({
+      id: t.id, type: 'tmpl',
+      slot: t.timeSlot || 'flexible',
+      deadline: t.deadline || null,
+      nameZh: t.nameZh || t.nameId || '',
+      nameId: t.nameId || t.nameZh || '',
+      done: isDone(t, d),
+    })),
+  ];
+
+  const slots = ['morning','afternoon','evening','flexible'];
+  const slotElIds = {morning:'mgrSlotMorning', afternoon:'mgrSlotAfternoon', evening:'mgrSlotEvening', flexible:'mgrSlotFlexible'};
+
+  slots.forEach(slot => {
+    const el = document.getElementById(slotElIds[slot]);
+    if (!el) return;
+    const items = allItems.filter(x => x.slot === slot);
+    el.innerHTML = items.map(x => {
+      const name = lang === 'id' ? (x.nameId || x.nameZh) : (x.nameZh || x.nameId);
+      const dl = x.deadline ? `<span style="font-size:9px;color:var(--ic-choc-mid);margin-left:auto;white-space:nowrap;">${x.deadline}</span>` : '';
+      return `<div class="ts-card${x.type==='adhoc'?' ts-adhoc':''}${x.done?' ts-done':''}" data-id="${x.id}" data-type="${x.type}">
+        <div class="ts-dot"></div><span style="flex:1;">${name}</span>${dl}
+      </div>`;
+    }).join('') + (items.length === 0 ? '<div class="ts-empty">空</div>' : '');
+
+    // SortableJS 跨欄拖曳
+    if (el._tsSortable) { try { el._tsSortable.destroy(); } catch(e){} el._tsSortable = null; }
+    el._tsSortable = Sortable.create(el, {
+      group: 'mgrTimeSlots',
+      animation: 120,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      filter: '.ts-empty',
+      preventOnFilter: false,
+      onEnd(evt) {
+        const newSlot = evt.to.closest('[data-slot]')?.dataset.slot;
+        if (!newSlot) return;
+        const id = evt.item.dataset.id;
+        const type = evt.item.dataset.type;
+        if (type === 'adhoc') {
+          const a = state.adhoc.find(x => x.id === id);
+          if (a && a.timeSlot !== newSlot) { a.timeSlot = newSlot; save(); }
+        } else {
+          const t = state.templates.find(x => x.id === id);
+          if (t && t.timeSlot !== newSlot) { t.timeSlot = newSlot; save(); }
+        }
+        // 同步清空「空」占位，補回實際 card（避免空欄位殘留）
+        setTimeout(() => renderMgrTimeSlotKanban(), 150);
+      }
+    });
+  });
+}
+
 /* ========== 管理者視圖 ========== */
 // call at end of renderAtikaView — find where renderAtikaView calls supply-related renders
 function renderManagerView(){
@@ -5505,6 +5630,7 @@ function renderManagerView(){
   document.getElementById('mgrFlexQuarterIncomplete').innerHTML=qS.inc.length?qS.inc.map(t=>renderTaskCard(t)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
   renderSectionDone('mgrFlexDoneWrap','mgrFlexDone','mgrFlexDoneLabel', allFxDone.map(t=>renderTaskCard(t)));
 
+  renderMgrTimeSlotKanban();
   renderMgrPunchStatus();
   renderMgrTomorrowOff();
   renderWeekWorkload();
