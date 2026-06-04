@@ -5853,21 +5853,33 @@ function renderPayrollTab(){
     const todayStr = ymd(today());
     const cells = days.map(d=>{
       const isFuture = d.dateStr > todayStr;
-      const isSun = d.dow === 0;
-      const isHol = d.isHoliday;
-      // status
-      let bg, label, title;
-      if (isFuture){ bg='#EDE8E0'; label=''; }
-      else if (d.leaveType==='full'){ bg='#E5ADA8'; label='假'; title=d.leaveType; }
-      else if (d.leaveType==='half'){ bg='#F5D0CC'; label='½'; }
-      else if (d.worked){ bg='var(--ic-caramel)'; label='✓'; }
-      else if (isHol||isSun){ bg='#D8D7B2'; label='休'; }
-      else { bg='#E0D8CC'; label=''; }
-      const [,mm2,dd2] = d.dateStr.split('-');
-      const isToday = d.dateStr===todayStr;
-      const ring = isToday ? 'outline:2px solid var(--ic-caramel-dk);outline-offset:1px;' : '';
+      const isToday = d.dateStr === todayStr;
+      // 判斷狀態（優先順序：請假 > 出勤 > 假日/例休 > 未打卡/未來）
+      let bg, label, txtColor='#9A7A58';
+      const leavePeriod = d.leave?.period; // 'full' | 'half' | undefined
+      if (leavePeriod === 'full'){
+        bg='#E5ADA8'; label='假'; txtColor='#7A2020';
+      } else if (leavePeriod === 'half'){
+        bg='#F5D0CC'; label='½'; txtColor='#7A2020';
+      } else if (d.punched){
+        bg='var(--ic-caramel)'; label='✓'; txtColor='#FAF7F2';
+      } else if (d.isHoliday){
+        bg='#D8D7B2'; label='休';
+      } else if (isToday){
+        bg='var(--ic-vanilla)'; label='今';
+      } else if (isFuture && d.isWorkday){
+        bg='#EDE8E0'; label='';
+      } else if (!d.isWorkday && !d.isHoliday){
+        // 非工作日、非例假日（不在排班內）
+        bg='#F0EDEA'; label='';
+      } else {
+        // 應上班但未打卡（過去）
+        bg='#EDE8E0'; label='？'; txtColor='#C09060';
+      }
+      const [,,dd2] = d.dateStr.split('-');
+      const ring = isToday ? 'outline:2.5px solid var(--ic-caramel-dk);outline-offset:1px;' : '';
       return `<div title="${d.dateStr}" style="display:flex;flex-direction:column;align-items:center;gap:1px;">
-        <div style="width:30px;height:30px;border-radius:8px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${d.worked?'#FAF7F2':'#9A7A58'};">${label}</div>
+        <div style="width:30px;height:30px;border-radius:8px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${txtColor};">${label}</div>
         <div style="font-size:9px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
       </div>`;
     }).join('');
@@ -5878,7 +5890,8 @@ function renderPayrollTab(){
         <div class="flex items-center gap-2 text-[10px]" style="color:var(--ic-choc-mid);">
           <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--ic-caramel);display:inline-block;"></span>出勤</span>
           <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#E5ADA8;display:inline-block;"></span>請假</span>
-          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#D8D7B2;display:inline-block;"></span>假日</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#D8D7B2;display:inline-block;"></span>例休</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#EDE8E0;display:inline-block;"></span>未打卡</span>
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;">${cells}</div>`;
