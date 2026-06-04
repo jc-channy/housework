@@ -12,7 +12,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -1001,6 +1002,9 @@
         <div class="flex gap-1.5 flex-wrap justify-end">
           <button onclick="openScheduleOverview()" class="btn-sm-primary"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽</button>
           <button onclick="openCategoryManageModal()" class="btn-sm-secondary"><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> 管理分類 <span id="catManageCount" class="text-xs text-gray-500"></span></button>
+          <button onclick="openTaskLibrary()" class="btn-sm-secondary"><i class="ti ti-books" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作庫</button>
+          <button onclick="exportTemplatesXlsx()" class="btn-sm-secondary"><i class="ti ti-file-download" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 匯出</button>
+          <label class="btn-sm-secondary cursor-pointer"><i class="ti ti-file-upload" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 匯入<input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importTemplatesXlsx(this)"></label>
           <button onclick="openAddTemplateModal()" class="btn-sm-primary">＋ 新增工作</button>
         </div>
       </div>
@@ -5426,6 +5430,219 @@ function renderMgrTimeSlotKanban(){
   });
 }
 
+/* ========== 家庭工作庫 ========== */
+const TASK_LIBRARY = [
+  // 清潔整理
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'掃地／拖地',nameId:'Menyapu/Mengepel lantai',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'整理客廳',nameId:'Merapikan ruang tamu',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'整理臥室',nameId:'Merapikan kamar tidur',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'清潔浴室',nameId:'Membersihkan kamar mandi',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'清潔廁所',nameId:'Membersihkan toilet',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'清洗廚房',nameId:'Membersihkan dapur',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'afternoon'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'倒垃圾分類',nameId:'Buang sampah & sortir',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'吸塵器清潔',nameId:'Menyedot debu',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'擦窗戶玻璃',nameId:'Mengelap jendela',mode:'flex',freqType:'mMonth',weekFlags:[1],timeSlot:'morning'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'清洗冰箱',nameId:'Membersihkan kulkas',mode:'flex',freqType:'mMonth',weekFlags:[1],timeSlot:'afternoon'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'清潔微波爐',nameId:'Membersihkan microwave',mode:'flex',freqType:'mMonth',weekFlags:[2],timeSlot:'afternoon'},
+  {catZh:'清潔整理',catId:'Kebersihan',nameZh:'整理衣櫥',nameId:'Merapikan lemari pakaian',mode:'flex',freqType:'mMonth',weekFlags:[1],timeSlot:'afternoon'},
+  // 烹飪餐飲
+  {catZh:'烹飪餐飲',catId:'Memasak',nameZh:'準備早餐',nameId:'Menyiapkan sarapan',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  {catZh:'烹飪餐飲',catId:'Memasak',nameZh:'準備午餐',nameId:'Menyiapkan makan siang',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  {catZh:'烹飪餐飲',catId:'Memasak',nameZh:'準備晚餐',nameId:'Menyiapkan makan malam',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'afternoon'},
+  {catZh:'烹飪餐飲',catId:'Memasak',nameZh:'採買食材',nameId:'Belanja bahan makanan',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'烹飪餐飲',catId:'Memasak',nameZh:'整理食材冰箱',nameId:'Merapikan bahan di kulkas',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'afternoon'},
+  // 洗衣燙衣
+  {catZh:'洗衣燙衣',catId:'Mencuci Pakaian',nameZh:'洗衣服',nameId:'Mencuci pakaian',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'洗衣燙衣',catId:'Mencuci Pakaian',nameZh:'晾曬衣服',nameId:'Menjemur pakaian',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'洗衣燙衣',catId:'Mencuci Pakaian',nameZh:'收摺衣服',nameId:'Melipat & memasukkan pakaian',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'afternoon'},
+  {catZh:'洗衣燙衣',catId:'Mencuci Pakaian',nameZh:'燙衣服',nameId:'Menyetrika pakaian',mode:'flex',freqType:'mWeek',weekFlags:[2,4],timeSlot:'afternoon'},
+  {catZh:'洗衣燙衣',catId:'Mencuci Pakaian',nameZh:'更換床單被套',nameId:'Ganti sprei & sarung bantal',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  // 照護服務
+  {catZh:'照護服務',catId:'Perawatan',nameZh:'接送小孩上下學',nameId:'Antar jemput anak sekolah',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5],timeSlot:'morning'},
+  {catZh:'照護服務',catId:'Perawatan',nameZh:'陪伴長輩',nameId:'Menemani lansia',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'afternoon'},
+  {catZh:'照護服務',catId:'Perawatan',nameZh:'餵養寵物',nameId:'Memberi makan hewan peliharaan',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  {catZh:'照護服務',catId:'Perawatan',nameZh:'遛狗',nameId:'Mengajak anjing jalan',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  {catZh:'照護服務',catId:'Perawatan',nameZh:'澆花澆草',nameId:'Menyiram tanaman',mode:'fixed',freqType:'daily',weekdays:[1,2,3,4,5,6,0],timeSlot:'morning'},
+  // 採買雜務
+  {catZh:'採買雜務',catId:'Belanja & Lainnya',nameZh:'超市／市場採買',nameId:'Belanja supermarket/pasar',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'採買雜務',catId:'Belanja & Lainnya',nameZh:'購買日用品',nameId:'Membeli kebutuhan rumah',mode:'flex',freqType:'mWeek',weekFlags:[2,4],timeSlot:'morning'},
+  {catZh:'採買雜務',catId:'Belanja & Lainnya',nameZh:'整理庭院',nameId:'Membersihkan halaman',mode:'flex',freqType:'mWeek',weekFlags:[1,3],timeSlot:'morning'},
+  {catZh:'採買雜務',catId:'Belanja & Lainnya',nameZh:'收發信件包裹',nameId:'Terima/kirim surat & paket',mode:'flex',freqType:'mWeek',weekFlags:[1,2,3,4],timeSlot:'flexible'},
+  {catZh:'採買雜務',catId:'Belanja & Lainnya',nameZh:'清洗車輛',nameId:'Mencuci kendaraan',mode:'flex',freqType:'mMonth',weekFlags:[1],timeSlot:'morning'},
+];
+
+let _libFilter = 'all';
+let _libSelected = new Set();
+
+function openTaskLibrary(){
+  _libFilter = 'all';
+  _libSelected = new Set();
+  renderTaskLibraryList();
+  document.getElementById('taskLibraryModal').classList.remove('hidden');
+}
+function closeTaskLibrary(){ document.getElementById('taskLibraryModal').classList.add('hidden'); }
+
+function filterTaskLib(cat){
+  _libFilter = cat;
+  document.querySelectorAll('.lib-filter-btn').forEach(b=>{
+    const active = b.textContent.includes(cat) || (cat==='all' && b.id==='libFilterAll');
+    b.className = `lib-filter-btn px-2 py-0.5 rounded-full text-xs ${active?'bg-gray-900 text-white':'bg-gray-100 text-gray-700'}`;
+  });
+  renderTaskLibraryList();
+}
+
+function renderTaskLibraryList(){
+  const items = _libFilter==='all' ? TASK_LIBRARY : TASK_LIBRARY.filter(t=>t.catZh===_libFilter);
+  const SLOT_LBL = {morning:'早上',afternoon:'下午',evening:'晚上',flexible:'彈性'};
+  document.getElementById('taskLibList').innerHTML = items.map((t,i)=>{
+    const idx = TASK_LIBRARY.indexOf(t);
+    const sel = _libSelected.has(idx);
+    const already = state.templates.some(x=>x.nameZh===t.nameZh);
+    return `<label class="flex items-center gap-2 p-2 rounded-lg border cursor-pointer ${sel?'border-caramel bg-amber-50':'border-gray-200'} ${already?'opacity-50':''}">
+      <input type="checkbox" class="w-4 h-4" ${sel?'checked':''} ${already?'disabled title="已在排程中"':''} onchange="toggleLibTask(${idx},this.checked)">
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold truncate">${t.nameZh} ${already?'<span class="text-xs text-gray-400">（已加入）</span>':''}</div>
+        <div class="id-text text-xs text-gray-500 truncate">${t.nameId}</div>
+      </div>
+      <span class="text-[10px] shrink-0 px-1.5 py-0.5 rounded" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">${SLOT_LBL[t.timeSlot]||'彈性'}</span>
+    </label>`;
+  }).join('') || '<div class="text-sm text-gray-400 italic py-4 text-center">無任務</div>';
+  updateLibSelCount();
+}
+
+function toggleLibTask(idx, checked){
+  if (checked) _libSelected.add(idx); else _libSelected.delete(idx);
+  updateLibSelCount();
+}
+function deselectAllLib(){
+  _libSelected.clear();
+  renderTaskLibraryList();
+}
+function updateLibSelCount(){
+  document.getElementById('libSelCount').textContent=`已選 ${_libSelected.size} 項 / ${_libSelected.size} dipilih`;
+}
+
+function addLibraryTasks(){
+  if (!_libSelected.size){ alert('請先勾選要加入的任務'); return; }
+  const maxOrder = Math.max(0,...state.templates.map(t=>t.order||0));
+  let added=0;
+  _libSelected.forEach(idx=>{
+    const t = TASK_LIBRARY[idx];
+    if (state.templates.some(x=>x.nameZh===t.nameZh)) return;
+    // 找或建分類
+    let cat = state.categories.find(c=>c.nameZh===t.catZh);
+    if (!cat){
+      cat = {id:'cat'+Date.now()+'_'+idx, nameZh:t.catZh, nameId:t.catId, order:state.categories.length};
+      state.categories.push(cat);
+    }
+    const newT = {
+      id: 'tmpl_lib_'+Date.now()+'_'+idx,
+      catId: cat.id,
+      nameZh: t.nameZh,
+      nameId: t.nameId,
+      descZh: '', descId: '',
+      mode: t.mode,
+      freqType: t.freqType || 'daily',
+      weekdays: t.weekdays || [1,2,3,4,5],
+      weekFlags: t.weekFlags || [],
+      timeSlot: t.timeSlot || 'flexible',
+      active: true,
+      order: maxOrder + added + 1,
+    };
+    state.templates.push(newT);
+    added++;
+  });
+  save();
+  closeTaskLibrary();
+  renderManagerView();
+  alert(`已加入 ${added} 項工作到排程 / ${added} tugas ditambahkan`);
+}
+
+/* ── Excel 匯出 ── */
+function exportTemplatesXlsx(){
+  if (typeof XLSX === 'undefined'){ alert('Excel 功能正在載入，請稍後再試'); return; }
+  const SLOT_LBL = {morning:'早上',afternoon:'下午',evening:'晚上',flexible:'彈性'};
+  const MODE_LBL = {fixed:'指定日(fixed)',flex:'彈性(flex)'};
+  const data = state.templates.map(t=>{
+    const cat = state.categories.find(c=>c.id===t.catId);
+    return {
+      '分類(Kategori)': cat?.nameZh||'',
+      '中文名稱(Nama ZH)': t.nameZh||'',
+      '印尼文名稱(Nama ID)': t.nameId||'',
+      '模式(Mode)': MODE_LBL[t.mode]||t.mode||'',
+      '頻率(Frekuensi)': t.freqType||'',
+      '星期(Hari)': (t.weekdays||[]).join(','),
+      '時段(Slot)': SLOT_LBL[t.timeSlot]||t.timeSlot||'彈性',
+      '說明中文(Deskripsi ZH)': t.descZh||'',
+      '說明印尼文(Deskripsi ID)': t.descId||'',
+      '已啟用(Aktif)': t.active===false?'否':'是',
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [{wch:14},{wch:20},{wch:24},{wch:18},{wch:14},{wch:16},{wch:10},{wch:24},{wch:28},{wch:10}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '工作排程');
+  // 說明 sheet
+  const helpData = [
+    {欄位:'模式(Mode)',說明:'fixed=指定每週幾 / flex=彈性週期'},
+    {欄位:'頻率(Frekuensi)',說明:'daily=每天 / mWeek=週彈性 / mMonth=月彈性 / quarterly=每季'},
+    {欄位:'星期(Hari)',說明:'0=日 1=一 2=二 3=三 4=四 5=五 6=六（逗號分隔，fixed模式用）'},
+    {欄位:'時段(Slot)',說明:'早上 / 下午 / 晚上 / 彈性'},
+    {欄位:'已啟用',說明:'是 / 否'},
+  ];
+  const wsHelp = XLSX.utils.json_to_sheet(helpData);
+  wsHelp['!cols'] = [{wch:20},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, wsHelp, '欄位說明');
+  XLSX.writeFile(wb, '工作排程_'+new Date().toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'')+'.xlsx');
+}
+
+/* ── Excel 匯入 ── */
+async function importTemplatesXlsx(input){
+  if (!input.files[0]) return;
+  if (typeof XLSX === 'undefined'){ alert('Excel 功能載入中，請稍後'); return; }
+  const file = input.files[0];
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type:'array'});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+  if (!rows.length){ alert('找不到資料，請確認格式'); return; }
+  const SLOT_MAP = {'早上':'morning','下午':'afternoon','晚上':'evening','彈性':'flexible','morning':'morning','afternoon':'afternoon','evening':'evening','flexible':'flexible'};
+  let added=0, skipped=0;
+  const maxOrder = Math.max(0,...state.templates.map(t=>t.order||0));
+  rows.forEach((row,i)=>{
+    const nameZh = (row['中文名稱(Nama ZH)']||row['中文名稱']||'').trim();
+    const nameId = (row['印尼文名稱(Nama ID)']||row['印尼文名稱']||'').trim();
+    if (!nameZh) return;
+    if (state.templates.some(t=>t.nameZh===nameZh)){ skipped++; return; }
+    const catZh = (row['分類(Kategori)']||row['分類']||'其他').trim();
+    let cat = state.categories.find(c=>c.nameZh===catZh);
+    if (!cat){
+      cat = {id:'cat_imp_'+Date.now()+'_'+i, nameZh:catZh, nameId:catZh, order:state.categories.length};
+      state.categories.push(cat);
+    }
+    const modeRaw = (row['模式(Mode)']||row['模式']||'fixed').toLowerCase();
+    const mode = modeRaw.includes('flex')?'flex':'fixed';
+    const freqRaw = (row['頻率(Frekuensi)']||row['頻率']||'daily').toLowerCase().trim();
+    const slotRaw = (row['時段(Slot)']||row['時段']||'彈性').trim();
+    const wdRaw = (row['星期(Hari)']||row['星期']||'').toString().trim();
+    const weekdays = wdRaw ? wdRaw.split(',').map(x=>parseInt(x.trim())).filter(n=>!isNaN(n)) : [1,2,3,4,5];
+    state.templates.push({
+      id: 'tmpl_imp_'+Date.now()+'_'+i,
+      catId: cat.id, nameZh, nameId,
+      descZh: (row['說明中文(Deskripsi ZH)']||'').trim(),
+      descId: (row['說明印尼文(Deskripsi ID)']||'').trim(),
+      mode, freqType: freqRaw.includes('month')?'mMonth':freqRaw.includes('week')?'mWeek':freqRaw.includes('quarter')?'quarterly':'daily',
+      weekdays, weekFlags: [], timeSlot: SLOT_MAP[slotRaw]||'flexible',
+      active: (row['已啟用(Aktif)']||row['已啟用']||'是').toString().trim()!=='否',
+      order: maxOrder + added + 1,
+    });
+    added++;
+  });
+  save(); renderManagerView();
+  input.value='';
+  alert(`匯入完成：新增 ${added} 項，跳過重複 ${skipped} 項 / Impor selesai: ${added} ditambahkan, ${skipped} dilewati`);
+}
+
 /* ========== 管理者視圖 ========== */
 // call at end of renderAtikaView — find where renderAtikaView calls supply-related renders
 function renderManagerView(){
@@ -6480,14 +6697,23 @@ function printLeaveForm(rid){
       ${policyZh ? `<div style="white-space:pre-wrap;font-size:13px;margin-bottom:8px;">${policyZh}</div>` : ''}
       ${policyId ? `<div style="white-space:pre-wrap;font-size:13px;color:#555;">${policyId}</div>` : ''}
     </div>` : '';
-  const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>請假單</title>
+  const typeNameId = (state.leaveTypes||[]).find(t=>t.id===r.type)?.nameId || typeName;
+  const PERIOD_ID = { full:'Satu Hari Penuh (1 Hari)', am:'Pagi Hari (0,5 Hari)', pm:'Sore Hari (0,5 Hari)' };
+  const isApproved = r.status==='approved';
+  const statusZh = isApproved ? '✓ 已批准' : '✗ 已拒絕';
+  const statusId = isApproved ? '✓ Disetujui' : '✗ Ditolak';
+  const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>請假單 / Formulir Cuti</title>
   <style>
-    body { font-family: 'PingFang TC', 'Noto Sans TC', sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; color: #333; }
-    h1 { text-align:center; font-size:22px; margin-bottom:4px; }
-    .subtitle { text-align:center; color:#777; font-size:13px; margin-bottom:24px; }
+    body { font-family: 'PingFang TC', 'Noto Sans TC', 'Noto Sans', sans-serif; max-width: 640px; margin: 40px auto; padding: 20px; color: #333; }
+    h1 { text-align:center; font-size:22px; margin-bottom:2px; }
+    .subtitle { text-align:center; color:#777; font-size:13px; margin-bottom:20px; }
     table { width:100%; border-collapse:collapse; margin-bottom:20px; }
-    td { padding:8px 12px; border:1px solid #ccc; font-size:14px; }
-    td:first-child { background:#f5f5f5; font-weight:bold; width:120px; }
+    td { padding:7px 10px; border:1px solid #ccc; font-size:13px; }
+    td:first-child { background:#f5f5f5; font-weight:bold; width:50%; }
+    .lbl-zh { display:block; }
+    .lbl-id { display:block; font-size:11px; color:#888; font-weight:normal; }
+    .val-zh { display:block; }
+    .val-id { display:block; font-size:11px; color:#777; }
     .section { border:1px solid #ddd; border-radius:8px; padding:14px 16px; margin-bottom:20px; background:#fafaf8; }
     .section-title { font-weight:bold; font-size:14px; margin-bottom:8px; color:#555; border-bottom:1px solid #e0e0e0; padding-bottom:6px; }
     .sign-row { display:flex; gap:40px; margin-top:32px; }
@@ -6497,22 +6723,22 @@ function printLeaveForm(rid){
   <h1>請假申請單</h1>
   <div class="subtitle">Formulir Permohonan Cuti</div>
   <table>
-    <tr><td>員工姓名</td><td>${helperName}</td></tr>
-    <tr><td>請假日期</td><td>${r.date}</td></tr>
-    <tr><td>請假類型</td><td>${typeName}</td></tr>
-    <tr><td>請假時段</td><td>${PERIOD_ZH[r.period]||r.period}</td></tr>
-    <tr><td>請假原因</td><td>${r.reason||'—'}</td></tr>
-    <tr><td>審核結果</td><td>✓ 已批准</td></tr>
-    <tr><td>批准人</td><td>${r.decidedBy||managerName}</td></tr>
-    <tr><td>批准日期</td><td>${r.decidedAt?r.decidedAt.slice(0,10):''}</td></tr>
-    ${r.managerNote?`<tr><td>管理者備註</td><td>${r.managerNote}</td></tr>`:''}
+    <tr><td><span class="lbl-zh">員工姓名</span><span class="lbl-id">Nama Karyawan</span></td><td>${helperName}</td></tr>
+    <tr><td><span class="lbl-zh">請假日期</span><span class="lbl-id">Tanggal Cuti</span></td><td>${r.date}</td></tr>
+    <tr><td><span class="lbl-zh">請假類型</span><span class="lbl-id">Jenis Cuti</span></td><td><span class="val-zh">${typeName}</span><span class="val-id">${typeNameId}</span></td></tr>
+    <tr><td><span class="lbl-zh">請假時段</span><span class="lbl-id">Periode Cuti</span></td><td><span class="val-zh">${PERIOD_ZH[r.period]||r.period}</span><span class="val-id">${PERIOD_ID[r.period]||r.period}</span></td></tr>
+    <tr><td><span class="lbl-zh">請假原因</span><span class="lbl-id">Alasan Cuti</span></td><td>${r.reason||'—'}</td></tr>
+    <tr><td><span class="lbl-zh">審核結果</span><span class="lbl-id">Hasil Keputusan</span></td><td><b>${statusZh}</b><span class="val-id">${statusId}</span></td></tr>
+    <tr><td><span class="lbl-zh">批准人</span><span class="lbl-id">Diputuskan oleh</span></td><td>${r.decidedBy||managerName}</td></tr>
+    <tr><td><span class="lbl-zh">批准日期</span><span class="lbl-id">Tanggal Keputusan</span></td><td>${r.decidedAt?r.decidedAt.slice(0,10):''}</td></tr>
+    ${r.managerNote?`<tr><td><span class="lbl-zh">管理者備註</span><span class="lbl-id">Catatan Majikan</span></td><td>${r.managerNote}</td></tr>`:''}
   </table>
   ${policyHtml}
   <div class="sign-row">
-    <div class="sign-box">員工簽名 / Tanda Tangan Karyawan<br><br><br></div>
-    <div class="sign-box">管理者確認 / Konfirmasi Majikan<br><br><br></div>
+    <div class="sign-box">員工簽名<br><small style="color:#aaa;">Tanda Tangan Karyawan</small><br><br><br></div>
+    <div class="sign-box">管理者確認<br><small style="color:#aaa;">Konfirmasi Majikan</small><br><br><br></div>
   </div>
-  <p style="font-size:11px;color:#aaa;text-align:center;margin-top:32px;">列印日期：${new Date().toLocaleDateString('zh-TW')}</p>
+  <p style="font-size:11px;color:#aaa;text-align:center;margin-top:32px;">列印日期 / Tanggal Cetak：${new Date().toLocaleDateString('zh-TW')}</p>
   <div style="text-align:center;margin-top:16px;"><button onclick="window.print()">🖨 列印 / Print</button></div>
   </body></html>`;
   const w = window.open('', '_blank');
@@ -6549,8 +6775,20 @@ async function decideLeave(rid, decision){
   r.status = decision;
   r.decidedAt = new Date().toISOString();
   r.decidedBy = state.currentUser.name;
+  r.helperNotified = false; // 尚未通知幫傭
   save();
   renderManagerView();
+  // 透過 Supabase chat 發系統通知
+  if (supabaseClient && cloudFamilyId){
+    const decLabel = decision==='approved' ? '已批准' : '已拒絕';
+    const decLabelId = decision==='approved' ? 'Disetujui' : 'Ditolak';
+    const msg = { family_id: cloudFamilyId,
+      from_user: '【系統通知】',
+      text_zh: `您的 ${r.date} 請假申請${decLabel}。請至「出勤」頁查看詳情。`,
+      text_id: `Permohonan cuti Anda tanggal ${r.date} telah ${decLabelId}. Silakan cek halaman "Absen".`,
+      status: 'sent', is_urgent: false };
+    try { await supabaseClient.from('messages').insert(msg); } catch(e){}
+  }
 }
 
 /* 薪資設定 modal */
@@ -6875,6 +7113,21 @@ function openMyPayroll(){
   `;
   // 我的請假紀錄（含管理者提醒）
   const myName = state.currentUser.name;
+  // 新審核通知橫幅
+  const unnotified = state.leaveRequests.filter(r =>
+    (r.requestedBy===myName || r.requestedBy==='Atika') &&
+    (r.status==='approved'||r.status==='rejected') && r.helperNotified===false
+  );
+  if (unnotified.length){
+    const notifDiv = document.createElement('div');
+    notifDiv.className = 'mb-2 rounded-xl px-3 py-2 text-sm font-semibold flex items-center gap-2';
+    notifDiv.style.cssText = 'background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;';
+    notifDiv.innerHTML = `<i class="ti ti-bell-ringing" style="font-size:16px;"></i> 您有 ${unnotified.length} 筆請假審核結果 · Ada ${unnotified.length} keputusan cuti baru`;
+    document.getElementById('myPayrollContent').prepend(notifDiv);
+    // 標記已通知
+    unnotified.forEach(r=>{ r.helperNotified=true; });
+    save();
+  }
   const mine = state.leaveRequests
     .filter(r => r.requestedBy === myName || r.requestedBy === 'Atika')
     .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
@@ -7084,53 +7337,60 @@ function doPrintPayroll(){
   const periodTitle = `${p.cycleStart.getFullYear()} 年 ${p.cycleStart.getMonth()+1} 月 (${fmtD(p.cycleStart)} ~ ${fmtD(p.cycleEnd)})`;
   let html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>薪資單 ${periodTitle}</title>
     <style>
-      body{font-family:'Noto Sans TC',sans-serif;padding:20px;font-size:13px;color:#1F2937}
-      h1{font-size:18px;margin-bottom:8px}
-      h2{font-size:15px;margin-top:16px;margin-bottom:6px;border-bottom:1px solid #ccc;padding-bottom:4px}
+      body{font-family:'Noto Sans TC','Noto Sans',sans-serif;padding:20px;font-size:13px;color:#1F2937}
+      h1{font-size:18px;margin-bottom:4px} h1 small{font-size:13px;color:#6B7280;font-weight:normal;}
+      h2{font-size:14px;margin-top:16px;margin-bottom:6px;border-bottom:1px solid #ccc;padding-bottom:4px}
+      h2 span{font-size:12px;color:#9CA3AF;font-weight:normal;margin-left:6px;}
       table{width:100%;border-collapse:collapse;margin-bottom:8px}
-      th,td{padding:4px 8px;border:1px solid #ddd;text-align:left}
+      th,td{padding:4px 8px;border:1px solid #ddd;text-align:left;vertical-align:top}
       th{background:#f4f4f4}
       .right{text-align:right}
       .big{font-size:18px;font-weight:bold;color:#1e40af}
       .sig{margin-top:20px;padding:20px;border:1px dashed #999}
+      .zh{display:block} .id{display:block;font-size:11px;color:#9CA3AF}
+      @media print { button{display:none} }
     </style></head><body>
-    <h1>家務管理 — 薪資與出勤明細</h1>
-    <div>週期：${periodTitle}</div>
-    <div>列印時間：${new Date().toLocaleString('zh-TW')}</div>`;
+    <h1>薪資與出勤明細 <small>/ Rincian Gaji & Kehadiran</small></h1>
+    <div>週期 / Periode：${periodTitle}</div>
+    <div>列印時間 / Waktu Cetak：${new Date().toLocaleString('zh-TW')}</div>`;
   if (opts.summary){
-    html += `<h2>薪資摘要</h2>
+    html += `<h2>薪資摘要 <span>Ringkasan Gaji</span></h2>
       <table>
-        <tr><th>項目</th><th class="right">金額</th></tr>
-        <tr><td>底薪</td><td class="right">$${p.baseSalary.toLocaleString()}</td></tr>
-        <tr><td>日薪</td><td class="right">$${p.dailyRate.toLocaleString()}</td></tr>
-        <tr><td>應出勤天數</td><td class="right">${p.scheduledWorkdays} 日</td></tr>
-        <tr><td>實際出勤</td><td class="right">${p.actualWorkdays} 日</td></tr>
-        <tr><td>請假天數</td><td class="right">${p.leaveDays} 日</td></tr>
-        <tr><td>休假日加班</td><td class="right">${p.overtimeDays} 日</td></tr>
-        <tr><td>請假扣薪</td><td class="right">-$${p.leavePay.toLocaleString()}</td></tr>
-        <tr><td>加班加薪</td><td class="right">+$${p.overtimePay.toLocaleString()}</td></tr>
-        <tr><td>額外加項</td><td class="right">+$${p.adjAdd.toLocaleString()}</td></tr>
-        <tr><td>額外扣項</td><td class="right">-$${p.adjDeduct.toLocaleString()}</td></tr>
-        <tr><td><b>實領</b></td><td class="right big">$${p.netSalary.toLocaleString()}</td></tr>
+        <tr><th><span class="zh">項目</span><span class="id">Item</span></th><th class="right"><span class="zh">金額</span><span class="id">Jumlah</span></th></tr>
+        <tr><td><span class="zh">底薪</span><span class="id">Gaji Pokok</span></td><td class="right">$${p.baseSalary.toLocaleString()}</td></tr>
+        <tr><td><span class="zh">日薪</span><span class="id">Gaji Harian</span></td><td class="right">$${p.dailyRate.toLocaleString()}</td></tr>
+        <tr><td><span class="zh">應出勤天數</span><span class="id">Hari Kerja Terjadwal</span></td><td class="right">${p.scheduledWorkdays} 日</td></tr>
+        <tr><td><span class="zh">實際出勤</span><span class="id">Hari Kerja Aktual</span></td><td class="right">${p.actualWorkdays} 日</td></tr>
+        <tr><td><span class="zh">請假天數</span><span class="id">Hari Cuti</span></td><td class="right">${p.leaveDays} 日</td></tr>
+        <tr><td><span class="zh">休假日加班</span><span class="id">Lembur Hari Libur</span></td><td class="right">${p.overtimeDays} 日</td></tr>
+        <tr><td><span class="zh">請假扣薪</span><span class="id">Potongan Cuti</span></td><td class="right">-$${p.leavePay.toLocaleString()}</td></tr>
+        <tr><td><span class="zh">加班加薪</span><span class="id">Bonus Lembur</span></td><td class="right">+$${p.overtimePay.toLocaleString()}</td></tr>
+        <tr><td><span class="zh">額外加項</span><span class="id">Tambahan</span></td><td class="right">+$${p.adjAdd.toLocaleString()}</td></tr>
+        <tr><td><span class="zh">額外扣項</span><span class="id">Potongan Tambahan</span></td><td class="right">-$${p.adjDeduct.toLocaleString()}</td></tr>
+        <tr><td><b><span class="zh">實領</span><span class="id">Gaji Bersih</span></b></td><td class="right big">$${p.netSalary.toLocaleString()}</td></tr>
       </table>`;
   }
   if (opts.adj && p.adjustments.length){
-    html += `<h2>額外項目明細</h2><table><tr><th>類型</th><th>名稱</th><th>備註</th><th class="right">金額</th></tr>` +
-      p.adjustments.map(a=>`<tr><td>${a.type==='add'?'<i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i>加項':'<i class="ti ti-minus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i>扣項'}</td><td>${a.name}</td><td>${a.note||''}</td><td class="right">${a.type==='add'?'+':'-'}$${a.amount.toLocaleString()}</td></tr>`).join('') +
+    html += `<h2>額外項目明細 <span>Rincian Item Tambahan</span></h2><table>
+      <tr><th><span class="zh">類型</span><span class="id">Jenis</span></th><th><span class="zh">名稱</span><span class="id">Nama</span></th><th><span class="zh">備註</span><span class="id">Keterangan</span></th><th class="right"><span class="zh">金額</span><span class="id">Jumlah</span></th></tr>` +
+      p.adjustments.map(a=>`<tr><td>${a.type==='add'?'<span class="zh">加項</span><span class="id">Tambah</span>':'<span class="zh">扣項</span><span class="id">Potong</span>'}</td><td>${a.name}</td><td>${a.note||''}</td><td class="right">${a.type==='add'?'+':'-'}$${a.amount.toLocaleString()}</td></tr>`).join('') +
       `</table>`;
   }
   if (opts.leaves){
     const inP = state.leaveRequests.filter(r=>r.date>=ymd(p.cycleStart)&&r.date<=ymd(p.cycleEnd));
     if (inP.length){
-      html += `<h2>本期請假紀錄</h2><table><tr><th>日期</th><th>時段</th><th>假別</th><th>狀態</th><th>原因</th><th>管理者提醒</th></tr>` +
+      html += `<h2>本期請假紀錄 <span>Catatan Cuti Periode Ini</span></h2><table>
+        <tr><th><span class="zh">日期</span><span class="id">Tanggal</span></th><th><span class="zh">時段</span><span class="id">Periode</span></th><th><span class="zh">假別</span><span class="id">Jenis</span></th><th><span class="zh">狀態</span><span class="id">Status</span></th><th><span class="zh">原因</span><span class="id">Alasan</span></th><th><span class="zh">管理者備註</span><span class="id">Catatan</span></th></tr>` +
         inP.map(r=>{
           const lt = state.leaveTypes.find(t=>t.id===r.type);
-          return `<tr><td>${r.date}</td><td>${({full:'全天',am:'上午',pm:'下午'})[r.period]}</td><td>${lt?.nameZh||r.type}</td><td>${({pending:'待審',approved:'批准',rejected:'拒絕'})[r.status]||r.status}</td><td>${r.reason||''}</td><td>${r.managerNote||''}</td></tr>`;
+          const periodId = ({full:'Penuh',am:'Pagi',pm:'Sore'})[r.period]||r.period;
+          const statusId = ({pending:'Menunggu',approved:'Disetujui',rejected:'Ditolak'})[r.status]||r.status;
+          return `<tr><td>${r.date}</td><td><span class="zh">${({full:'全天',am:'上午',pm:'下午'})[r.period]}</span><span class="id">${periodId}</span></td><td><span class="zh">${lt?.nameZh||r.type}</span><span class="id">${lt?.nameId||''}</span></td><td><span class="zh">${({pending:'待審',approved:'批准',rejected:'拒絕'})[r.status]||r.status}</span><span class="id">${statusId}</span></td><td>${r.reason||''}</td><td>${r.managerNote||''}</td></tr>`;
         }).join('') + `</table>`;
     }
   }
   if (opts.days){
-    html += `<h2>每日出勤明細</h2><table><tr><th>日期</th><th>狀態</th><th>上班</th><th>午休</th><th>下班</th></tr>` +
+    html += `<h2>每日出勤明細 <span>Rincian Kehadiran Harian</span></h2><table><tr><th><span class="zh">日期</span><span class="id">Tanggal</span></th><th><span class="zh">狀態</span><span class="id">Status</span></th><th><span class="zh">上班</span><span class="id">Masuk</span></th><th><span class="zh">午休</span><span class="id">Istirahat</span></th><th><span class="zh">下班</span><span class="id">Keluar</span></th></tr>` +
       p.days.map(d=>{
         const punches = state.punchLog?.[d.dateStr] || [];
         const g = type => punches.find(p=>p.type===type);
@@ -7141,10 +7401,10 @@ function doPrintPayroll(){
   if (opts.receipt){
     const r = (state.payrollReceipts||[]).find(rr=>rr.periodKey===p.periodKey);
     if (r){
-      html += `<h2>簽收紀錄</h2><div>日期：${r.signedDate}　金額：$${(r.amount||0).toLocaleString()}　備註：${r.note||''}</div>`;
+      html += `<h2>簽收紀錄 <span>Tanda Terima</span></h2><div>日期：${r.signedDate}　金額：$${(r.amount||0).toLocaleString()}　備註：${r.note||''}</div>`;
       if (r.photoDataUrl) html += `<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:300px;border:1px solid #ccc"></div>`;
     } else {
-      html += `<div class="sig"><b>薪資簽收</b><br><br>實領金額：$${p.netSalary.toLocaleString()}<br><br>收件人簽名：__________________<br><br>日期：____ 年 ____ 月 ____ 日</div>`;
+      html += `<div class="sig"><b>薪資簽收 / Tanda Terima Gaji</b><br><br>實領金額 / Gaji Bersih：$${p.netSalary.toLocaleString()}<br><br>收件人簽名 / Tanda Tangan：__________________<br><br>日期 / Tanggal：____ 年 ____ 月 ____ 日</div>`;
     }
   }
   html += `</body></html>`;
@@ -10005,6 +10265,37 @@ init();
       <p style="margin-top:10px;font-size:13px;color:var(--ic-choc-mid);">之後可隨時在 <i class="ti ti-dots-vertical" style="font-size:13px;vertical-align:-2px;"></i> 選單中找到所有設定。</p>
       <div class="ob-btn-row">
         <button class="ob-next" onclick="closeOnboarding()">開始使用 ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== 家庭工作庫 Modal ===== -->
+<div id="taskLibraryModal" class="hidden fixed inset-0 z-[70] flex items-end sm:items-center justify-center modal-backdrop p-2">
+  <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-xl">
+    <div class="flex items-center justify-between px-4 py-3 border-b" style="background:var(--ic-lemon);border-radius:16px 16px 0 0;">
+      <div>
+        <div class="font-bold text-base" style="color:var(--ic-chocolate);"><i class="ti ti-books" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i> 家庭工作庫</div>
+        <div class="id-text text-xs" style="color:var(--ic-choc-mid);">Perpustakaan Tugas Rumah</div>
+      </div>
+      <button onclick="closeTaskLibrary()" class="text-gray-400 text-xl leading-none">✕</button>
+    </div>
+    <div class="px-3 py-2 border-b flex gap-2 items-center flex-wrap" style="background:var(--ic-surface);">
+      <span class="text-xs text-gray-500">篩選分類：</span>
+      <button onclick="filterTaskLib('all')" id="libFilterAll" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-900 text-white">全部</button>
+      <button onclick="filterTaskLib('清潔整理')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">清潔</button>
+      <button onclick="filterTaskLib('烹飪餐飲')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">烹飪</button>
+      <button onclick="filterTaskLib('洗衣燙衣')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">洗衣</button>
+      <button onclick="filterTaskLib('照護服務')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">照護</button>
+      <button onclick="filterTaskLib('採買雜務')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">採買</button>
+    </div>
+    <div id="taskLibList" class="flex-1 overflow-y-auto px-3 py-2 space-y-1"></div>
+    <div class="px-4 py-3 border-t flex gap-2 items-center justify-between flex-wrap" style="background:var(--ic-surface);border-radius:0 0 16px 16px;">
+      <span id="libSelCount" class="text-xs text-gray-500">已選 0 項</span>
+      <div class="flex gap-2">
+        <button onclick="deselectAllLib()" class="btn-sm-secondary">取消全選</button>
+        <button onclick="addLibraryTasks()" class="btn-sm-primary"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 加入排程</button>
       </div>
     </div>
   </div>
