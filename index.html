@@ -1314,20 +1314,7 @@
         <label class="block font-semibold mb-1">印尼文 Nama</label>
         <input id="scNameId" type="text" data-lang="id" data-pair="scNameZh" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
       </div>
-      <div>
-        <label class="block font-semibold mb-1">顏色</label>
-        <div id="scColorSwatches" class="flex flex-wrap gap-2 mt-1">
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#D0A77B" style="background:#D0A77B;" title="焦糖"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#A87D52" style="background:#A87D52;" title="深焦糖"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#E5ADA8" style="background:#E5ADA8;" title="草莓粉"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#A85550" style="background:#A85550;" title="莓紅"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#D8D7B2" style="background:#D8D7B2;" title="薄荷"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#6A7840" style="background:#6A7840;" title="深綠"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#725C3F" style="background:#725C3F;" title="巧克力"></button>
-          <button type="button" class="sc-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#9A7A58" style="background:#9A7A58;" title="中棕"></button>
-        </div>
-        <input id="scColor" type="hidden" value="#D0A77B">
-      </div>
+      <input id="scColor" type="hidden" value="#D0A77B">
     </div>
     <div class="flex gap-2 mt-4">
       <button id="scDeleteBtn" onclick="deleteSupplyCat()" class="btn-ghost-danger hidden">刪除</button>
@@ -1582,20 +1569,7 @@
         <label class="block font-semibold mb-1">印尼文 Nama <button onclick="translateField('catNameId','catNameZh','id','zh')" class="trans-btn ml-1"><i class="ti ti-refresh" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 翻譯</button></label>
         <input id="catNameId" type="text" data-lang="id" data-pair="catNameZh" class="w-full border border-gray-300 rounded-lg p-2 bi-input">
       </div>
-      <div>
-        <label class="block font-semibold mb-1">顏色</label>
-        <div id="catColorSwatches" class="flex flex-wrap gap-2 mt-1">
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#D0A77B" style="background:#D0A77B;" title="焦糖"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#A87D52" style="background:#A87D52;" title="深焦糖"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#E5ADA8" style="background:#E5ADA8;" title="草莓粉"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#A85550" style="background:#A85550;" title="莓紅"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#D8D7B2" style="background:#D8D7B2;" title="薄荷"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#6A7840" style="background:#6A7840;" title="深綠"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#725C3F" style="background:#725C3F;" title="巧克力"></button>
-          <button type="button" class="cat-swatch w-8 h-8 rounded-lg border-2 border-transparent active:scale-90 transition-transform" data-color="#9A7A58" style="background:#9A7A58;" title="中棕"></button>
-        </div>
-        <input id="catColor" type="hidden" value="#D0A77B">
-      </div>
+      <input id="catColor" type="hidden" value="#D0A77B">
     </div>
     <div class="flex gap-2 mt-4">
       <button id="catDeleteBtn" onclick="deleteCat()" class="btn-ghost-danger hidden">刪除</button>
@@ -2298,7 +2272,7 @@ const DEFAULT_CATS = [
   {id:'bath',   nameZh:'廁所',     nameId:'Kamar Mandi',     color:'#9A7A58'},
   {id:'kitch',  nameZh:'廚房',     nameId:'Dapur',           color:'#E5ADA8'},
   {id:'cook',   nameZh:'煮餐',     nameId:'Memasak',         color:'#A85550'},
-  {id:'sun',    nameZh:'寢具陽光', nameId:'Menjemur',        color:'#EFE8D8'},
+  {id:'sun',    nameZh:'寢具陽光', nameId:'Menjemur',        color:'#4A7A8A'},
   {id:'app',    nameZh:'家電保養', nameId:'Perawatan Alat',  color:'#725C3F'},
   {id:'cat',    nameZh:'貓咪',     nameId:'Kucing',          color:'#D0A77B'},
   {id:'baby',   nameZh:'育兒',     nameId:'Pengasuhan Anak', color:'#E5ADA8'},
@@ -2898,8 +2872,8 @@ async function cloudPull(){
         // 補齊舊版雲端資料缺少的 mealConfig 欄位
         if (!state.mealConfig.ingCategories) state.mealConfig.ingCategories = ['肉類','蔬菜','海鮮','辛香料','調味料','其他'];
         if (!state.mealConfig.ingCategoryColors) state.mealConfig.ingCategoryColors = {
-          '肉類':'#C4706A','蔬菜':'#7A9A50','海鮮':'#5B8DB8',
-          '辛香料':'#D4956A','調味料':'#9A7A58','其他':'#A89880'
+          '肉類':'#A85550','蔬菜':'#6A7840','海鮮':'#4A7A8A',
+          '辛香料':'#D0A77B','調味料':'#9A7A58','其他':'#A87D52'
         };
         if (!state.mealConfig.cookMethods)   state.mealConfig.cookMethods   = ['大火快炒','清蒸','紅燒','滷','煮湯','炸','烤','涼拌','生食'];
         if (!state.ingredients.length) state.ingredients = [
@@ -8215,30 +8189,21 @@ function openSupplyCatModal(id){
   const i=document.getElementById('scNameId');
   z.value=c?.nameZh||''; i.value=c?.nameId||'';
   z.dataset.orig=z.value; i.dataset.orig=i.value;
-  const initScColor = c?.color||'#D0A77B';
-  document.getElementById('scColor').value=initScColor;
-  document.querySelectorAll('.sc-swatch').forEach(b=>{
-    b.classList.toggle('selected', b.dataset.color===initScColor);
-    b.onclick=()=>{
-      document.getElementById('scColor').value=b.dataset.color;
-      document.querySelectorAll('.sc-swatch').forEach(x=>x.classList.remove('selected'));
-      b.classList.add('selected');
-    };
-  });
+  document.getElementById('scColor').value=c?.color||'#D0A77B';
   document.getElementById('supplyCatModal').classList.remove('hidden');
 }
 function closeSupplyCatModal(){ document.getElementById('supplyCatModal').classList.add('hidden'); }
 function saveSupplyCat(){
   const zh=document.getElementById('scNameZh').value.trim();
   const id=document.getElementById('scNameId').value.trim();
-  const color=document.getElementById('scColor').value;
   if (!zh){ alert('請填寫中文名稱'); return; }
   if (state.editingSupplyCatId){
     const c=state.supplyCats.find(x=>x.id===state.editingSupplyCatId);
-    Object.assign(c, {nameZh:zh, nameId:id||zh, color});
+    Object.assign(c, {nameZh:zh, nameId:id||zh});
   } else {
+    const autoColor=_IC_PALETTE[state.supplyCats.length % _IC_PALETTE.length];
     state.supplyCats.push({
-      id:'sc'+Date.now(), nameZh:zh, nameId:id||zh, color,
+      id:'sc'+Date.now(), nameZh:zh, nameId:id||zh, color:autoColor,
       order:state.supplyCats.length,
     });
   }
@@ -8740,30 +8705,22 @@ function openCatModal(id){
   const setVal=(id,val)=>{const e=document.getElementById(id);e.value=val||'';e.dataset.orig=e.value;};
   setVal('catNameZh', c?.nameZh);
   setVal('catNameId', c?.nameId);
-  const initColor = c?.color||'#D0A77B';
-  document.getElementById('catColor').value=initColor;
-  document.querySelectorAll('.cat-swatch').forEach(b=>{
-    b.classList.toggle('selected', b.dataset.color===initColor);
-    b.onclick=()=>{
-      document.getElementById('catColor').value=b.dataset.color;
-      document.querySelectorAll('.cat-swatch').forEach(x=>x.classList.remove('selected'));
-      b.classList.add('selected');
-    };
-  });
+  document.getElementById('catColor').value=c?.color||'#D0A77B';
   document.getElementById('catModal').classList.remove('hidden');
 }
 function closeCatModal(){ document.getElementById('catModal').classList.add('hidden'); }
+const _IC_PALETTE=['#D0A77B','#A85550','#6A7840','#725C3F','#9A7A58','#A87D52','#E5ADA8','#4A7A8A'];
 function saveCat(){
   const zh=document.getElementById('catNameZh').value.trim();
   const id=document.getElementById('catNameId').value.trim();
-  const color=document.getElementById('catColor').value;
   if (!zh){ alert('請填寫中文名稱'); return; }
   if (state.editingCatId){
     const c=state.categories.find(x=>x.id===state.editingCatId);
-    Object.assign(c, {nameZh:zh, nameId:id||zh, color});
+    Object.assign(c, {nameZh:zh, nameId:id||zh});
   } else {
+    const autoColor=_IC_PALETTE[state.categories.length % _IC_PALETTE.length];
     state.categories.push({
-      id:'c'+Date.now(), nameZh:zh, nameId:id||zh, color,
+      id:'c'+Date.now(), nameZh:zh, nameId:id||zh, color:autoColor,
       order: state.categories.length,
     });
   }
