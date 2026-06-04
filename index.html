@@ -4574,7 +4574,7 @@ async function handleBiInputBlur(e){
 document.addEventListener('focusout', handleBiInputBlur, true);
 
 /* ========== 分類工具 ========== */
-function getCat(id){ return state.categories.find(c=>c.id===id) || {nameZh:'其他', nameId:'Lainnya', color:'#999'}; }
+function getCat(id){ return state.categories.find(c=>c.id===id) || {nameZh:'其他', nameId:'Lainnya', color:'var(--ic-caramel)'}; }
 
 /* ========== 主語言 ========== */
 function getCurrentLang(){ return state.currentUser?.lang || 'zh'; }
@@ -4671,7 +4671,7 @@ function renderTaskCard(t, opts={}){
   const d=opts.date||today();
   const done=isDone(t, d);
   const cat=getCat(t.catId);
-  const catStripeStyle=`border-left:5px solid ${cat.color}`;
+  const catStripeStyle='border-left:5px solid var(--ic-caramel)';
   let warnClass='';
   if (t.mode==='flex' && !done){
     const ago=daysSinceLast(t);
@@ -7444,7 +7444,7 @@ function renderScheduleOverview(){
     else if (lang==='id') display = t.nameId;
     else display = t.nameZh;
     return `<div class="schedule-chip text-[10px] leading-tight rounded px-1.5 py-0.5 mb-0.5 cursor-pointer hover:opacity-80 ${inactive?'opacity-50':''}"
-      style="background:${cat.color}22; border-left:3px solid ${cat.color};"
+      style="background:var(--ic-lemon);border-left:3px solid var(--ic-caramel);"
       onclick="closeScheduleOverview(); openTaskModal('${t.id}')"
       title="${t.nameZh} / ${t.nameId}">${display}</div>`;
   };
@@ -7544,7 +7544,7 @@ function buildScheduleOverviewPrintHTML(lang){
   };
   const chipP = t => {
     const cat = getCat(t.catId);
-    return `<div style="background:${cat.color}22;border-left:3px solid ${cat.color};padding:2px 4px;margin-bottom:2px;font-size:10px;border-radius:3px;">${nameOf(t)}</div>`;
+    return `<div style="background:var(--ic-lemon);border-left:3px solid var(--ic-caramel);padding:2px 4px;margin-bottom:2px;font-size:10px;border-radius:3px;">${nameOf(t)}</div>`;
   };
   const empty = '<span style="color:#ccc">·</span>';
   const dows = [1,2,3,4,5,6,0];
@@ -7642,36 +7642,35 @@ function renderCatFilters(){
   state.categories.sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
     const active=state.catFilter===c.id;
-    b.className='cat-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
-    // 用該分類顏色當底（淺底）；選中時加粗邊框
-    b.style.background = active ? c.color : c.color+'22';
-    b.style.color = active ? '#fff' : c.color;
-    b.style.borderColor = c.color;
-    b.style.borderWidth = active ? '2px' : '1px';
+    b.className='cat-filter px-3 py-1 rounded-full whitespace-nowrap text-xs font-semibold border transition-colors';
+    b.style.background = active ? 'var(--ic-caramel)' : 'var(--ic-lemon)';
+    b.style.color = active ? '#FAF7F2' : 'var(--ic-chocolate)';
+    b.style.borderColor = active ? 'var(--ic-caramel)' : 'var(--ic-vanilla)';
     b.dataset.cat=c.id;
-    b.dataset.catcolor=c.color;
     b.textContent=c.nameZh;
     wrap.appendChild(b);
   });
   wrap.querySelectorAll('.cat-filter').forEach(b=>{
     b.onclick=()=>{
       state.catFilter=b.dataset.cat;
-      // 取消其它按鈕的選中態
       wrap.querySelectorAll('.cat-filter').forEach(x=>{
         if (x.dataset.cat==='all'){
           x.classList.remove('bg-gray-900','text-white');
           x.classList.add('bg-gray-200');
+          x.style.background=''; x.style.color=''; x.style.borderColor='';
         } else {
-          const col = x.dataset.catcolor;
-          if (col){ x.style.background = col+'22'; x.style.color = col; x.style.borderWidth='1px'; }
+          x.style.background='var(--ic-lemon)';
+          x.style.color='var(--ic-chocolate)';
+          x.style.borderColor='var(--ic-vanilla)';
         }
       });
       if (b.dataset.cat==='all'){
         b.classList.remove('bg-gray-200');
         b.classList.add('bg-gray-900','text-white');
       } else {
-        const col = b.dataset.catcolor;
-        b.style.background = col; b.style.color='#fff'; b.style.borderWidth='2px';
+        b.style.background='var(--ic-caramel)';
+        b.style.color='#FAF7F2';
+        b.style.borderColor='var(--ic-caramel)';
       }
       renderTemplates();
     };
@@ -7684,7 +7683,7 @@ function renderTemplates(){
   document.getElementById('templateList').innerHTML=list.map(t=>{
     const cat=getCat(t.catId);
     return `
-      <div data-tid="${t.id}" class="${t.active===false?'bg-gray-100 opacity-60':'bg-white'} border border-gray-200 rounded-xl p-3 flex items-start gap-3 hover:border-blue-400" style="border-left:5px solid ${cat.color}">
+      <div data-tid="${t.id}" class="${t.active===false?'bg-gray-100 opacity-60':'bg-white'} border border-gray-200 rounded-xl p-3 flex items-start gap-3 hover:border-blue-400" style="border-left:5px solid var(--ic-caramel)">
         <span class="drag-handle select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
         <div class="flex-1 cursor-pointer min-w-0" onclick="openEditTemplate('${t.id}')">
           <div class="flex items-center gap-2 flex-wrap">
@@ -7695,7 +7694,7 @@ function renderTemplates(){
           </div>
           <div class="id-text text-sm text-gray-600">${t.nameId}</div>
           <div class="text-xs text-gray-500 mt-1 flex items-center gap-1.5 flex-wrap">
-            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold" style="background:${cat.color}22; color:${cat.color}; border:1px solid ${cat.color}66"><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> ${cat.nameZh}</span>
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold" style="background:var(--ic-lemon);color:var(--ic-chocolate);border:1px solid var(--ic-vanilla);"><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> ${cat.nameZh}</span>
             <span>${t.mode==='fixed' ? '指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、') : (t.freqType==='mWeek' ? weekFlagsLabel(t) : t.freqType==='mMonth' ? monthFlagsLabel(t) : (FREQ_ZH[t.freqType]||'')+' / '+(FREQ_ID[t.freqType]||''))}</span>
           </div>
         </div>
@@ -7712,7 +7711,7 @@ function renderCategories(){
     .map(c=>`
       <div data-cid="${c.id}" class="bg-white border border-gray-200 rounded-lg p-2 flex items-center gap-2 cursor-pointer hover:border-blue-400" onclick="openEditCat('${c.id}')">
         <span class="drag-handle select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);" onclick="event.stopPropagation()"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
-        <div class="w-4 h-4 rounded-full shrink-0" style="background:${c.color}"></div>
+
         <div class="flex-1 min-w-0">
           <div class="font-semibold text-sm">${c.nameZh}</div>
           <div class="id-text text-xs text-gray-500">${c.nameId}</div>
@@ -7831,7 +7830,7 @@ function renderSuppliesAtika(){
     if (!items.length) return '';
     return `
       <details class="mb-1.5">
-        <summary class="cursor-pointer text-xs font-bold text-gray-700 py-1.5 px-2 bg-gray-50 rounded-lg flex items-center justify-between" style="border-left:3px solid ${cat.color}">
+        <summary class="cursor-pointer text-xs font-bold py-1.5 px-2 rounded-lg flex items-center justify-between" style="background:var(--ic-lemon);color:var(--ic-chocolate);border-left:3px solid var(--ic-caramel);">
           <span>${lang==='id'?cat.nameId:cat.nameZh} <span class="text-gray-400 font-normal">${lang==='id'?cat.nameZh:cat.nameId}</span></span>
           <span class="text-[10px] text-gray-400">(${items.length}) ▼</span>
         </summary>
@@ -8040,7 +8039,7 @@ function renderManagerSupplyCard(s, group){
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-1 flex-wrap">
-            <span class="text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background:${cat.color}33;color:#1F2937">${cat.nameZh}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded-full font-semibold" style="background:var(--ic-lemon);color:var(--ic-chocolate);">${cat.nameZh}</span>
             <span class="font-semibold text-sm">${s.nameZh}</span>
           </div>
           <div class="id-text text-xs text-gray-600">${s.nameId}</div>
@@ -8849,7 +8848,7 @@ function openScenarioModal(id){
       return `
         <label class="flex items-center gap-2 py-1 px-1 cursor-pointer hover:bg-gray-50 rounded">
           <input type="checkbox" data-tid="${t.id}" ${sel.has(t.id)?'checked':''} class="w-4 h-4">
-          <span class="w-2 h-2 rounded-full shrink-0" style="background:${cat.color}"></span>
+          <i class="ti ti-folder shrink-0" style="font-size:12px;color:var(--ic-caramel);"></i>
           <span class="text-sm font-semibold">${t.nameZh}</span>
           <span class="text-xs text-gray-500">${t.nameId}</span>
           ${t.active===false?'<span class="text-xs text-gray-400">（停用）</span>':''}
