@@ -3628,6 +3628,7 @@ const DOW_ZH = ['日','一','二','三','四','五','六'];
 let _menuCellKey = null; // "1_lunch" = 週一午餐
 let _menuCellMode = 'cook';
 let _editIngId = null;
+let _openIngPickers = new Set(); // 記錄哪些 dish index 的 picker 是展開的
 
 // ── 切換每週循環 ──
 function toggleMenuCycle(){
@@ -3688,13 +3689,15 @@ function renderMenuSetSelector(){
   let html = sets.map((s,i) => {
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
+    const safeId = s.id.replace(/'/g,"\\'");
     return `<div class="flex items-center gap-1">
-      <button onclick="switchWeekMenuSet('${s.id}')" class="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors" style="${isActive?'background:var(--ic-caramel);color:#FAF7F2;':'background:var(--ic-vanilla);color:var(--ic-chocolate);'}">${s.name}${isThisWeek?'<span class="ml-1 text-[9px] opacity-75">本週</span>':''}</button>
+      <button onclick="switchWeekMenuSet('${safeId}')" class="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors" style="${isActive?'background:var(--ic-caramel);color:#FAF7F2;':'background:var(--ic-vanilla);color:var(--ic-chocolate);'}">${s.name}${isThisWeek?'<span class="ml-1 text-[9px] opacity-75">本週</span>':''}</button>
+      <button onclick="renameWeekMenuSet('${safeId}')" class="opacity-50 hover:opacity-100" title="重新命名"><i class="ti ti-pencil" style="font-size:11px;color:var(--ic-choc-mid);"></i></button>
       <label class="flex items-center gap-0.5 cursor-pointer" title="納入循環">
-        <input type="checkbox" ${s.cycleOn?'checked':''} onchange="toggleSetCycle('${s.id}',this.checked)" class="w-3 h-3 accent-amber-600">
+        <input type="checkbox" ${s.cycleOn?'checked':''} onchange="toggleSetCycle('${safeId}',this.checked)" class="w-3 h-3 accent-amber-600">
         <span class="text-[10px]" style="color:var(--ic-choc-mid);">循環</span>
       </label>
-      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${s.id}')" class="text-red-300 hover:text-red-500 text-xs leading-none" title="刪除"><i class="ti ti-x" style="font-size:11px;"></i></button>`:''}
+      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" class="text-red-300 hover:text-red-500 text-xs leading-none" title="刪除"><i class="ti ti-trash" style="font-size:11px;"></i></button>`:''}
     </div>`;
   }).join('<div class="w-px h-5 rounded-full mx-1" style="background:var(--ic-vanilla);"></div>');
 
@@ -3728,7 +3731,8 @@ function addWeekMenuSet(){
 
 function deleteWeekMenuSet(id){
   if ((state.weekMenuSets||[]).length <= 1) return;
-  customConfirm('確定刪除這組週菜單？', ()=>{
+  customConfirm('確定刪除這組週菜單？').then(ok=>{
+    if (!ok) return;
     state.weekMenuSets = state.weekMenuSets.filter(s=>s.id!==id);
     if (state.activeWeekMenuSetId === id){
       state.activeWeekMenuSetId = state.weekMenuSets[0].id;
@@ -3741,6 +3745,12 @@ function deleteWeekMenuSet(id){
 function toggleSetCycle(id, val){
   const s = (state.weekMenuSets||[]).find(s=>s.id===id);
   if (s) { s.cycleOn = val; save(); renderMenuSetSelector(); }
+}
+function renameWeekMenuSet(id){
+  const s = (state.weekMenuSets||[]).find(s=>s.id===id);
+  if (!s) return;
+  const newName = window.prompt('請輸入新名稱：', s.name);
+  if (newName && newName.trim()) { s.name = newName.trim(); save(); renderMenuSetSelector(); }
 }
 
 function renderMealChips(){
@@ -3845,7 +3855,7 @@ function openMenuCellModal(key){
   document.getElementById('skipReasonCustom').value = reason;
   document.getElementById('menuCellModal').classList.remove('hidden');
 }
-function closeMenuCellModal(){ document.getElementById('menuCellModal').classList.add('hidden'); _menuCellKey=null; }
+function closeMenuCellModal(){ document.getElementById('menuCellModal').classList.add('hidden'); _menuCellKey=null; _openIngPickers.clear(); }
 
 function setMenuCellMode(mode){
   _menuCellMode = mode;
@@ -3913,15 +3923,15 @@ function _rebuildDishListUI(){
     const selTags = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-2 py-0.5 rounded-full" style="background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`; }).join('');
     // 自動菜名提示
     const autoName = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
-    const ingPickerId = `ingPicker_${i}`;
+    const ingPickerOpen = _openIngPickers.has(i);
     return `<div class="rounded-xl p-3 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
       <div class="flex items-center gap-2 mb-2">
         <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="${autoName||'菜色名稱（選填，預設用食材名）'}" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;">
         <button onclick="_removeDish(${i})" class="text-red-400 shrink-0"><i class="ti ti-x" style="font-size:14px;" aria-hidden="true"></i></button>
       </div>
       ${selTags?`<div class="mb-2"><div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">已選食材</div><div class="flex flex-wrap gap-1">${selTags}</div></div>`:''}
-      <button type="button" onclick="document.getElementById('${ingPickerId}').classList.toggle('hidden')" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
-      <div id="${ingPickerId}" class="hidden mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
+      <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
+      <div id="ingPicker_${i}" class="${ingPickerOpen?'':'hidden'} mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
       <div class="mb-1">
         <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式</div>
         <div class="flex flex-wrap gap-1 mb-1">${(state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${(d.cookMethod||'').includes(m)?' cm-active':''}" style="${(d.cookMethod||'').includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')}</div>
@@ -3931,11 +3941,18 @@ function _rebuildDishListUI(){
   }).join('');
 }
 function _removeDish(i){ _cellDishes.splice(i,1); _rebuildDishListUI(); }
+function _toggleIngPicker(dishIdx){
+  if (_openIngPickers.has(dishIdx)) _openIngPickers.delete(dishIdx);
+  else _openIngPickers.add(dishIdx);
+  _rebuildDishListUI();
+}
 function _toggleIngredient(dishIdx, ingId){
   if (!_cellDishes[dishIdx].ingredientIds) _cellDishes[dishIdx].ingredientIds=[];
   const ids = _cellDishes[dishIdx].ingredientIds;
   const idx = ids.indexOf(ingId);
   if (idx>=0) ids.splice(idx,1); else ids.push(ingId);
+  // 保持 picker 開啟狀態（不關閉）
+  _openIngPickers.add(dishIdx);
   _rebuildDishListUI();
 }
 function _updateDishIng(i, sel){ _cellDishes[i].ingredientIds = Array.from(sel.selectedOptions).map(o=>o.value); _rebuildDishListUI(); }
@@ -4181,25 +4198,32 @@ function renderTodayMenuCard(){
     if (!cell) return;
     hasAny = true;
     if (cell.type==='skip'){
-      html += `<div class="mb-2 last:mb-0">
-        <span class="text-xs font-semibold px-2 py-0.5 rounded-full mr-2" style="background:#E5E7EB;color:#6B7280;">${meal.name}</span>
-        <span class="text-xs text-gray-500"><i class="ti ti-x" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${cell.skipReason||'今天不煮'}</span>
+      html += `<div class="flex items-center gap-2 py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
+        <span class="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">${meal.name}${meal.mealTime?` ${meal.mealTime}`:''}</span>
+        <span class="text-xs" style="color:#9CA3AF;"><i class="ti ti-moon" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${cell.skipReason||'今天不煮'}</span>
       </div>`;
     } else {
       const dishes = cell.dishes||[];
-      html += `<div class="mb-3 last:mb-0">
-        <span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:var(--ic-caramel);color:#FAF7F2;">${meal.name}</span>
+      const catColors = state.mealConfig?.ingCategoryColors||{};
+      html += `<div class="py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
+        <div class="flex items-center gap-1.5 mb-2">
+          <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <span class="text-xs font-bold" style="color:var(--ic-caramel);">${meal.name}</span>
+          ${meal.mealTime?`<span class="text-[10px]" style="color:var(--ic-choc-mid);">${meal.mealTime}</span>`:''}
+        </div>
+        <div class="space-y-2 pl-1">
         ${dishes.map(d=>{
-          const ingTags = (d.ingredientIds||[]).map(id=>{
-            const ing=(state.ingredients||[]).find(x=>x.id===id);
-            return ing?`<span class="text-xs px-2 py-0.5 rounded" style="background:var(--ic-lemon);color:var(--ic-chocolate);">${ing.name}</span>`:'';
-          }).join('');
-          return `<div class="mt-2 pl-2 border-l-2" style="border-color:var(--ic-caramel);">
-            <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">${d.dishName}</div>
-            ${ingTags?`<div class="flex flex-wrap gap-1 mt-1">${ingTags}</div>`:''}
-            ${d.cookMethod?`<div class="text-xs mt-1" style="color:var(--ic-choc-mid);">${d.cookMethod}</div>`:''}
+          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-1.5 py-0.5 rounded" style="background:${cc}22;color:${cc};">${ing.name}</span>`; }).join('');
+          const name = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '（未命名）';
+          return `<div class="flex items-start gap-2">
+            ${d.cookMethod?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${d.cookMethod}</span>`:''}
+            <div>
+              <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">${name}</div>
+              ${ingNames?`<div class="flex flex-wrap gap-1 mt-1">${ingNames}</div>`:''}
+            </div>
           </div>`;
         }).join('')}
+        </div>
       </div>`;
     }
   });
