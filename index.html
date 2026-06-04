@@ -281,6 +281,9 @@
   .atika-slot-section + .atika-slot-section { border-top:1px solid var(--ic-vanilla); }
   /* 彈性任務虛線左邊框 */
   .atika-flex-task-card { border-left:2px dashed var(--ic-vanilla) !important; border-radius:0 10px 10px 0 !important; }
+  /* 中文預設：隱藏印尼文 */
+  .hide-id-text .id-text { display: none !important; }
+
   /* 時間分配 Kanban */
   .ts-kanban { display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .ts-kanban::-webkit-scrollbar { display:none; }
@@ -826,10 +829,10 @@
       <div class="relative">
         <div class="flex gap-1 backdrop-blur rounded-xl p-1 overflow-x-auto scrollbar-thin" id="mgrTabBar" style="background:rgba(239,232,216,0.6);">
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week"><i class="ti ti-home" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 首頁</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品管理<span id="suppliesBadge" class="ml-1"></span></button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="menu"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 菜單</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 出勤與薪資<span id="leaveBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作</button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品<span id="suppliesBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 出勤<span id="leaveBadge" class="ml-1"></span></button>
         </div>
         <div id="mgrTabFade" class="pointer-events-none absolute right-0 top-0 h-full w-10 rounded-r-xl transition-opacity duration-300" style="background:linear-gradient(to right, transparent, rgba(239,232,216,0.95));opacity:0;"></div>
       </div>
@@ -877,21 +880,7 @@
         </div>
         <button onclick="document.getElementById('paydayBanner').classList.add('hidden')" class="text-lg leading-none" style="color:#B45309;opacity:0.5;">×</button>
       </div>
-      <!-- 統計 -->
-      <div class="grid grid-cols-3 gap-2 mb-4">
-        <div class="bg-white rounded-2xl border border-gray-200 p-3">
-          <div class="text-xs text-gray-500">本週應做</div>
-          <div id="stWeekTotal" class="text-2xl font-bold mt-1">—</div>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-3">
-          <div class="text-xs text-gray-500">已完成</div>
-          <div id="stWeekDone" class="text-2xl font-bold mt-1" style="color:#6A7840;">—</div>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-200 p-3">
-          <div class="text-xs text-gray-500">完成率</div>
-          <div id="stWeekPct" class="text-2xl font-bold mt-1" style="color:var(--ic-caramel-dk);">—</div>
-        </div>
-      </div>
+
 
       <!-- 本日提醒 + 今日時間軸（左右並排） -->
       <div class="grid md:grid-cols-2 gap-3 mb-4">
@@ -921,75 +910,72 @@
         <!-- 今日時間軸 -->
         <section>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日時間軸 / Linimasa</h3>
+            <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日時間軸</h3>
             <span id="timelineCount" class="text-xs text-gray-500"></span>
           </div>
           <div id="todayTimeline" class="bg-white border border-gray-200 rounded-xl p-3 max-h-60 overflow-y-auto"></div>
         </section>
       </div>
 
-      <!-- 左右並排：左=臨時+本日，右=彈性（依本週/本月/本季；可由裝置設定切單欄） -->
-      <div class="layout-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <section class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-bolt" style="font-size:14px;color:#EF4444;vertical-align:-1px;" aria-hidden="true"></i>臨時工作 / Tugas Tambahan</h3>
-              <div class="flex items-center gap-2">
-                <span id="mgrAdhocCount" class="text-xs text-gray-500"></span>
-                <button onclick="openAddAdhocModal()" class="btn-sm-danger">＋ 新增</button>
-              </div>
-            </div>
-            <div id="mgrAdhocIncomplete" class="space-y-2"></div>
-            <details id="mgrAdhocDoneWrap" class="mt-2 hidden">
-              <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
-                <span id="mgrAdhocDoneLabel"></span><span class="text-gray-400">▼</span>
-              </summary>
-              <div id="mgrAdhocDone" class="space-y-2 mt-2"></div>
-            </details>
-          </section>
-          <section>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-calendar-day" style="font-size:14px;color:#2563EB;vertical-align:-1px;" aria-hidden="true"></i>本日工作 / Tugas Hari Ini</h3>
-              <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
-            </div>
-            <div id="mgrTodayIncomplete" class="space-y-2"></div>
-            <details id="mgrTodayDoneWrap" class="mt-2 hidden">
-              <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
-                <span id="mgrTodayDoneLabel"></span><span class="text-gray-400">▼</span>
-              </summary>
-              <div id="mgrTodayDone" class="space-y-2 mt-2"></div>
-            </details>
-          </section>
+      <!-- 臨時工作 -->
+      <section class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-bolt" style="font-size:14px;color:#EF4444;vertical-align:-1px;" aria-hidden="true"></i>臨時工作</h3>
+          <div class="flex items-center gap-2">
+            <span id="mgrAdhocCount" class="text-xs text-gray-500"></span>
+            <button onclick="openAddAdhocModal()" class="btn-sm-danger">＋ 新增</button>
+          </div>
         </div>
-        <div>
-          <section>
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-repeat" style="font-size:14px;color:#F59E0B;vertical-align:-1px;" aria-hidden="true"></i>彈性工作 / Tugas Fleksibel</h3>
-              <span id="mgrFlexCount" class="text-xs text-gray-500"></span>
-            </div>
-            <div class="flex items-center gap-1.5 mt-2 mb-1"><i class="ti ti-calendar-week" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本週 / Minggu Ini</span></div>
-            <div id="mgrFlexWeekIncomplete" class="space-y-2"></div>
-            <div class="flex items-center gap-1.5 mt-3 mb-1"><i class="ti ti-calendar-month" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本月 / Bulan Ini</span></div>
-            <div id="mgrFlexMonthIncomplete" class="space-y-2"></div>
-            <div class="flex items-center gap-1.5 mt-3 mb-1"><i class="ti ti-calendar" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i><span class="text-sm font-semibold" style="color:var(--ic-caramel-dk);">本季 / Triwulan</span></div>
-            <div id="mgrFlexQuarterIncomplete" class="space-y-2"></div>
-            <details id="mgrFlexDoneWrap" class="mt-2 hidden">
-              <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
-                <span id="mgrFlexDoneLabel"></span><span class="text-gray-400">▼</span>
-              </summary>
-              <div id="mgrFlexDone" class="space-y-2 mt-2"></div>
-            </details>
-          </section>
-        </div>
-      </div>
+        <div id="mgrAdhocIncomplete" class="space-y-2"></div>
+        <details id="mgrAdhocDoneWrap" class="mt-2 hidden">
+          <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
+            <span id="mgrAdhocDoneLabel"></span><span class="text-gray-400">▼</span>
+          </summary>
+          <div id="mgrAdhocDone" class="space-y-2 mt-2"></div>
+        </details>
+      </section>
 
-      <!-- 今日時間分配 Kanban -->
-      <div class="rounded-2xl border overflow-hidden mt-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+      <!-- 本日工作（時間分段） -->
+      <section>
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-bold text-sm flex items-center gap-2"><i class="ti ti-calendar-day" style="font-size:14px;color:#2563EB;vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
+          <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
+        </div>
+        <div id="mgrSlotView" class="space-y-3"></div>
+        <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
+          <summary class="text-xs text-gray-500 py-1.5 px-2 bg-gray-100 rounded-lg flex items-center justify-between">
+            <span id="mgrTodayAllDoneLabel"></span><span class="text-gray-400">▼</span>
+          </summary>
+          <div id="mgrTodayAllDone" class="space-y-2 mt-2"></div>
+        </details>
+      </section>
+      <!-- 保留舊 ID（避免 sortable 報錯） -->
+      <div class="hidden" id="mgrTodayIncomplete" aria-hidden="true"></div>
+      <div class="hidden" id="mgrTodayDone" aria-hidden="true"></div>
+      <div class="hidden" id="mgrFlexWeekIncomplete" aria-hidden="true"></div>
+      <div class="hidden" id="mgrFlexMonthIncomplete" aria-hidden="true"></div>
+      <div class="hidden" id="mgrFlexQuarterIncomplete" aria-hidden="true"></div>
+      <div class="hidden" id="mgrFlexDone" aria-hidden="true"></div>
+
+
+    </div>
+
+    <!-- 月曆視圖（功能已下架） -->
+    <div id="tab-calendar" class="tab-content hidden" style="display:none !important"></div>
+
+    <!-- 排程總覽 -->
+    <!-- 舊「排程」分頁已移至工作排程頁面的「<i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽」按鈕（彈出 modal） -->
+    <div id="tab-schedule" class="tab-content hidden"></div>
+
+    <!-- 工作排程（模板） -->
+    <div id="tab-templates" class="tab-content hidden">
+      <!-- 工作時段分配 Kanban -->
+      <div class="rounded-2xl border overflow-hidden mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
         <div class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ic-vanilla);background:var(--ic-lemon);">
           <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);">
-            <i class="ti ti-clock-hour-4" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日時間分配
+            <i class="ti ti-clock-hour-4" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 工作時段分配
           </h3>
-          <span class="text-xs" style="color:var(--ic-choc-mid);">左右滑動 · 拖曳任務到時段</span>
+          <span class="text-xs" style="color:var(--ic-choc-mid);">左右滑動 · 拖曳分配永久套用</span>
         </div>
         <div class="ts-kanban">
           <div class="ts-col" data-slot="morning">
@@ -1010,17 +996,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- 月曆視圖（功能已下架） -->
-    <div id="tab-calendar" class="tab-content hidden" style="display:none !important"></div>
-
-    <!-- 排程總覽 -->
-    <!-- 舊「排程」分頁已移至工作排程頁面的「<i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽」按鈕（彈出 modal） -->
-    <div id="tab-schedule" class="tab-content hidden"></div>
-
-    <!-- 工作排程（模板） -->
-    <div id="tab-templates" class="tab-content hidden">
       <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
         <h3 class="font-bold"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程 / Kartu Tugas</h3>
         <div class="flex gap-1.5 flex-wrap justify-end">
@@ -1053,8 +1028,8 @@
         <button class="sc-filter px-3 py-1 rounded-full bg-gray-900 text-white whitespace-nowrap" data-cat="all">全部</button>
       </div>
 
-      <!-- 動線 Kanban：回報 → 已購買 → 補貨完成（暫不補充為支線） -->
-      <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成　｜　<i class="ti ti-player-pause" style="font-size:13px;vertical-align:-2px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
+      <!-- 動線 Kanban：回報 → 已購買 → 補貨完成 -->
+      <div class="text-xs text-gray-500 mb-2">流程：<i class="ti ti-alert-circle" style="font-size:13px;vertical-align:-2px;color:#8A4A46;" aria-hidden="true"></i> 已回報 → <i class="ti ti-shopping-cart" style="font-size:13px;vertical-align:-2px;color:#3A6A7A;" aria-hidden="true"></i> 已購買 → <i class="ti ti-circle-check" style="font-size:13px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 補貨完成</div>
       <div class="flex items-center justify-between mb-2">
         <div class="md:hidden text-xs flex items-center gap-1" style="color:var(--ic-choc-mid);">
           <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
@@ -1068,7 +1043,7 @@
             <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:12px;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
             <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:12px;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
             <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:12px;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
-            <div class="flex items-center gap-1.5"><i class="ti ti-player-pause" style="font-size:12px;color:#6B7280;" aria-hidden="true"></i> 暫不補充 為暫存區</div>
+
           </div>
         </div>
       </div>
@@ -1094,14 +1069,10 @@
           <div id="suppliesBought" class="space-y-2"></div>
         </div>
 
-        <!-- Col 3: 暫不補充 -->
-        <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-bold flex items-center gap-1.5 text-gray-700"><i class="ti ti-player-pause" style="font-size:15px;" aria-hidden="true"></i> 暫不補充</h4>
-            <span id="cntPaused" class="text-xs bg-gray-300 text-gray-700 px-2 rounded-full font-bold"></span>
-          </div>
-          <div class="text-xs text-gray-500 mb-2">暫時擱置</div>
-          <div id="suppliesPaused" class="space-y-2"></div>
+        <!-- Col 3 暫不補充 已移除 -->
+        <div class="hidden">
+          <span id="cntPaused"></span>
+          <div id="suppliesPaused" class="hidden"></div>
         </div>
 
         <!-- Col 4: 庫存正常 -->
@@ -2069,6 +2040,14 @@
         <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-base" data-fs="18" onclick="setDeviceFontSize(18)">大</button>
         <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-lg" data-fs="20" onclick="setDeviceFontSize(20)">特大</button>
       </div>
+    </div>
+
+    <div class="mb-4">
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <input type="checkbox" id="prefShowIdText" onchange="setDevicePrefShowIdText(this.checked)" class="w-4 h-4 rounded">
+        <span class="text-sm font-semibold">顯示印尼文（雙語模式）</span>
+      </label>
+      <p class="text-xs text-gray-400 mt-1">關閉後畫面僅顯示中文，此裝置獨立設定，不會同步。</p>
     </div>
 
     <div class="mb-3" id="layoutColsSection">
@@ -4027,34 +4006,30 @@ function renderMenuGrid(){
   if (!grid) return;
   const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
   if (!meals.length){ grid.innerHTML='<p class="text-xs text-gray-400 p-3">請先在「餐次設定」啟用至少一餐</p>'; return; }
-  const cols = 1 + 7; // row-label + 7 days
-  grid.style.gridTemplateColumns = '52px repeat(7,1fr)';
-  grid.style.minWidth = '560px';
-
+  // 直式：行=星期，欄=餐次
+  grid.style.gridTemplateColumns = `52px repeat(${meals.length},1fr)`;
+  grid.style.minWidth = `${52 + meals.length * 140}px`;
   const todayDow = today().getDay();
   let html = '';
-  // header row
+  // 標題列：空格 + 各餐次名稱
   html += '<div></div>';
-  for (let d=1;d<=7;d++){
-    const dow = d%7; // 1=一,...,6=六,0=日
-    const isToday = dow===todayDow;
-    html += `<div class="text-center text-xs font-semibold py-1 rounded-lg ${isToday?'':''}"`
-      + ` style="${isToday?'color:var(--ic-caramel);':'color:var(--ic-choc-mid);'}">週${DOW_ZH[dow]}</div>`;
-  }
-  // meal rows
   meals.forEach(meal=>{
     html += `<div class="flex flex-col items-center justify-center rounded-lg py-1 px-0.5" style="background:var(--ic-lemon);color:var(--ic-chocolate);">
       <span class="text-xs font-semibold">${meal.name}</span>
       ${meal.mealTime?`<span class="text-[9px] opacity-60">${meal.mealTime}</span>`:''}
     </div>`;
-    for (let d=1;d<=7;d++){
-      const dow = d%7;
+  });
+  // 各星期的行
+  for (let d=1;d<=7;d++){
+    const dow = d%7;
+    const isToday = dow===todayDow;
+    html += `<div class="flex items-center justify-center rounded-lg py-1" style="${isToday?'color:var(--ic-caramel);font-weight:700;':'color:var(--ic-choc-mid);'}font-size:12px;">週${DOW_ZH[dow]}</div>`;
+    meals.forEach(meal=>{
       const key = getMenuKey(dow, meal.id);
       const cell = state.weekMenu[key];
-      const isToday = dow===todayDow;
       html += renderMenuCell(key, cell, isToday);
-    }
-  });
+    });
+  }
   grid.innerHTML = html;
 }
 
@@ -4813,6 +4788,9 @@ function applyLangClass(el, isIndonesian){
   else el.classList.remove('id-text');
 }
 /* 套用所有 .bi-pri / .bi-sec 元素的雙語切換 */
+// 啟動時套用印尼文顯示設定
+(function(){ applyDevicePrefIdText(); })();
+
 function applyBilingualUI(){
   const lang=getCurrentLang();
   const other=lang==='zh'?'id':'zh';
@@ -5345,44 +5323,65 @@ function completeFocusTask(){
   saveGuarded(); setTimeout(()=>{ refreshAll(); }, 300);
 }
 
+/* ========== 本日工作時間分段視圖 ========== */
+function renderMgrSlotView(){
+  const d=today();
+  const todays=todaysTemplates();
+  const fxAll=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'))
+    .concat(flexTemplatesByPeriod('mWeek-monthly')).concat(flexTemplatesByPeriod('quarterly'));
+  function getSlot(t){ return t.timeSlot||'flexible'; }
+  const tdInc=todays.filter(t=>!isDone(t,d)), tdDone=todays.filter(t=>isDone(t,d));
+  const fxInc=fxAll.filter(t=>!isDone(t,d)), fxDone=fxAll.filter(t=>isDone(t,d));
+  const totalAll=todays.length+fxAll.length, totalDone=tdDone.length+fxDone.length;
+  document.getElementById('mgrTodayCount').textContent=`${totalDone}/${totalAll} 完成`;
+  const bySlot={morning:[],afternoon:[],evening:[],flexible:[]};
+  tdInc.forEach(t=>{const s=getSlot(t);(bySlot[s]||bySlot.flexible).push(t);});
+  fxInc.forEach(t=>bySlot.flexible.push(t));
+  const doneCnt={
+    morning:tdDone.filter(t=>getSlot(t)==='morning').length,
+    afternoon:tdDone.filter(t=>getSlot(t)==='afternoon').length,
+    evening:tdDone.filter(t=>getSlot(t)==='evening').length,
+    flexible:tdDone.filter(t=>getSlot(t)==='flexible').length+fxDone.length,
+  };
+  const SLOT_CFG=[
+    {slot:'morning',icon:'ti-sunrise',label:'早上',color:'var(--ic-caramel)'},
+    {slot:'afternoon',icon:'ti-sun',label:'下午',color:'var(--ic-caramel)'},
+    {slot:'evening',icon:'ti-moon',label:'晚上',color:'var(--ic-caramel)'},
+    {slot:'flexible',icon:'ti-arrows-shuffle',label:'彈性',color:'var(--ic-choc-mid)'},
+  ];
+  const container=document.getElementById('mgrSlotView');
+  if (!container) return;
+  let html='';
+  SLOT_CFG.forEach(({slot,icon,label,color})=>{
+    const items=bySlot[slot], done=doneCnt[slot], total=items.length+done;
+    if (!total) return;
+    html+=`<div class="mb-2">
+      <div class="flex items-center gap-1.5 mb-1.5">
+        <i class="ti ${icon}" style="font-size:12px;color:${color};"></i>
+        <span class="text-xs font-bold" style="color:var(--ic-chocolate);">${label}</span>
+        <span class="text-xs ml-auto" style="color:var(--ic-choc-mid);">${done}/${total} 完成</span>
+      </div>
+      <div class="space-y-2">${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div class="text-xs text-gray-400 italic py-1">全部完成</div>'}</div>
+    </div>`;
+  });
+  if (!html) html='<div class="text-sm text-gray-400 italic py-2 text-center">今日工作全部完成 🎉</div>';
+  container.innerHTML=html;
+  const allDone=[...tdDone,...fxDone];
+  renderSectionDone('mgrTodayAllDoneWrap','mgrTodayAllDone','mgrTodayAllDoneLabel',allDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
+}
+
 /* ========== 管理者時間分配 Kanban ========== */
 function renderMgrTimeSlotKanban(){
-  const d = today();
   const lang = getCurrentLang();
-  const ad = adhocForToday();
-  const todays = todaysTemplates();
-  const fxAll = flexTemplatesByPeriod('mWeek-weekly')
-    .concat(flexTemplatesByPeriod('mWeek-biweekly'))
-    .concat(flexTemplatesByPeriod('mWeek-monthly'))
-    .concat(flexTemplatesByPeriod('quarterly'));
-
-  // 組合全部任務（adhoc 和 template）
-  const allItems = [
-    ...ad.map(a => ({
-      id: a.id, type: 'adhoc',
-      slot: a.timeSlot || 'flexible',
-      deadline: a.deadline || null,
-      nameZh: a.textZh || a.textId || '',
-      nameId: a.textId || a.textZh || '',
-      done: !!a.completed,
-    })),
-    ...todays.map(t => ({
-      id: t.id, type: 'tmpl',
-      slot: t.timeSlot || 'flexible',
-      deadline: t.deadline || null,
-      nameZh: t.nameZh || t.nameId || '',
-      nameId: t.nameId || t.nameZh || '',
-      done: isDone(t, d),
-    })),
-    ...fxAll.map(t => ({
-      id: t.id, type: 'tmpl',
-      slot: t.timeSlot || 'flexible',
-      deadline: t.deadline || null,
-      nameZh: t.nameZh || t.nameId || '',
-      nameId: t.nameId || t.nameZh || '',
-      done: isDone(t, d),
-    })),
-  ];
+  // 使用所有已啟用模板（永久設定，非每日篩選）
+  const allTemplates = (state.templates || []).filter(t => t.active !== false);
+  const allItems = allTemplates.map(t => ({
+    id: t.id, type: 'tmpl',
+    slot: t.timeSlot || 'flexible',
+    nameZh: t.nameZh || t.nameId || '',
+    nameId: t.nameId || t.nameZh || '',
+    done: false,
+  }));
 
   const slots = ['morning','afternoon','evening','flexible'];
   const slotElIds = {morning:'mgrSlotMorning', afternoon:'mgrSlotAfternoon', evening:'mgrSlotEvening', flexible:'mgrSlotFlexible'};
@@ -5500,20 +5499,20 @@ function renderManagerView(){
     if (!block||!list) return;
     const items=[];
     // 待審請假
-    const pendingLeaves=(state.leaves||[]).filter(l=>l.status==='pending');
-    pendingLeaves.forEach(l=>{
-      const helperName=state.users?.find(u=>u.id===l.userId)?.name||'幫傭';
+    const pendingLeaves=(state.leaveRequests||[]).filter(r=>r.status==='pending');
+    const LV_PERIOD_SHORT={full:'全天',am:'上午',pm:'下午'};
+    pendingLeaves.forEach(r=>{
       items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
           <i class="ti ti-calendar-off shrink-0" style="font-size:15px;color:#A85550;" aria-hidden="true"></i>
           <div class="min-w-0">
-            <div class="text-xs font-semibold" style="color:#A85550;">${helperName} 申請請假</div>
-            <div class="text-[11px] text-gray-600">${l.dateStr}（${l.type==='half'?'半天':'全天'}）${l.reason?'・'+l.reason:''}</div>
+            <div class="text-xs font-semibold" style="color:#A85550;">${r.requestedBy||'幫傭'} 申請請假</div>
+            <div class="text-[11px] text-gray-600">${r.date}（${LV_PERIOD_SHORT[r.period]||'全天'}）${r.reason?'・'+r.reason:''}</div>
           </div>
         </div>
         <div class="flex gap-1 shrink-0">
-          <button onclick="approveLeave('${l.id}',true)" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#6A7840;color:#fff;">核准</button>
-          <button onclick="approveLeave('${l.id}',false)" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#fff;color:#A85550;border:1px solid #E5ADA8;">拒絕</button>
+          <button onclick="decideLeave('${r.id}','approved')" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#6A7840;color:#fff;">核准</button>
+          <button onclick="decideLeave('${r.id}','rejected')" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#fff;color:#A85550;border:1px solid #E5ADA8;">拒絕</button>
         </div>
       </div>`);
     });
@@ -5579,27 +5578,8 @@ function renderManagerView(){
   document.getElementById('mgrAdhocIncomplete').innerHTML=adSplit.inc.length?adSplit.inc.map(a=>renderAdhocCard(a)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
   renderSectionDone('mgrAdhocDoneWrap','mgrAdhocDone','mgrAdhocDoneLabel', adSplit.don.map(a=>renderAdhocCard(a)));
 
-  // 本日工作 - 分未完成/已完成
-  const todays=todaysTemplates();
-  const tdSplit=splitDone(todays, t=>isDone(t,d));
-  document.getElementById('mgrTodayCount').textContent=`${tdSplit.don.length}/${todays.length} 完成`;
-  document.getElementById('mgrTodayIncomplete').innerHTML=tdSplit.inc.length?tdSplit.inc.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
-  renderSectionDone('mgrTodayDoneWrap','mgrTodayDone','mgrTodayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
-
-  // 彈性 - 各週期內各自分未完成/已完成；總「已完成」收合一起
-  const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
-  const fxMonth=flexTemplatesByPeriod('mWeek-monthly');
-  const fxQuarter=flexTemplatesByPeriod('quarterly');
-  const wS=splitDone(fxWeek, t=>isDone(t,d));
-  const mS=splitDone(fxMonth, t=>isDone(t,d));
-  const qS=splitDone(fxQuarter, t=>isDone(t,d));
-  const allFxDone=[...wS.don,...mS.don,...qS.don];
-  const totalFx=fxWeek.length+fxMonth.length+fxQuarter.length;
-  document.getElementById('mgrFlexCount').textContent=`${allFxDone.length}/${totalFx} 完成`;
-  document.getElementById('mgrFlexWeekIncomplete').innerHTML=wS.inc.length?wS.inc.map(t=>renderTaskCard(t)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
-  document.getElementById('mgrFlexMonthIncomplete').innerHTML=mS.inc.length?mS.inc.map(t=>renderTaskCard(t)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
-  document.getElementById('mgrFlexQuarterIncomplete').innerHTML=qS.inc.length?qS.inc.map(t=>renderTaskCard(t)).join(''):'<div class="text-xs text-gray-400 italic">無</div>';
-  renderSectionDone('mgrFlexDoneWrap','mgrFlexDone','mgrFlexDoneLabel', allFxDone.map(t=>renderTaskCard(t)));
+  // 本日工作 + 彈性（時間分段呈現）
+  renderMgrSlotView();
 
   renderMgrTimeSlotKanban();
   renderMgrPunchStatus();
@@ -6055,20 +6035,15 @@ function renderTodayTimeline(){
     return;
   }
   el.innerHTML = events.map(e=>{
-    const t=new Date(e.at).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    const icon = e.kind==='punch' ? '🕐' : e.kind==='adhoc' ? '🔴' : '🔵';
-    const bgCls = e.kind==='punch' ? 'bg-blue-50 px-2 rounded' : '';
-    return `
-      <div class="flex items-start gap-3 py-1.5 border-b border-gray-100 last:border-0 ${bgCls}">
-        <div class="text-xs font-mono text-gray-500 shrink-0 w-12">${t}</div>
-        <div class="shrink-0 text-xs">${icon}</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-sm font-semibold">${e.nameZh}</div>
-          <div class="id-text text-xs text-gray-500">${e.nameId}</div>
-        </div>
-        <div class="text-xs text-blue-700 font-semibold shrink-0">${e.by}</div>
-      </div>
-    `;
+    const dt=new Date(e.at);
+    const h=dt.getHours().toString().padStart(2,'0'), m=dt.getMinutes().toString().padStart(2,'0');
+    const t=`${h}:${m}`;
+    const punchBg = e.kind==='punch' ? 'background:rgba(239,232,216,0.5);border-radius:6px;' : '';
+    return `<div class="flex items-center gap-2 py-1 border-b border-gray-100 last:border-0" style="${punchBg}">
+        <span class="text-[11px] font-mono shrink-0 w-10" style="color:var(--ic-choc-mid);">${t}</span>
+        <span class="text-[11px] flex-1 truncate${e.kind==='punch'?' font-semibold':''}" style="color:var(--ic-chocolate);">${e.nameZh}</span>
+        <span class="text-[10px] shrink-0" style="color:var(--ic-choc-mid);">${e.by}</span>
+      </div>`;
   }).join('');
 }
 
@@ -7913,6 +7888,19 @@ function runScheduledScenarioActions(){
 function renderSchedule(){ /* 舊版排程渲染已停用，由 #scheduleOverviewModal 取代 */ }
 
 /* === 工作排程總覽矩陣 === */
+function setDevicePrefShowIdText(v){
+  const prefs = JSON.parse(localStorage.getItem('devicePrefs')||'{}');
+  prefs.showIdText = v;
+  localStorage.setItem('devicePrefs', JSON.stringify(prefs));
+  applyDevicePrefIdText();
+}
+function applyDevicePrefIdText(){
+  const prefs = JSON.parse(localStorage.getItem('devicePrefs')||'{}');
+  const show = prefs.showIdText === true; // 預設 false（僅中文）
+  document.body.classList.toggle('hide-id-text', !show);
+  const cb = document.getElementById('prefShowIdText');
+  if (cb) cb.checked = show;
+}
 function openDevicePrefsModal(){
   highlightFontSizeButton();
   highlightLayoutColsButton();
@@ -8603,7 +8591,7 @@ function renderManagerSupplyCard(s, group){
           <button onclick="openEditSupplyModal('${s.id}')" class="text-xs text-blue-600" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
         </div>
       </div>
-      ${s.reportStatus?`<div class="text-xs text-red-700 mt-1">${REPORT_LABEL[s.reportStatus]}</div>`:''}
+      ${s.notes?`<div class="text-[10px] text-gray-500 mt-1 italic">${s.notes}</div>`:''}${s.reportStatus?`<div class="text-xs text-red-700 mt-1">${REPORT_LABEL[s.reportStatus]}</div>`:''}
       ${repAt?`<div class="text-xs text-gray-500">📩 回報：${s.reportedBy} · ${repAt}</div>`:''}
       ${s.handleStatus?`<div class="text-xs text-blue-700">${HANDLE_LABEL[s.handleStatus]}：${s.handledBy} · ${hdAt}</div>`:''}
       ${actions}
@@ -8636,6 +8624,13 @@ function handleSupply(sid, status){
       const isAtika=state.currentUser?.role==='helper';
       if (isAtika) renderSuppliesAtika(); else renderManagerView();
     }, 1500);
+  } else if (status==='paused') {
+    // 暫不補充：清除回報狀態，回到正常庫存，備註「用完不補充」
+    s.reportStatus=null; s.reportedAt=null; s.reportedBy=null;
+    s.handleStatus=null; s.handledAt=null; s.handledBy=null;
+    const note='用完不補充（'+new Date().toLocaleDateString('zh-TW',{month:'numeric',day:'numeric'})+'）';
+    s.notes = s.notes ? s.notes+'；'+note : note;
+    logSupplyHistory(s.id, 'paused', note);
   } else {
     s.handleStatus=status;
     s.handledAt=new Date().toISOString();
