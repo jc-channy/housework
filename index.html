@@ -259,6 +259,35 @@
   #atikaAllDoneState .celeb-icon {
     animation: celebFloat 2.4s ease-in-out infinite;
   }
+  /* ── Atika A+B 混搭 設計 ── */
+  /* 深色 hero header */
+  #atikaView > header {
+    background: var(--ic-choc-dk) !important;
+    border-bottom-color: transparent !important;
+  }
+  #atikaView > header #atikaDateZh,
+  #atikaView > header #atikaClock { color: var(--ic-lemon) !important; }
+  #atikaView > header #atikaDateId { color: var(--ic-caramel) !important; opacity:0.85; }
+  #atikaView > header #atikaGreetingHdr { color: var(--ic-caramel) !important; }
+  #atikaView > header button,
+  #atikaView > header .hdr-menu-btn { color: var(--ic-vanilla) !important; }
+  #atikaView > header .hdr-dropdown button { color: var(--ic-chocolate) !important; }
+  /* 時間分區 */
+  .atika-time-hdr { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+  .atika-time-label { font-size:12px; font-weight:700; color:var(--ic-choc-mid); }
+  .atika-time-line { flex:1; height:1px; background:var(--ic-vanilla); }
+  .atika-time-badge { font-size:10px; background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
+  .atika-slot-section { padding:12px 16px; }
+  .atika-slot-section + .atika-slot-section { border-top:1px solid var(--ic-vanilla); }
+  /* 彈性任務虛線左邊框 */
+  .atika-flex-task-card { border-left:2px dashed var(--ic-vanilla) !important; border-radius:0 10px 10px 0 !important; }
+  /* 底部導航 */
+  #atikaBottomNav { position:fixed; bottom:0; left:0; right:0; z-index:40; background:var(--ic-surface); border-top:1px solid var(--ic-vanilla); display:none; flex-direction:row; padding-bottom:env(safe-area-inset-bottom,0px); }
+  #atikaView.active-view #atikaBottomNav { display:flex; }
+  .atika-nav-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-size:9px; color:var(--ic-choc-mid); cursor:pointer; padding:7px 0 5px; }
+  .atika-nav-item.active { color:var(--ic-caramel-dk); font-weight:700; }
+  #atikaView.active-view main { padding-bottom: calc(72px + env(safe-area-inset-bottom,0px)) !important; }
+
   .task-sec-hdr {
     border-left: 4px solid var(--ic-strawberry);
     background: var(--ic-straw-lt);
@@ -581,6 +610,28 @@
 
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
+    <!-- ═══ Hero 進度環 ═══ -->
+    <div id="atikaHeroCard" class="rounded-2xl p-4" style="background:var(--ic-choc-dk);">
+      <div class="flex items-center gap-4">
+        <div style="position:relative;width:68px;height:68px;flex-shrink:0;">
+          <svg width="68" height="68" viewBox="0 0 68 68" aria-hidden="true">
+            <circle cx="34" cy="34" r="27" fill="none" stroke="#725C3F" stroke-width="5.5"/>
+            <circle id="atikaRingFill" cx="34" cy="34" r="27" fill="none" stroke="#D0A77B" stroke-width="5.5"
+              stroke-dasharray="169.6" stroke-dashoffset="169.6" stroke-linecap="round"
+              transform="rotate(-90 34 34)" style="transition:stroke-dashoffset 0.75s ease;"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <span id="atikaRingPct" style="font-size:13px;font-weight:800;color:var(--ic-caramel);"></span>
+          </div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div id="atikaHeroGreet" style="font-size:11px;color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgLabel" style="font-size:15px;font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgSub" style="font-size:11px;color:var(--ic-vanilla);opacity:0.7;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ 本日提醒（獨立區塊，打卡上方）═══ -->
     <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
       <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
@@ -588,6 +639,20 @@
         <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
         <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
         <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+      </div>
+    </div>
+
+    <!-- ═══ 聚焦卡：現在要做 ═══ -->
+    <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
+      <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+        <i class="ti ti-player-play" style="font-size:10px;" aria-hidden="true"></i> 現在要做 / Sedang dikerjakan
+      </div>
+      <div id="atikaFocusTask" style="font-size:14px;font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span id="atikaFocusDeadline" style="font-size:11px;background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
+        <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
+          <i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> 完成
+        </button>
       </div>
     </div>
 
@@ -632,25 +697,17 @@
       <div id="atikaTodayMenuBody" class="space-y-2 px-4 pb-4"></div>
     </section>
 
-    <!-- ═══ 卡片 2：今日任務 ═══ -->
-    <section class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-      <!-- 進度 + 新增按鈕 -->
-      <div class="flex items-center justify-end mb-2">
-        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增臨時工作</button>
-      </div>
-      <!-- 今日總進度條 -->
-      <div class="mb-4 rounded-xl p-3" style="background:var(--ic-lemon);">
-        <div class="flex items-center justify-between mb-2">
-          <span id="totalProgressLabel" class="text-sm font-bold" style="color:var(--ic-caramel-dk);"></span>
-          <span id="totalProgressPct" class="text-lg font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
-        </div>
-        <div class="rounded-full overflow-hidden" style="height:14px;background:var(--ic-vanilla);">
-          <div id="totalProgressBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 6px rgba(160,100,40,0.4);"></div>
-        </div>
+    <!-- ═══ 卡片 2：今日任務（時間分區）═══ -->
+    <section class="rounded-2xl border overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+
+      <!-- 標題列 + 新增按鈕 -->
+      <div class="flex items-center justify-between px-4 pt-3 pb-2">
+        <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日任務 / Tugas Hari Ini</span>
+        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增</button>
       </div>
 
-      <!-- 全部完成慶祝 empty state（JS 控制顯示） -->
-      <div id="atikaAllDoneState" class="hidden text-center py-6 px-4">
+      <!-- 全部完成慶祝 empty state -->
+      <div id="atikaAllDoneState" class="hidden text-center py-8 px-4">
         <div class="celeb-icon inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style="background:var(--ic-lemon);">
           <i class="ti ti-trophy" style="font-size:32px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
         </div>
@@ -659,54 +716,89 @@
         <div class="text-xs px-4 py-2 rounded-full inline-block" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">好好休息，辛苦了 ☕</div>
       </div>
 
-      <!-- 分類 A+B：臨時工作 -->
-      <div class="task-sec-hdr" id="adhocSection">
-        <div class="tsh-pri">Tugas Tambahan</div>
-        <div class="tsh-sec">臨時工作</div>
-      </div>
-      <div id="adhocIncomplete" class="space-y-2 sortable-list mb-1"></div>
-      <details id="adhocDoneWrap" class="mb-1 hidden">
-        <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer" style="color:var(--ic-choc-mid);background:var(--ic-lemon);">
-          <span id="adhocDoneLabel"></span>
-          <span style="color:var(--ic-choc-mid);">▼</span>
-        </summary>
-        <div id="adhocDone" class="space-y-2 mt-2"></div>
-      </details>
-      <div id="adhocEmpty" class="text-xs italic mb-3" style="color:var(--ic-choc-mid);">Tekan tombol merah untuk menambah / 點紅色按鈕新增</div>
-
-      <!-- 分隔線 -->
-      <div class="border-t my-3" style="border-color:var(--ic-vanilla);"></div>
-
-      <!-- 分類 A+B：常規＋彈性 -->
-      <div class="task-sec-hdr regular mb-3">
-        <div class="tsh-pri">Tugas Rutin &amp; Fleksibel</div>
-        <div class="tsh-sec">常規＋彈性工作</div>
+      <!-- 早上 -->
+      <div id="atikaMorningSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <div class="atika-time-hdr">
+          <i class="ti ti-sunrise" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <span class="atika-time-label">早上 / Pagi</span>
+          <div class="atika-time-line"></div>
+          <span id="atikaMorningBadge" class="atika-time-badge"></span>
+        </div>
+        <div id="atikaMorningTasks" class="space-y-2 sortable-list"></div>
       </div>
 
-      <!-- 本日工作 -->
-      <div id="todayIncomplete" class="space-y-2 sortable-list"></div>
-      <details id="todayDoneWrap" class="mt-1 mb-3 hidden">
-        <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer" style="color:var(--ic-choc-mid);background:var(--ic-lemon);">
-          <span id="todayDoneLabel"></span>
-          <span style="color:var(--ic-choc-mid);">▼</span>
-        </summary>
-        <div id="todayDone" class="space-y-2 mt-2"></div>
-      </details>
+      <!-- 下午 -->
+      <div id="atikaAfternoonSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <div class="atika-time-hdr">
+          <i class="ti ti-sun" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <span class="atika-time-label">下午 / Siang</span>
+          <div class="atika-time-line"></div>
+          <span id="atikaAfternoonBadge" class="atika-time-badge"></span>
+        </div>
+        <div id="atikaAfternoonTasks" class="space-y-2 sortable-list"></div>
+      </div>
 
-      <!-- 彈性工作 -->
-      <div id="flexWeekIncomplete" class="space-y-2 sortable-list"></div>
-      <div id="flexMonthIncomplete" class="space-y-2 sortable-list mt-1"></div>
-      <div id="flexQuarterIncomplete" class="space-y-2 sortable-list mt-1"></div>
-      <details id="flexDoneWrap" class="mt-1 hidden">
-        <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer" style="color:var(--ic-choc-mid);background:var(--ic-lemon);">
-          <span id="flexDoneLabel"></span>
-          <span style="color:var(--ic-choc-mid);">▼</span>
-        </summary>
-        <div id="flexDone" class="space-y-2 mt-2"></div>
-      </details>
+      <!-- 晚上 -->
+      <div id="atikaEveningSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <div class="atika-time-hdr">
+          <i class="ti ti-moon" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <span class="atika-time-label">晚上 / Malam</span>
+          <div class="atika-time-line"></div>
+          <span id="atikaEveningBadge" class="atika-time-badge"></span>
+        </div>
+        <div id="atikaEveningTasks" class="space-y-2 sortable-list"></div>
+      </div>
+
+      <!-- 彈性 -->
+      <div id="atikaFlexSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <div class="atika-time-hdr">
+          <i class="ti ti-arrows-shuffle" style="font-size:13px;color:var(--ic-choc-mid);" aria-hidden="true"></i>
+          <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性任務 / Fleksibel</span>
+          <div class="atika-time-line"></div>
+          <span class="atika-time-badge" style="color:var(--ic-choc-mid);background:var(--ic-vanilla);">空檔安排</span>
+        </div>
+        <div id="atikaFlexTasks" class="space-y-2 sortable-list"></div>
+      </div>
+
+      <!-- 已完成（折疊） -->
+      <div id="atikaDoneWrapOuter" class="hidden atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
+        <details id="atikaDoneWrap">
+          <summary class="text-xs py-1 flex items-center justify-between cursor-pointer" style="color:var(--ic-choc-mid);">
+            <span id="atikaDoneLabel"></span>
+            <i class="ti ti-chevron-down" style="font-size:12px;" aria-hidden="true"></i>
+          </summary>
+          <div id="atikaDoneList" class="space-y-2 mt-2"></div>
+        </details>
+      </div>
+
     </section>
 
   </main>
+
+  <!-- ═══ 底部導航欄 ═══ -->
+  <div id="atikaBottomNav">
+    <div class="atika-nav-item active">
+      <i class="ti ti-home" style="font-size:20px;" aria-hidden="true"></i>
+      <span>首頁</span>
+    </div>
+    <div class="atika-nav-item" onclick="document.getElementById('atikaPunchSection').scrollIntoView({behavior:'smooth'})">
+      <i class="ti ti-circle-check" style="font-size:20px;" aria-hidden="true"></i>
+      <span>打卡</span>
+    </div>
+    <div class="atika-nav-item" onclick="openAddAdhocModal()">
+      <i class="ti ti-plus" style="font-size:20px;" aria-hidden="true"></i>
+      <span>新增</span>
+    </div>
+    <div class="atika-nav-item" onclick="openSuppliesModal()">
+      <i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i>
+      <span>備品</span>
+    </div>
+    <div class="atika-nav-item" onclick="openMyPayroll()">
+      <i class="ti ti-calendar-off" style="font-size:20px;" aria-hidden="true"></i>
+      <span>請假</span>
+    </div>
+  </div>
+
 </section>
 
 <!-- ===== 管理者視圖 ===== -->
@@ -1263,6 +1355,21 @@
         <input id="adhocId" type="text" data-lang="id" data-pair="adhocZh" class="id-text w-full border border-gray-300 rounded-lg p-2 text-sm bi-input" placeholder="Misalnya: Mengelap jendela">
       </div>
     </div>
+    <div class="flex gap-2">
+      <div class="flex-1">
+        <label class="block text-sm font-semibold mb-1">時間分段 / Waktu</label>
+        <select id="adhocTimeSlot" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+          <option value="flexible">彈性（空檔安排）</option>
+          <option value="morning">早上 Pagi</option>
+          <option value="afternoon">下午 Siang</option>
+          <option value="evening">晚上 Malam</option>
+        </select>
+      </div>
+      <div class="w-28">
+        <label class="block text-sm font-semibold mb-1">截止時間</label>
+        <input id="adhocDeadline" type="time" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+      </div>
+    </div>
     <p class="text-xs text-gray-500 mt-2 mb-3">💡 輸入完按 Tab 或點下一格，會自動翻譯</p>
     <button onclick="saveAdhoc()" class="w-full text-white py-3 rounded-xl font-semibold" style="background:#C4706A;">加入今天 / Tambah</button>
   </div>
@@ -1512,6 +1619,21 @@
           <button type="button" onclick="setMonthFlagsPreset([12])" class="text-blue-600 underline">每年一次 (12月)</button>
           <button type="button" onclick="setMonthFlagsPreset([1,2,3,4,5,6,7,8,9,10,11,12])" class="text-blue-600 underline">每月(全選)</button>
         </div>
+      </div>
+      <div>
+        <label class="block font-semibold mb-1">時間分段 / Waktu Pengerjaan</label>
+        <div class="flex gap-2">
+          <select id="tmplTimeSlot" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm">
+            <option value="flexible">彈性（空檔安排）</option>
+            <option value="morning">早上 Pagi</option>
+            <option value="afternoon">下午 Siang</option>
+            <option value="evening">晚上 Malam</option>
+          </select>
+          <div class="flex-1">
+            <input id="tmplDeadline" type="time" class="w-full border border-gray-300 rounded-lg p-2 text-sm" placeholder="截止時間（選填）">
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">選填截止時間 → 會出現在「現在要做」聚焦卡</p>
       </div>
       <div class="border-t pt-3">
         <label class="flex items-center gap-2 cursor-pointer">
@@ -4479,6 +4601,7 @@ function logout(){
   state.currentUser=null;
   state.pinBuffer='';
   document.getElementById('atikaView').classList.add('hidden');
+  document.getElementById('atikaView').classList.remove('active-view');
   document.getElementById('managerView').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
   document.body.classList.add('pin-locked');
@@ -4489,6 +4612,7 @@ function showMainView(){
   document.body.classList.remove('pin-locked');
   if (state.currentUser.role==='helper'){
     document.getElementById('atikaView').classList.remove('hidden');
+    document.getElementById('atikaView').classList.add('active-view');
     renderAtikaView();
   } else {
     document.getElementById('managerView').classList.remove('hidden');
@@ -5052,98 +5176,159 @@ function renderAtikaView(){
     applyLangClass(rSec, lang==='zh');
   } else rBanner.classList.add('hidden');
 
-  // 臨時
+  // ── 收集所有任務 ──
   const ad=adhocForToday();
-  const adSplit=splitDone(ad, a=>a.completed);
-  const _ac=document.getElementById('adhocCount'); if(_ac) _ac.textContent=`${adSplit.don.length}/${ad.length} 完成`;
-  document.getElementById('adhocEmpty').style.display=ad.length===0?'block':'none';
-  document.getElementById('adhocIncomplete').innerHTML=adSplit.inc.map(a=>renderAdhocCard(a)).join('');
-  renderSectionDone('adhocDoneWrap','adhocDone','adhocDoneLabel', adSplit.don.map(a=>renderAdhocCard(a)));
-
-  // 本日
   const todays=todaysTemplates();
-  const tdSplit=splitDone(todays, t=>isDone(t, d));
-  const _tc=document.getElementById('todayCount'); if(_tc) _tc.textContent=`${tdSplit.don.length}/${todays.length} 完成`;
-  document.getElementById('todayIncomplete').innerHTML=tdSplit.inc.length
-    ? tdSplit.inc.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join('')
-    : `<div class="text-sm text-gray-400 italic text-center py-3">🎉 全部完成 / Selesai</div>`;
-  renderSectionDone('todayDoneWrap','todayDone','todayDoneLabel', tdSplit.don.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
-
-  // 彈性（依本週/本月/本季列出；mWeek 多週的 → 每週類；單週的 → 每月類）
   const fxWeek=flexTemplatesByPeriod('mWeek-weekly').concat(flexTemplatesByPeriod('mWeek-biweekly'));
   const fxMonth=flexTemplatesByPeriod('mWeek-monthly');
   const fxQuarter=flexTemplatesByPeriod('quarterly');
-  const wSplit=splitDone(fxWeek, t=>isDone(t,d));
-  const mSplit=splitDone(fxMonth, t=>isDone(t,d));
-  const qSplit=splitDone(fxQuarter, t=>isDone(t,d));
-  const allDone=[...wSplit.don, ...mSplit.don, ...qSplit.don];
-  const totalFx=fxWeek.length+fxMonth.length+fxQuarter.length;
-  const _fc=document.getElementById('flexCount'); if(_fc) _fc.textContent=`${allDone.length}/${totalFx} 完成`;
-  document.getElementById('flexWeekIncomplete').innerHTML = wSplit.inc.length
-    ? wSplit.inc.map(t=>renderTaskCard(t)).join('')
-    : `<div class="text-xs text-gray-400 italic">無 / Tidak ada</div>`;
-  document.getElementById('flexMonthIncomplete').innerHTML = mSplit.inc.length
-    ? mSplit.inc.map(t=>renderTaskCard(t)).join('')
-    : `<div class="text-xs text-gray-400 italic">無 / Tidak ada</div>`;
-  document.getElementById('flexQuarterIncomplete').innerHTML = qSplit.inc.length
-    ? qSplit.inc.map(t=>renderTaskCard(t)).join('')
-    : `<div class="text-xs text-gray-400 italic">無 / Tidak ada</div>`;
-  renderSectionDone('flexDoneWrap','flexDone','flexDoneLabel', allDone.map(t=>renderTaskCard(t)));
+  const allFlexTemplates=[...fxWeek,...fxMonth,...fxQuarter];
 
-  // ── 總進度條 ──
-  const totalDone = adSplit.don.length + tdSplit.don.length + allDone.length;
-  const totalAll  = ad.length + todays.length + totalFx;
+  // ── 完成狀態拆分 ──
+  const adDone=ad.filter(a=>a.completed), adInc=ad.filter(a=>!a.completed);
+  const tdDone=todays.filter(t=>isDone(t,d)), tdInc=todays.filter(t=>!isDone(t,d));
+  const fxDone=allFlexTemplates.filter(t=>isDone(t,d)), fxInc=allFlexTemplates.filter(t=>!isDone(t,d));
+
+  // ── 總進度 ──
+  const totalDone = adDone.length + tdDone.length + fxDone.length;
+  const totalAll  = ad.length + todays.length + allFlexTemplates.length;
   const pct = totalAll > 0 ? Math.round(totalDone / totalAll * 100) : 0;
   const allFinished = totalAll > 0 && totalDone === totalAll;
-  const progLabel = document.getElementById('totalProgressLabel');
-  const progPct   = document.getElementById('totalProgressPct');
-  const progBar   = document.getElementById('totalProgressBar');
-  if (progLabel) {
-    if (allFinished) {
-      progLabel.innerHTML = lang==='id'
-        ? '<i class="ti ti-confetti" style="font-size:13px;vertical-align:-1px;color:var(--ic-strawberry);"></i> Semua selesai!'
-        : '<i class="ti ti-confetti" style="font-size:13px;vertical-align:-1px;color:var(--ic-strawberry);"></i> 全部完成！太棒了';
-      progBar.style.background = 'var(--ic-mint)';
-    } else {
-      progLabel.textContent = lang==='id'
-        ? `${totalDone} dari ${totalAll} tugas selesai`
-        : `今日已完成 ${totalDone} / ${totalAll} 項`;
-      progBar.style.background = 'var(--ic-caramel-dk)';
-    }
-    progPct.textContent = `${pct}%`;
-    progBar.style.width = `${pct}%`;
+
+  // ── Hero 進度環 ──
+  const circumference = 2 * Math.PI * 27; // r=27 → ≈169.6
+  const ringOffset = circumference - (pct / 100) * circumference;
+  const ringFill = document.getElementById('atikaRingFill');
+  if (ringFill) ringFill.style.strokeDashoffset = ringOffset.toFixed(1);
+  const ringPct = document.getElementById('atikaRingPct');
+  if (ringPct) ringPct.textContent = `${pct}%`;
+  const heroGreet = document.getElementById('atikaHeroGreet');
+  if (heroGreet) heroGreet.textContent = state.currentUser?.name
+    ? getGreeting(state.currentUser.name, lang).replace(/<[^>]+>/g,'') : '';
+  const heroLabel = document.getElementById('atikaHeroProgLabel');
+  if (heroLabel) heroLabel.textContent = allFinished
+    ? (lang==='id' ? 'Semua tugas selesai! 🎉' : '今日工作全部完成！')
+    : (lang==='id' ? `${totalDone} dari ${totalAll} tugas selesai` : `今日進度 ${totalDone} / ${totalAll} 項`);
+  const heroSub = document.getElementById('atikaHeroProgSub');
+  if (heroSub) heroSub.textContent = allFinished
+    ? (lang==='id' ? 'Istirahat dulu, sudah kerja keras ☕' : '好好休息，辛苦了 ☕')
+    : (lang==='id' ? `Sisa ${totalAll - totalDone} tugas lagi` : `還有 ${totalAll - totalDone} 項待完成`);
+
+  // ── 時間分區分組函式 ──
+  function getSlot(item){ return item.timeSlot || 'flexible'; }
+  function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a)).join(''); }
+  function slotHtml_tmpl(items){ return items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''); }
+
+  // 合併 incomplete 任務依 slot 分組
+  const bySlot = { morning:[], afternoon:[], evening:[], flexible:[] };
+  adInc.forEach(a => { const s=getSlot(a); bySlot[s]=(bySlot[s]||bySlot.flexible); bySlot[s||'flexible'].push({_type:'adhoc', item:a}); });
+  tdInc.forEach(t => { const s=getSlot(t); (bySlot[s]||bySlot.flexible).push({_type:'tmpl', item:t}); });
+  fxInc.forEach(t => { (bySlot.flexible).push({_type:'flex', item:t}); }); // flex templates → always flexible
+
+  function renderSlotItems(slotArr){
+    if (!slotArr.length) return '<div class="text-xs italic" style="color:var(--ic-choc-mid);padding:4px 0;">沒有任務 / Tidak ada</div>';
+    return slotArr.map(({_type, item})=>
+      _type==='adhoc' ? renderAdhocCard(item)
+      : renderTaskCard(item,{hideMode:true,hideLastDone:true})
+    ).join('');
   }
-  // 慶祝 empty state：全部完成時顯示，並收起任務區塊
-  const celebEl = document.getElementById('atikaAllDoneState');
-  const adhocSecEl = document.getElementById('adhocSection');
-  const dividerEl = celebEl?.nextElementSibling;
-  // 找出分隔線（border-t my-3 那個 div）和 regular section header
-  const taskCard = document.querySelector('#atikaView section:last-of-type') || celebEl?.closest('section');
-  const regularHdr = taskCard?.querySelector('.task-sec-hdr.regular');
-  if (celebEl) {
-    if (allFinished && totalAll > 0) {
-      celebEl.classList.remove('hidden');
-      if (adhocSecEl) adhocSecEl.style.display='none';
-      if (regularHdr) regularHdr.style.display='none';
-      // 隱藏各 incomplete 區（只保留 done 折疊）
-      ['adhocIncomplete','adhocEmpty','todayIncomplete','flexWeekIncomplete','flexMonthIncomplete','flexQuarterIncomplete'].forEach(id=>{
-        const el=document.getElementById(id); if(el) el.style.display='none';
-      });
-      // 隱藏分隔線
-      const sep = taskCard?.querySelector('.border-t.my-3'); if(sep) sep.style.display='none';
+  function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
+
+  // 計算各 slot 完成數（含 done）
+  function slotProgress(slot, incArr){
+    const doneCount =
+      adDone.filter(a=>getSlot(a)===slot).length +
+      tdDone.filter(t=>getSlot(t)===slot).length +
+      (slot==='flexible' ? fxDone.length : 0);
+    const total = incArr.length + doneCount;
+    return total ? `${doneCount}/${total} 完成` : '';
+  }
+
+  // 哪些 slot 有任務（inc 或 done）
+  function slotHasAny(slot){
+    const hasDone = adDone.some(a=>getSlot(a)===slot) || tdDone.some(t=>getSlot(t)===slot) || (slot==='flexible'&&fxDone.length>0);
+    return bySlot[slot].length > 0 || hasDone;
+  }
+
+  // 渲染各分區
+  ['morning','afternoon','evening','flexible'].forEach(slot=>{
+    const secId = slot==='morning'?'atikaMorningSection':slot==='afternoon'?'atikaAfternoonSection':slot==='evening'?'atikaEveningSection':'atikaFlexSection';
+    const tasksId = slot==='morning'?'atikaMorningTasks':slot==='afternoon'?'atikaAfternoonTasks':slot==='evening'?'atikaEveningTasks':'atikaFlexTasks';
+    const badgeId = slot==='morning'?'atikaMorningBadge':slot==='afternoon'?'atikaAfternoonBadge':slot==='evening'?'atikaEveningBadge':null;
+    const sec = document.getElementById(secId);
+    const tasksEl = document.getElementById(tasksId);
+    const badgeEl = badgeId ? document.getElementById(badgeId) : null;
+    if (!sec || !tasksEl) return;
+    const show = slotHasAny(slot) || slot==='flexible';
+    sec.style.display = show ? '' : 'none';
+    tasksEl.innerHTML = renderSlotItems(bySlot[slot]);
+    if (badgeEl) badgeEl.textContent = slotProgress(slot, bySlot[slot]);
+  });
+
+  // ── 已完成區（折疊）──
+  const allDoneItems = [
+    ...adDone.map(a=>renderAdhocCard(a)),
+    ...tdDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
+    ...fxDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
+  ];
+  const doneOuter = document.getElementById('atikaDoneWrapOuter');
+  const doneList  = document.getElementById('atikaDoneList');
+  const doneLabel = document.getElementById('atikaDoneLabel');
+  if (doneOuter) doneOuter.classList.toggle('hidden', allDoneItems.length===0);
+  if (doneLabel) doneLabel.textContent = `已完成 ${allDoneItems.length} 項 / ${allDoneItems.length} selesai`;
+  if (doneList)  doneList.innerHTML = allDoneItems.join('');
+
+  // ── 聚焦卡：找截止時間最近的未完成任務 ──
+  const focusCandidates = [
+    ...adInc.filter(a=>a.deadline).map(a=>({...a, _type:'adhoc', _nameZh:a.textZh, _nameId:a.textId})),
+    ...tdInc.filter(t=>t.deadline).map(t=>({...t, _type:'tmpl', _nameZh:t.nameZh, _nameId:t.nameId})),
+  ].sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
+  const focusTask = focusCandidates[0] || null;
+  window._atikaFocusTask = focusTask;
+  const focusCard = document.getElementById('atikaFocusCard');
+  if (focusCard) {
+    if (focusTask) {
+      focusCard.classList.remove('hidden');
+      const ftEl = document.getElementById('atikaFocusTask');
+      if (ftEl) ftEl.textContent = lang==='id'
+        ? (focusTask._nameId||focusTask._nameZh||'')
+        : (focusTask._nameZh||focusTask._nameId||'');
+      const fdEl = document.getElementById('atikaFocusDeadline');
+      if (fdEl) fdEl.innerHTML = `<i class="ti ti-clock" style="font-size:10px;" aria-hidden="true"></i> 需在 ${focusTask.deadline} 前完成`;
     } else {
-      celebEl.classList.add('hidden');
-      if (adhocSecEl) adhocSecEl.style.display='';
-      if (regularHdr) regularHdr.style.display='';
-      ['adhocIncomplete','adhocEmpty','todayIncomplete','flexWeekIncomplete','flexMonthIncomplete','flexQuarterIncomplete'].forEach(id=>{
-        const el=document.getElementById(id); if(el) el.style.display='';
-      });
-      const sep = taskCard?.querySelector('.border-t.my-3'); if(sep) sep.style.display='';
+      focusCard.classList.add('hidden');
     }
+  }
+
+  // ── 慶祝 empty state ──
+  const celebEl = document.getElementById('atikaAllDoneState');
+  if (celebEl) {
+    celebEl.classList.toggle('hidden', !(allFinished && totalAll > 0));
+    ['atikaMorningSection','atikaAfternoonSection','atikaEveningSection','atikaFlexSection'].forEach(id=>{
+      const el=document.getElementById(id);
+      if (el) el.style.display = (allFinished && totalAll > 0) ? 'none' : '';
+    });
   }
 
   initSortable();
   _updateAtikaSupplyBadge();
+}
+
+/* ========== completeFocusTask ========== */
+function completeFocusTask(){
+  const ft = window._atikaFocusTask;
+  if (!ft) return;
+  if (ft._type === 'adhoc') {
+    const a = state.adhoc.find(x => x.id === ft.id);
+    if (a) { a.completed = true; a.completedAt = new Date().toISOString(); }
+  } else {
+    // template
+    const key = compKey(ft, today());
+    if (!state.completions[key]) {
+      state.completions[key] = { at: new Date().toISOString(), by: state.currentUser?.name || '' };
+    }
+  }
+  saveGuarded(); setTimeout(()=>{ refreshAll(); }, 300);
 }
 
 /* ========== 管理者視圖 ========== */
@@ -8780,6 +8965,8 @@ function openAddAdhocModal(){
   const i=document.getElementById('adhocId');
   z.value=''; i.value='';
   z.dataset.orig=''; i.dataset.orig='';
+  const ts=document.getElementById('adhocTimeSlot'); if(ts) ts.value='flexible';
+  const dl=document.getElementById('adhocDeadline'); if(dl) dl.value='';
   document.getElementById('adhocModal').classList.remove('hidden');
   setTimeout(()=>z.focus(), 100);
 }
@@ -8794,6 +8981,8 @@ function saveAdhoc(){
     textId: id || zh,
     completed:false, by:state.currentUser.name,
     order: state.adhoc.length,
+    timeSlot: document.getElementById('adhocTimeSlot')?.value || 'flexible',
+    deadline: document.getElementById('adhocDeadline')?.value || null,
   });
   save(); closeAdhocModal(); refreshAll();
 }
@@ -8845,6 +9034,8 @@ function openTemplateModal(id){
   document.getElementById('tmplActive').checked=t?(t.active!==false):true;
   setVal('tmplDescZh', t?.descZh);
   setVal('tmplDescId', t?.descId);
+  const tsl=document.getElementById('tmplTimeSlot'); if(tsl) tsl.value=t?.timeSlot||'flexible';
+  const tdl=document.getElementById('tmplDeadline'); if(tdl) tdl.value=t?.deadline||'';
   setMode(t?.mode||'fixed');
   setWeekFlagsButtons(t?.weekFlags || [1,2,3,4]);
   setMonthFlagsButtons(t?.monthFlags || [1,4,7,10]);
@@ -8935,6 +9126,8 @@ function saveTemplate(){
       descZh: document.getElementById('tmplDescZh')?.value.trim() || '',
       descId: document.getElementById('tmplDescId')?.value.trim() || '',
       active: activeEl ? activeEl.checked : true,
+      timeSlot: document.getElementById('tmplTimeSlot')?.value || 'flexible',
+      deadline: document.getElementById('tmplDeadline')?.value || null,
     };
     if (!data.nameZh){ alert('請填寫中文名稱'); return; }
     if (tmplMode==='fixed' && data.weekdays.length===0){ alert('指定日模式請選擇至少一個週幾'); return; }
