@@ -979,42 +979,35 @@
 
     <div id="tab-menu" class="tab-content hidden">
 
-        <!-- 餐次設定 + 控制列 -->
-        <div class="rounded-2xl p-4 mb-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 菜單設定</h2>
-            <button onclick="openMealConfigModal()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-vanilla);color:var(--ic-chocolate);"><i class="ti ti-settings" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 基本設定</button>
-          </div>
-          <div class="flex items-center gap-3 flex-wrap">
-            <div id="mealChips" class="flex gap-2 flex-wrap flex-1"></div>
-            <label class="flex items-center gap-2 text-xs cursor-pointer" style="color:var(--ic-choc-mid);">
-              <span>每週循環</span>
-              <div class="relative" onclick="toggleMenuCycle()">
-                <div id="cycleTrack" class="w-9 h-5 rounded-full transition-colors" style="background:var(--ic-caramel);"></div>
-                <div id="cycleThumb" class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all" style="left:18px;"></div>
-              </div>
-            </label>
-          </div>
-        </div>
-
         <!-- 週菜單表格 -->
         <div class="rounded-2xl border mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div class="flex items-center justify-between px-4 pt-4 pb-2">
+          <!-- 標題列 -->
+          <div class="flex items-center justify-between px-4 pt-4 pb-2 flex-wrap gap-2">
             <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-week" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 本週菜單</h2>
-            <span class="text-xs" style="color:var(--ic-choc-mid);">點格子編輯</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs" style="color:var(--ic-choc-mid);">點格子編輯</span>
+              <button onclick="openMealConfigModal()" class="text-xs px-2 py-1 rounded-lg" style="background:var(--ic-vanilla);color:var(--ic-chocolate);"><i class="ti ti-settings" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 設定</button>
+            </div>
           </div>
+          <!-- 週菜單組切換 -->
+          <div id="menuSetSelector" class="flex items-center gap-2 px-4 pb-3 flex-wrap"></div>
           <div class="overflow-x-auto pb-3 px-3">
             <div id="menuGrid" style="display:grid;gap:4px;"></div>
           </div>
         </div>
 
-        <!-- 食材庫 -->
+        <!-- 食材庫（可收合） -->
         <div class="rounded-2xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div class="flex items-center justify-between px-4 pt-4 pb-2">
+          <button onclick="toggleIngLib()" class="w-full flex items-center justify-between px-4 pt-4 pb-2 text-left">
             <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-basket" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 食材庫</h2>
-            <button onclick="openIngredientModal(null)" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">＋ 新增食材</button>
+            <i id="ingLibChevron" class="ti ti-chevron-down" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
+          </button>
+          <div id="ingLibBody" class="hidden">
+            <div class="px-4 pb-2 flex justify-end">
+              <button onclick="openIngredientModal(null)" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">＋ 新增食材</button>
+            </div>
+            <div id="ingredientList" class="px-4 pb-4"></div>
           </div>
-          <div id="ingredientList" class="px-4 pb-4"></div>
         </div>
     </div>
 
@@ -2493,6 +2486,8 @@ let state = {
   },
   ingredients: [],
   weekMenu: {},
+  weekMenuSets: [],
+  activeWeekMenuSetId: '',
   preferences: { fontSize: 18 },
   catFilter: 'all',
   supplyCatFilter: 'all',
@@ -2536,8 +2531,20 @@ function load() {
       if (d.mealConfig) state.mealConfig = Object.assign({}, state.mealConfig, d.mealConfig);
       state.ingredients = d.ingredients || [];
       state.weekMenu = d.weekMenu || {};
+      state.weekMenuSets = d.weekMenuSets || [];
+      state.activeWeekMenuSetId = d.activeWeekMenuSetId || '';
     } catch(e){}
   }
+  // 遷移：舊資料只有 weekMenu，沒有 weekMenuSets → 建立第一組
+  if (!state.weekMenuSets || !state.weekMenuSets.length) {
+    const firstSet = { id: 'wset_1', name: '第一週', cycleOn: true, menu: state.weekMenu || {} };
+    state.weekMenuSets = [firstSet];
+    state.activeWeekMenuSetId = 'wset_1';
+  }
+  // 載入時確保 weekMenu 指向 active set
+  const _activeSet = state.weekMenuSets.find(s => s.id === state.activeWeekMenuSetId);
+  if (_activeSet) state.weekMenu = _activeSet.menu || {};
+  else { state.activeWeekMenuSetId = state.weekMenuSets[0].id; state.weekMenu = state.weekMenuSets[0].menu || {}; }
   if (!state.users.length) state.users = DEFAULT_USERS.map(u=>({...u}));
   // 遷移：舊使用者沒有 lang 欄位
   state.users.forEach(u=>{ if (!u.lang) u.lang = u.role==='helper'?'id':'zh'; });
@@ -2690,6 +2697,13 @@ function save() {
     mealConfig: state.mealConfig,
     ingredients: state.ingredients,
     weekMenu: state.weekMenu,
+    weekMenuSets: (() => {
+      // 儲存前先把當前 weekMenu 同步到 active set
+      const _s = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
+      if (_s) _s.menu = state.weekMenu;
+      return state.weekMenuSets;
+    })(),
+    activeWeekMenuSetId: state.activeWeekMenuSetId,
     savedAt: new Date().toISOString(),
   }));
   // Phase 2 雲端同步勾子（若已連線且非雲端回寫）
@@ -3627,10 +3641,89 @@ function getMenuKey(dow, mealId){ return dow + '_' + mealId; }
 
 // ── 渲染 Tab ──
 function renderMenuTab(){
-  renderMealChips();
-  renderCycleToggle();
+  renderMenuSetSelector();
   renderMenuGrid();
   renderIngredientList();
+}
+
+function toggleIngLib(){
+  const body = document.getElementById('ingLibBody');
+  const chev = document.getElementById('ingLibChevron');
+  if (!body || !chev) return;
+  body.classList.toggle('hidden');
+  chev.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+function renderMenuSetSelector(){
+  const el = document.getElementById('menuSetSelector');
+  if (!el) return;
+  const sets = state.weekMenuSets || [];
+  const activeId = state.activeWeekMenuSetId;
+  const cycleCount = sets.filter(s=>s.cycleOn).length;
+  // 計算「本週」用哪一組（按 ISO 週數循環）
+  const isoWeek = (d => {
+    const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
+    return Math.round((t-new Date(t.getFullYear(),0,4))/(7*86400000));
+  })(today());
+  const cycleSets = sets.filter(s=>s.cycleOn);
+  const thisWeekSet = cycleSets.length > 1 ? cycleSets[isoWeek % cycleSets.length] : null;
+
+  let html = sets.map((s,i) => {
+    const isActive = s.id === activeId;
+    const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
+    return `<div class="flex items-center gap-1">
+      <button onclick="switchWeekMenuSet('${s.id}')" class="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors" style="${isActive?'background:var(--ic-caramel);color:#FAF7F2;':'background:var(--ic-vanilla);color:var(--ic-chocolate);'}">${s.name}${isThisWeek?'<span class="ml-1 text-[9px] opacity-75">本週</span>':''}</button>
+      <label class="flex items-center gap-0.5 cursor-pointer" title="納入循環">
+        <input type="checkbox" ${s.cycleOn?'checked':''} onchange="toggleSetCycle('${s.id}',this.checked)" class="w-3 h-3 accent-amber-600">
+        <span class="text-[10px]" style="color:var(--ic-choc-mid);">循環</span>
+      </label>
+      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${s.id}')" class="text-red-300 hover:text-red-500 text-xs leading-none" title="刪除"><i class="ti ti-x" style="font-size:11px;"></i></button>`:''}
+    </div>`;
+  }).join('<div class="w-px h-5 rounded-full mx-1" style="background:var(--ic-vanilla);"></div>');
+
+  html += `<button onclick="addWeekMenuSet()" class="text-xs px-2 py-1 rounded-lg border border-dashed" style="border-color:var(--ic-caramel);color:var(--ic-caramel);"><i class="ti ti-plus" style="font-size:11px;vertical-align:-1px;"></i> 新增週菜單</button>`;
+  if (cycleCount > 1) html += `<span class="text-[10px] px-2 py-0.5 rounded-full" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">共 ${cycleCount} 週循環</span>`;
+  el.innerHTML = html;
+}
+
+function switchWeekMenuSet(id){
+  // 先把當前 weekMenu 存回 active set
+  const cur = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
+  if (cur) cur.menu = state.weekMenu;
+  // 切換
+  state.activeWeekMenuSetId = id;
+  const next = (state.weekMenuSets||[]).find(s=>s.id===id);
+  state.weekMenu = next ? (next.menu || {}) : {};
+  save(); renderMenuTab();
+}
+
+function addWeekMenuSet(){
+  // 先存當前
+  const cur = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
+  if (cur) cur.menu = state.weekMenu;
+  const newId = 'wset_'+Date.now();
+  const n = (state.weekMenuSets||[]).length + 1;
+  state.weekMenuSets.push({ id: newId, name: '第'+n+'週', cycleOn: true, menu: {} });
+  state.activeWeekMenuSetId = newId;
+  state.weekMenu = {};
+  save(); renderMenuTab();
+}
+
+function deleteWeekMenuSet(id){
+  if ((state.weekMenuSets||[]).length <= 1) return;
+  customConfirm('確定刪除這組週菜單？', ()=>{
+    state.weekMenuSets = state.weekMenuSets.filter(s=>s.id!==id);
+    if (state.activeWeekMenuSetId === id){
+      state.activeWeekMenuSetId = state.weekMenuSets[0].id;
+      state.weekMenu = state.weekMenuSets[0].menu || {};
+    }
+    save(); renderMenuTab();
+  });
+}
+
+function toggleSetCycle(id, val){
+  const s = (state.weekMenuSets||[]).find(s=>s.id===id);
+  if (s) { s.cycleOn = val; save(); renderMenuSetSelector(); }
 }
 
 function renderMealChips(){
