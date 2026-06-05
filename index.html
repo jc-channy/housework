@@ -3157,8 +3157,31 @@ async function cloudPull(){
         state.users        = d.users        || state.users;
         state.categories   = d.categories   || state.categories;
         state.templates    = d.templates    || state.templates;
-        state.completions  = d.completions  || state.completions;
-        state.adhoc        = d.adhoc        || state.adhoc;
+        // ── 防止「需勾兩次」競態：若有 pending push，合併而非覆蓋 ──
+        if (cloudPushTimer) {
+          // 本地有未推送的變更 → last-write-wins merge（本地較新則保留）
+          const cc = d.completions || {}, lc = state.completions || {};
+          const merged = Object.assign({}, cc);
+          Object.keys(lc).forEach(k => {
+            if (!merged[k] || (lc[k]?.at || '') >= (merged[k]?.at || '')) merged[k] = lc[k];
+          });
+          state.completions = merged;
+          // adhoc：保留本地較新的 completed 狀態
+          const caMap = Object.fromEntries((d.adhoc||[]).map(a=>[a.id,a]));
+          const laMap = Object.fromEntries((state.adhoc||[]).map(a=>[a.id,a]));
+          const allIds = new Set([...Object.keys(caMap),...Object.keys(laMap)]);
+          state.adhoc = [...allIds].map(id=>{
+            const ca=caMap[id], la=laMap[id];
+            if (!ca) return la;
+            if (!la) return ca;
+            // 若本地 completedAt 較新，保留本地 completed 狀態
+            if (la.completed && (!ca.completed || (la.completedAt||'')>=(ca.completedAt||''))) return Object.assign({},ca,{completed:la.completed,completedAt:la.completedAt,completedBy:la.completedBy});
+            return ca;
+          });
+        } else {
+          state.completions  = d.completions  || state.completions;
+          state.adhoc        = d.adhoc        || state.adhoc;
+        }
         state.notes        = d.notes        || state.notes;
         state.reminders    = d.reminders    || state.reminders;
         state.supplies     = d.supplies     || state.supplies;
