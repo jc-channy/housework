@@ -585,6 +585,35 @@
   #punchExpandBtn.expanded { transform: rotate(180deg); }
   #punchCollapsible { overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
   #punchCollapsible.collapsed { max-height:0 !important; opacity:0; pointer-events:none; margin-top:0 !important; }
+
+  /* ═════════════════════════════════
+     Super Theme Editor (STE) Styles
+     ═════════════════════════════════ */
+  .ste-tab-bar { display:flex; border-bottom:2px solid var(--ic-vanilla); }
+  .ste-tab { flex:1; padding:10px 4px; font-size:var(--font-nano); font-weight:600; text-align:center;
+             border:none; background:none; color:var(--ic-choc-mid); cursor:pointer;
+             border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .ste-tab.ste-active { color:var(--ic-chocolate); border-bottom-color:var(--ic-caramel); }
+  .ste-body { flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch; }
+  .ste-section { margin-bottom:20px; }
+  .ste-section-title { font-size:var(--font-nano); font-weight:700; color:var(--ic-choc-mid);
+                       text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
+                       padding-bottom:4px; border-bottom:1px solid var(--ic-vanilla); }
+  .ste-row { display:flex; align-items:center; gap:10px; padding:9px 0;
+             border-bottom:1px solid var(--ic-vanilla); }
+  .ste-swatch { width:28px; height:28px; border-radius:6px; flex-shrink:0;
+                border:1px solid rgba(0,0,0,.12); cursor:pointer; }
+  .ste-label { flex:1; font-size:var(--font-secondary); color:var(--ic-chocolate); min-width:0; line-height:1.3; }
+  .ste-label small { display:block; font-size:var(--font-nano); color:var(--ic-choc-mid); font-family:monospace; }
+  .ste-color-input { width:40px; height:28px; border:1px solid var(--ic-vanilla);
+                     border-radius:6px; cursor:pointer; padding:2px; background:none; }
+  .ste-font-preview { font-weight:700; color:var(--ic-caramel-dk); white-space:nowrap;
+                      min-width:56px; text-align:right; font-size:var(--font-nano); }
+  .ste-range { flex:1; accent-color:var(--ic-caramel); min-width:80px; }
+  .ste-footer { padding:12px 16px; border-top:2px solid var(--ic-vanilla);
+                display:flex; gap:8px; flex-shrink:0; background:var(--ic-surface); }
+  .ste-preview-text { font-weight:600; padding:4px 8px; border-radius:6px;
+                      background:var(--ic-lemon); color:var(--ic-chocolate); }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -2181,6 +2210,10 @@
         </button>
       </div>
     </div>
+    <!-- 隱藏觸發按鈕（點標題 5 下解鎖） -->
+    <div class="mt-4 pt-3 border-t" style="border-color:var(--ic-vanilla);">
+      <button id="steSecretBtn" onclick="openSTE()" class="hidden w-full py-2.5 rounded-xl text-sm font-semibold border border-dashed" style="color:var(--ic-caramel-dk);border-color:var(--ic-caramel);background:var(--ic-lemon);">🎨 超級主題編輯器</button>
+    </div>
   </div>
 </div>
 
@@ -3254,6 +3287,7 @@ async function cloudPull(){
         window._cloudSyncing = false;
       }
       refreshAll();
+      loadSavedTheme();  // 雲端拉下新主題後重新套用
     } else {
       // 雲端尚無資料 → 把本地推上去
       await cloudPushImmediate();
@@ -10392,6 +10426,8 @@ async function init(){
   }
   updateChatBadge();
   startMinuteTicker();
+  loadSavedTheme();
+  setTimeout(initSTE, 300);
 }
 
 /* ========== 每分鐘 ticker：時鐘 + 跨日刷新 ========== */
@@ -10455,6 +10491,298 @@ function startMinuteTicker(){
   const msToNextMin = (60-now.getSeconds())*1000 - now.getMilliseconds();
   setTimeout(()=>{ tickMinute(); setInterval(tickMinute, 60000); }, msToNextMin);
 }
+
+/* ══════════════════════════════════════════════
+   Super Theme Editor (STE)
+   觸發：在「顯示設定」標題點 5 下
+   儲存：localStorage 'homeeday_super_theme'
+   套用：loadSavedTheme() 在 init() 中呼叫
+   ══════════════════════════════════════════════ */
+
+const STE_COLORS = {
+  main: [
+    { v:'--ic-chocolate',  label:'主文字',     def:'#725C3F' },
+    { v:'--ic-choc-dk',    label:'深標題',     def:'#4A3828' },
+    { v:'--ic-choc-mid',   label:'次要文字',   def:'#9A7A58' },
+    { v:'--ic-caramel',    label:'品牌主色',   def:'#D0A77B' },
+    { v:'--ic-caramel-dk', label:'深焦糖',     def:'#A87D52' },
+  ],
+  func: [
+    { v:'--ic-strawberry', label:'提醒 / 警示', def:'#E5ADA8' },
+    { v:'--ic-straw-lt',   label:'提醒背景',    def:'#FBF0EE' },
+    { v:'--ic-mint',       label:'完成 / 成功', def:'#D8D7B2' },
+    { v:'--ic-mint-lt',    label:'完成背景',    def:'#F0F0E0' },
+  ],
+  bg: [
+    { v:'--ic-lemon',   label:'頁面底色',  def:'#EFE8D8' },
+    { v:'--ic-vanilla', label:'邊框 / 分隔', def:'#E5E0D8' },
+    { v:'--ic-surface', label:'卡片底色',  def:'#FAF7F2' },
+  ],
+};
+
+const STE_FONTS = [
+  { v:'--font-display',   label:'大標題',    def:2,      min:1,    max:3,    step:0.0625 },
+  { v:'--font-page',      label:'頁面標題',  def:1.5,    min:1,    max:2.5,  step:0.0625 },
+  { v:'--font-section',   label:'區塊標題',  def:1.1875, min:0.75, max:2,    step:0.0625 },
+  { v:'--font-card',      label:'卡片標題',  def:1,      min:0.625,max:1.5,  step:0.0625 },
+  { v:'--font-body',      label:'內文',      def:0.875,  min:0.5,  max:1.25, step:0.0625 },
+  { v:'--font-secondary', label:'次要文字',  def:0.8125, min:0.5,  max:1.125,step:0.0625 },
+  { v:'--font-caption',   label:'說明文字',  def:0.75,   min:0.5,  max:1,    step:0.0625 },
+  { v:'--font-nano',      label:'極小 / nav',def:0.6875, min:0.4,  max:1,    step:0.0625 },
+  { v:'--font-btn',       label:'按鈕文字',  def:0.9375, min:0.625,max:1.25, step:0.0625 },
+  { v:'--font-btn-sm',    label:'小按鈕',    def:0.75,   min:0.5,  max:1,    step:0.0625 },
+  { v:'--font-input',     label:'輸入欄位',  def:1,      min:0.625,max:1.25, step:0.0625 },
+];
+
+let _steState = {};
+let _steTapCount = 0, _steTapTimer = null;
+
+function initSTE() {
+  _buildSTEColorRows();
+  _buildSTEFontRows();
+  // Secret trigger: tap "顯示設定" title 5 times
+  const trigger = document.querySelector('#devicePrefsModal .text-xl.font-bold');
+  if (!trigger) return;
+  trigger.style.cursor = 'default';
+  trigger.addEventListener('click', () => {
+    _steTapCount++;
+    clearTimeout(_steTapTimer);
+    _steTapTimer = setTimeout(() => { _steTapCount = 0; }, 2000);
+    if (_steTapCount >= 5) {
+      _steTapCount = 0;
+      const btn = document.getElementById('steSecretBtn');
+      if (btn) { btn.classList.remove('hidden'); btn.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    }
+  });
+}
+
+function _steVarId(v) { return v.replace(/^--/,'').replace(/-/g,'_'); }
+
+function _buildSTEColorRows() {
+  ['main','func','bg'].forEach(group => {
+    const el = document.getElementById('ste-color-' + group);
+    if (!el) return;
+    el.innerHTML = STE_COLORS[group].map(c => {
+      const vid = _steVarId(c.v);
+      return `<div class="ste-row">
+        <div class="ste-swatch" id="ste-sw-${vid}" style="background:${c.def};"></div>
+        <div class="ste-label">${c.label} <small>${c.v}</small></div>
+        <input type="color" class="ste-color-input" id="ste-inp-${vid}"
+               value="${c.def}" oninput="steColorChange('${c.v}',this.value)">
+      </div>`;
+    }).join('');
+  });
+}
+
+function _buildSTEFontRows() {
+  const el = document.getElementById('ste-font-rows');
+  if (!el) return;
+  el.innerHTML = STE_FONTS.map(f => {
+    const vid = _steVarId(f.v);
+    const sampleStyle = `font-size:${f.def}rem;font-weight:600;`;
+    return `<div class="ste-row">
+      <div class="ste-label">${f.label} <small>${f.v}</small></div>
+      <input type="range" class="ste-range" id="ste-range-${vid}"
+             min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}"
+             oninput="steFontChange('${f.v}',this.value)">
+      <div class="ste-font-preview" id="ste-fval-${vid}">${f.def}rem</div>
+    </div>`;
+  }).join('');
+}
+
+function openSTE() {
+  closeDevicePrefsModal();
+  // 從 state.preferences 讀取（雲端同步來源）
+  const saved = state.preferences?.superTheme || JSON.parse(localStorage.getItem('homeeday_super_theme') || '{}');
+  _steState = JSON.parse(JSON.stringify(saved));
+
+  // Load color inputs
+  [...STE_COLORS.main, ...STE_COLORS.func, ...STE_COLORS.bg].forEach(c => {
+    const vid = _steVarId(c.v);
+    const val = (saved.colors && saved.colors[c.v]) || c.def;
+    const inp = document.getElementById('ste-inp-' + vid);
+    const sw  = document.getElementById('ste-sw-'  + vid);
+    if (inp) inp.value = val;
+    if (sw)  sw.style.background = val;
+  });
+
+  // Load font sliders
+  STE_FONTS.forEach(f => {
+    const vid = _steVarId(f.v);
+    const savedVal = saved.fonts && saved.fonts[f.v];
+    const val = savedVal ? parseFloat(savedVal) : f.def;
+    const rangeEl = document.getElementById('ste-range-' + vid);
+    const valEl   = document.getElementById('ste-fval-'  + vid);
+    if (rangeEl) rangeEl.value = val;
+    if (valEl)   valEl.textContent = _fmtRem(val);
+  });
+
+  // Load card sliders
+  const savedRadius = saved.cards && saved.cards['--te-card-radius'];
+  const savedGap    = saved.cards && saved.cards['--te-card-gap'];
+  const rEl = document.getElementById('ste-card-radius');
+  const gEl = document.getElementById('ste-card-gap');
+  const rvEl = document.getElementById('ste-card-radius-val');
+  const gvEl = document.getElementById('ste-card-gap-val');
+  if (rEl) { const px = savedRadius ? Math.round(parseFloat(savedRadius)*16) : 16; rEl.value = px; if(rvEl) rvEl.textContent = px; }
+  if (gEl) { const px = savedGap    ? Math.round(parseFloat(savedGap)   *16) : 16; gEl.value = px; if(gvEl) gvEl.textContent = px; }
+
+  _steMarkFsBtn(parseInt(localStorage.getItem('deviceFontSize') || '18'));
+  switchSTETab('ste-colors', document.querySelector('.ste-tab[data-stab="ste-colors"]'));
+  document.getElementById('superThemeEditor').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSTE() {
+  document.getElementById('superThemeEditor').classList.add('hidden');
+  document.body.style.overflow = '';
+  loadSavedTheme();  // revert any unsaved live-preview changes
+}
+
+function switchSTETab(tabId, btn) {
+  document.querySelectorAll('.ste-tabcontent').forEach(t => t.classList.add('hidden'));
+  document.querySelectorAll('.ste-tab').forEach(t => t.classList.remove('ste-active'));
+  const tabEl = document.getElementById(tabId);
+  if (tabEl) tabEl.classList.remove('hidden');
+  if (btn) btn.classList.add('ste-active');
+}
+
+function steColorChange(varName, value) {
+  if (!_steState.colors) _steState.colors = {};
+  _steState.colors[varName] = value;
+  const sw = document.getElementById('ste-sw-' + _steVarId(varName));
+  if (sw) sw.style.background = value;
+  _injectThemeStyle(_steState);
+}
+
+function steFontChange(varName, value) {
+  if (!_steState.fonts) _steState.fonts = {};
+  _steState.fonts[varName] = value + 'rem';
+  const valEl = document.getElementById('ste-fval-' + _steVarId(varName));
+  if (valEl) valEl.textContent = _fmtRem(parseFloat(value));
+  _injectThemeStyle(_steState);
+}
+
+function stePreviewCards() {
+  const rEl = document.getElementById('ste-card-radius');
+  const gEl = document.getElementById('ste-card-gap');
+  const rvEl = document.getElementById('ste-card-radius-val');
+  const gvEl = document.getElementById('ste-card-gap-val');
+  if (rEl && rvEl) rvEl.textContent = rEl.value;
+  if (gEl && gvEl) gvEl.textContent = gEl.value;
+  if (!_steState.cards) _steState.cards = {};
+  if (rEl) _steState.cards['--te-card-radius'] = (rEl.value / 16) + 'rem';
+  if (gEl) _steState.cards['--te-card-gap']    = (gEl.value / 16) + 'rem';
+  // Update preview card
+  const preview = document.getElementById('ste-card-preview');
+  if (preview && rEl) preview.style.borderRadius = (rEl.value) + 'px';
+  _injectThemeStyle(_steState);
+}
+
+function saveSTE() {
+  stePreviewCards();
+  // 存入 state.preferences → 自動進入雲端同步
+  if (!state.preferences) state.preferences = {};
+  state.preferences.superTheme = _steState;
+  save();  // 寫 localStorage + cloudPush
+  _injectThemeStyle(_steState);
+  document.getElementById('superThemeEditor').classList.add('hidden');
+  document.body.style.overflow = '';
+  // small toast
+  const t = document.createElement('div');
+  t.textContent = '✓ 主題已儲存';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ic-caramel-dk);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:700;z-index:9999;pointer-events:none;';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+function resetSTE() {
+  if (!confirm('重置所有主題設定？畫面將回復預設樣式。')) return;
+  if (state.preferences) delete state.preferences.superTheme;
+  save();  // 同步清除至雲端
+  _steState = {};
+  const styleEl = document.getElementById('themeOverrideStyle');
+  if (styleEl) styleEl.textContent = '';
+
+  // Reset color inputs
+  [...STE_COLORS.main, ...STE_COLORS.func, ...STE_COLORS.bg].forEach(c => {
+    const vid = _steVarId(c.v);
+    const inp = document.getElementById('ste-inp-' + vid);
+    const sw  = document.getElementById('ste-sw-'  + vid);
+    if (inp) inp.value = c.def;
+    if (sw)  sw.style.background = c.def;
+  });
+  // Reset font sliders
+  STE_FONTS.forEach(f => {
+    const vid = _steVarId(f.v);
+    const rangeEl = document.getElementById('ste-range-' + vid);
+    const valEl   = document.getElementById('ste-fval-'  + vid);
+    if (rangeEl) rangeEl.value = f.def;
+    if (valEl)   valEl.textContent = _fmtRem(f.def);
+  });
+  // Reset card sliders
+  const rEl = document.getElementById('ste-card-radius');
+  const gEl = document.getElementById('ste-card-gap');
+  if (rEl) rEl.value = 16;
+  if (gEl) gEl.value = 16;
+  const rvEl = document.getElementById('ste-card-radius-val');
+  const gvEl = document.getElementById('ste-card-gap-val');
+  if (rvEl) rvEl.textContent = '16';
+  if (gvEl) gvEl.textContent = '16';
+  const preview = document.getElementById('ste-card-preview');
+  if (preview) preview.style.borderRadius = '';
+}
+
+function _steMarkFsBtn(fs) {
+  document.querySelectorAll('#superThemeEditor .ste-fs-btn').forEach(btn => {
+    const active = parseInt(btn.dataset.fs) === fs;
+    btn.style.background = active ? 'var(--ic-lemon)' : '';
+    btn.style.borderColor = active ? 'var(--ic-caramel)' : '';
+    btn.style.color       = active ? 'var(--ic-chocolate)' : '';
+  });
+}
+
+function _fmtRem(v) {
+  return parseFloat(v).toFixed(4).replace(/\.?0+$/, '') + 'rem';
+}
+
+function _injectThemeStyle(theme) {
+  let css = ':root {\n';
+  if (theme.colors) Object.entries(theme.colors).forEach(([k,v]) => { css += `  ${k}: ${v};\n`; });
+  if (theme.fonts)  Object.entries(theme.fonts).forEach(([k,v])  => { css += `  ${k}: ${v};\n`; });
+  if (theme.cards) {
+    if (theme.cards['--te-card-radius']) css += `  --te-card-radius: ${theme.cards['--te-card-radius']};\n`;
+    if (theme.cards['--te-card-gap'])    css += `  --te-card-gap: ${theme.cards['--te-card-gap']};\n`;
+  }
+  css += '}\n';
+  if (theme.cards && theme.cards['--te-card-radius']) {
+    css += '[class*="rounded-2xl"] { border-radius: var(--te-card-radius, 1rem) !important; }\n';
+    css += '[class*="rounded-xl"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.667) !important; }\n';
+    css += '[class*="rounded-lg"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.5) !important; }\n';
+  }
+  if (theme.cards && theme.cards['--te-card-gap']) {
+    css += '.space-y-4 > * + * { margin-top: var(--te-card-gap, 1rem) !important; }\n';
+    css += '.py-4 { padding-top: calc(var(--te-card-gap, 1rem) * 0.25) !important; padding-bottom: calc(var(--te-card-gap, 1rem) * 0.25) !important; }\n';
+  }
+  let styleEl = document.getElementById('themeOverrideStyle');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'themeOverrideStyle';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = css;
+}
+
+function loadSavedTheme() {
+  // 優先從 state.preferences 讀（雲端同步來源）
+  const theme = state.preferences?.superTheme;
+  if (theme && Object.keys(theme).length) { _injectThemeStyle(theme); return; }
+  // fallback：舊版 localStorage（遷移用）
+  const saved = localStorage.getItem('homeeday_super_theme');
+  if (!saved) return;
+  try { _injectThemeStyle(JSON.parse(saved)); } catch(e) { console.warn('Theme load error:', e); }
+}
+
 init();
 </script>
 
@@ -10592,6 +10920,110 @@ init();
         <button onclick="addLibraryTasks()" class="btn-sm-primary"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 加入排程</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== Super Theme Editor ===== -->
+<div id="superThemeEditor" class="hidden fixed inset-0 z-[9999] flex flex-col" style="background:var(--ic-lemon);">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-4 py-3 border-b flex-shrink-0" style="border-color:var(--ic-vanilla);background:var(--ic-surface);">
+    <div>
+      <div class="font-black text-lg" style="color:var(--ic-chocolate);">🎨 超級主題編輯器</div>
+      <div class="text-xs" style="color:var(--ic-choc-mid);">即時預覽 · 儲存後套用此裝置</div>
+    </div>
+    <button onclick="closeSTE()" class="text-3xl leading-none px-2" style="color:var(--ic-choc-mid);" aria-label="關閉">×</button>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="ste-tab-bar flex-shrink-0" style="background:var(--ic-surface);">
+    <button class="ste-tab ste-active" data-stab="ste-colors" onclick="switchSTETab('ste-colors',this)">🎨 顏色</button>
+    <button class="ste-tab" data-stab="ste-fonts" onclick="switchSTETab('ste-fonts',this)">📝 字體</button>
+    <button class="ste-tab" data-stab="ste-cards" onclick="switchSTETab('ste-cards',this)">🃏 卡片</button>
+  </div>
+
+  <!-- Body -->
+  <div class="ste-body">
+
+    <!-- ─── 顏色 tab ─── -->
+    <div id="ste-colors" class="ste-tabcontent">
+      <div class="ste-section">
+        <div class="ste-section-title">🍫 主色系</div>
+        <div id="ste-color-main"></div>
+      </div>
+      <div class="ste-section">
+        <div class="ste-section-title">🍓 功能色（提醒 / 完成）</div>
+        <div id="ste-color-func"></div>
+      </div>
+      <div class="ste-section">
+        <div class="ste-section-title">🍦 底色 / 背景</div>
+        <div id="ste-color-bg"></div>
+      </div>
+    </div>
+
+    <!-- ─── 字體 tab ─── -->
+    <div id="ste-fonts" class="ste-tabcontent hidden">
+      <div class="ste-section">
+        <div class="ste-section-title">基礎字體縮放（影響所有 rem 值）</div>
+        <div class="grid grid-cols-4 gap-2 mb-1">
+          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="14" onclick="setDeviceFontSize(14);_steMarkFsBtn(14)">
+            <span style="font-size:14px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+            <span style="font-size:10px;color:var(--ic-choc-mid)">小</span>
+          </button>
+          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="16" onclick="setDeviceFontSize(16);_steMarkFsBtn(16)">
+            <span style="font-size:16px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+            <span style="font-size:10px;color:var(--ic-choc-mid)">中</span>
+          </button>
+          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="18" onclick="setDeviceFontSize(18);_steMarkFsBtn(18)">
+            <span style="font-size:18px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+            <span style="font-size:10px;color:var(--ic-choc-mid)">大</span>
+          </button>
+          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="20" onclick="setDeviceFontSize(20);_steMarkFsBtn(20)">
+            <span style="font-size:20px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+            <span style="font-size:10px;color:var(--ic-choc-mid)">特大</span>
+          </button>
+        </div>
+      </div>
+      <div class="ste-section">
+        <div class="ste-section-title">字級 Token 微調（rem）</div>
+        <div id="ste-font-rows"></div>
+      </div>
+    </div>
+
+    <!-- ─── 卡片 tab ─── -->
+    <div id="ste-cards" class="ste-tabcontent hidden">
+      <div class="ste-section">
+        <div class="ste-section-title">卡片圓角</div>
+        <div class="ste-row">
+          <div class="ste-label">圓角大小 <small>rounded-2xl / rounded-xl</small></div>
+          <input type="range" id="ste-card-radius" class="ste-range" min="0" max="24" step="1" value="16"
+                 oninput="stePreviewCards()">
+          <div class="ste-font-preview"><span id="ste-card-radius-val">16</span>px</div>
+        </div>
+      </div>
+      <div class="ste-section">
+        <div class="ste-section-title">卡片間距</div>
+        <div class="ste-row">
+          <div class="ste-label">上下間距 <small>space-y-4 / py-4</small></div>
+          <input type="range" id="ste-card-gap" class="ste-range" min="4" max="32" step="4" value="16"
+                 oninput="stePreviewCards()">
+          <div class="ste-font-preview"><span id="ste-card-gap-val">16</span>px</div>
+        </div>
+      </div>
+      <div class="ste-section">
+        <div class="ste-section-title">即時預覽</div>
+        <div id="ste-card-preview" class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+          <div class="font-bold text-sm mb-2" style="color:var(--ic-chocolate);">卡片標題預覽</div>
+          <div class="text-xs" style="color:var(--ic-choc-mid);">這裡顯示卡片內文的樣子，可以看到圓角和間距的變化效果。</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.ste-body -->
+
+  <!-- Footer -->
+  <div class="ste-footer">
+    <button onclick="resetSTE()" class="btn-ghost" style="flex:1;">↺ 重置全部</button>
+    <button onclick="saveSTE()" class="btn-primary" style="flex:1;">✓ 儲存套用</button>
   </div>
 </div>
 
