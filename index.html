@@ -33,8 +33,37 @@
     --ic-surface:    #FAF7F2;  /* 卡片白底 */
     --bg: var(--ic-lemon);
     --ink: var(--ic-chocolate);
+
+    /* ── Homee Day Typography Tokens ── */
+    --font-display:   2rem;       /* 36px @ Large(18px root) */
+    --font-page:      1.5rem;     /* 27px */
+    --font-section:   1.1875rem;  /* 21.4px */
+    --font-card:      1rem;       /* 18px */
+    --font-body:      0.875rem;   /* 15.75px */
+    --font-secondary: 0.8125rem;  /* 14.6px */
+    --font-caption:   0.75rem;    /* 13.5px */
+    --font-nano:      0.6875rem;  /* 12.4px — nav tabs */
+    --font-btn:       0.9375rem;  /* 16.9px */
+    --font-btn-sm:    0.75rem;    /* 13.5px */
+    --font-input:     1rem;       /* 18px */
+    --font-close:     1.375rem;   /* 24.75px — modal × */
   }
   html { font-size: 18px; }
+
+  /* ── Homee Day Typography Utility Classes ── */
+  .t-display   { font-size: var(--font-display); }
+  .t-page      { font-size: var(--font-page); }
+  .t-section   { font-size: var(--font-section); }
+  .t-card      { font-size: var(--font-card); }
+  .t-body      { font-size: var(--font-body); }
+  .t-secondary { font-size: var(--font-secondary); }
+  .t-caption   { font-size: var(--font-caption); }
+  .t-nano      { font-size: var(--font-nano); }
+  .t-btn       { font-size: var(--font-btn); }
+  .t-btn-sm    { font-size: var(--font-btn-sm); }
+  .t-input     { font-size: var(--font-input); }
+  .t-close     { font-size: var(--font-close); }
+
   html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC','Noto Sans', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   /* iOS safe-area */
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -104,7 +133,7 @@
   .sortable-chosen { box-shadow: 0 4px 12px rgba(114,92,63,.15); }
 
   /* 翻譯按鈕 */
-  .trans-btn { font-size: 11px; color: var(--ic-caramel-dk); }
+  .trans-btn { font-size: var(--font-nano); color: var(--ic-caramel-dk); }
   .trans-btn:disabled { color: var(--ic-vanilla); cursor: wait; }
   body.translating .save-btn { opacity: .5; pointer-events: none; }
 
@@ -203,6 +232,7 @@
     background-color: var(--ic-surface) !important;
     border-color: var(--ic-vanilla) !important;
     color: var(--ic-chocolate) !important;
+    font-size: var(--font-input) !important;
   }
   input::placeholder, textarea::placeholder { color: var(--ic-choc-mid) !important; opacity: 0.6; }
 
@@ -277,9 +307,9 @@
   #atikaView > header .hdr-dropdown button { color: var(--ic-chocolate) !important; }
   /* 時間分區 */
   .atika-time-hdr { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
-  .atika-time-label { font-size:15px; font-weight:800; color:var(--ic-chocolate); letter-spacing:-0.01em; }
+  .atika-time-label { font-size:var(--font-card); font-weight:800; color:var(--ic-chocolate); letter-spacing:-0.01em; }
   .atika-time-line { flex:1; height:1px; background:var(--ic-vanilla); }
-  .atika-time-badge { font-size:10px; background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
+  .atika-time-badge { font-size:var(--font-nano); background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
   .atika-slot-section { padding:12px 16px; }
   .atika-slot-section + .atika-slot-section { border-top:1px solid var(--ic-vanilla); }
   /* 彈性任務虛線左邊框 */
@@ -293,7 +323,7 @@
   .tmpl-menu-item {
     display:flex; align-items:center; gap:8px;
     width:100%; padding:9px 16px;
-    font-size:13px; font-family:inherit;
+    font-size:var(--font-secondary); font-family:inherit;
     color:var(--ic-chocolate); background:none; border:none;
     cursor:pointer; text-align:left; white-space:nowrap;
     transition:background .15s;
@@ -314,19 +344,19 @@
   .ts-col { scroll-snap-align:start; min-width:min(78vw,220px); flex-shrink:0; border-right:1px solid var(--ic-vanilla); display:flex; flex-direction:column; }
   .ts-col:last-child { border-right:none; }
   @media(min-width:640px){ .ts-kanban { display:grid; grid-template-columns:repeat(4,1fr); overflow-x:visible; } .ts-col { min-width:auto; } }
-  .ts-col-hdr { padding:9px 12px; font-size:13px; font-weight:700; color:var(--ic-chocolate); display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--ic-vanilla); }
+  .ts-col-hdr { padding:9px 12px; font-size:var(--font-secondary); font-weight:700; color:var(--ic-chocolate); display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--ic-vanilla); }
   .ts-col[data-slot="morning"] .ts-col-hdr   { background:#FFF8EE; }
   .ts-col[data-slot="afternoon"] .ts-col-hdr { background:#FFFBF0; }
   .ts-col[data-slot="evening"] .ts-col-hdr   { background:#F4F0F8; }
   .ts-col[data-slot="flexible"] .ts-col-hdr  { background:var(--ic-lemon); }
   .ts-list { min-height:48px; padding:7px; flex:1; }
-  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:11px; color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
+  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:var(--font-caption); color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
   .ts-card:active { cursor:grabbing; }
   .ts-card .ts-dot { width:7px; height:7px; border-radius:50%; background:var(--ic-caramel); flex-shrink:0; margin-top:2px; }
   .ts-card.ts-adhoc .ts-dot { background:var(--ic-strawberry); }
   .ts-card.ts-done { opacity:0.45; }
   .ts-card.ts-done span { text-decoration:line-through; }
-  .ts-empty { font-size:10px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
+  .ts-empty { font-size:var(--font-nano); color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
   /* 底部導航 */
 
   .task-sec-hdr {
@@ -340,8 +370,8 @@
     border-left-color: var(--ic-caramel);
     background: #F5F0E8;
   }
-  .task-sec-hdr .tsh-pri { font-size: 14px; font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
-  .task-sec-hdr .tsh-sec { font-size: 11px; color: #C48080; margin-top: 2px; }
+  .task-sec-hdr .tsh-pri { font-size: var(--font-body); font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
+  .task-sec-hdr .tsh-sec { font-size: var(--font-nano); color: #C48080; margin-top: 2px; }
   .task-sec-hdr.regular .tsh-pri { color: var(--ic-chocolate); }
   .task-sec-hdr.regular .tsh-sec { color: var(--ic-choc-mid); }
 
@@ -352,7 +382,7 @@
     display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--ic-vanilla); border-radius: 10px;
     background: transparent; cursor: pointer; color: var(--ic-choc-mid);
-    font-size: 18px; line-height: 1;
+    font-size: var(--font-card); line-height: 1;
   }
   .hdr-menu-btn:active { background: var(--ic-vanilla); }
   .hdr-dropdown {
@@ -366,7 +396,7 @@
     display: flex; align-items: center; gap: 10px;
     width: 100%; padding: 12px 16px;
     background: none; border: none; cursor: pointer;
-    font-size: 14px; color: var(--ic-chocolate); text-align: left;
+    font-size: var(--font-body); color: var(--ic-chocolate); text-align: left;
   }
   .hdr-dropdown button:hover { background: var(--ic-lemon); }
   .hdr-dropdown button:not(:last-child) { border-bottom: 1px solid var(--ic-vanilla); }
@@ -382,7 +412,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 20px; height: 48px;
     background: var(--ic-caramel); color: #FAF7F2;
-    font-size: 15px; font-weight: 500; letter-spacing: 0.01em;
+    font-size: var(--font-btn); font-weight: 500; letter-spacing: 0.01em;
     border: none; border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -397,7 +427,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 20px; height: 48px;
     background: #C4706A; color: #FAF7F2;
-    font-size: 15px; font-weight: 500;
+    font-size: var(--font-btn); font-weight: 500;
     border: none; border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -410,7 +440,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 18px; height: 48px;
     background: var(--ic-surface); color: var(--ic-chocolate);
-    font-size: 15px; font-weight: 500;
+    font-size: var(--font-btn); font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -424,7 +454,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 16px; height: 48px;
     background: transparent; color: var(--ic-choc-mid);
-    font-size: 14px; font-weight: 400;
+    font-size: var(--font-body); font-weight: 400;
     border: 1px solid var(--ic-vanilla); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -436,7 +466,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 16px; height: 48px;
     background: transparent; color: #A85550;
-    font-size: 14px; font-weight: 400;
+    font-size: var(--font-body); font-weight: 400;
     border: 1px solid var(--ic-strawberry); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -448,7 +478,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 14px; height: 36px;
     background: var(--ic-caramel); color: #FAF7F2;
-    font-size: 12px; font-weight: 500;
+    font-size: var(--font-btn-sm); font-weight: 500;
     border: none; border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -461,7 +491,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-surface); color: var(--ic-chocolate);
-    font-size: 12px; font-weight: 500;
+    font-size: var(--font-btn-sm); font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -474,7 +504,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-straw-lt); color: #A85550;
-    font-size: 12px; font-weight: 500;
+    font-size: var(--font-btn-sm); font-weight: 500;
     border: 1px solid var(--ic-strawberry); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -498,19 +528,19 @@
   .ob-step { display:none; }
   .ob-step.active { display:block; }
   .ob-step-icon { font-size:48px; margin-bottom:16px; }
-  .ob-step h2 { font-size:20px; font-weight:800; color:var(--ic-choc-dk); margin-bottom:6px; }
-  .ob-step p { font-size:14px; color:var(--ic-choc-mid); line-height:1.6; margin-bottom:4px; }
+  .ob-step h2 { font-size:var(--font-section); font-weight:800; color:var(--ic-choc-dk); margin-bottom:6px; }
+  .ob-step p { font-size:var(--font-body); color:var(--ic-choc-mid); line-height:1.6; margin-bottom:4px; }
   .ob-features { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0; }
-  .ob-feat { background:var(--ic-lemon); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--ic-chocolate); }
-  .ob-feat .of-icon { font-size:18px; margin-bottom:4px; }
-  .ob-feat .of-label { font-weight:600; font-size:12px; }
-  .ob-feat .of-sub { font-size:11px; color:var(--ic-choc-mid); }
+  .ob-feat { background:var(--ic-lemon); border-radius:12px; padding:10px 12px; font-size:var(--font-secondary); color:var(--ic-chocolate); }
+  .ob-feat .of-icon { font-size:var(--font-card); margin-bottom:4px; }
+  .ob-feat .of-label { font-weight:600; font-size:var(--font-nano); }
+  .ob-feat .of-sub { font-size:var(--font-nano); color:var(--ic-choc-mid); }
   .ob-dots { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
   .ob-dot { width:8px; height:8px; border-radius:50%; background:var(--ic-vanilla); transition:background 0.2s,width 0.2s; }
   .ob-dot.active { background:var(--ic-caramel-dk); width:22px; border-radius:4px; }
   .ob-btn-row { display:flex; gap:10px; margin-top:18px; }
-  .ob-skip { flex:0; padding:12px 16px; border-radius:12px; border:none; background:transparent; color:var(--ic-choc-mid); font-size:14px; cursor:pointer; }
-  .ob-next { flex:1; padding:13px; border-radius:14px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+  .ob-skip { flex:0; padding:12px 16px; border-radius:12px; border:none; background:transparent; color:var(--ic-choc-mid); font-size:var(--font-body); cursor:pointer; }
+  .ob-next { flex:1; padding:13px; border-radius:14px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:var(--font-btn); font-weight:700; cursor:pointer; }
 
   /* ===== Custom confirm modal ===== */
   #customConfirmOverlay { display:none; position:fixed; inset:0; background:rgba(74,56,40,0.35); z-index:10000; align-items:center; justify-content:center; padding:24px; }
@@ -518,10 +548,10 @@
   #customConfirmBox { background:var(--ic-surface); border-radius:20px; padding:24px 20px 16px; max-width:320px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.18); animation:confirmPop 0.2s cubic-bezier(.34,1.56,.64,1); }
   @keyframes confirmPop { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
   #customConfirmBox .cc-icon { font-size:28px; margin-bottom:8px; }
-  #customConfirmBox .cc-msg { font-size:15px; color:var(--ic-chocolate); line-height:1.5; white-space:pre-line; }
+  #customConfirmBox .cc-msg { font-size:var(--font-body); color:var(--ic-chocolate); line-height:1.5; white-space:pre-line; }
   #customConfirmBox .cc-btns { display:flex; gap:8px; margin-top:18px; }
-  #customConfirmBox .cc-cancel { flex:1; padding:11px; border-radius:12px; border:1.5px solid var(--ic-vanilla); background:transparent; color:var(--ic-choc-mid); font-size:14px; cursor:pointer; }
-  #customConfirmBox .cc-ok { flex:1; padding:11px; border-radius:12px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+  #customConfirmBox .cc-cancel { flex:1; padding:11px; border-radius:12px; border:1.5px solid var(--ic-vanilla); background:transparent; color:var(--ic-choc-mid); font-size:var(--font-body); cursor:pointer; }
+  #customConfirmBox .cc-ok { flex:1; padding:11px; border-radius:12px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:var(--font-body); font-weight:600; cursor:pointer; }
   #customConfirmBox .cc-ok.danger { background:#A85550; }
 
   /* ===== Task completion animation ===== */
@@ -606,7 +636,7 @@
     </div>
     <p id="pinError" class="text-center text-sm mt-3 hidden" style="color:#A85550;">PIN 錯誤，請再試一次 / PIN salah, coba lagi</p>
   </div>
-  <details class="mt-6 max-w-xs w-full" style="font-size:11px;color:var(--ic-choc-mid);">
+  <details class="mt-6 max-w-xs w-full" style="font-size:var(--font-nano);color:var(--ic-choc-mid);">
     <summary class="cursor-pointer text-center opacity-50 select-none" style="list-style:none;">
       <i class="ti ti-lock" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 忘記 PIN？點此查看提示
     </summary>
@@ -662,13 +692,13 @@
               transform="rotate(-90 34 34)" style="transition:stroke-dashoffset 0.75s ease;"/>
           </svg>
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-            <span id="atikaRingPct" style="font-size:13px;font-weight:800;color:var(--ic-caramel);"></span>
+            <span id="atikaRingPct" style="font-size:var(--font-secondary);font-weight:800;color:var(--ic-caramel);"></span>
           </div>
         </div>
         <div style="flex:1;min-width:0;">
-          <div id="atikaHeroGreet" style="font-size:11px;color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgLabel" style="font-size:15px;font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgSub" style="font-size:11px;color:var(--ic-vanilla);opacity:0.7;"></div>
+          <div id="atikaHeroGreet" style="font-size:var(--font-nano);color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgLabel" style="font-size:var(--font-card);font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgSub" style="font-size:var(--font-nano);color:var(--ic-vanilla);opacity:0.7;"></div>
         </div>
       </div>
     </div>
@@ -685,13 +715,13 @@
 
     <!-- ═══ 聚焦卡：現在要做 ═══ -->
     <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
-      <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+      <div style="font-size:var(--font-nano);color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
         <i class="ti ti-player-play" style="font-size:10px;" aria-hidden="true"></i> 現在要做 / Sedang dikerjakan
       </div>
-      <div id="atikaFocusTask" style="font-size:14px;font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
+      <div id="atikaFocusTask" style="font-size:var(--font-body);font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <span id="atikaFocusDeadline" style="font-size:11px;background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
-        <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
+        <span id="atikaFocusDeadline" style="font-size:var(--font-nano);background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
+        <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:var(--font-btn-sm);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
           <i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> 完成
         </button>
       </div>
@@ -894,7 +924,7 @@
             <!-- 今日提醒（單行嵌入）-->
             <div class="border-t mt-2 pt-2" style="border-color:var(--ic-vanilla);">
               <div class="flex items-center gap-2 cursor-pointer py-0.5" onclick="toggleReminderEdit()">
-                <i class="ti ti-speakerphone" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+                <i class="ti ti-speakerphone" style="font-size:1em;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
                 <span class="text-xs font-semibold" style="color:var(--ic-chocolate);">今日提醒</span>
                 <span id="reminderPreview" class="text-xs truncate flex-1" style="color:var(--ic-choc-mid);"></span>
                 <span class="text-xs shrink-0" style="color:var(--ic-choc-mid);">編輯 ›</span>
@@ -909,7 +939,7 @@
                   <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
                 </div>
                 <div class="flex justify-end gap-2 mt-2">
-                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
+                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;">清除</button>
                   <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
                 </div>
                 <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
@@ -961,7 +991,7 @@
         <details id="mgrAdhocDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrAdhocDoneLabel"></span>
-            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:0.75em;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrAdhocDone" class="space-y-2 mt-2"></div>
         </details>
@@ -977,7 +1007,7 @@
         <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrTodayAllDoneLabel"></span>
-            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:0.75em;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrTodayAllDone" class="space-y-2 mt-2"></div>
         </details>
@@ -1017,19 +1047,19 @@
         <div class="ts-kanban-wrap">
         <div class="ts-kanban">
           <div class="ts-col" data-slot="morning">
-            <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:15px;color:#E0943A;" aria-hidden="true"></i> 早上</div>
+            <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:1em;color:#E0943A;" aria-hidden="true"></i> 早上</div>
             <div id="mgrSlotMorning" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="afternoon">
-            <div class="ts-col-hdr"><i class="ti ti-sun" style="font-size:15px;color:#D4A017;" aria-hidden="true"></i> 下午</div>
+            <div class="ts-col-hdr"><i class="ti ti-sun" style="font-size:1em;color:#D4A017;" aria-hidden="true"></i> 下午</div>
             <div id="mgrSlotAfternoon" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="evening">
-            <div class="ts-col-hdr"><i class="ti ti-moon" style="font-size:15px;color:#7B68C8;" aria-hidden="true"></i> 晚上</div>
+            <div class="ts-col-hdr"><i class="ti ti-moon" style="font-size:1em;color:#7B68C8;" aria-hidden="true"></i> 晚上</div>
             <div id="mgrSlotEvening" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="flexible">
-            <div class="ts-col-hdr"><i class="ti ti-arrows-shuffle" style="font-size:15px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 彈性</div>
+            <div class="ts-col-hdr"><i class="ti ti-arrows-shuffle" style="font-size:1em;color:var(--ic-choc-mid);" aria-hidden="true"></i> 彈性</div>
             <div id="mgrSlotFlexible" class="ts-list"></div>
           </div>
         </div>
@@ -1100,7 +1130,7 @@
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成 -->
       <div class="flex items-center justify-between mb-2">
         <div class="md:hidden text-xs flex items-center gap-1" style="color:var(--ic-choc-mid);">
-          <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
+          <i class="ti ti-arrows-left-right" style="font-size:0.75em;" aria-hidden="true"></i> 左右滑動查看各欄
         </div>
         <div class="relative ml-auto" id="supplyFlowTooltipWrap">
           <button onclick="document.getElementById('supplyFlowTooltip').classList.toggle('hidden')" class="flex items-center gap-1 text-xs" style="color:var(--ic-choc-mid);" aria-label="流程說明">
@@ -1108,9 +1138,9 @@
           </button>
           <div id="supplyFlowTooltip" class="hidden absolute right-0 top-6 z-20 rounded-xl p-3 text-xs shadow-lg w-64" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);color:var(--ic-choc-mid);">
             <div class="flex items-center gap-1.5 mb-1.5 font-semibold" style="color:var(--ic-chocolate);">備品處理流程</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:12px;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:12px;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:12px;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:0.75em;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:0.75em;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:0.75em;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
 
           </div>
         </div>
@@ -2110,10 +2140,22 @@
     <div class="mb-4">
       <label class="block text-sm font-semibold mb-2">字體大小 / Ukuran Huruf</label>
       <div class="grid grid-cols-4 gap-2">
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-xs" data-fs="14" onclick="setDeviceFontSize(14)">小</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-sm" data-fs="16" onclick="setDeviceFontSize(16)">中</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-base" data-fs="18" onclick="setDeviceFontSize(18)">大</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-lg" data-fs="20" onclick="setDeviceFontSize(20)">特大</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="14" onclick="setDeviceFontSize(14)">
+          <span style="font-size:14px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+          <span style="font-size:10px;color:var(--ic-choc-mid)">小</span>
+        </button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="16" onclick="setDeviceFontSize(16)">
+          <span style="font-size:16px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+          <span style="font-size:10px;color:var(--ic-choc-mid)">中</span>
+        </button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="18" onclick="setDeviceFontSize(18)">
+          <span style="font-size:18px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+          <span style="font-size:10px;color:var(--ic-choc-mid)">大</span>
+        </button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="20" onclick="setDeviceFontSize(20)">
+          <span style="font-size:20px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
+          <span style="font-size:10px;color:var(--ic-choc-mid)">特大</span>
+        </button>
       </div>
     </div>
 
@@ -2445,7 +2487,7 @@
 <div id="undoToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl z-[80] flex items-center gap-3 max-w-md">
   <span class="text-base">↶</span>
   <span id="undoToastMsg" class="text-sm"></span>
-  <button onclick="performUndo()" class="btn-primary" style="height:auto;padding:5px 14px;font-size:13px;">復原</button>
+  <button onclick="performUndo()" class="btn-primary" style="height:auto;padding:5px 14px;">復原</button>
   <button onclick="closeUndoToast()" class="text-gray-400 text-lg">×</button>
 </div>
 
@@ -8980,7 +9022,7 @@ function renderSupplyCatManager(){
   if (!el) return;
   el.innerHTML=state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).map(c=>`
     <div class="rounded-xl p-2.5 flex items-center gap-2 cursor-pointer" style="background:var(--ic-lemon);border:1px solid var(--ic-vanilla);" onmouseenter="this.style.borderColor='var(--ic-caramel)'" onmouseleave="this.style.borderColor='var(--ic-vanilla)'" onclick="openEditSupplyCat('${c.id}')">
-      <i class="ti ti-folder" style="font-size:15px;color:var(--ic-caramel);" aria-hidden="true"></i>
+      <i class="ti ti-folder" style="font-size:1em;color:var(--ic-caramel);" aria-hidden="true"></i>
       <div class="flex-1 min-w-0">
         <div class="font-semibold text-sm" style="color:var(--ic-chocolate);">${c.nameZh}</div>
         <div class="id-text text-xs" style="color:var(--ic-choc-mid);">${c.nameId}</div>
