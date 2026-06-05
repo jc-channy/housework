@@ -874,76 +874,77 @@
 
     <!-- 本週概覽 -->
     <div id="tab-week" class="tab-content hidden">
-      <!-- Atika 今日進度 -->
-      <div id="mgrAtikaDayCard" class="hidden mb-4 rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
-            <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+      <!-- 雙欄版面：桌機左欄（進度+提醒+需處理+發薪）+ 右欄（時間軸）-->
+      <div class="md:grid md:grid-cols-2 md:gap-4 md:items-start mb-4">
+        <!-- 左欄 -->
+        <div class="space-y-3 mb-3 md:mb-0">
+          <!-- Atika 今日進度（含今日提醒） -->
+          <div id="mgrAtikaDayCard" class="hidden rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+                <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+              </div>
+              <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+            </div>
+            <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
+              <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+            </div>
+            <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
+            <!-- 今日提醒（單行嵌入）-->
+            <div class="border-t mt-2 pt-2" style="border-color:var(--ic-vanilla);">
+              <div class="flex items-center gap-2 cursor-pointer py-0.5" onclick="toggleReminderEdit()">
+                <i class="ti ti-speakerphone" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+                <span class="text-xs font-semibold" style="color:var(--ic-chocolate);">今日提醒</span>
+                <span id="reminderPreview" class="text-xs truncate flex-1" style="color:var(--ic-choc-mid);"></span>
+                <span class="text-xs shrink-0" style="color:var(--ic-choc-mid);">編輯 ›</span>
+              </div>
+              <div id="reminderInlineEdit" class="hidden mt-2">
+                <div class="flex gap-2 items-start mb-2">
+                  <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
+                  <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+                </div>
+                <div class="flex gap-2 items-start">
+                  <textarea id="mgrReminderId" rows="2" data-lang="id" data-pair="mgrReminderZh" class="id-text flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="Misalnya: Kucing ke dokter"></textarea>
+                  <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+                </div>
+                <div class="flex justify-end gap-2 mt-2">
+                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
+                  <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
+                </div>
+                <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
+              </div>
+            </div>
           </div>
-          <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
-        </div>
-        <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
-          <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
-        </div>
-        <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
-      </div>
 
-      <!-- 需要你處理 -->
-      <div id="mgrActionBlock" class="hidden mb-4 rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
-        <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
-          <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
-          <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
-          <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
-        </div>
-        <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
-      </div>
-
-      <!-- 發薪日提醒 Banner -->
-      <div id="paydayBanner" class="hidden mb-4 rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-lemon);border:1px solid var(--ic-caramel);">
-        <i class="ti ti-cash" style="font-size:22px;color:var(--ic-caramel-dk);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
-        <div class="flex-1 min-w-0">
-          <div id="paydayBannerText" class="text-sm font-semibold" style="color:var(--ic-chocolate);"></div>
-          <button onclick="switchTab('payroll')" class="text-xs mt-1 font-semibold" style="color:var(--ic-caramel-dk);">查看薪資報表 →</button>
-        </div>
-        <button onclick="document.getElementById('paydayBanner').classList.add('hidden')" class="text-lg leading-none" style="color:var(--ic-choc-mid);opacity:0.6;">×</button>
-      </div>
-
-
-      <!-- 本日提醒 + 今日時間軸（左右並排） -->
-      <div class="grid md:grid-cols-2 gap-3 mb-4">
-        <!-- 本日提醒（折疊式）H-01 -->
-        <details id="reminderDetails" class="reminder-banner rounded-2xl overflow-hidden" style="border:2px solid var(--ic-caramel);">
-          <summary class="px-3 py-2.5 flex items-center gap-2 cursor-pointer select-none" style="background:var(--ic-lemon);list-style:none;">
-            <i class="ti ti-speakerphone" style="font-size:14px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
-            <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日提醒</span>
-            <span id="reminderPreview" class="text-xs truncate flex-1 ml-1" style="color:var(--ic-choc-mid);"></span>
-            <i class="ti ti-chevron-down reminder-chevron" style="font-size:12px;color:var(--ic-choc-mid);transition:transform .2s;" aria-hidden="true"></i>
-          </summary>
-          <div class="px-3 pb-3 pt-2" style="border-top:1px solid var(--ic-vanilla);">
-            <div class="flex gap-2 items-start mb-2">
-              <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
-              <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <!-- 需要你處理 -->
+          <div id="mgrActionBlock" class="hidden rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
+            <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
+              <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
+              <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
+              <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
             </div>
-            <div class="flex gap-2 items-start">
-              <textarea id="mgrReminderId" rows="2" data-lang="id" data-pair="mgrReminderZh" class="id-text flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="Misalnya: Kucing ke dokter"></textarea>
-              <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
-            </div>
-            <div class="flex justify-end gap-2 mt-2">
-              <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
-              <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
-            </div>
-            <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
+            <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
           </div>
-        </details>
 
-        <!-- 今日時間軸 -->
+          <!-- 發薪日提醒 Banner -->
+          <div id="paydayBanner" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-lemon);border:1px solid var(--ic-caramel);">
+            <i class="ti ti-cash" style="font-size:22px;color:var(--ic-caramel-dk);flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+            <div class="flex-1 min-w-0">
+              <div id="paydayBannerText" class="text-sm font-semibold" style="color:var(--ic-chocolate);"></div>
+              <button onclick="switchTab('payroll')" class="text-xs mt-1 font-semibold" style="color:var(--ic-caramel-dk);">查看薪資報表 →</button>
+            </div>
+            <button onclick="document.getElementById('paydayBanner').classList.add('hidden')" class="text-lg leading-none" style="color:var(--ic-choc-mid);opacity:0.6;">×</button>
+          </div>
+        </div>
+
+        <!-- 右欄：今日時間軸 -->
         <section>
           <div class="flex items-center justify-between mb-2">
             <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日時間軸</h3>
             <span id="timelineCount" class="text-xs text-gray-500"></span>
           </div>
-          <div id="todayTimeline" class="bg-white border border-gray-200 rounded-xl p-3 max-h-60 overflow-y-auto"></div>
+          <div id="todayTimeline" class="bg-white border border-gray-200 rounded-xl p-3 max-h-96 overflow-y-auto"></div>
         </section>
       </div>
 
@@ -6293,6 +6294,8 @@ function renderTodayTimeline(){
   // 打卡事件
   const punches = state.punchLog?.[td] || [];
   const ptypeMap = PUNCH_TYPES.reduce((m,p)=>(m[p.id]=p,m),{});
+  // Q1: 合併動態小憩打卡 ID（rest_<rsId>_start / end）
+  try{ getPunchPlanForDate().forEach(p=>{ if(!ptypeMap[p.id]) ptypeMap[p.id]=p; }); }catch(e){}
   punches.forEach(p=>{
     const pt = ptypeMap[p.type];
     if (!pt) return;
@@ -8635,6 +8638,10 @@ function updateReminderPreview(){
     p.style.color='var(--ic-choc-mid)';
   }
 }
+function toggleReminderEdit(){
+  const el=document.getElementById('reminderInlineEdit');
+  if(el) el.classList.toggle('hidden');
+}
 function saveReminder(){
   const zh=document.getElementById('mgrReminderZh').value.trim();
   const id=document.getElementById('mgrReminderId').value.trim();
@@ -8642,8 +8649,8 @@ function saveReminder(){
   state.reminders[ymd(today())]={zh, id, by:state.currentUser.name, at:new Date().toISOString()};
   save(); renderManagerView();
   // 儲存後自動收合提醒區塊
-  const d=document.getElementById('reminderDetails');
-  if(d) d.removeAttribute('open');
+  const d=document.getElementById('reminderInlineEdit');
+  if(d) d.classList.add('hidden');
   alert('已儲存 / Tersimpan');
 }
 function clearReminder(){
