@@ -681,6 +681,16 @@
 
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
+    <!-- ═══ 本日提醒（獨立區塊，進度環上方）═══ -->
+    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
+      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
+      <div class="flex-1">
+        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
+        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
+        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+      </div>
+    </div>
+
     <!-- ═══ Hero 進度環 ═══ -->
     <div id="atikaHeroCard" class="rounded-2xl p-4" style="background:var(--ic-choc-dk);">
       <div class="flex items-center gap-4">
@@ -700,16 +710,6 @@
           <div id="atikaHeroProgLabel" style="font-size:var(--font-card);font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
           <div id="atikaHeroProgSub" style="font-size:var(--font-nano);color:var(--ic-vanilla);opacity:0.7;"></div>
         </div>
-      </div>
-    </div>
-
-    <!-- ═══ 本日提醒（獨立區塊，打卡上方）═══ -->
-    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
-      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
-      <div class="flex-1">
-        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
-        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
-        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
       </div>
     </div>
 
@@ -774,7 +774,7 @@
       <!-- 標題列 + 新增按鈕 -->
       <div class="flex items-center justify-between px-4 pt-3 pb-2">
         <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日任務 / Tugas Hari Ini</span>
-        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增</button>
+        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增臨時工作</button>
       </div>
 
       <!-- 全部完成慶祝 empty state -->
@@ -6062,12 +6062,12 @@ function getPunchPlanForDate(d=today()){
     rests.forEach(rs=>{
       plan.push({
         id:'rest_'+rs.id+'_start', emoji:'ti ti-moon',
-        zh:`${rs.nameZh} 起`, id_:`${rs.nameId||rs.nameZh} mulai`,
+        zh:`${rs.nameZh} 開始`, id_:`${rs.nameId||rs.nameZh} mulai`,
         kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
       });
       plan.push({
         id:'rest_'+rs.id+'_end', emoji:'ti ti-sun',
-        zh:`${rs.nameZh} 收`, id_:`${rs.nameId||rs.nameZh} kembali`,
+        zh:`${rs.nameZh} 結束`, id_:`${rs.nameId||rs.nameZh} kembali`,
         kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
       });
     });
@@ -6092,7 +6092,7 @@ function getPunchMetaByType(type, d=today()){
     if (rs){
       return {
         id:type, emoji: isStart?'<i class="ti ti-moon" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i>':'<i class="ti ti-sun" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i>',
-        zh: `${rs.nameZh} ${isStart?'起':'收'}`,
+        zh: `${rs.nameZh} ${isStart?'開始':'結束'}`,
         id_: `${rs.nameId||rs.nameZh} ${isStart?'mulai':'kembali'}`,
         kind:'rest', rsId,
       };
@@ -6188,9 +6188,9 @@ function renderPunchSection(){
         ? 'background:var(--ic-straw-lt);border:1px solid var(--ic-strawberry);'
         : 'background:var(--ic-mint-lt);border:1px solid var(--ic-mint);';
       return `<button onclick="openPunchEdit('${pt.id}')"
-        style="${chipStyle}border-radius:10px;padding:4px 8px;display:inline-flex;flex-direction:column;align-items:center;width:68px;box-sizing:border-box;"
+        style="${chipStyle}border-radius:10px;padding:4px 8px;display:inline-flex;flex-direction:column;align-items:center;min-width:60px;max-width:100px;box-sizing:border-box;"
         class="active:scale-95 transition-transform">
-        <span class="text-[10px] truncate w-full text-center" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
+        <span class="text-[10px] text-center leading-tight" style="color:var(--ic-choc-mid);word-break:keep-all;"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
         <span class="font-bold tabular-nums text-sm" style="color:var(--ic-chocolate)">${p.at}</span>
         ${bf ? '<span class="text-[9px] font-bold" style="color:#A85550">補打</span>' : ''}
       </button>`;
