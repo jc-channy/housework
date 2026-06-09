@@ -3954,11 +3954,11 @@ function renderMenuWeekStrip(){
   const DOW_LBL = ['日','一','二','三','四','五','六'];
   const todayIdx = DOW_ORDER.indexOf(todayDow);
 
-  const thStyle = 'padding:8px 4px;text-align:center;font-size:15px;font-weight:600;color:var(--ic-chocolate);border-bottom:0.5px solid var(--ic-vanilla);';
+  const thStyle = 'padding:8px 4px;text-align:center;font-size:17px;font-weight:600;color:var(--ic-chocolate);border-bottom:0.5px solid var(--ic-vanilla);';
   let html = `<div style="overflow-x:auto;width:100%;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">
     <thead><tr>
-      <th style="width:34px;${thStyle}"></th>
-      ${meals.map(m=>`<th style="${thStyle}">${m.name}${m.mealTime?`<br><span style="font-size:11px;font-weight:400;color:var(--ic-choc-mid);">${m.mealTime}</span>`:''}</th>`).join('')}
+      <th style="width:36px;${thStyle}"></th>
+      ${meals.map(m=>`<th style="${thStyle}">${m.name}${m.mealTime?`<br><span style="font-size:12px;font-weight:400;color:var(--ic-choc-mid);">${m.mealTime}</span>`:''}</th>`).join('')}
     </tr></thead>
     <tbody>`;
 
@@ -3971,8 +3971,8 @@ function renderMenuWeekStrip(){
     const dowColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-choc-mid)';
     html += `<tr style="${rowBg}border-bottom:0.5px solid var(--ic-vanilla);">
       <td style="padding:5px 3px;text-align:center;vertical-align:middle;">
-        <div style="font-size:13px;color:${dowColor};font-weight:${isToday?700:400};">${DOW_LBL[dow]}</div>
-        <div style="font-size:15px;color:${dowColor};font-weight:${isToday?700:500};">${dateNum}</div>
+        <div style="font-size:15px;color:${dowColor};font-weight:${isToday?700:400};">${DOW_LBL[dow]}</div>
+        <div style="font-size:17px;color:${dowColor};font-weight:${isToday?700:500};">${dateNum}</div>
       </td>`;
     meals.forEach(meal => {
       const key = getMenuKey(dow, meal.id);
@@ -4223,13 +4223,13 @@ function renderMenuGrid(){
 function renderMenuCell(key, cell, isToday){
   const border = isToday ? 'border:1.5px solid var(--ic-caramel);' : 'border:0.5px solid var(--ic-vanilla);';
   if (!cell || cell.type==='empty'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:56px;border-radius:8px;background:var(--ic-surface);${border}cursor:pointer;display:flex;align-items:center;justify-content:center;">
-      <span style="font-size:16px;color:var(--ic-vanilla);">＋</span>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:var(--ic-surface);${border}cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:18px;color:var(--ic-vanilla);">＋</span>
     </div>`;
   }
   if (cell.type==='skip'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:56px;border-radius:8px;background:#F3F4F6;${border}cursor:pointer;padding:6px 8px;display:flex;flex-direction:column;justify-content:center;gap:2px;">
-      <span style="font-size:12px;color:#9CA3AF;">✕ ${cell.skipReason||'不煮'}</span>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:#F3F4F6;${border}cursor:pointer;padding:8px;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+      <span style="font-size:13px;color:#9CA3AF;">✕ ${cell.skipReason||'不煮'}</span>
     </div>`;
   }
   // cook
@@ -4237,15 +4237,15 @@ function renderMenuCell(key, cell, isToday){
   const catColors = state.mealConfig?.ingCategoryColors||{};
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.slice(0,3).map(d=>{
-    const methodChip = d.cookMethod ? `<span style="font-size:11px;font-weight:600;padding:1px 6px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:18px;">${d.cookMethod}</span>` : '';
+    const methodChip = d.cookMethod ? `<span style="font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:19px;">${d.cookMethod}</span>` : '';
     const nameStr = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '';
-    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:11px;padding:1px 5px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
-    return `<div style="display:flex;align-items:center;gap:3px;overflow:hidden;margin-bottom:3px;flex-wrap:nowrap;">${methodChip}${nameStr?`<span style="font-size:13px;color:var(--ic-chocolate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
+    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:12px;padding:1px 5px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
+    return `<div style="display:flex;align-items:center;gap:3px;overflow:hidden;margin-bottom:4px;flex-wrap:nowrap;">${methodChip}${nameStr?`<span style="font-size:14px;color:var(--ic-chocolate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
   }).join('');
-  const more = dishes.length>3 ? `<span style="font-size:11px;color:var(--ic-caramel);">+${dishes.length-3}</span>` : '';
-  return `<div onclick="openMenuCellModal('${key}')" style="min-height:56px;border-radius:8px;background:var(--ic-lemon);${border}cursor:pointer;padding:6px 8px;">
+  const more = dishes.length>3 ? `<span style="font-size:12px;color:var(--ic-caramel);">+${dishes.length-3}</span>` : '';
+  return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:var(--ic-lemon);${border}cursor:pointer;padding:8px;">
     ${dishHtml}${more}
-    ${!dishes.length?`<span style="font-size:13px;color:var(--ic-caramel);">＋</span>`:''}
+    ${!dishes.length?`<span style="font-size:14px;color:var(--ic-caramel);">＋</span>`:''}
   </div>`;
 }
 
