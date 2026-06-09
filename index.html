@@ -1230,7 +1230,7 @@
           <!-- 組別列 -->
           <div id="menuSetSelector" class="flex items-center gap-2 px-4 py-3 flex-wrap" style="border-bottom:1px solid var(--ic-vanilla);"></div>
           <!-- 週狀態一覽 -->
-          <div id="menuWeekStrip" class="flex gap-1 px-3 py-3" style="border-bottom:1px solid var(--ic-vanilla);"></div>
+          <div id="menuWeekStrip" style="border-bottom:1px solid var(--ic-vanilla);padding:0;"></div>
           <!-- 日詳細 -->
           <div id="menuDayDetail" class="px-4 pt-3 pb-5"></div>
           <!-- 設定按鈕 -->
@@ -3947,34 +3947,46 @@ function renderMenuWeekStrip(){
   const el = document.getElementById('menuWeekStrip');
   if (!el) return;
   const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
+  if (!meals.length){ el.innerHTML='<p style="font-size:12px;color:var(--ic-choc-mid);padding:8px 12px;">請先在「設定餐次」啟用至少一餐</p>'; return; }
   const todayDow = today().getDay();
-  if (_menuActiveDow === null) _menuActiveDow = todayDow;
+  const todayDate = today();
   const DOW_ORDER = [1,2,3,4,5,6,0];
   const DOW_LBL = ['日','一','二','三','四','五','六'];
   const todayIdx = DOW_ORDER.indexOf(todayDow);
-  const todayDate = today();
-  const getDotColor = (dow, meal) => {
-    const key = getMenuKey(dow, meal.id);
-    const cell = state.weekMenu[key];
-    if (!cell || cell.type==='empty') return 'var(--ic-vanilla)';
-    if (cell.type==='skip') return 'var(--ic-strawberry)';
-    return 'var(--ic-mint)';
-  };
-  el.innerHTML = DOW_ORDER.map((dow, idx) => {
+
+  const thStyle = 'padding:6px 4px;text-align:center;font-size:10px;font-weight:600;color:var(--ic-chocolate);border-bottom:0.5px solid var(--ic-vanilla);';
+  let html = `<div style="overflow-x:auto;width:100%;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+    <thead><tr>
+      <th style="width:30px;${thStyle}"></th>
+      ${meals.map(m=>`<th style="${thStyle}">${m.name}${m.mealTime?`<br><span style="font-size:8px;font-weight:400;color:var(--ic-choc-mid);">${m.mealTime}</span>`:''}</th>`).join('')}
+    </tr></thead>
+    <tbody>`;
+
+  DOW_ORDER.forEach((dow, idx) => {
     const isToday = dow === todayDow;
-    const isActive = dow === _menuActiveDow;
     const diff = idx - todayIdx;
     const d = new Date(todayDate); d.setDate(d.getDate()+diff);
     const dateNum = d.getDate();
-    const dots = meals.map(m =>
-      `<div style="width:5px;height:5px;border-radius:50%;background:${isToday?'var(--ic-caramel)':getDotColor(dow,m)};"></div>`
-    ).join('') || `<div style="width:5px;height:5px;border-radius:50%;background:var(--ic-vanilla);"></div>`;
-    return `<div onclick="setMenuDay(${dow})" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:10px;cursor:pointer;border:1.5px solid ${isActive?'var(--ic-caramel)':'transparent'};background:${isActive?'var(--ic-lemon)':'transparent'};">
-      <div style="font-size:9px;color:var(--ic-choc-mid);">${DOW_LBL[dow]}</div>
-      <div style="font-size:13px;color:${isToday?'var(--ic-caramel-dk)':'var(--ic-chocolate)'};font-weight:${isToday?600:400};">${dateNum}</div>
-      <div style="display:flex;gap:2px;">${dots}</div>
-    </div>`;
-  }).join('');
+    const rowBg = isToday ? 'background:rgba(198,134,66,0.05);' : '';
+    const dowColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-choc-mid)';
+    html += `<tr style="${rowBg}border-bottom:0.5px solid var(--ic-vanilla);">
+      <td style="padding:5px 3px;text-align:center;vertical-align:middle;">
+        <div style="font-size:9px;color:${dowColor};font-weight:${isToday?700:400};">${DOW_LBL[dow]}</div>
+        <div style="font-size:11px;color:${dowColor};font-weight:${isToday?700:500};">${dateNum}</div>
+      </td>`;
+    meals.forEach(meal => {
+      const key = getMenuKey(dow, meal.id);
+      html += `<td style="padding:4px;vertical-align:top;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  el.innerHTML = html;
+
+  // hide legacy day detail
+  const dd = document.getElementById('menuDayDetail');
+  if (dd) dd.style.display = 'none';
 }
 
 function setMenuDay(dow){
@@ -4085,7 +4097,7 @@ function renderMenuSetSelector(){
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
     const safeId = s.id.replace(/'/g,"\'");
-    const cycleIcon = s.cycleOn ? '<i class="ti ti-refresh" style="font-size:10px;opacity:0.7;vertical-align:-1px;" aria-hidden="true"></i> ' : '';
+    const cycleIcon = s.cycleOn ? '<span style="color:#6BAF92;font-size:9px;margin-right:2px;">●</span>' : '';
     const badge = isThisWeek ? ' <span style="font-size:9px;opacity:0.85;">★本週</span>' : '';
     return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:11px;padding:4px 11px;border-radius:99px;border:0.5px solid;cursor:pointer;">${cycleIcon}${s.name}${badge}</button>`;
   }).join('');
@@ -4211,30 +4223,29 @@ function renderMenuGrid(){
 function renderMenuCell(key, cell, isToday){
   const border = isToday ? 'border:1.5px solid var(--ic-caramel);' : 'border:0.5px solid var(--ic-vanilla);';
   if (!cell || cell.type==='empty'){
-    return `<div onclick="openMenuCellModal('${key}')" class="rounded-xl cursor-pointer flex items-center justify-center min-h-[72px] hover:opacity-80 transition-opacity" style="background:var(--ic-surface);${border}">
-      <i class="ti ti-plus" style="font-size:16px;color:var(--ic-vanilla);" aria-hidden="true"></i>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:44px;border-radius:8px;background:var(--ic-surface);${border}cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:14px;color:var(--ic-vanilla);">＋</span>
     </div>`;
   }
   if (cell.type==='skip'){
-    return `<div onclick="openMenuCellModal('${key}')" class="rounded-xl cursor-pointer p-2 min-h-[72px] hover:opacity-80 transition-opacity" style="background:#F3F4F6;${border}">
-      <div class="text-xs font-semibold text-gray-500 mb-1"><i class="ti ti-x" style="font-size:11px;" aria-hidden="true"></i> 不煮</div>
-      <div class="text-xs text-gray-400" style="font-size:10px;">${cell.skipReason||''}</div>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:44px;border-radius:8px;background:#F3F4F6;${border}cursor:pointer;padding:5px 6px;display:flex;flex-direction:column;justify-content:center;gap:2px;">
+      <span style="font-size:9px;color:#9CA3AF;">✕ ${cell.skipReason||'不煮'}</span>
     </div>`;
   }
   // cook
   const dishes = cell.dishes||[];
   const catColors = state.mealConfig?.ingCategoryColors||{};
   const allIngs = state.ingredients||[];
-  const dishHtml = dishes.slice(0,2).map(d=>{
-    const methodChip = d.cookMethod ? `<span class="inline-block rounded-full px-1.5 mr-1 flex-shrink-0" style="font-size:9px;font-weight:600;background:var(--ic-caramel);color:#FAF7F2;line-height:16px;">${d.cookMethod}</span>` : '';
-    const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
-    const label = d.dishName || ingNames || '未命名';
-    return `<div class="flex items-start gap-0.5 mb-0.5">${methodChip}<span class="truncate" style="font-size:10px;font-weight:500;color:var(--ic-chocolate);">・${label}</span></div>`;
+  const dishHtml = dishes.slice(0,3).map(d=>{
+    const methodChip = d.cookMethod ? `<span style="font-size:8px;font-weight:600;padding:0 4px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:14px;">${d.cookMethod}</span>` : '';
+    const nameStr = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '';
+    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:8px;padding:0 3px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
+    return `<div style="display:flex;align-items:center;gap:2px;overflow:hidden;margin-bottom:2px;flex-wrap:nowrap;">${methodChip}${nameStr?`<span style="font-size:9px;color:var(--ic-chocolate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
   }).join('');
-  const more = dishes.length>2 ? `<div style="font-size:9px;color:var(--ic-caramel);">+${dishes.length-2} 道</div>` : '';
-  return `<div onclick="openMenuCellModal('${key}')" class="rounded-xl cursor-pointer p-2 min-h-[72px] hover:opacity-80 transition-opacity" style="background:var(--ic-lemon);${border}">
+  const more = dishes.length>3 ? `<span style="font-size:8px;color:var(--ic-caramel);">+${dishes.length-3}</span>` : '';
+  return `<div onclick="openMenuCellModal('${key}')" style="min-height:44px;border-radius:8px;background:var(--ic-lemon);${border}cursor:pointer;padding:5px 6px;">
     ${dishHtml}${more}
-    ${!dishes.length?`<span style="font-size:10px;color:var(--ic-caramel);">＋ 新增菜色</span>`:''}
+    ${!dishes.length?`<span style="font-size:10px;color:var(--ic-caramel);">＋</span>`:''}
   </div>`;
 }
 
@@ -4635,9 +4646,11 @@ function renderTodayMenuCard(){
           const noteDisplay = d.noteId || d.note || '';
           return `<div class="flex items-start gap-2">
             ${d.cookMethod?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${d.cookMethod}</span>`:''}
-            <div>
-              <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">${name}</div>
-              ${ingNames?`<div class="flex flex-wrap gap-1 mt-1">${ingNames}</div>`:''}
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden;">
+                <span class="text-sm font-semibold shrink-0" style="color:var(--ic-chocolate);">${name}</span>
+                ${ingNames}
+              </div>
               ${noteDisplay?`<div class="text-[10px] mt-0.5" style="font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</div>`:''}
             </div>
           </div>`;
