@@ -33,37 +33,8 @@
     --ic-surface:    #FAF7F2;  /* 卡片白底 */
     --bg: var(--ic-lemon);
     --ink: var(--ic-chocolate);
-
-    /* ── Homee Day Typography Tokens ── */
-    --font-display:   2rem;       /* 36px @ Large(18px root) */
-    --font-page:      1.5rem;     /* 27px */
-    --font-section:   1.1875rem;  /* 21.4px */
-    --font-card:      1rem;       /* 18px */
-    --font-body:      0.875rem;   /* 15.75px */
-    --font-secondary: 0.8125rem;  /* 14.6px */
-    --font-caption:   0.75rem;    /* 13.5px */
-    --font-nano:      0.6875rem;  /* 12.4px — nav tabs */
-    --font-btn:       0.9375rem;  /* 16.9px */
-    --font-btn-sm:    0.75rem;    /* 13.5px */
-    --font-input:     1rem;       /* 18px */
-    --font-close:     1.375rem;   /* 24.75px — modal × */
   }
   html { font-size: 18px; }
-
-  /* ── Homee Day Typography Utility Classes ── */
-  .t-display   { font-size: var(--font-display); }
-  .t-page      { font-size: var(--font-page); }
-  .t-section   { font-size: var(--font-section); }
-  .t-card      { font-size: var(--font-card); }
-  .t-body      { font-size: var(--font-body); }
-  .t-secondary { font-size: var(--font-secondary); }
-  .t-caption   { font-size: var(--font-caption); }
-  .t-nano      { font-size: var(--font-nano); }
-  .t-btn       { font-size: var(--font-btn); }
-  .t-btn-sm    { font-size: var(--font-btn-sm); }
-  .t-input     { font-size: var(--font-input); }
-  .t-close     { font-size: var(--font-close); }
-
   html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC','Noto Sans', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   /* iOS safe-area */
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -133,7 +104,7 @@
   .sortable-chosen { box-shadow: 0 4px 12px rgba(114,92,63,.15); }
 
   /* 翻譯按鈕 */
-  .trans-btn { font-size: var(--font-nano); color: var(--ic-caramel-dk); }
+  .trans-btn { font-size: 11px; color: var(--ic-caramel-dk); }
   .trans-btn:disabled { color: var(--ic-vanilla); cursor: wait; }
   body.translating .save-btn { opacity: .5; pointer-events: none; }
 
@@ -232,7 +203,6 @@
     background-color: var(--ic-surface) !important;
     border-color: var(--ic-vanilla) !important;
     color: var(--ic-chocolate) !important;
-    font-size: var(--font-input) !important;
   }
   input::placeholder, textarea::placeholder { color: var(--ic-choc-mid) !important; opacity: 0.6; }
 
@@ -307,9 +277,9 @@
   #atikaView > header .hdr-dropdown button { color: var(--ic-chocolate) !important; }
   /* 時間分區 */
   .atika-time-hdr { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
-  .atika-time-label { font-size:var(--font-card); font-weight:800; color:var(--ic-chocolate); letter-spacing:-0.01em; }
+  .atika-time-label { font-size:15px; font-weight:800; color:var(--ic-chocolate); letter-spacing:-0.01em; }
   .atika-time-line { flex:1; height:1px; background:var(--ic-vanilla); }
-  .atika-time-badge { font-size:var(--font-nano); background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
+  .atika-time-badge { font-size:10px; background:var(--ic-lemon); border-radius:20px; padding:2px 8px; color:var(--ic-chocolate); white-space:nowrap; }
   .atika-slot-section { padding:12px 16px; }
   .atika-slot-section + .atika-slot-section { border-top:1px solid var(--ic-vanilla); }
   /* 彈性任務虛線左邊框 */
@@ -323,7 +293,7 @@
   .tmpl-menu-item {
     display:flex; align-items:center; gap:8px;
     width:100%; padding:9px 16px;
-    font-size:var(--font-secondary); font-family:inherit;
+    font-size:13px; font-family:inherit;
     color:var(--ic-chocolate); background:none; border:none;
     cursor:pointer; text-align:left; white-space:nowrap;
     transition:background .15s;
@@ -344,19 +314,19 @@
   .ts-col { scroll-snap-align:start; min-width:min(78vw,220px); flex-shrink:0; border-right:1px solid var(--ic-vanilla); display:flex; flex-direction:column; }
   .ts-col:last-child { border-right:none; }
   @media(min-width:640px){ .ts-kanban { display:grid; grid-template-columns:repeat(4,1fr); overflow-x:visible; } .ts-col { min-width:auto; } }
-  .ts-col-hdr { padding:9px 12px; font-size:var(--font-secondary); font-weight:700; color:var(--ic-chocolate); display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--ic-vanilla); }
+  .ts-col-hdr { padding:9px 12px; font-size:13px; font-weight:700; color:var(--ic-chocolate); display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--ic-vanilla); }
   .ts-col[data-slot="morning"] .ts-col-hdr   { background:#FFF8EE; }
   .ts-col[data-slot="afternoon"] .ts-col-hdr { background:#FFFBF0; }
   .ts-col[data-slot="evening"] .ts-col-hdr   { background:#F4F0F8; }
   .ts-col[data-slot="flexible"] .ts-col-hdr  { background:var(--ic-lemon); }
   .ts-list { min-height:48px; padding:7px; flex:1; }
-  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:var(--font-caption); color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
+  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:11px; color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
   .ts-card:active { cursor:grabbing; }
   .ts-card .ts-dot { width:7px; height:7px; border-radius:50%; background:var(--ic-caramel); flex-shrink:0; margin-top:2px; }
   .ts-card.ts-adhoc .ts-dot { background:var(--ic-strawberry); }
   .ts-card.ts-done { opacity:0.45; }
   .ts-card.ts-done span { text-decoration:line-through; }
-  .ts-empty { font-size:var(--font-nano); color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
+  .ts-empty { font-size:10px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
   /* 底部導航 */
 
   .task-sec-hdr {
@@ -370,8 +340,8 @@
     border-left-color: var(--ic-caramel);
     background: #F5F0E8;
   }
-  .task-sec-hdr .tsh-pri { font-size: var(--font-body); font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
-  .task-sec-hdr .tsh-sec { font-size: var(--font-nano); color: #C48080; margin-top: 2px; }
+  .task-sec-hdr .tsh-pri { font-size: 14px; font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
+  .task-sec-hdr .tsh-sec { font-size: 11px; color: #C48080; margin-top: 2px; }
   .task-sec-hdr.regular .tsh-pri { color: var(--ic-chocolate); }
   .task-sec-hdr.regular .tsh-sec { color: var(--ic-choc-mid); }
 
@@ -382,7 +352,7 @@
     display: flex; align-items: center; justify-content: center;
     border: 1px solid var(--ic-vanilla); border-radius: 10px;
     background: transparent; cursor: pointer; color: var(--ic-choc-mid);
-    font-size: var(--font-card); line-height: 1;
+    font-size: 18px; line-height: 1;
   }
   .hdr-menu-btn:active { background: var(--ic-vanilla); }
   .hdr-dropdown {
@@ -396,7 +366,7 @@
     display: flex; align-items: center; gap: 10px;
     width: 100%; padding: 12px 16px;
     background: none; border: none; cursor: pointer;
-    font-size: var(--font-body); color: var(--ic-chocolate); text-align: left;
+    font-size: 14px; color: var(--ic-chocolate); text-align: left;
   }
   .hdr-dropdown button:hover { background: var(--ic-lemon); }
   .hdr-dropdown button:not(:last-child) { border-bottom: 1px solid var(--ic-vanilla); }
@@ -412,7 +382,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 20px; height: 48px;
     background: var(--ic-caramel); color: #FAF7F2;
-    font-size: var(--font-btn); font-weight: 500; letter-spacing: 0.01em;
+    font-size: 15px; font-weight: 500; letter-spacing: 0.01em;
     border: none; border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -427,7 +397,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 20px; height: 48px;
     background: #C4706A; color: #FAF7F2;
-    font-size: var(--font-btn); font-weight: 500;
+    font-size: 15px; font-weight: 500;
     border: none; border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -440,7 +410,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 18px; height: 48px;
     background: var(--ic-surface); color: var(--ic-chocolate);
-    font-size: var(--font-btn); font-weight: 500;
+    font-size: 15px; font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, border-color 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -454,7 +424,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 16px; height: 48px;
     background: transparent; color: var(--ic-choc-mid);
-    font-size: var(--font-body); font-weight: 400;
+    font-size: 14px; font-weight: 400;
     border: 1px solid var(--ic-vanilla); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -466,7 +436,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 16px; height: 48px;
     background: transparent; color: #A85550;
-    font-size: var(--font-body); font-weight: 400;
+    font-size: 14px; font-weight: 400;
     border: 1px solid var(--ic-strawberry); border-radius: 14px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     -webkit-tap-highlight-color: transparent;
@@ -478,7 +448,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 14px; height: 36px;
     background: var(--ic-caramel); color: #FAF7F2;
-    font-size: var(--font-btn-sm); font-weight: 500;
+    font-size: 12px; font-weight: 500;
     border: none; border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -491,7 +461,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-surface); color: var(--ic-chocolate);
-    font-size: var(--font-btn-sm); font-weight: 500;
+    font-size: 12px; font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -504,7 +474,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-straw-lt); color: #A85550;
-    font-size: var(--font-btn-sm); font-weight: 500;
+    font-size: 12px; font-weight: 500;
     border: 1px solid var(--ic-strawberry); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -528,19 +498,19 @@
   .ob-step { display:none; }
   .ob-step.active { display:block; }
   .ob-step-icon { font-size:48px; margin-bottom:16px; }
-  .ob-step h2 { font-size:var(--font-section); font-weight:800; color:var(--ic-choc-dk); margin-bottom:6px; }
-  .ob-step p { font-size:var(--font-body); color:var(--ic-choc-mid); line-height:1.6; margin-bottom:4px; }
+  .ob-step h2 { font-size:20px; font-weight:800; color:var(--ic-choc-dk); margin-bottom:6px; }
+  .ob-step p { font-size:14px; color:var(--ic-choc-mid); line-height:1.6; margin-bottom:4px; }
   .ob-features { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:14px 0; }
-  .ob-feat { background:var(--ic-lemon); border-radius:12px; padding:10px 12px; font-size:var(--font-secondary); color:var(--ic-chocolate); }
-  .ob-feat .of-icon { font-size:var(--font-card); margin-bottom:4px; }
-  .ob-feat .of-label { font-weight:600; font-size:var(--font-nano); }
-  .ob-feat .of-sub { font-size:var(--font-nano); color:var(--ic-choc-mid); }
+  .ob-feat { background:var(--ic-lemon); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--ic-chocolate); }
+  .ob-feat .of-icon { font-size:18px; margin-bottom:4px; }
+  .ob-feat .of-label { font-weight:600; font-size:12px; }
+  .ob-feat .of-sub { font-size:11px; color:var(--ic-choc-mid); }
   .ob-dots { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
   .ob-dot { width:8px; height:8px; border-radius:50%; background:var(--ic-vanilla); transition:background 0.2s,width 0.2s; }
   .ob-dot.active { background:var(--ic-caramel-dk); width:22px; border-radius:4px; }
   .ob-btn-row { display:flex; gap:10px; margin-top:18px; }
-  .ob-skip { flex:0; padding:12px 16px; border-radius:12px; border:none; background:transparent; color:var(--ic-choc-mid); font-size:var(--font-body); cursor:pointer; }
-  .ob-next { flex:1; padding:13px; border-radius:14px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:var(--font-btn); font-weight:700; cursor:pointer; }
+  .ob-skip { flex:0; padding:12px 16px; border-radius:12px; border:none; background:transparent; color:var(--ic-choc-mid); font-size:14px; cursor:pointer; }
+  .ob-next { flex:1; padding:13px; border-radius:14px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
 
   /* ===== Custom confirm modal ===== */
   #customConfirmOverlay { display:none; position:fixed; inset:0; background:rgba(74,56,40,0.35); z-index:10000; align-items:center; justify-content:center; padding:24px; }
@@ -548,10 +518,10 @@
   #customConfirmBox { background:var(--ic-surface); border-radius:20px; padding:24px 20px 16px; max-width:320px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,0.18); animation:confirmPop 0.2s cubic-bezier(.34,1.56,.64,1); }
   @keyframes confirmPop { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
   #customConfirmBox .cc-icon { font-size:28px; margin-bottom:8px; }
-  #customConfirmBox .cc-msg { font-size:var(--font-body); color:var(--ic-chocolate); line-height:1.5; white-space:pre-line; }
+  #customConfirmBox .cc-msg { font-size:15px; color:var(--ic-chocolate); line-height:1.5; white-space:pre-line; }
   #customConfirmBox .cc-btns { display:flex; gap:8px; margin-top:18px; }
-  #customConfirmBox .cc-cancel { flex:1; padding:11px; border-radius:12px; border:1.5px solid var(--ic-vanilla); background:transparent; color:var(--ic-choc-mid); font-size:var(--font-body); cursor:pointer; }
-  #customConfirmBox .cc-ok { flex:1; padding:11px; border-radius:12px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:var(--font-body); font-weight:600; cursor:pointer; }
+  #customConfirmBox .cc-cancel { flex:1; padding:11px; border-radius:12px; border:1.5px solid var(--ic-vanilla); background:transparent; color:var(--ic-choc-mid); font-size:14px; cursor:pointer; }
+  #customConfirmBox .cc-ok { flex:1; padding:11px; border-radius:12px; border:none; background:var(--ic-caramel-dk); color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
   #customConfirmBox .cc-ok.danger { background:#A85550; }
 
   /* ===== Task completion animation ===== */
@@ -585,113 +555,6 @@
   #punchExpandBtn.expanded { transform: rotate(180deg); }
   #punchCollapsible { overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
   #punchCollapsible.collapsed { max-height:0 !important; opacity:0; pointer-events:none; margin-top:0 !important; }
-
-  /* ═════════════════════════════════
-     Super Theme Editor (STE) Styles
-     ═════════════════════════════════ */
-  .ste-tab-bar { display:flex; border-bottom:2px solid var(--ic-vanilla); }
-  .ste-tab { flex:1; padding:10px 4px; font-size:var(--font-nano); font-weight:600; text-align:center;
-             border:none; background:none; color:var(--ic-choc-mid); cursor:pointer;
-             border-bottom:3px solid transparent; margin-bottom:-2px; }
-  .ste-tab.ste-active { color:var(--ic-chocolate); border-bottom-color:var(--ic-caramel); }
-  .ste-body { flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch; }
-  .ste-section { margin-bottom:20px; }
-  .ste-section-title { font-size:var(--font-nano); font-weight:700; color:var(--ic-choc-mid);
-                       text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px;
-                       padding-bottom:4px; border-bottom:1px solid var(--ic-vanilla); }
-  .ste-row { display:flex; align-items:center; gap:10px; padding:9px 0;
-             border-bottom:1px solid var(--ic-vanilla); }
-  .ste-swatch { width:28px; height:28px; border-radius:6px; flex-shrink:0;
-                border:1px solid rgba(0,0,0,.12); cursor:pointer; }
-  .ste-label { flex:1; font-size:var(--font-secondary); color:var(--ic-chocolate); min-width:0; line-height:1.3; }
-  .ste-label small { display:block; font-size:var(--font-nano); color:var(--ic-choc-mid); font-family:monospace; }
-  .ste-color-input { width:40px; height:28px; border:1px solid var(--ic-vanilla);
-                     border-radius:6px; cursor:pointer; padding:2px; background:none; }
-  .ste-font-preview { font-weight:700; color:var(--ic-caramel-dk); white-space:nowrap;
-                      min-width:56px; text-align:right; font-size:var(--font-nano); }
-  .ste-range { flex:1; accent-color:var(--ic-caramel); min-width:80px; }
-  .ste-footer { padding:12px 16px; border-top:2px solid var(--ic-vanilla);
-                display:flex; gap:8px; flex-shrink:0; background:var(--ic-surface); }
-  .ste-preview-text { font-weight:600; padding:4px 8px; border-radius:6px;
-                      background:var(--ic-lemon); color:var(--ic-chocolate); }
-
-  /* ═══ WYSIWYG Page Editor ═══ */
-  body.page-edit-mode { user-select: none; }
-  body.page-edit-mode *:not(#steInspector):not(#steInspector *):not(#steEditToggle):not(#steEditToggle *) {
-    cursor: crosshair !important;
-  }
-  .ste-hover-highlight {
-    outline: 2px dashed rgba(208,167,123,0.8) !important;
-    outline-offset: 1px !important;
-  }
-  .ste-selected-highlight {
-    outline: 3px solid #D0A77B !important;
-    outline-offset: 2px !important;
-    box-shadow: 0 0 0 6px rgba(208,167,123,0.18) !important;
-  }
-  #steEditToggle {
-    position: fixed;
-    bottom: 88px;
-    right: 14px;
-    z-index: 9990;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: none;
-    background: var(--ic-caramel);
-    color: #FAF7F2;
-    font-size: var(--font-secondary);
-    font-weight: 700;
-    box-shadow: 0 4px 16px rgba(74,56,40,.25);
-    cursor: pointer !important;
-    transition: background .15s;
-  }
-  #steEditToggle.edit-active {
-    background: var(--ic-caramel-dk);
-    box-shadow: 0 4px 20px rgba(74,56,40,.4);
-  }
-  #steInspector {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 9995;
-    background: var(--ic-surface);
-    border-top: 2px solid var(--ic-caramel);
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -8px 40px rgba(74,56,40,.18);
-    transform: translateY(100%);
-    transition: transform .28s cubic-bezier(.34,1.1,.64,1);
-    max-height: 68vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  #steInspector.insp-open { transform: translateY(0); }
-  .insp-handle { width:40px;height:4px;border-radius:2px;background:var(--ic-vanilla);margin:10px auto 0; }
-  .insp-header { display:flex;align-items:center;justify-content:space-between;padding:10px 16px 12px; }
-  .insp-tag { font-size:var(--font-nano);font-weight:700;padding:2px 8px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-caramel-dk);font-family:monospace; }
-  .insp-title { font-size:var(--font-secondary);font-weight:700;color:var(--ic-chocolate);flex:1;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-  .insp-close { font-size:22px;color:var(--ic-choc-mid);line-height:1;background:none;border:none;cursor:pointer !important; }
-  .insp-body { padding:0 16px 20px; }
-  .insp-section { margin-bottom:16px; }
-  .insp-section-label { font-size:var(--font-nano);font-weight:700;color:var(--ic-choc-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px; }
-  .insp-row { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ic-vanilla); }
-  .insp-row:last-child { border-bottom:none; }
-  .insp-prop { flex:1;font-size:var(--font-secondary);color:var(--ic-chocolate); }
-  .insp-prop small { display:block;font-size:var(--font-nano);color:var(--ic-choc-mid);font-family:monospace; }
-  .insp-color { width:36px;height:28px;border:1px solid var(--ic-vanilla);border-radius:6px;cursor:pointer;padding:2px;background:none; }
-  .insp-range { flex:1;accent-color:var(--ic-caramel);min-width:80px; }
-  .insp-val { font-size:var(--font-nano);font-weight:700;color:var(--ic-caramel-dk);min-width:44px;text-align:right; }
-  .insp-swatch { width:28px;height:28px;border-radius:6px;flex-shrink:0;border:1px solid rgba(0,0,0,.1); }
-  .insp-textarea { width:100%;border:1.5px solid var(--ic-vanilla);border-radius:10px;padding:8px 10px;font-size:var(--font-body);color:var(--ic-chocolate);background:var(--ic-lemon);font-family:inherit;resize:vertical;min-height:60px;box-sizing:border-box; }
-  .insp-textarea:focus { border-color:var(--ic-caramel);outline:none; }
-  .insp-apply-btn { width:100%;margin-top:10px;padding:10px;border-radius:12px;border:none;background:var(--ic-caramel);color:#FAF7F2;font-weight:700;font-size:var(--font-body);cursor:pointer; }
-  .insp-var-chip { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:var(--ic-lemon);border:1px solid var(--ic-vanilla);font-size:var(--font-nano);font-family:monospace;color:var(--ic-caramel-dk); }
-  .insp-tab-bar { display:flex;border-bottom:1.5px solid var(--ic-vanilla);margin-bottom:12px; }
-  .insp-tab { flex:1;padding:8px 4px;font-size:var(--font-nano);font-weight:600;text-align:center;border:none;background:none;color:var(--ic-choc-mid);cursor:pointer !important;border-bottom:2px solid transparent;margin-bottom:-1.5px; }
-  .insp-tab.insp-tab-active { color:var(--ic-chocolate);border-bottom-color:var(--ic-caramel); }
-  .edit-mode-banner { display:none;position:fixed;top:0;left:0;right:0;z-index:9989;height:3px;background:linear-gradient(90deg,var(--ic-caramel),var(--ic-caramel-dk),var(--ic-caramel)); }
-  body.page-edit-mode .edit-mode-banner { display:block; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -743,7 +606,7 @@
     </div>
     <p id="pinError" class="text-center text-sm mt-3 hidden" style="color:#A85550;">PIN 錯誤，請再試一次 / PIN salah, coba lagi</p>
   </div>
-  <details class="mt-6 max-w-xs w-full" style="font-size:var(--font-nano);color:var(--ic-choc-mid);">
+  <details class="mt-6 max-w-xs w-full" style="font-size:11px;color:var(--ic-choc-mid);">
     <summary class="cursor-pointer text-center opacity-50 select-none" style="list-style:none;">
       <i class="ti ti-lock" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 忘記 PIN？點此查看提示
     </summary>
@@ -788,16 +651,6 @@
 
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
-    <!-- ═══ 本日提醒（獨立區塊，進度環上方）═══ -->
-    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
-      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
-      <div class="flex-1">
-        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
-        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
-        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
-      </div>
-    </div>
-
     <!-- ═══ Hero 進度環 ═══ -->
     <div id="atikaHeroCard" class="rounded-2xl p-4" style="background:var(--ic-choc-dk);">
       <div class="flex items-center gap-4">
@@ -809,26 +662,36 @@
               transform="rotate(-90 34 34)" style="transition:stroke-dashoffset 0.75s ease;"/>
           </svg>
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-            <span id="atikaRingPct" style="font-size:var(--font-secondary);font-weight:800;color:var(--ic-caramel);"></span>
+            <span id="atikaRingPct" style="font-size:13px;font-weight:800;color:var(--ic-caramel);"></span>
           </div>
         </div>
         <div style="flex:1;min-width:0;">
-          <div id="atikaHeroGreet" style="font-size:var(--font-nano);color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgLabel" style="font-size:var(--font-card);font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgSub" style="font-size:var(--font-nano);color:var(--ic-vanilla);opacity:0.7;"></div>
+          <div id="atikaHeroGreet" style="font-size:11px;color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgLabel" style="font-size:15px;font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
+          <div id="atikaHeroProgSub" style="font-size:11px;color:var(--ic-vanilla);opacity:0.7;"></div>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══ 本日提醒（獨立區塊，打卡上方）═══ -->
+    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
+      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
+      <div class="flex-1">
+        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
+        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
+        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
       </div>
     </div>
 
     <!-- ═══ 聚焦卡：現在要做 ═══ -->
     <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
-      <div style="font-size:var(--font-nano);color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+      <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
         <i class="ti ti-player-play" style="font-size:10px;" aria-hidden="true"></i> 現在要做 / Sedang dikerjakan
       </div>
-      <div id="atikaFocusTask" style="font-size:var(--font-body);font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
+      <div id="atikaFocusTask" style="font-size:14px;font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <span id="atikaFocusDeadline" style="font-size:var(--font-nano);background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
-        <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:var(--font-btn-sm);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
+        <span id="atikaFocusDeadline" style="font-size:11px;background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
+        <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
           <i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> 完成
         </button>
       </div>
@@ -881,7 +744,7 @@
       <!-- 標題列 + 新增按鈕 -->
       <div class="flex items-center justify-between px-4 pt-3 pb-2">
         <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日任務 / Tugas Hari Ini</span>
-        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增臨時工作</button>
+        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增</button>
       </div>
 
       <!-- 全部完成慶祝 empty state -->
@@ -1031,7 +894,7 @@
             <!-- 今日提醒（單行嵌入）-->
             <div class="border-t mt-2 pt-2" style="border-color:var(--ic-vanilla);">
               <div class="flex items-center gap-2 cursor-pointer py-0.5" onclick="toggleReminderEdit()">
-                <i class="ti ti-speakerphone" style="font-size:1em;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+                <i class="ti ti-speakerphone" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
                 <span class="text-xs font-semibold" style="color:var(--ic-chocolate);">今日提醒</span>
                 <span id="reminderPreview" class="text-xs truncate flex-1" style="color:var(--ic-choc-mid);"></span>
                 <span class="text-xs shrink-0" style="color:var(--ic-choc-mid);">編輯 ›</span>
@@ -1046,7 +909,7 @@
                   <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
                 </div>
                 <div class="flex justify-end gap-2 mt-2">
-                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;">清除</button>
+                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
                   <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
                 </div>
                 <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
@@ -1098,7 +961,7 @@
         <details id="mgrAdhocDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrAdhocDoneLabel"></span>
-            <i class="ti ti-chevron-down done-chevron" style="font-size:0.75em;transition:transform .2s;" aria-hidden="true"></i>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrAdhocDone" class="space-y-2 mt-2"></div>
         </details>
@@ -1114,7 +977,7 @@
         <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrTodayAllDoneLabel"></span>
-            <i class="ti ti-chevron-down done-chevron" style="font-size:0.75em;transition:transform .2s;" aria-hidden="true"></i>
+            <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
           </summary>
           <div id="mgrTodayAllDone" class="space-y-2 mt-2"></div>
         </details>
@@ -1154,19 +1017,19 @@
         <div class="ts-kanban-wrap">
         <div class="ts-kanban">
           <div class="ts-col" data-slot="morning">
-            <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:1em;color:#E0943A;" aria-hidden="true"></i> 早上</div>
+            <div class="ts-col-hdr"><i class="ti ti-sunrise" style="font-size:15px;color:#E0943A;" aria-hidden="true"></i> 早上</div>
             <div id="mgrSlotMorning" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="afternoon">
-            <div class="ts-col-hdr"><i class="ti ti-sun" style="font-size:1em;color:#D4A017;" aria-hidden="true"></i> 下午</div>
+            <div class="ts-col-hdr"><i class="ti ti-sun" style="font-size:15px;color:#D4A017;" aria-hidden="true"></i> 下午</div>
             <div id="mgrSlotAfternoon" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="evening">
-            <div class="ts-col-hdr"><i class="ti ti-moon" style="font-size:1em;color:#7B68C8;" aria-hidden="true"></i> 晚上</div>
+            <div class="ts-col-hdr"><i class="ti ti-moon" style="font-size:15px;color:#7B68C8;" aria-hidden="true"></i> 晚上</div>
             <div id="mgrSlotEvening" class="ts-list"></div>
           </div>
           <div class="ts-col" data-slot="flexible">
-            <div class="ts-col-hdr"><i class="ti ti-arrows-shuffle" style="font-size:1em;color:var(--ic-choc-mid);" aria-hidden="true"></i> 彈性</div>
+            <div class="ts-col-hdr"><i class="ti ti-arrows-shuffle" style="font-size:15px;color:var(--ic-choc-mid);" aria-hidden="true"></i> 彈性</div>
             <div id="mgrSlotFlexible" class="ts-list"></div>
           </div>
         </div>
@@ -1237,7 +1100,7 @@
       <!-- 動線 Kanban：回報 → 已購買 → 補貨完成 -->
       <div class="flex items-center justify-between mb-2">
         <div class="md:hidden text-xs flex items-center gap-1" style="color:var(--ic-choc-mid);">
-          <i class="ti ti-arrows-left-right" style="font-size:0.75em;" aria-hidden="true"></i> 左右滑動查看各欄
+          <i class="ti ti-arrows-left-right" style="font-size:12px;" aria-hidden="true"></i> 左右滑動查看各欄
         </div>
         <div class="relative ml-auto" id="supplyFlowTooltipWrap">
           <button onclick="document.getElementById('supplyFlowTooltip').classList.toggle('hidden')" class="flex items-center gap-1 text-xs" style="color:var(--ic-choc-mid);" aria-label="流程說明">
@@ -1245,9 +1108,9 @@
           </button>
           <div id="supplyFlowTooltip" class="hidden absolute right-0 top-6 z-20 rounded-xl p-3 text-xs shadow-lg w-64" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);color:var(--ic-choc-mid);">
             <div class="flex items-center gap-1.5 mb-1.5 font-semibold" style="color:var(--ic-chocolate);">備品處理流程</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:0.75em;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:0.75em;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
-            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:0.75em;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-alert-circle" style="font-size:12px;color:#8A4A46;" aria-hidden="true"></i> Atika 回報 → 已回報欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-shopping-cart" style="font-size:12px;color:#3A6A7A;" aria-hidden="true"></i> 你購買 → 已購買欄</div>
+            <div class="flex items-center gap-1.5 mb-1"><i class="ti ti-circle-check" style="font-size:12px;color:#6A7840;" aria-hidden="true"></i> Atika 收納 → 庫存正常</div>
 
           </div>
         </div>
@@ -2247,22 +2110,10 @@
     <div class="mb-4">
       <label class="block text-sm font-semibold mb-2">字體大小 / Ukuran Huruf</label>
       <div class="grid grid-cols-4 gap-2">
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="14" onclick="setDeviceFontSize(14)">
-          <span style="font-size:14px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-          <span style="font-size:10px;color:var(--ic-choc-mid)">小</span>
-        </button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="16" onclick="setDeviceFontSize(16)">
-          <span style="font-size:16px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-          <span style="font-size:10px;color:var(--ic-choc-mid)">中</span>
-        </button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="18" onclick="setDeviceFontSize(18)">
-          <span style="font-size:18px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-          <span style="font-size:10px;color:var(--ic-choc-mid)">大</span>
-        </button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg flex flex-col items-center gap-0.5" data-fs="20" onclick="setDeviceFontSize(20)">
-          <span style="font-size:20px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-          <span style="font-size:10px;color:var(--ic-choc-mid)">特大</span>
-        </button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-xs" data-fs="14" onclick="setDeviceFontSize(14)">小</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-sm" data-fs="16" onclick="setDeviceFontSize(16)">中</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-base" data-fs="18" onclick="setDeviceFontSize(18)">大</button>
+        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-lg" data-fs="20" onclick="setDeviceFontSize(20)">特大</button>
       </div>
     </div>
 
@@ -2287,10 +2138,6 @@
           <div class="text-xs">兩欄（電腦/大手機）</div>
         </button>
       </div>
-    </div>
-    <!-- 隱藏觸發按鈕（點標題 5 下解鎖） -->
-    <div class="mt-4 pt-3 border-t" style="border-color:var(--ic-vanilla);">
-      <button id="steSecretBtn" onclick="openSTE()" class="hidden w-full py-2.5 rounded-xl text-sm font-semibold border border-dashed" style="color:var(--ic-caramel-dk);border-color:var(--ic-caramel);background:var(--ic-lemon);">🎨 超級主題編輯器</button>
     </div>
   </div>
 </div>
@@ -2598,7 +2445,7 @@
 <div id="undoToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-3 rounded-xl shadow-2xl z-[80] flex items-center gap-3 max-w-md">
   <span class="text-base">↶</span>
   <span id="undoToastMsg" class="text-sm"></span>
-  <button onclick="performUndo()" class="btn-primary" style="height:auto;padding:5px 14px;">復原</button>
+  <button onclick="performUndo()" class="btn-primary" style="height:auto;padding:5px 14px;font-size:13px;">復原</button>
   <button onclick="closeUndoToast()" class="text-gray-400 text-lg">×</button>
 </div>
 
@@ -3268,31 +3115,8 @@ async function cloudPull(){
         state.users        = d.users        || state.users;
         state.categories   = d.categories   || state.categories;
         state.templates    = d.templates    || state.templates;
-        // ── 防止「需勾兩次」競態：若有 pending push，合併而非覆蓋 ──
-        if (cloudPushTimer) {
-          // 本地有未推送的變更 → last-write-wins merge（本地較新則保留）
-          const cc = d.completions || {}, lc = state.completions || {};
-          const merged = Object.assign({}, cc);
-          Object.keys(lc).forEach(k => {
-            if (!merged[k] || (lc[k]?.at || '') >= (merged[k]?.at || '')) merged[k] = lc[k];
-          });
-          state.completions = merged;
-          // adhoc：保留本地較新的 completed 狀態
-          const caMap = Object.fromEntries((d.adhoc||[]).map(a=>[a.id,a]));
-          const laMap = Object.fromEntries((state.adhoc||[]).map(a=>[a.id,a]));
-          const allIds = new Set([...Object.keys(caMap),...Object.keys(laMap)]);
-          state.adhoc = [...allIds].map(id=>{
-            const ca=caMap[id], la=laMap[id];
-            if (!ca) return la;
-            if (!la) return ca;
-            // 若本地 completedAt 較新，保留本地 completed 狀態
-            if (la.completed && (!ca.completed || (la.completedAt||'')>=(ca.completedAt||''))) return Object.assign({},ca,{completed:la.completed,completedAt:la.completedAt,completedBy:la.completedBy});
-            return ca;
-          });
-        } else {
-          state.completions  = d.completions  || state.completions;
-          state.adhoc        = d.adhoc        || state.adhoc;
-        }
+        state.completions  = d.completions  || state.completions;
+        state.adhoc        = d.adhoc        || state.adhoc;
         state.notes        = d.notes        || state.notes;
         state.reminders    = d.reminders    || state.reminders;
         state.supplies     = d.supplies     || state.supplies;
@@ -3365,7 +3189,6 @@ async function cloudPull(){
         window._cloudSyncing = false;
       }
       refreshAll();
-      loadSavedTheme();  // 雲端拉下新主題後重新套用
     } else {
       // 雲端尚無資料 → 把本地推上去
       await cloudPushImmediate();
@@ -6197,12 +6020,12 @@ function getPunchPlanForDate(d=today()){
     rests.forEach(rs=>{
       plan.push({
         id:'rest_'+rs.id+'_start', emoji:'ti ti-moon',
-        zh:`${rs.nameZh} 開始`, id_:`${rs.nameId||rs.nameZh} mulai`,
+        zh:`${rs.nameZh} 起`, id_:`${rs.nameId||rs.nameZh} mulai`,
         kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
       });
       plan.push({
         id:'rest_'+rs.id+'_end', emoji:'ti ti-sun',
-        zh:`${rs.nameZh} 結束`, id_:`${rs.nameId||rs.nameZh} kembali`,
+        zh:`${rs.nameZh} 收`, id_:`${rs.nameId||rs.nameZh} kembali`,
         kind:'rest', rsId:rs.id, range:`${rs.startTime}-${rs.endTime}`,
       });
     });
@@ -6227,7 +6050,7 @@ function getPunchMetaByType(type, d=today()){
     if (rs){
       return {
         id:type, emoji: isStart?'<i class="ti ti-moon" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i>':'<i class="ti ti-sun" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i>',
-        zh: `${rs.nameZh} ${isStart?'開始':'結束'}`,
+        zh: `${rs.nameZh} ${isStart?'起':'收'}`,
         id_: `${rs.nameId||rs.nameZh} ${isStart?'mulai':'kembali'}`,
         kind:'rest', rsId,
       };
@@ -6323,9 +6146,9 @@ function renderPunchSection(){
         ? 'background:var(--ic-straw-lt);border:1px solid var(--ic-strawberry);'
         : 'background:var(--ic-mint-lt);border:1px solid var(--ic-mint);';
       return `<button onclick="openPunchEdit('${pt.id}')"
-        style="${chipStyle}border-radius:10px;padding:4px 8px;display:inline-flex;flex-direction:column;align-items:center;min-width:60px;max-width:100px;box-sizing:border-box;"
+        style="${chipStyle}border-radius:10px;padding:4px 8px;display:inline-flex;flex-direction:column;align-items:center;width:68px;box-sizing:border-box;"
         class="active:scale-95 transition-transform">
-        <span class="text-[10px] text-center leading-tight" style="color:var(--ic-choc-mid);word-break:keep-all;"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
+        <span class="text-[10px] truncate w-full text-center" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
         <span class="font-bold tabular-nums text-sm" style="color:var(--ic-chocolate)">${p.at}</span>
         ${bf ? '<span class="text-[9px] font-bold" style="color:#A85550">補打</span>' : ''}
       </button>`;
@@ -9157,7 +8980,7 @@ function renderSupplyCatManager(){
   if (!el) return;
   el.innerHTML=state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).map(c=>`
     <div class="rounded-xl p-2.5 flex items-center gap-2 cursor-pointer" style="background:var(--ic-lemon);border:1px solid var(--ic-vanilla);" onmouseenter="this.style.borderColor='var(--ic-caramel)'" onmouseleave="this.style.borderColor='var(--ic-vanilla)'" onclick="openEditSupplyCat('${c.id}')">
-      <i class="ti ti-folder" style="font-size:1em;color:var(--ic-caramel);" aria-hidden="true"></i>
+      <i class="ti ti-folder" style="font-size:15px;color:var(--ic-caramel);" aria-hidden="true"></i>
       <div class="flex-1 min-w-0">
         <div class="font-semibold text-sm" style="color:var(--ic-chocolate);">${c.nameZh}</div>
         <div class="id-text text-xs" style="color:var(--ic-choc-mid);">${c.nameId}</div>
@@ -10470,8 +10293,6 @@ function refreshAll(){
   if (!state.currentUser) return;
   if (state.currentUser.role==='helper') renderAtikaView();
   else renderManagerView();
-  _showEditToggle();
-  applyTextOverrides();
 }
 
 /* ========== 啟動 ========== */
@@ -10506,8 +10327,6 @@ async function init(){
   }
   updateChatBadge();
   startMinuteTicker();
-  loadSavedTheme();
-  setTimeout(initSTE, 300);
 }
 
 /* ========== 每分鐘 ticker：時鐘 + 跨日刷新 ========== */
@@ -10571,744 +10390,6 @@ function startMinuteTicker(){
   const msToNextMin = (60-now.getSeconds())*1000 - now.getMilliseconds();
   setTimeout(()=>{ tickMinute(); setInterval(tickMinute, 60000); }, msToNextMin);
 }
-
-/* ══════════════════════════════════════════════
-   Super Theme Editor (STE)
-   觸發：在「顯示設定」標題點 5 下
-   儲存：localStorage 'homeeday_super_theme'
-   套用：loadSavedTheme() 在 init() 中呼叫
-   ══════════════════════════════════════════════ */
-
-const STE_COLORS = {
-  main: [
-    { v:'--ic-chocolate',  label:'主文字',     def:'#725C3F' },
-    { v:'--ic-choc-dk',    label:'深標題',     def:'#4A3828' },
-    { v:'--ic-choc-mid',   label:'次要文字',   def:'#9A7A58' },
-    { v:'--ic-caramel',    label:'品牌主色',   def:'#D0A77B' },
-    { v:'--ic-caramel-dk', label:'深焦糖',     def:'#A87D52' },
-  ],
-  func: [
-    { v:'--ic-strawberry', label:'提醒 / 警示', def:'#E5ADA8' },
-    { v:'--ic-straw-lt',   label:'提醒背景',    def:'#FBF0EE' },
-    { v:'--ic-mint',       label:'完成 / 成功', def:'#D8D7B2' },
-    { v:'--ic-mint-lt',    label:'完成背景',    def:'#F0F0E0' },
-  ],
-  bg: [
-    { v:'--ic-lemon',   label:'頁面底色',  def:'#EFE8D8' },
-    { v:'--ic-vanilla', label:'邊框 / 分隔', def:'#E5E0D8' },
-    { v:'--ic-surface', label:'卡片底色',  def:'#FAF7F2' },
-  ],
-};
-
-const STE_FONTS = [
-  { v:'--font-display',   label:'大標題',    def:2,      min:1,    max:3,    step:0.0625 },
-  { v:'--font-page',      label:'頁面標題',  def:1.5,    min:1,    max:2.5,  step:0.0625 },
-  { v:'--font-section',   label:'區塊標題',  def:1.1875, min:0.75, max:2,    step:0.0625 },
-  { v:'--font-card',      label:'卡片標題',  def:1,      min:0.625,max:1.5,  step:0.0625 },
-  { v:'--font-body',      label:'內文',      def:0.875,  min:0.5,  max:1.25, step:0.0625 },
-  { v:'--font-secondary', label:'次要文字',  def:0.8125, min:0.5,  max:1.125,step:0.0625 },
-  { v:'--font-caption',   label:'說明文字',  def:0.75,   min:0.5,  max:1,    step:0.0625 },
-  { v:'--font-nano',      label:'極小 / nav',def:0.6875, min:0.4,  max:1,    step:0.0625 },
-  { v:'--font-btn',       label:'按鈕文字',  def:0.9375, min:0.625,max:1.25, step:0.0625 },
-  { v:'--font-btn-sm',    label:'小按鈕',    def:0.75,   min:0.5,  max:1,    step:0.0625 },
-  { v:'--font-input',     label:'輸入欄位',  def:1,      min:0.625,max:1.25, step:0.0625 },
-];
-
-let _steState = {};
-let _steTapCount = 0, _steTapTimer = null;
-
-function initSTE() {
-  _buildSTEColorRows();
-  _buildSTEFontRows();
-  // Secret trigger: tap "顯示設定" title 5 times
-  const trigger = document.querySelector('#devicePrefsModal .text-xl.font-bold');
-  if (!trigger) return;
-  trigger.style.cursor = 'default';
-  trigger.addEventListener('click', () => {
-    _steTapCount++;
-    clearTimeout(_steTapTimer);
-    _steTapTimer = setTimeout(() => { _steTapCount = 0; }, 2000);
-    if (_steTapCount >= 5) {
-      _steTapCount = 0;
-      const btn = document.getElementById('steSecretBtn');
-      if (btn) { btn.classList.remove('hidden'); btn.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-    }
-  });
-}
-
-function _steVarId(v) { return v.replace(/^--/,'').replace(/-/g,'_'); }
-
-function _buildSTEColorRows() {
-  ['main','func','bg'].forEach(group => {
-    const el = document.getElementById('ste-color-' + group);
-    if (!el) return;
-    el.innerHTML = STE_COLORS[group].map(c => {
-      const vid = _steVarId(c.v);
-      return `<div class="ste-row">
-        <div class="ste-swatch" id="ste-sw-${vid}" style="background:${c.def};"></div>
-        <div class="ste-label">${c.label} <small>${c.v}</small></div>
-        <input type="color" class="ste-color-input" id="ste-inp-${vid}"
-               value="${c.def}" oninput="steColorChange('${c.v}',this.value)">
-      </div>`;
-    }).join('');
-  });
-}
-
-function _buildSTEFontRows() {
-  const el = document.getElementById('ste-font-rows');
-  if (!el) return;
-  el.innerHTML = STE_FONTS.map(f => {
-    const vid = _steVarId(f.v);
-    const sampleStyle = `font-size:${f.def}rem;font-weight:600;`;
-    return `<div class="ste-row">
-      <div class="ste-label">${f.label} <small>${f.v}</small></div>
-      <input type="range" class="ste-range" id="ste-range-${vid}"
-             min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}"
-             oninput="steFontChange('${f.v}',this.value)">
-      <div class="ste-font-preview" id="ste-fval-${vid}">${f.def}rem</div>
-    </div>`;
-  }).join('');
-}
-
-function openSTE() {
-  closeDevicePrefsModal();
-  // 從 state.preferences 讀取（雲端同步來源）
-  const saved = state.preferences?.superTheme || JSON.parse(localStorage.getItem('homeeday_super_theme') || '{}');
-  _steState = JSON.parse(JSON.stringify(saved));
-
-  // Load color inputs
-  [...STE_COLORS.main, ...STE_COLORS.func, ...STE_COLORS.bg].forEach(c => {
-    const vid = _steVarId(c.v);
-    const val = (saved.colors && saved.colors[c.v]) || c.def;
-    const inp = document.getElementById('ste-inp-' + vid);
-    const sw  = document.getElementById('ste-sw-'  + vid);
-    if (inp) inp.value = val;
-    if (sw)  sw.style.background = val;
-  });
-
-  // Load font sliders
-  STE_FONTS.forEach(f => {
-    const vid = _steVarId(f.v);
-    const savedVal = saved.fonts && saved.fonts[f.v];
-    const val = savedVal ? parseFloat(savedVal) : f.def;
-    const rangeEl = document.getElementById('ste-range-' + vid);
-    const valEl   = document.getElementById('ste-fval-'  + vid);
-    if (rangeEl) rangeEl.value = val;
-    if (valEl)   valEl.textContent = _fmtRem(val);
-  });
-
-  // Load card sliders
-  const savedRadius = saved.cards && saved.cards['--te-card-radius'];
-  const savedGap    = saved.cards && saved.cards['--te-card-gap'];
-  const rEl = document.getElementById('ste-card-radius');
-  const gEl = document.getElementById('ste-card-gap');
-  const rvEl = document.getElementById('ste-card-radius-val');
-  const gvEl = document.getElementById('ste-card-gap-val');
-  if (rEl) { const px = savedRadius ? Math.round(parseFloat(savedRadius)*16) : 16; rEl.value = px; if(rvEl) rvEl.textContent = px; }
-  if (gEl) { const px = savedGap    ? Math.round(parseFloat(savedGap)   *16) : 16; gEl.value = px; if(gvEl) gvEl.textContent = px; }
-
-  _steMarkFsBtn(parseInt(localStorage.getItem('deviceFontSize') || '18'));
-  switchSTETab('ste-colors', document.querySelector('.ste-tab[data-stab="ste-colors"]'));
-  document.getElementById('superThemeEditor').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeSTE() {
-  document.getElementById('superThemeEditor').classList.add('hidden');
-  document.body.style.overflow = '';
-  loadSavedTheme();  // revert any unsaved live-preview changes
-}
-
-function switchSTETab(tabId, btn) {
-  document.querySelectorAll('.ste-tabcontent').forEach(t => t.classList.add('hidden'));
-  document.querySelectorAll('.ste-tab').forEach(t => t.classList.remove('ste-active'));
-  const tabEl = document.getElementById(tabId);
-  if (tabEl) tabEl.classList.remove('hidden');
-  if (btn) btn.classList.add('ste-active');
-}
-
-function steColorChange(varName, value) {
-  if (!_steState.colors) _steState.colors = {};
-  _steState.colors[varName] = value;
-  const sw = document.getElementById('ste-sw-' + _steVarId(varName));
-  if (sw) sw.style.background = value;
-  _injectThemeStyle(_steState);
-}
-
-function steFontChange(varName, value) {
-  if (!_steState.fonts) _steState.fonts = {};
-  _steState.fonts[varName] = value + 'rem';
-  const valEl = document.getElementById('ste-fval-' + _steVarId(varName));
-  if (valEl) valEl.textContent = _fmtRem(parseFloat(value));
-  _injectThemeStyle(_steState);
-}
-
-function stePreviewCards() {
-  const rEl = document.getElementById('ste-card-radius');
-  const gEl = document.getElementById('ste-card-gap');
-  const rvEl = document.getElementById('ste-card-radius-val');
-  const gvEl = document.getElementById('ste-card-gap-val');
-  if (rEl && rvEl) rvEl.textContent = rEl.value;
-  if (gEl && gvEl) gvEl.textContent = gEl.value;
-  if (!_steState.cards) _steState.cards = {};
-  if (rEl) _steState.cards['--te-card-radius'] = (rEl.value / 16) + 'rem';
-  if (gEl) _steState.cards['--te-card-gap']    = (gEl.value / 16) + 'rem';
-  // Update preview card
-  const preview = document.getElementById('ste-card-preview');
-  if (preview && rEl) preview.style.borderRadius = (rEl.value) + 'px';
-  _injectThemeStyle(_steState);
-}
-
-function saveSTE() {
-  stePreviewCards();
-  // 存入 state.preferences → 自動進入雲端同步
-  if (!state.preferences) state.preferences = {};
-  state.preferences.superTheme = _steState;
-  save();  // 寫 localStorage + cloudPush
-  _injectThemeStyle(_steState);
-  document.getElementById('superThemeEditor').classList.add('hidden');
-  document.body.style.overflow = '';
-  // small toast
-  const t = document.createElement('div');
-  t.textContent = '✓ 主題已儲存';
-  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ic-caramel-dk);color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:700;z-index:9999;pointer-events:none;';
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2000);
-}
-
-function resetSTE() {
-  if (!confirm('重置所有主題設定？畫面將回復預設樣式。')) return;
-  if (state.preferences) delete state.preferences.superTheme;
-  save();  // 同步清除至雲端
-  _steState = {};
-  const styleEl = document.getElementById('themeOverrideStyle');
-  if (styleEl) styleEl.textContent = '';
-
-  // Reset color inputs
-  [...STE_COLORS.main, ...STE_COLORS.func, ...STE_COLORS.bg].forEach(c => {
-    const vid = _steVarId(c.v);
-    const inp = document.getElementById('ste-inp-' + vid);
-    const sw  = document.getElementById('ste-sw-'  + vid);
-    if (inp) inp.value = c.def;
-    if (sw)  sw.style.background = c.def;
-  });
-  // Reset font sliders
-  STE_FONTS.forEach(f => {
-    const vid = _steVarId(f.v);
-    const rangeEl = document.getElementById('ste-range-' + vid);
-    const valEl   = document.getElementById('ste-fval-'  + vid);
-    if (rangeEl) rangeEl.value = f.def;
-    if (valEl)   valEl.textContent = _fmtRem(f.def);
-  });
-  // Reset card sliders
-  const rEl = document.getElementById('ste-card-radius');
-  const gEl = document.getElementById('ste-card-gap');
-  if (rEl) rEl.value = 16;
-  if (gEl) gEl.value = 16;
-  const rvEl = document.getElementById('ste-card-radius-val');
-  const gvEl = document.getElementById('ste-card-gap-val');
-  if (rvEl) rvEl.textContent = '16';
-  if (gvEl) gvEl.textContent = '16';
-  const preview = document.getElementById('ste-card-preview');
-  if (preview) preview.style.borderRadius = '';
-}
-
-function _steMarkFsBtn(fs) {
-  document.querySelectorAll('#superThemeEditor .ste-fs-btn').forEach(btn => {
-    const active = parseInt(btn.dataset.fs) === fs;
-    btn.style.background = active ? 'var(--ic-lemon)' : '';
-    btn.style.borderColor = active ? 'var(--ic-caramel)' : '';
-    btn.style.color       = active ? 'var(--ic-chocolate)' : '';
-  });
-}
-
-function _fmtRem(v) {
-  return parseFloat(v).toFixed(4).replace(/\.?0+$/, '') + 'rem';
-}
-
-function _injectThemeStyle(theme) {
-  let css = ':root {\n';
-  if (theme.colors) Object.entries(theme.colors).forEach(([k,v]) => { css += `  ${k}: ${v};\n`; });
-  if (theme.fonts)  Object.entries(theme.fonts).forEach(([k,v])  => { css += `  ${k}: ${v};\n`; });
-  if (theme.cards) {
-    if (theme.cards['--te-card-radius']) css += `  --te-card-radius: ${theme.cards['--te-card-radius']};\n`;
-    if (theme.cards['--te-card-gap'])    css += `  --te-card-gap: ${theme.cards['--te-card-gap']};\n`;
-  }
-  css += '}\n';
-  if (theme.cards && theme.cards['--te-card-radius']) {
-    css += '[class*="rounded-2xl"] { border-radius: var(--te-card-radius, 1rem) !important; }\n';
-    css += '[class*="rounded-xl"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.667) !important; }\n';
-    css += '[class*="rounded-lg"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.5) !important; }\n';
-  }
-  if (theme.cards && theme.cards['--te-card-gap']) {
-    css += '.space-y-4 > * + * { margin-top: var(--te-card-gap, 1rem) !important; }\n';
-    css += '.py-4 { padding-top: calc(var(--te-card-gap, 1rem) * 0.25) !important; padding-bottom: calc(var(--te-card-gap, 1rem) * 0.25) !important; }\n';
-  }
-  let styleEl = document.getElementById('themeOverrideStyle');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'themeOverrideStyle';
-    document.head.appendChild(styleEl);
-  }
-  styleEl.textContent = css;
-}
-
-function loadSavedTheme() {
-  // 優先從 state.preferences 讀（雲端同步來源）
-  const theme = state.preferences?.superTheme;
-  if (theme && Object.keys(theme).length) { _injectThemeStyle(theme); return; }
-  // fallback：舊版 localStorage（遷移用）
-  const saved = localStorage.getItem('homeeday_super_theme');
-  if (!saved) return;
-  try { _injectThemeStyle(JSON.parse(saved)); } catch(e) { console.warn('Theme load error:', e); }
-}
-
-
-/* ══════════════════════════════════════════════════════
-   WYSIWYG Page Editor
-   ─ 管理者限定：點任何元素直接編輯文字 / 樣式 / 變數
-   ══════════════════════════════════════════════════════ */
-
-let _editMode = false;
-let _inspEl = null;   // currently inspected element
-let _hoverEl = null;
-
-// ── CSS variable registry（用於反向查找）──
-const ALL_COLOR_VARS = [
-  '--ic-chocolate','--ic-choc-dk','--ic-choc-mid',
-  '--ic-caramel','--ic-caramel-dk',
-  '--ic-strawberry','--ic-straw-lt',
-  '--ic-mint','--ic-mint-lt',
-  '--ic-lemon','--ic-vanilla','--ic-surface',
-];
-const ALL_FONT_VARS = [
-  '--font-display','--font-page','--font-section','--font-card',
-  '--font-body','--font-secondary','--font-caption','--font-nano',
-  '--font-btn','--font-btn-sm','--font-input','--font-close',
-];
-
-// ── Helpers ──────────────────────────────────────────
-function _rgbToHex(rgb) {
-  if (!rgb || rgb === 'transparent') return null;
-  const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  if (!m) return null;
-  return '#' + [m[1],m[2],m[3]].map(x => parseInt(x).toString(16).padStart(2,'0')).join('');
-}
-
-function _getComputedHex(varName) {
-  const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-  // CSS var values might be hex already
-  if (val.startsWith('#')) return val;
-  return _rgbToHex(val) || val;
-}
-
-function _hexToComputedMatch(hex) {
-  if (!hex) return null;
-  for (const v of ALL_COLOR_VARS) {
-    const computed = _getComputedHex(v);
-    if (computed && computed.toLowerCase() === hex.toLowerCase()) return v;
-  }
-  return null;
-}
-
-function _pxToRem(px) {
-  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
-  return (parseFloat(px) / rootPx).toFixed(4).replace(/\.?0+$/, '');
-}
-
-function _remToFontVar(remVal) {
-  const root = document.documentElement;
-  for (const v of ALL_FONT_VARS) {
-    const computed = parseFloat(getComputedStyle(root).getPropertyValue(v));
-    if (Math.abs(computed - parseFloat(remVal)) < 0.01) return v;
-  }
-  return null;
-}
-
-// Generate a stable CSS selector for an element
-function _getSelector(el) {
-  if (!el || el === document.body) return 'body';
-  if (el.id) return '#' + el.id;
-  // Walk up to nearest ancestor with ID
-  let path = [];
-  let cur = el;
-  while (cur && cur !== document.body) {
-    if (cur.id) { path.unshift('#' + cur.id); break; }
-    const siblings = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
-    const idx = siblings.indexOf(cur) + 1;
-    const seg = cur.tagName.toLowerCase() + (siblings.length > 1 ? `:nth-of-type(${idx})` : '');
-    path.unshift(seg);
-    cur = cur.parentNode;
-  }
-  return path.join(' > ');
-}
-
-// Get direct text content (excluding children text)
-function _getDirectText(el) {
-  let text = '';
-  for (const node of el.childNodes) {
-    if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
-  }
-  return text.trim();
-}
-
-// Check if element is inside a dynamically rendered section
-function _isDynamic(el) {
-  return !!(el.closest('[data-tid]') || el.closest('[data-aid]') || el.closest('.task-card'));
-}
-
-// ── Toggle edit mode ──────────────────────────────────
-function togglePageEditMode() {
-  // Only manager can use this
-  if (state.currentUser?.role !== 'manager') return;
-  _editMode = !_editMode;
-  const btn = document.getElementById('steEditToggle');
-  const label = document.getElementById('steEditLabel');
-  if (_editMode) {
-    document.body.classList.add('page-edit-mode');
-    btn.classList.add('edit-active');
-    if (label) label.textContent = '結束編輯';
-    document.addEventListener('mouseover', _onHover, true);
-    document.addEventListener('click', _onClick, true);
-  } else {
-    document.body.classList.remove('page-edit-mode');
-    btn.classList.remove('edit-active');
-    if (label) label.textContent = '編輯頁面';
-    document.removeEventListener('mouseover', _onHover, true);
-    document.removeEventListener('click', _onClick, true);
-    if (_hoverEl) { _hoverEl.classList.remove('ste-hover-highlight'); _hoverEl = null; }
-    if (_inspEl)  { _inspEl.classList.remove('ste-selected-highlight'); _inspEl = null; }
-    closeInspector();
-  }
-}
-
-// Show toggle button when manager is logged in
-function _showEditToggle() {
-  const btn = document.getElementById('steEditToggle');
-  if (!btn) return;
-  btn.style.display = (state.currentUser?.role === 'manager') ? 'flex' : 'none';
-}
-
-// ── Hover & click handlers ────────────────────────────
-function _onHover(e) {
-  const SKIP = ['#steInspector','#steEditToggle','.edit-mode-banner'];
-  if (SKIP.some(s => e.target.closest(s))) return;
-  if (_hoverEl && _hoverEl !== _inspEl) _hoverEl.classList.remove('ste-hover-highlight');
-  _hoverEl = e.target;
-  if (_hoverEl !== _inspEl) _hoverEl.classList.add('ste-hover-highlight');
-}
-
-function _onClick(e) {
-  const SKIP = ['#steInspector','#steEditToggle','.edit-mode-banner'];
-  if (SKIP.some(s => e.target.closest(s))) return;
-  e.preventDefault(); e.stopPropagation();
-  if (_inspEl) _inspEl.classList.remove('ste-selected-highlight');
-  if (_hoverEl) _hoverEl.classList.remove('ste-hover-highlight');
-  _inspEl = e.target;
-  _inspEl.classList.add('ste-selected-highlight');
-  openInspector(_inspEl);
-}
-
-// ── Inspector ─────────────────────────────────────────
-function openInspector(el) {
-  const tag = el.tagName.toLowerCase();
-  const directText = _getDirectText(el);
-  const sel = _getSelector(el);
-  const cs = getComputedStyle(el);
-
-  document.getElementById('inspTag').textContent = tag;
-  document.getElementById('inspTitle').textContent =
-    directText ? directText.slice(0, 40) : el.className.toString().split(' ').filter(Boolean)[0] || sel;
-
-  // ── Text tab ──
-  const textTab = document.getElementById('insp-text');
-  const isDyn = _isDynamic(el);
-  if (directText || isDyn) {
-    textTab.innerHTML = `
-      ${isDyn ? '<div class="text-xs mb-2 px-2 py-1.5 rounded-lg" style="background:#FBF0EE;color:#A85550;">⚠ 這個文字由程式動態產生（任務資料），僅能修改樣式，無法永久改文字</div>' : ''}
-      <textarea class="insp-textarea" id="inspTextInput" ${isDyn?'disabled':''} placeholder="文字內容">${isDyn ? directText : (window._steTextOverrides?.[sel] ?? directText)}</textarea>
-      ${!isDyn ? `<button class="insp-apply-btn" onclick="_applyTextEdit('${sel.replace(/'/g,"\\'")}')">✓ 套用文字變更</button>` : ''}
-    `;
-  } else {
-    textTab.innerHTML = '<div class="text-xs" style="color:var(--ic-choc-mid);">此元素沒有直接文字內容（包含子元素）</div>';
-  }
-
-  // ── Style tab ──
-  const styleTab = document.getElementById('insp-style');
-  const colorHex = _rgbToHex(cs.color);
-  const bgHex    = _rgbToHex(cs.backgroundColor);
-  const fsPx     = cs.fontSize;
-  const fsRem    = _pxToRem(fsPx);
-  const brPx     = parseFloat(cs.borderRadius) || 0;
-  const colorVar = colorHex ? (_hexToComputedMatch(colorHex) || null) : null;
-  const bgVar    = bgHex    ? (_hexToComputedMatch(bgHex)    || null) : null;
-  const fsVar    = _remToFontVar(fsRem);
-
-  styleTab.innerHTML = `
-    <div class="insp-section">
-      <div class="insp-section-label">🎨 顏色</div>
-      ${colorHex ? `
-        <div class="insp-row">
-          <div class="insp-swatch" style="background:${colorHex};"></div>
-          <div class="insp-prop">前景文字色 ${colorVar ? `<small>${colorVar}</small>` : ''}</div>
-          <input type="color" class="insp-color" value="${colorHex}"
-                 oninput="_applyColorProp('color','${colorVar||''}',this.value,'${sel.replace(/'/g,"\\'")}')">
-        </div>` : ''}
-      ${bgHex && bgHex !== '#000000' ? `
-        <div class="insp-row">
-          <div class="insp-swatch" style="background:${bgHex};"></div>
-          <div class="insp-prop">背景色 ${bgVar ? `<small>${bgVar}</small>` : ''}</div>
-          <input type="color" class="insp-color" value="${bgHex}"
-                 oninput="_applyColorProp('background-color','${bgVar||''}',this.value,'${sel.replace(/'/g,"\\'")}')">
-        </div>` : ''}
-    </div>
-    <div class="insp-section">
-      <div class="insp-section-label">📏 字體大小</div>
-      <div class="insp-row">
-        <div class="insp-prop">字體大小 ${fsVar ? `<small>${fsVar}</small>` : `<small>${parseFloat(fsPx).toFixed(1)}px</small>`}</div>
-        <input type="range" class="insp-range" min="8" max="64" step="1" value="${parseFloat(fsPx).toFixed(0)}"
-               oninput="_applyFontSizeProp('${fsVar||''}',this.value,'${sel.replace(/'/g,"\\'")}');document.getElementById('inspFsVal').textContent=this.value+'px'">
-        <div class="insp-val" id="inspFsVal">${parseFloat(fsPx).toFixed(0)}px</div>
-      </div>
-    </div>
-    <div class="insp-section">
-      <div class="insp-section-label">⬛ 圓角</div>
-      <div class="insp-row">
-        <div class="insp-prop">border-radius</div>
-        <input type="range" class="insp-range" min="0" max="32" step="1" value="${brPx.toFixed(0)}"
-               oninput="_applyElemStyle('${sel.replace(/'/g,"\\'")}','border-radius',this.value+'px');document.getElementById('inspBrVal').textContent=this.value+'px'">
-        <div class="insp-val" id="inspBrVal">${brPx.toFixed(0)}px</div>
-      </div>
-    </div>
-  `;
-
-  // ── Variables tab ──
-  const varsTab = document.getElementById('insp-vars');
-  const inlineStyle = el.getAttribute('style') || '';
-  const detectedVars = [...new Set([...inlineStyle.matchAll(/var\((--[^)]+)\)/g)].map(m=>m[1]))];
-  const allVars = [...ALL_COLOR_VARS, ...ALL_FONT_VARS];
-  const savedTheme = state.preferences?.superTheme || {};
-
-  if (detectedVars.length) {
-    varsTab.innerHTML = `
-      <div class="insp-section">
-        <div class="insp-section-label">此元素使用的變數</div>
-        ${detectedVars.map(v => {
-          const isColor = ALL_COLOR_VARS.includes(v);
-          const isFont  = ALL_FONT_VARS.includes(v);
-          const currentVal = getComputedStyle(document.documentElement).getPropertyValue(v).trim() ||
-                             (savedTheme.colors?.[v]) || (savedTheme.fonts?.[v]) || '';
-          const hexVal = isColor ? (_rgbToHex(currentVal) || currentVal) : '';
-          const remVal = isFont  ? (parseFloat(currentVal)||0) : 0;
-          return `<div class="insp-row">
-            ${isColor ? `<div class="insp-swatch" style="background:${hexVal};"></div>` : ''}
-            <div class="insp-prop" style="font-family:monospace;">${v}
-              <small>${isColor ? hexVal : isFont ? currentVal : currentVal}</small>
-            </div>
-            ${isColor ? `<input type="color" class="insp-color" value="${hexVal}" oninput="_applyVar('${v}','color',this.value)">` : ''}
-            ${isFont  ? `
-              <input type="range" class="insp-range" min="8" max="64" step="1"
-                     value="${(remVal*18).toFixed(0)}"
-                     oninput="_applyVar('${v}','font',(this.value/18)+'rem');document.getElementById('vv_${v.replace(/--|-/g,'_')}').textContent=this.value+'px'">
-              <div class="insp-val" id="vv_${v.replace(/--|-/g,'_')}">${(remVal*18).toFixed(0)}px</div>
-            ` : ''}
-          </div>`;
-        }).join('')}
-      </div>
-      <button class="insp-apply-btn" onclick="_saveVarChanges()">✓ 儲存所有變數變更</button>
-    `;
-  } else {
-    varsTab.innerHTML = `
-      <div class="text-xs mb-3" style="color:var(--ic-choc-mid);">此元素沒有直接引用 CSS 變數。可從下方所有變數中選擇修改：</div>
-      <div class="insp-section">
-        <div class="insp-section-label">所有顏色變數</div>
-        ${ALL_COLOR_VARS.map(v => {
-          const hexVal = _getComputedHex(v);
-          return `<div class="insp-row">
-            <div class="insp-swatch" style="background:${hexVal};"></div>
-            <div class="insp-prop" style="font-family:monospace;font-size:var(--font-nano);">${v}</div>
-            <input type="color" class="insp-color" value="${hexVal}" oninput="_applyVar('${v}','color',this.value)">
-          </div>`;
-        }).join('')}
-      </div>
-      <button class="insp-apply-btn" onclick="_saveVarChanges()">✓ 儲存所有變數變更</button>
-    `;
-  }
-
-  switchInspTab('insp-text', document.querySelector('.insp-tab[data-itab="insp-text"]'));
-  document.getElementById('steInspector').classList.add('insp-open');
-}
-
-function closeInspector() {
-  document.getElementById('steInspector').classList.remove('insp-open');
-  if (_inspEl) { _inspEl.classList.remove('ste-selected-highlight'); _inspEl = null; }
-}
-
-function switchInspTab(tabId, btn) {
-  document.querySelectorAll('.insp-tabcontent').forEach(t => t.style.display = 'none');
-  document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('insp-tab-active'));
-  const el = document.getElementById(tabId); if (el) el.style.display = '';
-  if (btn) btn.classList.add('insp-tab-active');
-}
-
-// ── Apply helpers ─────────────────────────────────────
-let _pendingVarChanges = {};
-
-function _applyVar(varName, type, value) {
-  _pendingVarChanges[varName] = { type, value };
-  // Live preview
-  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
-  Object.entries(_pendingVarChanges).forEach(([v, {type, value}]) => {
-    if (type === 'color') { if (!theme.colors) theme.colors = {}; theme.colors[v] = value; }
-    if (type === 'font')  { if (!theme.fonts)  theme.fonts  = {}; theme.fonts[v]  = value; }
-  });
-  _injectThemeStyle(theme);
-}
-
-function _saveVarChanges() {
-  if (!Object.keys(_pendingVarChanges).length) return;
-  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
-  Object.entries(_pendingVarChanges).forEach(([v, {type, value}]) => {
-    if (type === 'color') { if (!theme.colors) theme.colors = {}; theme.colors[v] = value; }
-    if (type === 'font')  { if (!theme.fonts)  theme.fonts  = {}; theme.fonts[v]  = value; }
-  });
-  if (!state.preferences) state.preferences = {};
-  state.preferences.superTheme = theme;
-  save();
-  _injectThemeStyle(theme);
-  _pendingVarChanges = {};
-  _showSavedToast();
-}
-
-function _applyColorProp(cssProp, varName, hex, sel) {
-  if (varName) {
-    _applyVar(varName, 'color', hex);
-  } else {
-    _applyElemStyle(sel, cssProp, hex);
-  }
-}
-
-function _applyFontSizeProp(varName, pxVal, sel) {
-  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
-  const remVal = (parseFloat(pxVal) / rootPx).toFixed(4).replace(/\.?0+$/,'') + 'rem';
-  if (varName) {
-    _applyVar(varName, 'font', remVal);
-  } else {
-    _applyElemStyle(sel, 'font-size', pxVal + 'px');
-  }
-}
-
-// Element-specific CSS override
-let _pendingElemStyles = {};
-function _applyElemStyle(sel, prop, value) {
-  if (!_pendingElemStyles[sel]) _pendingElemStyles[sel] = {};
-  _pendingElemStyles[sel][prop] = value;
-  // Live inject
-  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
-  if (!theme.elemStyles) theme.elemStyles = {};
-  Object.assign(theme.elemStyles, _pendingElemStyles);
-  _injectThemeStyle(theme);
-}
-
-// Text override
-let _pendingTextOverrides = {};
-if (!window._steTextOverrides) window._steTextOverrides = {};
-
-function _applyTextEdit(sel) {
-  const ta = document.getElementById('inspTextInput');
-  if (!ta) return;
-  const newText = ta.value;
-  window._steTextOverrides[sel] = newText;
-  _pendingTextOverrides[sel] = newText;
-  // Apply immediately to DOM
-  try {
-    const el = document.querySelector(sel);
-    if (el) {
-      // Replace only text nodes, keep child elements
-      for (const node of el.childNodes) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-          node.textContent = newText;
-          break;
-        }
-      }
-    }
-  } catch(e) {}
-  // Save
-  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
-  if (!theme.textOverrides) theme.textOverrides = {};
-  Object.assign(theme.textOverrides, _pendingTextOverrides);
-  if (!state.preferences) state.preferences = {};
-  state.preferences.superTheme = theme;
-  save();
-  _showSavedToast();
-}
-
-function _showSavedToast() {
-  const t = document.createElement('div');
-  t.textContent = '✓ 已儲存並同步';
-  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ic-caramel-dk);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:99999;pointer-events:none;';
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2000);
-}
-
-// ── Apply text overrides after each render ────────────
-function applyTextOverrides() {
-  const overrides = state.preferences?.superTheme?.textOverrides;
-  if (!overrides) return;
-  Object.entries(overrides).forEach(([sel, text]) => {
-    try {
-      const el = document.querySelector(sel);
-      if (!el) return;
-      for (const node of el.childNodes) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-          node.textContent = text; break;
-        }
-      }
-    } catch(e) {}
-  });
-  // Sync to local cache
-  window._steTextOverrides = Object.assign({}, overrides);
-}
-
-// ── _injectThemeStyle extension: elemStyles ───────────
-// (extends the existing _injectThemeStyle to handle elemStyles)
-const _origInjectThemeStyle = typeof _injectThemeStyle !== 'undefined' ? _injectThemeStyle : null;
-function _injectThemeStyle(theme) {
-  let css = ':root {\n';
-  if (theme.colors) Object.entries(theme.colors).forEach(([k,v]) => { css += `  ${k}: ${v};\n`; });
-  if (theme.fonts)  Object.entries(theme.fonts).forEach(([k,v])  => { css += `  ${k}: ${v};\n`; });
-  if (theme.cards) {
-    if (theme.cards['--te-card-radius']) css += `  --te-card-radius: ${theme.cards['--te-card-radius']};\n`;
-    if (theme.cards['--te-card-gap'])    css += `  --te-card-gap: ${theme.cards['--te-card-gap']};\n`;
-  }
-  css += '}\n';
-  if (theme.cards && theme.cards['--te-card-radius']) {
-    css += '[class*="rounded-2xl"] { border-radius: var(--te-card-radius, 1rem) !important; }\n';
-    css += '[class*="rounded-xl"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.667) !important; }\n';
-    css += '[class*="rounded-lg"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.5) !important; }\n';
-  }
-  if (theme.cards && theme.cards['--te-card-gap']) {
-    css += '.space-y-4 > * + * { margin-top: var(--te-card-gap, 1rem) !important; }\n';
-  }
-  // Element-specific style overrides
-  if (theme.elemStyles) {
-    Object.entries(theme.elemStyles).forEach(([sel, props]) => {
-      try {
-        css += `${sel} { `;
-        Object.entries(props).forEach(([p,v]) => { css += `${p}: ${v} !important; `; });
-        css += '}\n';
-      } catch(e) {}
-    });
-  }
-  let styleEl = document.getElementById('themeOverrideStyle');
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = 'themeOverrideStyle';
-    document.head.appendChild(styleEl);
-  }
-  styleEl.textContent = css;
-}
-
 init();
 </script>
 
@@ -11446,137 +10527,6 @@ init();
         <button onclick="addLibraryTasks()" class="btn-sm-primary"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 加入排程</button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ===== Super Theme Editor ===== -->
-<div id="superThemeEditor" class="hidden fixed inset-0 z-[9999] flex flex-col" style="background:var(--ic-lemon);">
-  <!-- Header -->
-  <div class="flex items-center justify-between px-4 py-3 border-b flex-shrink-0" style="border-color:var(--ic-vanilla);background:var(--ic-surface);">
-    <div>
-      <div class="font-black text-lg" style="color:var(--ic-chocolate);">🎨 超級主題編輯器</div>
-      <div class="text-xs" style="color:var(--ic-choc-mid);">即時預覽 · 儲存後套用此裝置</div>
-    </div>
-    <button onclick="closeSTE()" class="text-3xl leading-none px-2" style="color:var(--ic-choc-mid);" aria-label="關閉">×</button>
-  </div>
-
-  <!-- Tab bar -->
-  <div class="ste-tab-bar flex-shrink-0" style="background:var(--ic-surface);">
-    <button class="ste-tab ste-active" data-stab="ste-colors" onclick="switchSTETab('ste-colors',this)">🎨 顏色</button>
-    <button class="ste-tab" data-stab="ste-fonts" onclick="switchSTETab('ste-fonts',this)">📝 字體</button>
-    <button class="ste-tab" data-stab="ste-cards" onclick="switchSTETab('ste-cards',this)">🃏 卡片</button>
-  </div>
-
-  <!-- Body -->
-  <div class="ste-body">
-
-    <!-- ─── 顏色 tab ─── -->
-    <div id="ste-colors" class="ste-tabcontent">
-      <div class="ste-section">
-        <div class="ste-section-title">🍫 主色系</div>
-        <div id="ste-color-main"></div>
-      </div>
-      <div class="ste-section">
-        <div class="ste-section-title">🍓 功能色（提醒 / 完成）</div>
-        <div id="ste-color-func"></div>
-      </div>
-      <div class="ste-section">
-        <div class="ste-section-title">🍦 底色 / 背景</div>
-        <div id="ste-color-bg"></div>
-      </div>
-    </div>
-
-    <!-- ─── 字體 tab ─── -->
-    <div id="ste-fonts" class="ste-tabcontent hidden">
-      <div class="ste-section">
-        <div class="ste-section-title">基礎字體縮放（影響所有 rem 值）</div>
-        <div class="grid grid-cols-4 gap-2 mb-1">
-          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="14" onclick="setDeviceFontSize(14);_steMarkFsBtn(14)">
-            <span style="font-size:14px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-            <span style="font-size:10px;color:var(--ic-choc-mid)">小</span>
-          </button>
-          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="16" onclick="setDeviceFontSize(16);_steMarkFsBtn(16)">
-            <span style="font-size:16px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-            <span style="font-size:10px;color:var(--ic-choc-mid)">中</span>
-          </button>
-          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="18" onclick="setDeviceFontSize(18);_steMarkFsBtn(18)">
-            <span style="font-size:18px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-            <span style="font-size:10px;color:var(--ic-choc-mid)">大</span>
-          </button>
-          <button class="ste-fs-btn border border-gray-300 py-2 rounded-xl flex flex-col items-center gap-0.5" data-fs="20" onclick="setDeviceFontSize(20);_steMarkFsBtn(20)">
-            <span style="font-size:20px;font-weight:900;line-height:1;color:var(--ic-choc-mid)">A</span>
-            <span style="font-size:10px;color:var(--ic-choc-mid)">特大</span>
-          </button>
-        </div>
-      </div>
-      <div class="ste-section">
-        <div class="ste-section-title">字級 Token 微調（rem）</div>
-        <div id="ste-font-rows"></div>
-      </div>
-    </div>
-
-    <!-- ─── 卡片 tab ─── -->
-    <div id="ste-cards" class="ste-tabcontent hidden">
-      <div class="ste-section">
-        <div class="ste-section-title">卡片圓角</div>
-        <div class="ste-row">
-          <div class="ste-label">圓角大小 <small>rounded-2xl / rounded-xl</small></div>
-          <input type="range" id="ste-card-radius" class="ste-range" min="0" max="24" step="1" value="16"
-                 oninput="stePreviewCards()">
-          <div class="ste-font-preview"><span id="ste-card-radius-val">16</span>px</div>
-        </div>
-      </div>
-      <div class="ste-section">
-        <div class="ste-section-title">卡片間距</div>
-        <div class="ste-row">
-          <div class="ste-label">上下間距 <small>space-y-4 / py-4</small></div>
-          <input type="range" id="ste-card-gap" class="ste-range" min="4" max="32" step="4" value="16"
-                 oninput="stePreviewCards()">
-          <div class="ste-font-preview"><span id="ste-card-gap-val">16</span>px</div>
-        </div>
-      </div>
-      <div class="ste-section">
-        <div class="ste-section-title">即時預覽</div>
-        <div id="ste-card-preview" class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div class="font-bold text-sm mb-2" style="color:var(--ic-chocolate);">卡片標題預覽</div>
-          <div class="text-xs" style="color:var(--ic-choc-mid);">這裡顯示卡片內文的樣子，可以看到圓角和間距的變化效果。</div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /.ste-body -->
-
-  <!-- Footer -->
-  <div class="ste-footer">
-    <button onclick="resetSTE()" class="btn-ghost" style="flex:1;">↺ 重置全部</button>
-    <button onclick="saveSTE()" class="btn-primary" style="flex:1;">✓ 儲存套用</button>
-  </div>
-</div>
-
-<!-- ═══ WYSIWYG Page Editor UI ═══ -->
-<div class="edit-mode-banner"></div>
-
-<button id="steEditToggle" onclick="togglePageEditMode()">
-  <i class="ti ti-pencil" aria-hidden="true"></i>
-  <span id="steEditLabel">編輯頁面</span>
-</button>
-
-<div id="steInspector">
-  <div class="insp-handle"></div>
-  <div class="insp-header">
-    <span class="insp-tag" id="inspTag">div</span>
-    <span class="insp-title" id="inspTitle">選取元素</span>
-    <button class="insp-close" onclick="closeInspector()">×</button>
-  </div>
-  <div class="insp-body">
-    <div class="insp-tab-bar">
-      <button class="insp-tab insp-tab-active" data-itab="insp-text" onclick="switchInspTab('insp-text',this)">✏️ 文字</button>
-      <button class="insp-tab" data-itab="insp-style" onclick="switchInspTab('insp-style',this)">🎨 樣式</button>
-      <button class="insp-tab" data-itab="insp-vars" onclick="switchInspTab('insp-vars',this)">⚙️ 變數</button>
-    </div>
-    <div id="insp-text" class="insp-tabcontent"></div>
-    <div id="insp-style" class="insp-tabcontent" style="display:none;"></div>
-    <div id="insp-vars" class="insp-tabcontent" style="display:none;"></div>
   </div>
 </div>
 
