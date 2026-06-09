@@ -614,6 +614,84 @@
                 display:flex; gap:8px; flex-shrink:0; background:var(--ic-surface); }
   .ste-preview-text { font-weight:600; padding:4px 8px; border-radius:6px;
                       background:var(--ic-lemon); color:var(--ic-chocolate); }
+
+  /* ═══ WYSIWYG Page Editor ═══ */
+  body.page-edit-mode { user-select: none; }
+  body.page-edit-mode *:not(#steInspector):not(#steInspector *):not(#steEditToggle):not(#steEditToggle *) {
+    cursor: crosshair !important;
+  }
+  .ste-hover-highlight {
+    outline: 2px dashed rgba(208,167,123,0.8) !important;
+    outline-offset: 1px !important;
+  }
+  .ste-selected-highlight {
+    outline: 3px solid #D0A77B !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 6px rgba(208,167,123,0.18) !important;
+  }
+  #steEditToggle {
+    position: fixed;
+    bottom: 88px;
+    right: 14px;
+    z-index: 9990;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: none;
+    background: var(--ic-caramel);
+    color: #FAF7F2;
+    font-size: var(--font-secondary);
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(74,56,40,.25);
+    cursor: pointer !important;
+    transition: background .15s;
+  }
+  #steEditToggle.edit-active {
+    background: var(--ic-caramel-dk);
+    box-shadow: 0 4px 20px rgba(74,56,40,.4);
+  }
+  #steInspector {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 9995;
+    background: var(--ic-surface);
+    border-top: 2px solid var(--ic-caramel);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 40px rgba(74,56,40,.18);
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.34,1.1,.64,1);
+    max-height: 68vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #steInspector.insp-open { transform: translateY(0); }
+  .insp-handle { width:40px;height:4px;border-radius:2px;background:var(--ic-vanilla);margin:10px auto 0; }
+  .insp-header { display:flex;align-items:center;justify-content:space-between;padding:10px 16px 12px; }
+  .insp-tag { font-size:var(--font-nano);font-weight:700;padding:2px 8px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-caramel-dk);font-family:monospace; }
+  .insp-title { font-size:var(--font-secondary);font-weight:700;color:var(--ic-chocolate);flex:1;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+  .insp-close { font-size:22px;color:var(--ic-choc-mid);line-height:1;background:none;border:none;cursor:pointer !important; }
+  .insp-body { padding:0 16px 20px; }
+  .insp-section { margin-bottom:16px; }
+  .insp-section-label { font-size:var(--font-nano);font-weight:700;color:var(--ic-choc-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px; }
+  .insp-row { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ic-vanilla); }
+  .insp-row:last-child { border-bottom:none; }
+  .insp-prop { flex:1;font-size:var(--font-secondary);color:var(--ic-chocolate); }
+  .insp-prop small { display:block;font-size:var(--font-nano);color:var(--ic-choc-mid);font-family:monospace; }
+  .insp-color { width:36px;height:28px;border:1px solid var(--ic-vanilla);border-radius:6px;cursor:pointer;padding:2px;background:none; }
+  .insp-range { flex:1;accent-color:var(--ic-caramel);min-width:80px; }
+  .insp-val { font-size:var(--font-nano);font-weight:700;color:var(--ic-caramel-dk);min-width:44px;text-align:right; }
+  .insp-swatch { width:28px;height:28px;border-radius:6px;flex-shrink:0;border:1px solid rgba(0,0,0,.1); }
+  .insp-textarea { width:100%;border:1.5px solid var(--ic-vanilla);border-radius:10px;padding:8px 10px;font-size:var(--font-body);color:var(--ic-chocolate);background:var(--ic-lemon);font-family:inherit;resize:vertical;min-height:60px;box-sizing:border-box; }
+  .insp-textarea:focus { border-color:var(--ic-caramel);outline:none; }
+  .insp-apply-btn { width:100%;margin-top:10px;padding:10px;border-radius:12px;border:none;background:var(--ic-caramel);color:#FAF7F2;font-weight:700;font-size:var(--font-body);cursor:pointer; }
+  .insp-var-chip { display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:var(--ic-lemon);border:1px solid var(--ic-vanilla);font-size:var(--font-nano);font-family:monospace;color:var(--ic-caramel-dk); }
+  .insp-tab-bar { display:flex;border-bottom:1.5px solid var(--ic-vanilla);margin-bottom:12px; }
+  .insp-tab { flex:1;padding:8px 4px;font-size:var(--font-nano);font-weight:600;text-align:center;border:none;background:none;color:var(--ic-choc-mid);cursor:pointer !important;border-bottom:2px solid transparent;margin-bottom:-1.5px; }
+  .insp-tab.insp-tab-active { color:var(--ic-chocolate);border-bottom-color:var(--ic-caramel); }
+  .edit-mode-banner { display:none;position:fixed;top:0;left:0;right:0;z-index:9989;height:3px;background:linear-gradient(90deg,var(--ic-caramel),var(--ic-caramel-dk),var(--ic-caramel)); }
+  body.page-edit-mode .edit-mode-banner { display:block; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -10392,6 +10470,8 @@ function refreshAll(){
   if (!state.currentUser) return;
   if (state.currentUser.role==='helper') renderAtikaView();
   else renderManagerView();
+  _showEditToggle();
+  applyTextOverrides();
 }
 
 /* ========== 啟動 ========== */
@@ -10783,6 +10863,452 @@ function loadSavedTheme() {
   try { _injectThemeStyle(JSON.parse(saved)); } catch(e) { console.warn('Theme load error:', e); }
 }
 
+
+/* ══════════════════════════════════════════════════════
+   WYSIWYG Page Editor
+   ─ 管理者限定：點任何元素直接編輯文字 / 樣式 / 變數
+   ══════════════════════════════════════════════════════ */
+
+let _editMode = false;
+let _inspEl = null;   // currently inspected element
+let _hoverEl = null;
+
+// ── CSS variable registry（用於反向查找）──
+const ALL_COLOR_VARS = [
+  '--ic-chocolate','--ic-choc-dk','--ic-choc-mid',
+  '--ic-caramel','--ic-caramel-dk',
+  '--ic-strawberry','--ic-straw-lt',
+  '--ic-mint','--ic-mint-lt',
+  '--ic-lemon','--ic-vanilla','--ic-surface',
+];
+const ALL_FONT_VARS = [
+  '--font-display','--font-page','--font-section','--font-card',
+  '--font-body','--font-secondary','--font-caption','--font-nano',
+  '--font-btn','--font-btn-sm','--font-input','--font-close',
+];
+
+// ── Helpers ──────────────────────────────────────────
+function _rgbToHex(rgb) {
+  if (!rgb || rgb === 'transparent') return null;
+  const m = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!m) return null;
+  return '#' + [m[1],m[2],m[3]].map(x => parseInt(x).toString(16).padStart(2,'0')).join('');
+}
+
+function _getComputedHex(varName) {
+  const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  // CSS var values might be hex already
+  if (val.startsWith('#')) return val;
+  return _rgbToHex(val) || val;
+}
+
+function _hexToComputedMatch(hex) {
+  if (!hex) return null;
+  for (const v of ALL_COLOR_VARS) {
+    const computed = _getComputedHex(v);
+    if (computed && computed.toLowerCase() === hex.toLowerCase()) return v;
+  }
+  return null;
+}
+
+function _pxToRem(px) {
+  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+  return (parseFloat(px) / rootPx).toFixed(4).replace(/\.?0+$/, '');
+}
+
+function _remToFontVar(remVal) {
+  const root = document.documentElement;
+  for (const v of ALL_FONT_VARS) {
+    const computed = parseFloat(getComputedStyle(root).getPropertyValue(v));
+    if (Math.abs(computed - parseFloat(remVal)) < 0.01) return v;
+  }
+  return null;
+}
+
+// Generate a stable CSS selector for an element
+function _getSelector(el) {
+  if (!el || el === document.body) return 'body';
+  if (el.id) return '#' + el.id;
+  // Walk up to nearest ancestor with ID
+  let path = [];
+  let cur = el;
+  while (cur && cur !== document.body) {
+    if (cur.id) { path.unshift('#' + cur.id); break; }
+    const siblings = Array.from(cur.parentNode?.children || []).filter(c => c.tagName === cur.tagName);
+    const idx = siblings.indexOf(cur) + 1;
+    const seg = cur.tagName.toLowerCase() + (siblings.length > 1 ? `:nth-of-type(${idx})` : '');
+    path.unshift(seg);
+    cur = cur.parentNode;
+  }
+  return path.join(' > ');
+}
+
+// Get direct text content (excluding children text)
+function _getDirectText(el) {
+  let text = '';
+  for (const node of el.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
+  }
+  return text.trim();
+}
+
+// Check if element is inside a dynamically rendered section
+function _isDynamic(el) {
+  return !!(el.closest('[data-tid]') || el.closest('[data-aid]') || el.closest('.task-card'));
+}
+
+// ── Toggle edit mode ──────────────────────────────────
+function togglePageEditMode() {
+  // Only manager can use this
+  if (state.currentUser?.role !== 'manager') return;
+  _editMode = !_editMode;
+  const btn = document.getElementById('steEditToggle');
+  const label = document.getElementById('steEditLabel');
+  if (_editMode) {
+    document.body.classList.add('page-edit-mode');
+    btn.classList.add('edit-active');
+    if (label) label.textContent = '結束編輯';
+    document.addEventListener('mouseover', _onHover, true);
+    document.addEventListener('click', _onClick, true);
+  } else {
+    document.body.classList.remove('page-edit-mode');
+    btn.classList.remove('edit-active');
+    if (label) label.textContent = '編輯頁面';
+    document.removeEventListener('mouseover', _onHover, true);
+    document.removeEventListener('click', _onClick, true);
+    if (_hoverEl) { _hoverEl.classList.remove('ste-hover-highlight'); _hoverEl = null; }
+    if (_inspEl)  { _inspEl.classList.remove('ste-selected-highlight'); _inspEl = null; }
+    closeInspector();
+  }
+}
+
+// Show toggle button when manager is logged in
+function _showEditToggle() {
+  const btn = document.getElementById('steEditToggle');
+  if (!btn) return;
+  btn.style.display = (state.currentUser?.role === 'manager') ? 'flex' : 'none';
+}
+
+// ── Hover & click handlers ────────────────────────────
+function _onHover(e) {
+  const SKIP = ['#steInspector','#steEditToggle','.edit-mode-banner'];
+  if (SKIP.some(s => e.target.closest(s))) return;
+  if (_hoverEl && _hoverEl !== _inspEl) _hoverEl.classList.remove('ste-hover-highlight');
+  _hoverEl = e.target;
+  if (_hoverEl !== _inspEl) _hoverEl.classList.add('ste-hover-highlight');
+}
+
+function _onClick(e) {
+  const SKIP = ['#steInspector','#steEditToggle','.edit-mode-banner'];
+  if (SKIP.some(s => e.target.closest(s))) return;
+  e.preventDefault(); e.stopPropagation();
+  if (_inspEl) _inspEl.classList.remove('ste-selected-highlight');
+  if (_hoverEl) _hoverEl.classList.remove('ste-hover-highlight');
+  _inspEl = e.target;
+  _inspEl.classList.add('ste-selected-highlight');
+  openInspector(_inspEl);
+}
+
+// ── Inspector ─────────────────────────────────────────
+function openInspector(el) {
+  const tag = el.tagName.toLowerCase();
+  const directText = _getDirectText(el);
+  const sel = _getSelector(el);
+  const cs = getComputedStyle(el);
+
+  document.getElementById('inspTag').textContent = tag;
+  document.getElementById('inspTitle').textContent =
+    directText ? directText.slice(0, 40) : el.className.toString().split(' ').filter(Boolean)[0] || sel;
+
+  // ── Text tab ──
+  const textTab = document.getElementById('insp-text');
+  const isDyn = _isDynamic(el);
+  if (directText || isDyn) {
+    textTab.innerHTML = `
+      ${isDyn ? '<div class="text-xs mb-2 px-2 py-1.5 rounded-lg" style="background:#FBF0EE;color:#A85550;">⚠ 這個文字由程式動態產生（任務資料），僅能修改樣式，無法永久改文字</div>' : ''}
+      <textarea class="insp-textarea" id="inspTextInput" ${isDyn?'disabled':''} placeholder="文字內容">${isDyn ? directText : (window._steTextOverrides?.[sel] ?? directText)}</textarea>
+      ${!isDyn ? `<button class="insp-apply-btn" onclick="_applyTextEdit('${sel.replace(/'/g,"\\'")}')">✓ 套用文字變更</button>` : ''}
+    `;
+  } else {
+    textTab.innerHTML = '<div class="text-xs" style="color:var(--ic-choc-mid);">此元素沒有直接文字內容（包含子元素）</div>';
+  }
+
+  // ── Style tab ──
+  const styleTab = document.getElementById('insp-style');
+  const colorHex = _rgbToHex(cs.color);
+  const bgHex    = _rgbToHex(cs.backgroundColor);
+  const fsPx     = cs.fontSize;
+  const fsRem    = _pxToRem(fsPx);
+  const brPx     = parseFloat(cs.borderRadius) || 0;
+  const colorVar = colorHex ? (_hexToComputedMatch(colorHex) || null) : null;
+  const bgVar    = bgHex    ? (_hexToComputedMatch(bgHex)    || null) : null;
+  const fsVar    = _remToFontVar(fsRem);
+
+  styleTab.innerHTML = `
+    <div class="insp-section">
+      <div class="insp-section-label">🎨 顏色</div>
+      ${colorHex ? `
+        <div class="insp-row">
+          <div class="insp-swatch" style="background:${colorHex};"></div>
+          <div class="insp-prop">前景文字色 ${colorVar ? `<small>${colorVar}</small>` : ''}</div>
+          <input type="color" class="insp-color" value="${colorHex}"
+                 oninput="_applyColorProp('color','${colorVar||''}',this.value,'${sel.replace(/'/g,"\\'")}')">
+        </div>` : ''}
+      ${bgHex && bgHex !== '#000000' ? `
+        <div class="insp-row">
+          <div class="insp-swatch" style="background:${bgHex};"></div>
+          <div class="insp-prop">背景色 ${bgVar ? `<small>${bgVar}</small>` : ''}</div>
+          <input type="color" class="insp-color" value="${bgHex}"
+                 oninput="_applyColorProp('background-color','${bgVar||''}',this.value,'${sel.replace(/'/g,"\\'")}')">
+        </div>` : ''}
+    </div>
+    <div class="insp-section">
+      <div class="insp-section-label">📏 字體大小</div>
+      <div class="insp-row">
+        <div class="insp-prop">字體大小 ${fsVar ? `<small>${fsVar}</small>` : `<small>${parseFloat(fsPx).toFixed(1)}px</small>`}</div>
+        <input type="range" class="insp-range" min="8" max="64" step="1" value="${parseFloat(fsPx).toFixed(0)}"
+               oninput="_applyFontSizeProp('${fsVar||''}',this.value,'${sel.replace(/'/g,"\\'")}');document.getElementById('inspFsVal').textContent=this.value+'px'">
+        <div class="insp-val" id="inspFsVal">${parseFloat(fsPx).toFixed(0)}px</div>
+      </div>
+    </div>
+    <div class="insp-section">
+      <div class="insp-section-label">⬛ 圓角</div>
+      <div class="insp-row">
+        <div class="insp-prop">border-radius</div>
+        <input type="range" class="insp-range" min="0" max="32" step="1" value="${brPx.toFixed(0)}"
+               oninput="_applyElemStyle('${sel.replace(/'/g,"\\'")}','border-radius',this.value+'px');document.getElementById('inspBrVal').textContent=this.value+'px'">
+        <div class="insp-val" id="inspBrVal">${brPx.toFixed(0)}px</div>
+      </div>
+    </div>
+  `;
+
+  // ── Variables tab ──
+  const varsTab = document.getElementById('insp-vars');
+  const inlineStyle = el.getAttribute('style') || '';
+  const detectedVars = [...new Set([...inlineStyle.matchAll(/var\((--[^)]+)\)/g)].map(m=>m[1]))];
+  const allVars = [...ALL_COLOR_VARS, ...ALL_FONT_VARS];
+  const savedTheme = state.preferences?.superTheme || {};
+
+  if (detectedVars.length) {
+    varsTab.innerHTML = `
+      <div class="insp-section">
+        <div class="insp-section-label">此元素使用的變數</div>
+        ${detectedVars.map(v => {
+          const isColor = ALL_COLOR_VARS.includes(v);
+          const isFont  = ALL_FONT_VARS.includes(v);
+          const currentVal = getComputedStyle(document.documentElement).getPropertyValue(v).trim() ||
+                             (savedTheme.colors?.[v]) || (savedTheme.fonts?.[v]) || '';
+          const hexVal = isColor ? (_rgbToHex(currentVal) || currentVal) : '';
+          const remVal = isFont  ? (parseFloat(currentVal)||0) : 0;
+          return `<div class="insp-row">
+            ${isColor ? `<div class="insp-swatch" style="background:${hexVal};"></div>` : ''}
+            <div class="insp-prop" style="font-family:monospace;">${v}
+              <small>${isColor ? hexVal : isFont ? currentVal : currentVal}</small>
+            </div>
+            ${isColor ? `<input type="color" class="insp-color" value="${hexVal}" oninput="_applyVar('${v}','color',this.value)">` : ''}
+            ${isFont  ? `
+              <input type="range" class="insp-range" min="8" max="64" step="1"
+                     value="${(remVal*18).toFixed(0)}"
+                     oninput="_applyVar('${v}','font',(this.value/18)+'rem');document.getElementById('vv_${v.replace(/--|-/g,'_')}').textContent=this.value+'px'">
+              <div class="insp-val" id="vv_${v.replace(/--|-/g,'_')}">${(remVal*18).toFixed(0)}px</div>
+            ` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="insp-apply-btn" onclick="_saveVarChanges()">✓ 儲存所有變數變更</button>
+    `;
+  } else {
+    varsTab.innerHTML = `
+      <div class="text-xs mb-3" style="color:var(--ic-choc-mid);">此元素沒有直接引用 CSS 變數。可從下方所有變數中選擇修改：</div>
+      <div class="insp-section">
+        <div class="insp-section-label">所有顏色變數</div>
+        ${ALL_COLOR_VARS.map(v => {
+          const hexVal = _getComputedHex(v);
+          return `<div class="insp-row">
+            <div class="insp-swatch" style="background:${hexVal};"></div>
+            <div class="insp-prop" style="font-family:monospace;font-size:var(--font-nano);">${v}</div>
+            <input type="color" class="insp-color" value="${hexVal}" oninput="_applyVar('${v}','color',this.value)">
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="insp-apply-btn" onclick="_saveVarChanges()">✓ 儲存所有變數變更</button>
+    `;
+  }
+
+  switchInspTab('insp-text', document.querySelector('.insp-tab[data-itab="insp-text"]'));
+  document.getElementById('steInspector').classList.add('insp-open');
+}
+
+function closeInspector() {
+  document.getElementById('steInspector').classList.remove('insp-open');
+  if (_inspEl) { _inspEl.classList.remove('ste-selected-highlight'); _inspEl = null; }
+}
+
+function switchInspTab(tabId, btn) {
+  document.querySelectorAll('.insp-tabcontent').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('insp-tab-active'));
+  const el = document.getElementById(tabId); if (el) el.style.display = '';
+  if (btn) btn.classList.add('insp-tab-active');
+}
+
+// ── Apply helpers ─────────────────────────────────────
+let _pendingVarChanges = {};
+
+function _applyVar(varName, type, value) {
+  _pendingVarChanges[varName] = { type, value };
+  // Live preview
+  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
+  Object.entries(_pendingVarChanges).forEach(([v, {type, value}]) => {
+    if (type === 'color') { if (!theme.colors) theme.colors = {}; theme.colors[v] = value; }
+    if (type === 'font')  { if (!theme.fonts)  theme.fonts  = {}; theme.fonts[v]  = value; }
+  });
+  _injectThemeStyle(theme);
+}
+
+function _saveVarChanges() {
+  if (!Object.keys(_pendingVarChanges).length) return;
+  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
+  Object.entries(_pendingVarChanges).forEach(([v, {type, value}]) => {
+    if (type === 'color') { if (!theme.colors) theme.colors = {}; theme.colors[v] = value; }
+    if (type === 'font')  { if (!theme.fonts)  theme.fonts  = {}; theme.fonts[v]  = value; }
+  });
+  if (!state.preferences) state.preferences = {};
+  state.preferences.superTheme = theme;
+  save();
+  _injectThemeStyle(theme);
+  _pendingVarChanges = {};
+  _showSavedToast();
+}
+
+function _applyColorProp(cssProp, varName, hex, sel) {
+  if (varName) {
+    _applyVar(varName, 'color', hex);
+  } else {
+    _applyElemStyle(sel, cssProp, hex);
+  }
+}
+
+function _applyFontSizeProp(varName, pxVal, sel) {
+  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 18;
+  const remVal = (parseFloat(pxVal) / rootPx).toFixed(4).replace(/\.?0+$/,'') + 'rem';
+  if (varName) {
+    _applyVar(varName, 'font', remVal);
+  } else {
+    _applyElemStyle(sel, 'font-size', pxVal + 'px');
+  }
+}
+
+// Element-specific CSS override
+let _pendingElemStyles = {};
+function _applyElemStyle(sel, prop, value) {
+  if (!_pendingElemStyles[sel]) _pendingElemStyles[sel] = {};
+  _pendingElemStyles[sel][prop] = value;
+  // Live inject
+  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
+  if (!theme.elemStyles) theme.elemStyles = {};
+  Object.assign(theme.elemStyles, _pendingElemStyles);
+  _injectThemeStyle(theme);
+}
+
+// Text override
+let _pendingTextOverrides = {};
+if (!window._steTextOverrides) window._steTextOverrides = {};
+
+function _applyTextEdit(sel) {
+  const ta = document.getElementById('inspTextInput');
+  if (!ta) return;
+  const newText = ta.value;
+  window._steTextOverrides[sel] = newText;
+  _pendingTextOverrides[sel] = newText;
+  // Apply immediately to DOM
+  try {
+    const el = document.querySelector(sel);
+    if (el) {
+      // Replace only text nodes, keep child elements
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          node.textContent = newText;
+          break;
+        }
+      }
+    }
+  } catch(e) {}
+  // Save
+  const theme = JSON.parse(JSON.stringify(state.preferences?.superTheme || {}));
+  if (!theme.textOverrides) theme.textOverrides = {};
+  Object.assign(theme.textOverrides, _pendingTextOverrides);
+  if (!state.preferences) state.preferences = {};
+  state.preferences.superTheme = theme;
+  save();
+  _showSavedToast();
+}
+
+function _showSavedToast() {
+  const t = document.createElement('div');
+  t.textContent = '✓ 已儲存並同步';
+  t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ic-caramel-dk);color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:99999;pointer-events:none;';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// ── Apply text overrides after each render ────────────
+function applyTextOverrides() {
+  const overrides = state.preferences?.superTheme?.textOverrides;
+  if (!overrides) return;
+  Object.entries(overrides).forEach(([sel, text]) => {
+    try {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          node.textContent = text; break;
+        }
+      }
+    } catch(e) {}
+  });
+  // Sync to local cache
+  window._steTextOverrides = Object.assign({}, overrides);
+}
+
+// ── _injectThemeStyle extension: elemStyles ───────────
+// (extends the existing _injectThemeStyle to handle elemStyles)
+const _origInjectThemeStyle = typeof _injectThemeStyle !== 'undefined' ? _injectThemeStyle : null;
+function _injectThemeStyle(theme) {
+  let css = ':root {\n';
+  if (theme.colors) Object.entries(theme.colors).forEach(([k,v]) => { css += `  ${k}: ${v};\n`; });
+  if (theme.fonts)  Object.entries(theme.fonts).forEach(([k,v])  => { css += `  ${k}: ${v};\n`; });
+  if (theme.cards) {
+    if (theme.cards['--te-card-radius']) css += `  --te-card-radius: ${theme.cards['--te-card-radius']};\n`;
+    if (theme.cards['--te-card-gap'])    css += `  --te-card-gap: ${theme.cards['--te-card-gap']};\n`;
+  }
+  css += '}\n';
+  if (theme.cards && theme.cards['--te-card-radius']) {
+    css += '[class*="rounded-2xl"] { border-radius: var(--te-card-radius, 1rem) !important; }\n';
+    css += '[class*="rounded-xl"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.667) !important; }\n';
+    css += '[class*="rounded-lg"] { border-radius: calc(var(--te-card-radius, 1rem) * 0.5) !important; }\n';
+  }
+  if (theme.cards && theme.cards['--te-card-gap']) {
+    css += '.space-y-4 > * + * { margin-top: var(--te-card-gap, 1rem) !important; }\n';
+  }
+  // Element-specific style overrides
+  if (theme.elemStyles) {
+    Object.entries(theme.elemStyles).forEach(([sel, props]) => {
+      try {
+        css += `${sel} { `;
+        Object.entries(props).forEach(([p,v]) => { css += `${p}: ${v} !important; `; });
+        css += '}\n';
+      } catch(e) {}
+    });
+  }
+  let styleEl = document.getElementById('themeOverrideStyle');
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'themeOverrideStyle';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = css;
+}
+
 init();
 </script>
 
@@ -11024,6 +11550,33 @@ init();
   <div class="ste-footer">
     <button onclick="resetSTE()" class="btn-ghost" style="flex:1;">↺ 重置全部</button>
     <button onclick="saveSTE()" class="btn-primary" style="flex:1;">✓ 儲存套用</button>
+  </div>
+</div>
+
+<!-- ═══ WYSIWYG Page Editor UI ═══ -->
+<div class="edit-mode-banner"></div>
+
+<button id="steEditToggle" onclick="togglePageEditMode()">
+  <i class="ti ti-pencil" aria-hidden="true"></i>
+  <span id="steEditLabel">編輯頁面</span>
+</button>
+
+<div id="steInspector">
+  <div class="insp-handle"></div>
+  <div class="insp-header">
+    <span class="insp-tag" id="inspTag">div</span>
+    <span class="insp-title" id="inspTitle">選取元素</span>
+    <button class="insp-close" onclick="closeInspector()">×</button>
+  </div>
+  <div class="insp-body">
+    <div class="insp-tab-bar">
+      <button class="insp-tab insp-tab-active" data-itab="insp-text" onclick="switchInspTab('insp-text',this)">✏️ 文字</button>
+      <button class="insp-tab" data-itab="insp-style" onclick="switchInspTab('insp-style',this)">🎨 樣式</button>
+      <button class="insp-tab" data-itab="insp-vars" onclick="switchInspTab('insp-vars',this)">⚙️ 變數</button>
+    </div>
+    <div id="insp-text" class="insp-tabcontent"></div>
+    <div id="insp-style" class="insp-tabcontent" style="display:none;"></div>
+    <div id="insp-vars" class="insp-tabcontent" style="display:none;"></div>
   </div>
 </div>
 
