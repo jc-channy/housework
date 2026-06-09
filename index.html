@@ -3929,15 +3929,17 @@ function getCurrentCycleMenu(){
   if (!sets.length) return state.weekMenu || {};
   const cycleSets = sets.filter(s => s.cycleOn);
   if (cycleSets.length <= 1) {
-    // 沒有循環或只有一組：用 active set
-    const active = sets.find(s => s.id === state.activeWeekMenuSetId);
-    return (active ? active.menu : sets[0].menu) || {};
+    // 單組：直接用 state.weekMenu（永遠是最新的工作副本）
+    return state.weekMenu || {};
   }
   // 多組循環：按 ISO 週數決定本週用哪一組
   const d = today();
   const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
   const isoWeek = Math.round((t - new Date(t.getFullYear(),0,4)) / (7*86400000));
-  return cycleSets[isoWeek % cycleSets.length].menu || {};
+  const thisSet = cycleSets[isoWeek % cycleSets.length];
+  // 若本週的組就是目前 active，也用 state.weekMenu
+  if (thisSet.id === state.activeWeekMenuSetId) return state.weekMenu || {};
+  return thisSet.menu || {};
 }
 
 let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
@@ -4415,7 +4417,7 @@ function addDishToCell(){
 function clearMenuCell(){
   if (!_menuCellKey) return;
   delete state.weekMenu[_menuCellKey];
-  save(); closeMenuCellModal(); renderMenuTab();
+  save(); closeMenuCellModal(); renderMenuTab(); renderTodayMenuCard();
 }
 function saveMenuCell(){
   if (!_menuCellKey) return;
@@ -4432,7 +4434,7 @@ function saveMenuCell(){
     const dishes = _cellDishes.filter(d=>d.dishName.trim()||((d.ingredientIds||[]).length));
     state.weekMenu[_menuCellKey] = { type:'cook', dishes };
   }
-  save(); closeMenuCellModal(); renderMenuTab();
+  save(); closeMenuCellModal(); renderMenuTab(); renderTodayMenuCard();
 }
 
 // ── Meal Config Modal ──
