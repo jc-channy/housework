@@ -2809,10 +2809,10 @@ function load() {
     state.weekMenuSets = [firstSet];
     state.activeWeekMenuSetId = 'wset_1';
   }
-  // 載入時確保 weekMenu 指向 active set
+  // 載入時確保 weekMenu 指向 active set（只有 set.menu 非空時才覆蓋，避免空 set 清掉頂層資料）
   const _activeSet = state.weekMenuSets.find(s => s.id === state.activeWeekMenuSetId);
-  if (_activeSet) state.weekMenu = _activeSet.menu || {};
-  else { state.activeWeekMenuSetId = state.weekMenuSets[0].id; state.weekMenu = state.weekMenuSets[0].menu || {}; }
+  if (_activeSet) { const _m = _activeSet.menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
+  else { state.activeWeekMenuSetId = state.weekMenuSets[0].id; const _m = state.weekMenuSets[0].menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
   if (!state.users.length) state.users = DEFAULT_USERS.map(u=>({...u}));
   // 遷移：舊使用者沒有 lang 欄位
   state.users.forEach(u=>{ if (!u.lang) u.lang = u.role==='helper'?'id':'zh'; });
@@ -3142,11 +3142,13 @@ async function cloudPull(){
         if (d.weekMenuSets       !== undefined && Array.isArray(d.weekMenuSets) && d.weekMenuSets.length) state.weekMenuSets = d.weekMenuSets;
         if (d.activeWeekMenuSetId!== undefined) state.activeWeekMenuSetId = d.activeWeekMenuSetId;
         // 拉取後重新同步 active set 的 menu
+        // 只有 set.menu 有實際資料時才覆蓋，避免空 set.menu 清掉頂層 weekMenu
         { const _ps = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
-          if (_ps) state.weekMenu = _ps.menu || {};
+          if (_ps) { const _m = _ps.menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
           else if (state.weekMenuSets && state.weekMenuSets.length){
             state.activeWeekMenuSetId = state.weekMenuSets[0].id;
-            state.weekMenu = state.weekMenuSets[0].menu || {};
+            const _m = state.weekMenuSets[0].menu || {};
+            if (Object.keys(_m).length) state.weekMenu = _m;
           }
         }
         if (d.mealConfig         !== undefined) state.mealConfig = Object.assign({}, state.mealConfig, d.mealConfig);
@@ -4425,12 +4427,6 @@ function saveMenuCell(){
     const reason = document.getElementById('skipReasonCustom').value.trim();
     state.weekMenu[_menuCellKey] = { type:'skip', skipReason: reason };
   } else {
-    // 若沒填菜名，自動用食材名稱組合
-    _cellDishes.forEach(d=>{
-      if (!d.dishName.trim() && d.ingredientIds && d.ingredientIds.length) {
-        d.dishName = d.ingredientIds.map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
-      }
-    });
     const dishes = _cellDishes.filter(d=>d.dishName.trim()||((d.ingredientIds||[]).length));
     state.weekMenu[_menuCellKey] = { type:'cook', dishes };
   }
@@ -4635,6 +4631,7 @@ function renderTodayMenuCard(){
     } else {
       const dishes = cell.dishes||[];
       const catColors = state.mealConfig?.ingCategoryColors||{};
+      const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
       html += `<div class="py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
         <div class="flex items-center gap-1.5 mb-2">
           <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
@@ -4643,13 +4640,14 @@ function renderTodayMenuCard(){
         </div>
         <div class="space-y-2 pl-1">
         ${dishes.map(d=>{
-          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-1.5 py-0.5 rounded" style="background:${cc}22;color:${cc};">${ing.name}</span>`; }).join('');
-          const name = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '（未命名）';
+          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span class="text-xs px-1.5 py-0.5 rounded" style="background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
+          const name = d.dishName || '（未命名）';
           const noteDisplay = d.noteId || d.note || '';
+          const cookIdLabel = d.cookMethod ? (_cookIdMap[d.cookMethod] || '') : '';
           return `<div class="flex items-start gap-2">
-            ${d.cookMethod?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${d.cookMethod}</span>`:''}
+            ${d.cookMethod?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${d.cookMethod}${cookIdLabel?` / ${cookIdLabel}`:''}</span>`:''}
             <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;overflow:hidden;">
                 <span class="text-sm font-semibold shrink-0" style="color:var(--ic-chocolate);">${name}</span>
                 ${ingNames}
               </div>
