@@ -7631,15 +7631,15 @@ function doPrintPayroll(){
 
   /* ── 薪資摘要 rows ── */
   const breakdown = [];
-  breakdown.push({ label: '底薪', amount: p.baseSalary, sign: '' });
+  breakdown.push({ label: '底薪', labelId: 'Gaji Pokok', amount: p.baseSalary, sign: '' });
   if (p.overtimeDays > 0)
-    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日`, amount: p.overtimePay, sign: '+' });
+    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日`, labelId: `Lembur ${p.overtimeDays} hari`, amount: p.overtimePay, sign: '+' });
   if (p.adjAdd > 0)
-    breakdown.push({ label: '額外津貼', amount: p.adjAdd, sign: '+' });
+    breakdown.push({ label: '額外津貼', labelId: 'Tunjangan', amount: p.adjAdd, sign: '+' });
   if (p.leavePay > 0)
-    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日`, amount: p.leavePay, sign: '-' });
+    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日`, labelId: `Potongan cuti ${p.leaveDays} hari`, amount: p.leavePay, sign: '-' });
   if (p.adjDeduct > 0)
-    breakdown.push({ label: '其他扣項', amount: p.adjDeduct, sign: '-' });
+    breakdown.push({ label: '其他扣項', labelId: 'Potongan lain', amount: p.adjDeduct, sign: '-' });
 
   /* ── HTML ── */
   let html = `<!DOCTYPE html>
@@ -7654,15 +7654,15 @@ body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size
 .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:14px;margin-bottom:22px}
 .hd h1{font-size:21px;font-weight:800;letter-spacing:-.5px}
 .hd .sub{font-size:11px;color:#999;margin-top:3px}
-.hd-r{text-align:right;font-size:12px;color:#555;line-height:1.8}
+.hd-r{text-align:right;font-size:12.5px;color:#444;line-height:1.8}
 .hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
 .hero{background:#1a1a1a;color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between}
-.hero-lbl{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.5px;margin-bottom:5px}
+.hero-lbl{font-size:12px;color:rgba(255,255,255,.8);letter-spacing:.5px;margin-bottom:5px}
 .hero-amt{font-size:38px;font-weight:900;letter-spacing:-2px}
-.hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.6);line-height:2}
+.hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.85);line-height:2}
 .sec{margin-bottom:22px}
-.sec-ttl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#aaa;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #ebebeb}
-.sec-ttl .id{font-size:10px;color:#ccc;margin-left:6px;font-weight:400;letter-spacing:0;text-transform:none}
+.sec-ttl{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid #ccc}
+.sec-ttl .id{font-size:11px;color:#555;margin-left:6px;font-weight:500;letter-spacing:.3px}
 table.sum{width:100%;border-collapse:collapse}
 table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13.5px}
 table.sum td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
@@ -7672,16 +7672,16 @@ table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px
 .att-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .att-card{background:#f7f7f7;border-radius:10px;padding:11px 10px;text-align:center}
 .att-card .n{font-size:22px;font-weight:800;color:#1a1a1a;line-height:1;margin-bottom:3px}
-.att-card .l{font-size:10px;color:#999;line-height:1.4}
+.att-card .l{font-size:10px;color:#666;line-height:1.4}
 .att-ok{background:#f0fdf4}.att-ok .n{color:#166534}
 .att-warn{background:#fff7ed}.att-warn .n{color:#9a3412}
 .att-blue{background:#eff6ff}.att-blue .n{color:#1d4ed8}
 ul.act{list-style:none}
 ul.act li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
 ul.act li:last-child{border-bottom:none}
-.act-dt{font-size:11px;color:#bbb;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
-.act-lbl{flex:1;color:#333}
-.act-note{font-size:11px;color:#bbb}
+.act-dt{font-size:11px;color:#888;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.act-lbl{flex:1;color:#222}
+.act-note{font-size:11px;color:#888}
 .act-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
 table.days{width:100%;border-collapse:collapse;font-size:12px}
 table.days th{text-align:left;padding:5px 6px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;font-size:11px;color:#777;font-weight:600}
@@ -7691,30 +7691,30 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 .sig-box .sig-ttl{font-size:13px;font-weight:700;margin-bottom:8px}
 .sig-amt{font-size:20px;font-weight:800;margin-bottom:16px}
 .sig-row{display:flex;gap:24px}
-.sig-fld{flex:1;border-bottom:1px solid #ccc;padding-top:20px;font-size:10px;color:#bbb}
+.sig-fld{flex:1;border-bottom:1px solid #bbb;padding-top:20px;font-size:11px;color:#888}
 .sig-ok{background:#f0fdf4;border-radius:10px;padding:14px 18px;font-size:13px}
 .sig-ok .sig-ok-badge{font-weight:700;color:#166534;margin-bottom:4px}
-.footer{margin-top:22px;padding-top:10px;border-top:1px solid #ebebeb;font-size:10px;color:#ccc;text-align:center}
+.footer{margin-top:22px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#999;text-align:center}
 </style>
 </head>
 <body>
 
 <div class="hd">
-  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">Payroll Statement</div></div>
-  <div class="hd-r"><strong>${helperName}</strong><div>週期 ${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div><div>列印 ${new Date().toLocaleDateString('zh-TW')}</div></div>
+  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">Laporan Penggajian · Payroll Statement</div></div>
+  <div class="hd-r"><strong>${helperName}</strong><div>週期 / Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div><div>列印 / Cetak：${new Date().toLocaleDateString('zh-TW')}</div></div>
 </div>
 
 <div class="hero">
   <div>
-    <div class="hero-lbl">本期實領 · Gaji Bersih</div>
+    <div class="hero-lbl">本期實領 <span style="font-size:11px;opacity:.9">· Gaji Bersih</span></div>
     <div class="hero-amt">NT$ ${p.netSalary.toLocaleString()}</div>
   </div>
   <div class="hero-r">
     <div>底薪 NT$&nbsp;${p.baseSalary.toLocaleString()}</div>
-    ${p.overtimePay > 0 ? `<div style="color:rgba(134,239,172,.95)">加班 +${p.overtimePay.toLocaleString()}</div>` : ''}
-    ${p.adjAdd > 0      ? `<div style="color:rgba(134,239,172,.95)">津貼 +${p.adjAdd.toLocaleString()}</div>` : ''}
-    ${p.leavePay > 0    ? `<div style="color:rgba(253,164,122,.95)">請假 −${p.leavePay.toLocaleString()}</div>` : ''}
-    ${p.adjDeduct > 0   ? `<div style="color:rgba(253,164,122,.95)">扣項 −${p.adjDeduct.toLocaleString()}</div>` : ''}
+    ${p.overtimePay > 0 ? `<div style="color:rgba(134,255,134,1)">加班 +${p.overtimePay.toLocaleString()}</div>` : ''}
+    ${p.adjAdd > 0      ? `<div style="color:rgba(134,255,134,1)">津貼 +${p.adjAdd.toLocaleString()}</div>` : ''}
+    ${p.leavePay > 0    ? `<div style="color:rgba(255,180,140,1)">請假 −${p.leavePay.toLocaleString()}</div>` : ''}
+    ${p.adjDeduct > 0   ? `<div style="color:rgba(255,180,140,1)">扣項 −${p.adjDeduct.toLocaleString()}</div>` : ''}
   </div>
 </div>
 `;
@@ -7726,9 +7726,9 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     ${breakdown.map(row => {
       const cls = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
       const prefix = row.sign === '+' ? '+' : (row.sign === '-' ? '−' : '');
-      return `<tr><td style="color:#555">${row.label}</td><td class="${cls}">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
+      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:11px;color:#888">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
     }).join('')}
-    <tr class="net"><td>本期實領</td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
+    <tr class="net"><td>本期實領 <span style="font-size:12px;color:#555;font-weight:500">/ Gaji Bersih</span></td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
   </table>
 </div>`;
   }
@@ -7737,10 +7737,10 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     html += `<div class="sec">
   <div class="sec-ttl">出勤摘要 <span class="id">Ringkasan Kehadiran</span></div>
   <div class="att-grid">
-    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤</div></div>
-    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤</div></div>
-    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假天數</div></div>
-    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班</div></div>
+    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤<br><span style="font-size:9px;color:#888">Hari Terjadwal</span></div></div>
+    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤<br><span style="font-size:9px;color:#666">Hadir Aktual</span></div></div>
+    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假<br><span style="font-size:9px;color:#888">Hari Cuti</span></div></div>
+    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班<br><span style="font-size:9px;color:#888">Lembur Libur</span></div></div>
   </div>
 </div>`;
   }
@@ -7795,8 +7795,8 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
   ${r.photoDataUrl?`<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:200px;border-radius:6px;border:1px solid #ccc"></div>`:''}</div></div>`;
     } else {
       html += `<div class="sec"><div class="sig-box">
-  <div class="sig-ttl">薪資簽收 · Tanda Terima Gaji</div>
-  <div class="sig-amt">本期實領：NT$&nbsp;${p.netSalary.toLocaleString()}</div>
+  <div class="sig-ttl">薪資簽收 <span style="font-size:12px;color:#555;font-weight:400">· Tanda Terima Gaji</span></div>
+  <div class="sig-amt">本期實領 / Gaji Bersih：NT$&nbsp;${p.netSalary.toLocaleString()}</div>
   <div class="sig-row">
     <div class="sig-fld">簽名 / Tanda Tangan</div>
     <div class="sig-fld" style="max-width:160px">日期 / Tanggal</div>
@@ -9209,7 +9209,7 @@ function renderSupplyCatFilters(){
     const b=document.createElement('button');
     b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
     b.style.fontSize='17px'; b.style.padding='6px 14px';
-    if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='var(--ic-lemon)'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='var(--ic-vanilla)'; }
+    if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='white'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='#C0A880'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
     wrap.appendChild(b);
@@ -9217,7 +9217,7 @@ function renderSupplyCatFilters(){
   wrap.querySelectorAll('.sc-filter').forEach(b=>{
     b.onclick=()=>{
       state.supplyCatFilter=b.dataset.cat;
-      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='var(--ic-lemon)'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='var(--ic-vanilla)'; });
+      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='white'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='#C0A880'; });
       b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)';
       renderSuppliesManager();
     };
@@ -9281,7 +9281,7 @@ function renderSuppliesManager(){
     ? ok.map(s=>{
         return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:11px 12px;display:flex;align-items:center;gap:8px;">
           <div style="flex:1;min-width:0;overflow:hidden;">
-            <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+            <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
           </div>
           <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
           <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
@@ -9300,7 +9300,7 @@ function renderManagerSupplyCard(s, group){
   let actionsHtml='';
   if (group==='reported'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
       <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
       <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='bought'){
@@ -9309,7 +9309,7 @@ function renderManagerSupplyCard(s, group){
       <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='paused'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
       <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
       <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   }
@@ -9317,8 +9317,9 @@ function renderManagerSupplyCard(s, group){
   const catIcon=firstChar.codePointAt(0)>0x2000?firstChar:'';
   return `
     <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:12px;display:flex;flex-direction:column;gap:9px;">
-      <div style="overflow:hidden;">
-        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${catIcon?catIcon+' ':''}${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+      <div>
+        <div style="margin-bottom:4px;"><span style="font-size:11px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:5px;padding:2px 7px;">${cat.nameZh}</span></div>
+        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:18px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         ${statusPill}
