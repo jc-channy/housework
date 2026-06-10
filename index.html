@@ -2073,15 +2073,15 @@
 </div>
 
 <!-- ===== 管理備品 Bottom Sheet ===== -->
-<div id="manageSuppliesModal" class="hidden fixed inset-0 z-50 flex items-end modal-backdrop" onclick="if(event.target===this)closeManageSuppliesModal()">
-  <div class="modal-sheet w-full rounded-t-2xl max-h-[85vh] flex flex-col" style="border-top-left-radius:20px;border-top-right-radius:20px;">
+<div id="manageSuppliesModal" class="hidden fixed inset-0 z-50 flex items-end justify-center modal-backdrop" onclick="if(event.target===this)closeManageSuppliesModal()">
+  <div class="modal-sheet w-full rounded-t-2xl max-h-[85vh] flex flex-col" style="max-width:520px;border-top-left-radius:20px;border-top-right-radius:20px;">
     <div class="flex items-center justify-between px-5 py-4 flex-shrink-0" style="border-bottom:1px solid var(--ic-vanilla);">
       <div class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-settings" style="font-size:17px;" aria-hidden="true"></i> 管理備品</div>
       <button onclick="closeManageSuppliesModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="flex flex-shrink-0" style="border-bottom:1px solid var(--ic-vanilla);">
-      <button id="smpTab1" onclick="switchSupplyManageTab(1)" class="flex-1 py-2.5 font-semibold text-sm" style="border-bottom:2px solid var(--ic-caramel);color:var(--ic-chocolate);">分類管理</button>
-      <button id="smpTab2" onclick="switchSupplyManageTab(2)" class="flex-1 py-2.5 font-semibold text-sm" style="border-bottom:2px solid transparent;color:var(--ic-choc-mid);">備品清單</button>
+      <button id="smpTab1" onclick="switchSupplyManageTab(1)" class="flex-1 py-3 font-semibold" style="font-size:15px;border-bottom:2px solid var(--ic-caramel);color:var(--ic-chocolate);">分類管理</button>
+      <button id="smpTab2" onclick="switchSupplyManageTab(2)" class="flex-1 py-3 font-semibold" style="font-size:15px;border-bottom:2px solid transparent;color:var(--ic-choc-mid);">備品清單</button>
     </div>
     <div class="overflow-y-auto flex-1 px-4 py-4">
       <div id="smpPanel1">
@@ -8467,14 +8467,14 @@ function renderManageSupplyList(){
   });
   el.innerHTML=sorted.map(s=>{
     const cat=getSupplyCat(s.catId);
-    return `<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:0.5px solid var(--ic-vanilla);background:var(--ic-lemon);">
+    return `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:0.5px solid var(--ic-vanilla);background:var(--ic-lemon);">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:700;color:#2A1A08;">${s.nameZh} <span style="font-size:11px;color:#B0A090;font-weight:400;">/ ${s.nameId}</span></div>
-        <div style="font-size:11px;color:var(--ic-choc-mid);margin-top:1px;">${cat.nameZh}</div>
+        <div style="font-size:15px;font-weight:700;color:#2A1A08;">${s.nameZh}</div>
+        <div style="font-size:12px;color:#B0A090;margin-top:2px;">${s.nameId} · ${cat.nameZh}</div>
       </div>
-      <button onclick="openEditSupplyModal('${s.id}')" class="btn-sm-secondary" style="padding:0 8px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="openEditSupplyModal('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
     </div>`;
-  }).join('') || `<div style="font-size:13px;color:#B0A090;font-style:italic;text-align:center;padding:16px 0;">尚未新增備品</div>`;
+  }).join('') || `<div style="font-size:14px;color:#B0A090;font-style:italic;text-align:center;padding:16px 0;">尚未新增備品</div>`;
 }
 function openSupplyCategoryManageModal(){
   renderSupplyCatManager();
@@ -9089,14 +9089,12 @@ function renderSupplyCatManager(){
   const sorted=state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0));
   const rowHtml=sorted.map(c=>{
     const count=state.supplies.filter(s=>s.catId===c.id).length;
-    return `<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;border:0.5px solid var(--ic-vanilla);background:var(--ic-lemon);">
-      <span style="font-size:16px;width:24px;text-align:center;">${c.emoji||'📦'}</span>
+    return `<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:0.5px solid var(--ic-vanilla);background:var(--ic-lemon);">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:700;color:#2A1A08;">${c.nameZh}</div>
-        <div style="font-size:11px;color:var(--ic-choc-mid);">${c.nameId}</div>
+        <div style="font-size:15px;font-weight:700;color:#2A1A08;">${c.nameZh}</div>
+        <div style="font-size:12px;color:var(--ic-choc-mid);margin-top:2px;">${c.nameId} · ${count} 項</div>
       </div>
-      <span style="font-size:11px;color:var(--ic-choc-mid);">${count} 項</span>
-      <button onclick="openEditSupplyCat('${c.id}')" class="btn-sm-secondary" style="padding:0 8px;" title="編輯"><i class="ti ti-pencil" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="openEditSupplyCat('${c.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="編輯"><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
     </div>`;
   }).join('');
   const el=document.getElementById('supplyCatList');
