@@ -3933,7 +3933,7 @@ function renderMenuWeekStrip(){
       </td>`;
     meals.forEach(meal => {
       const key = getMenuKey(dow, meal.id);
-      html += `<td style="padding:5px 4px;vertical-align:top;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
+      html += `<td style="padding:5px 4px;vertical-align:top;height:1px;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
     });
     html += `</tr>`;
   });
@@ -4320,12 +4320,12 @@ function renderMenuGrid(){
 function renderMenuCell(key, cell, isToday){
   const border = isToday ? 'border:1.5px solid var(--ic-caramel);' : 'border:0.5px solid #DDD0C0;';
   if (!cell || cell.type==='empty'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:72px;border-radius:10px;background:var(--ic-surface);${border}border-style:dashed;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+    return `<div onclick="openMenuCellModal('${key}')" style="height:100%;min-height:72px;border-radius:10px;background:var(--ic-surface);${border}border-style:dashed;cursor:pointer;display:flex;align-items:center;justify-content:center;">
       <span style="font-size:22px;color:#C8B49A;">＋</span>
     </div>`;
   }
   if (cell.type==='skip'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:72px;width:100%;border-radius:10px;background:#EDEBE7;border:0.5px solid #D0C8C0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+    return `<div onclick="openMenuCellModal('${key}')" style="height:100%;min-height:72px;width:100%;border-radius:10px;background:#EDEBE7;border:0.5px solid #D0C8C0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
       <span style="font-size:13px;font-weight:600;color:#6B5E52;">${cell.skipReason||'今天不煮'}</span>
     </div>`;
   }
