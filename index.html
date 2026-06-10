@@ -2334,12 +2334,13 @@
       <div class="text-xl font-bold"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 列印薪資單</div>
       <button onclick="closePrintOptions()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
+    <p class="text-xs mb-3" style="color:#9CA3AF;">預設輸出人性化閱讀版；勾選「每日明細」可附完整打卡紀錄。</p>
     <div class="space-y-2 text-sm">
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prSummary" checked class="w-4 h-4"> 薪資摘要（底薪/實領/加減項）</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prDays" checked class="w-4 h-4"> 當期每日出勤明細</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prLeaves" checked class="w-4 h-4"> 當期請假紀錄</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prAdj" checked class="w-4 h-4"> 額外加扣項清單</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prReceipt" class="w-4 h-4"> 含簽收區（手簽用）</label>
+      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prSummary" checked class="w-4 h-4"> 薪資摘要（底薪・加減項・實領）</label>
+      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prAttendSummary" checked class="w-4 h-4"> 出勤摘要（應出勤・實出・請假・加班）</label>
+      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prActivity" checked class="w-4 h-4"> 本期異動（請假＋加扣項整合列表）</label>
+      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prReceipt" checked class="w-4 h-4"> 簽收區</label>
+      <label class="flex items-center gap-2 cursor-pointer" style="color:#9CA3AF;"><input type="checkbox" id="prDays" class="w-4 h-4"> 每日出勤明細（通常不需要）</label>
     </div>
     <button onclick="doPrintPayroll()" class="btn-primary w-full mt-4"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 列印</button>
   </div>
@@ -7595,90 +7596,218 @@ function printPayroll(){ document.getElementById('printOptionsModal').classList.
 function closePrintOptions(){ document.getElementById('printOptionsModal').classList.add('hidden'); }
 function doPrintPayroll(){
   const opts = {
-    summary: document.getElementById('prSummary').checked,
-    days: document.getElementById('prDays').checked,
-    leaves: document.getElementById('prLeaves').checked,
-    adj: document.getElementById('prAdj').checked,
-    receipt: document.getElementById('prReceipt').checked,
+    summary:       document.getElementById('prSummary').checked,
+    attendSummary: document.getElementById('prAttendSummary').checked,
+    activity:      document.getElementById('prActivity').checked,
+    days:          document.getElementById('prDays').checked,
+    receipt:       document.getElementById('prReceipt').checked,
   };
   const viewDate = state.payrollViewDate ? new Date(state.payrollViewDate) : today();
   const p = calculatePayroll(viewDate);
-  const fmtD = (d) => `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
-  const periodTitle = `${p.cycleStart.getFullYear()} 年 ${p.cycleStart.getMonth()+1} 月 (${fmtD(p.cycleStart)} ~ ${fmtD(p.cycleEnd)})`;
-  let html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>薪資單 ${periodTitle}</title>
-    <style>
-      body{font-family:'Noto Sans TC','Noto Sans',sans-serif;padding:20px;font-size:13px;color:#1F2937}
-      h1{font-size:18px;margin-bottom:4px} h1 small{font-size:13px;color:#6B7280;font-weight:normal;}
-      h2{font-size:14px;margin-top:16px;margin-bottom:6px;border-bottom:1px solid #ccc;padding-bottom:4px}
-      h2 span{font-size:12px;color:#9CA3AF;font-weight:normal;margin-left:6px;}
-      table{width:100%;border-collapse:collapse;margin-bottom:8px}
-      th,td{padding:4px 8px;border:1px solid #ddd;text-align:left;vertical-align:top}
-      th{background:#f4f4f4}
-      .right{text-align:right}
-      .big{font-size:18px;font-weight:bold;color:#1e40af}
-      .sig{margin-top:20px;padding:20px;border:1px dashed #999}
-      .zh{display:block} .id{display:block;font-size:11px;color:#9CA3AF}
-      @media print { button{display:none} }
-    </style></head><body>
-    <h1>薪資與出勤明細 <small>/ Rincian Gaji & Kehadiran</small></h1>
-    <div>週期 / Periode：${periodTitle}</div>
-    <div>列印時間 / Waktu Cetak：${new Date().toLocaleString('zh-TW')}</div>`;
-  if (opts.summary){
-    html += `<h2>薪資摘要 <span>Ringkasan Gaji</span></h2>
-      <table>
-        <tr><th><span class="zh">項目</span><span class="id">Item</span></th><th class="right"><span class="zh">金額</span><span class="id">Jumlah</span></th></tr>
-        <tr><td><span class="zh">底薪</span><span class="id">Gaji Pokok</span></td><td class="right">$${p.baseSalary.toLocaleString()}</td></tr>
-        <tr><td><span class="zh">日薪</span><span class="id">Gaji Harian</span></td><td class="right">$${p.dailyRate.toLocaleString()}</td></tr>
-        <tr><td><span class="zh">應出勤天數</span><span class="id">Hari Kerja Terjadwal</span></td><td class="right">${p.scheduledWorkdays} 日</td></tr>
-        <tr><td><span class="zh">實際出勤</span><span class="id">Hari Kerja Aktual</span></td><td class="right">${p.actualWorkdays} 日</td></tr>
-        <tr><td><span class="zh">請假天數</span><span class="id">Hari Cuti</span></td><td class="right">${p.leaveDays} 日</td></tr>
-        <tr><td><span class="zh">休假日加班</span><span class="id">Lembur Hari Libur</span></td><td class="right">${p.overtimeDays} 日</td></tr>
-        <tr><td><span class="zh">請假扣薪</span><span class="id">Potongan Cuti</span></td><td class="right">-$${p.leavePay.toLocaleString()}</td></tr>
-        <tr><td><span class="zh">加班加薪</span><span class="id">Bonus Lembur</span></td><td class="right">+$${p.overtimePay.toLocaleString()}</td></tr>
-        <tr><td><span class="zh">額外加項</span><span class="id">Tambahan</span></td><td class="right">+$${p.adjAdd.toLocaleString()}</td></tr>
-        <tr><td><span class="zh">額外扣項</span><span class="id">Potongan Tambahan</span></td><td class="right">-$${p.adjDeduct.toLocaleString()}</td></tr>
-        <tr><td><b><span class="zh">實領</span><span class="id">Gaji Bersih</span></b></td><td class="right big">$${p.netSalary.toLocaleString()}</td></tr>
-      </table>`;
-  }
-  if (opts.adj && p.adjustments.length){
-    html += `<h2>額外項目明細 <span>Rincian Item Tambahan</span></h2><table>
-      <tr><th><span class="zh">類型</span><span class="id">Jenis</span></th><th><span class="zh">名稱</span><span class="id">Nama</span></th><th><span class="zh">備註</span><span class="id">Keterangan</span></th><th class="right"><span class="zh">金額</span><span class="id">Jumlah</span></th></tr>` +
-      p.adjustments.map(a=>`<tr><td>${a.type==='add'?'<span class="zh">加項</span><span class="id">Tambah</span>':'<span class="zh">扣項</span><span class="id">Potong</span>'}</td><td>${a.name}</td><td>${a.note||''}</td><td class="right">${a.type==='add'?'+':'-'}$${a.amount.toLocaleString()}</td></tr>`).join('') +
-      `</table>`;
-  }
-  if (opts.leaves){
-    const inP = state.leaveRequests.filter(r=>r.date>=ymd(p.cycleStart)&&r.date<=ymd(p.cycleEnd));
-    if (inP.length){
-      html += `<h2>本期請假紀錄 <span>Catatan Cuti Periode Ini</span></h2><table>
-        <tr><th><span class="zh">日期</span><span class="id">Tanggal</span></th><th><span class="zh">時段</span><span class="id">Periode</span></th><th><span class="zh">假別</span><span class="id">Jenis</span></th><th><span class="zh">狀態</span><span class="id">Status</span></th><th><span class="zh">原因</span><span class="id">Alasan</span></th><th><span class="zh">管理者備註</span><span class="id">Catatan</span></th></tr>` +
-        inP.map(r=>{
-          const lt = state.leaveTypes.find(t=>t.id===r.type);
-          const periodId = ({full:'Penuh',am:'Pagi',pm:'Sore'})[r.period]||r.period;
-          const statusId = ({pending:'Menunggu',approved:'Disetujui',rejected:'Ditolak'})[r.status]||r.status;
-          return `<tr><td>${r.date}</td><td><span class="zh">${({full:'全天',am:'上午',pm:'下午'})[r.period]}</span><span class="id">${periodId}</span></td><td><span class="zh">${lt?.nameZh||r.type}</span><span class="id">${lt?.nameId||''}</span></td><td><span class="zh">${({pending:'待審',approved:'批准',rejected:'拒絕'})[r.status]||r.status}</span><span class="id">${statusId}</span></td><td>${r.reason||''}</td><td>${r.managerNote||''}</td></tr>`;
-        }).join('') + `</table>`;
+  const fmtD = d => `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  const helperName = (state.users?.find(u=>u.role==='helper')?.name) || '幫傭';
+  const periodLabel = `${p.cycleStart.getFullYear()} 年 ${p.cycleStart.getMonth()+1} 月`;
+
+  /* ── 本期異動 items ── */
+  const activityItems = [];
+  p.days.forEach(d => {
+    if (d.leave && d.deductedPay > 0) {
+      const typeName = d.leaveType ? d.leaveType.nameZh : '請假';
+      const portion  = d.leave.period === 'full' ? '全天' : '半天';
+      activityItems.push({ date: d.dateStr, label: `${typeName}（${portion}）`, amount: -d.deductedPay });
+    } else if (d.addedPay > 0) {
+      activityItems.push({ date: d.dateStr, label: '假日加班', amount: d.addedPay });
     }
+  });
+  p.adjustments.forEach(a => {
+    const amt = a.type === 'add' ? a.amount : -a.amount;
+    activityItems.push({ date: null, label: a.name, amount: amt, note: a.note });
+  });
+  activityItems.sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return 1; if (!b.date) return -1;
+    return a.date.localeCompare(b.date);
+  });
+
+  /* ── 薪資摘要 rows ── */
+  const breakdown = [];
+  breakdown.push({ label: '底薪', amount: p.baseSalary, sign: '' });
+  if (p.overtimeDays > 0)
+    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日`, amount: p.overtimePay, sign: '+' });
+  if (p.adjAdd > 0)
+    breakdown.push({ label: '額外津貼', amount: p.adjAdd, sign: '+' });
+  if (p.leavePay > 0)
+    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日`, amount: p.leavePay, sign: '-' });
+  if (p.adjDeduct > 0)
+    breakdown.push({ label: '其他扣項', amount: p.adjDeduct, sign: '-' });
+
+  /* ── HTML ── */
+  let html = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>薪資結算單 ${periodLabel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:14px;color:#1a1a1a;background:#fff;padding:36px 40px;max-width:700px;margin:0 auto}
+@media print{body{padding:22px 28px}.no-print{display:none!important}}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:14px;margin-bottom:22px}
+.hd h1{font-size:21px;font-weight:800;letter-spacing:-.5px}
+.hd .sub{font-size:11px;color:#999;margin-top:3px}
+.hd-r{text-align:right;font-size:12px;color:#555;line-height:1.8}
+.hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
+.hero{background:#1a1a1a;color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between}
+.hero-lbl{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.5px;margin-bottom:5px}
+.hero-amt{font-size:38px;font-weight:900;letter-spacing:-2px}
+.hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.6);line-height:2}
+.sec{margin-bottom:22px}
+.sec-ttl{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#aaa;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #ebebeb}
+.sec-ttl .id{font-size:10px;color:#ccc;margin-left:6px;font-weight:400;letter-spacing:0;text-transform:none}
+table.sum{width:100%;border-collapse:collapse}
+table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13.5px}
+table.sum td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
+table.sum tr:last-child td{border-bottom:none}
+table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px solid #1a1a1a;border-bottom:none}
+.add{color:#166534}.ded{color:#991b1b}
+.att-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.att-card{background:#f7f7f7;border-radius:10px;padding:11px 10px;text-align:center}
+.att-card .n{font-size:22px;font-weight:800;color:#1a1a1a;line-height:1;margin-bottom:3px}
+.att-card .l{font-size:10px;color:#999;line-height:1.4}
+.att-ok{background:#f0fdf4}.att-ok .n{color:#166534}
+.att-warn{background:#fff7ed}.att-warn .n{color:#9a3412}
+.att-blue{background:#eff6ff}.att-blue .n{color:#1d4ed8}
+ul.act{list-style:none}
+ul.act li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
+ul.act li:last-child{border-bottom:none}
+.act-dt{font-size:11px;color:#bbb;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.act-lbl{flex:1;color:#333}
+.act-note{font-size:11px;color:#bbb}
+.act-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+table.days{width:100%;border-collapse:collapse;font-size:12px}
+table.days th{text-align:left;padding:5px 6px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;font-size:11px;color:#777;font-weight:600}
+table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
+.d-ok{color:#166534;font-weight:500}.d-lv{color:#991b1b;font-weight:500}.d-ot{color:#1d4ed8;font-weight:500}
+.sig-box{border:1.5px dashed #ccc;border-radius:12px;padding:20px 24px}
+.sig-box .sig-ttl{font-size:13px;font-weight:700;margin-bottom:8px}
+.sig-amt{font-size:20px;font-weight:800;margin-bottom:16px}
+.sig-row{display:flex;gap:24px}
+.sig-fld{flex:1;border-bottom:1px solid #ccc;padding-top:20px;font-size:10px;color:#bbb}
+.sig-ok{background:#f0fdf4;border-radius:10px;padding:14px 18px;font-size:13px}
+.sig-ok .sig-ok-badge{font-weight:700;color:#166534;margin-bottom:4px}
+.footer{margin-top:22px;padding-top:10px;border-top:1px solid #ebebeb;font-size:10px;color:#ccc;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">Payroll Statement</div></div>
+  <div class="hd-r"><strong>${helperName}</strong><div>週期 ${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div><div>列印 ${new Date().toLocaleDateString('zh-TW')}</div></div>
+</div>
+
+<div class="hero">
+  <div>
+    <div class="hero-lbl">本期實領 · Gaji Bersih</div>
+    <div class="hero-amt">NT$ ${p.netSalary.toLocaleString()}</div>
+  </div>
+  <div class="hero-r">
+    <div>底薪 NT$&nbsp;${p.baseSalary.toLocaleString()}</div>
+    ${p.overtimePay > 0 ? `<div style="color:rgba(134,239,172,.95)">加班 +${p.overtimePay.toLocaleString()}</div>` : ''}
+    ${p.adjAdd > 0      ? `<div style="color:rgba(134,239,172,.95)">津貼 +${p.adjAdd.toLocaleString()}</div>` : ''}
+    ${p.leavePay > 0    ? `<div style="color:rgba(253,164,122,.95)">請假 −${p.leavePay.toLocaleString()}</div>` : ''}
+    ${p.adjDeduct > 0   ? `<div style="color:rgba(253,164,122,.95)">扣項 −${p.adjDeduct.toLocaleString()}</div>` : ''}
+  </div>
+</div>
+`;
+
+  if (opts.summary) {
+    html += `<div class="sec">
+  <div class="sec-ttl">薪資摘要 <span class="id">Ringkasan Gaji</span></div>
+  <table class="sum">
+    ${breakdown.map(row => {
+      const cls = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
+      const prefix = row.sign === '+' ? '+' : (row.sign === '-' ? '−' : '');
+      return `<tr><td style="color:#555">${row.label}</td><td class="${cls}">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
+    }).join('')}
+    <tr class="net"><td>本期實領</td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
+  </table>
+</div>`;
   }
-  if (opts.days){
-    html += `<h2>每日出勤明細 <span>Rincian Kehadiran Harian</span></h2><table><tr><th><span class="zh">日期</span><span class="id">Tanggal</span></th><th><span class="zh">狀態</span><span class="id">Status</span></th><th><span class="zh">上班</span><span class="id">Masuk</span></th><th><span class="zh">午休</span><span class="id">Istirahat</span></th><th><span class="zh">下班</span><span class="id">Keluar</span></th></tr>` +
-      p.days.map(d=>{
-        const punches = state.punchLog?.[d.dateStr] || [];
-        const g = type => punches.find(p=>p.type===type);
-        const ws=g('work_start'), rs=g('rest_start'), re=g('rest_end'), we=g('work_end');
-        return `<tr><td>${d.dateStr} (${'日一二三四五六'[d.dow]})</td><td>${d.status}</td><td>${ws?ws.at:'-'}</td><td>${(rs?.at||'-')} ~ ${(re?.at||'-')}</td><td>${we?we.at:'-'}</td></tr>`;
-      }).join('') + `</table>`;
+
+  if (opts.attendSummary) {
+    html += `<div class="sec">
+  <div class="sec-ttl">出勤摘要 <span class="id">Ringkasan Kehadiran</span></div>
+  <div class="att-grid">
+    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤</div></div>
+    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤</div></div>
+    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假天數</div></div>
+    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班</div></div>
+  </div>
+</div>`;
   }
-  if (opts.receipt){
-    const r = (state.payrollReceipts||[]).find(rr=>rr.periodKey===p.periodKey);
-    if (r){
-      html += `<h2>簽收紀錄 <span>Tanda Terima</span></h2><div>日期：${r.signedDate}　金額：$${(r.amount||0).toLocaleString()}　備註：${r.note||''}</div>`;
-      if (r.photoDataUrl) html += `<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:300px;border:1px solid #ccc"></div>`;
+
+  if (opts.activity) {
+    html += `<div class="sec">
+  <div class="sec-ttl">本期異動 <span class="id">Aktivitas Periode Ini</span></div>`;
+    if (activityItems.length) {
+      html += `<ul class="act">` +
+        activityItems.map(item => {
+          const dt    = item.date ? item.date.slice(5).replace('-','/') : '—';
+          const amtHtml = item.amount >= 0
+            ? `<span class="act-amt add">+${item.amount.toLocaleString()}</span>`
+            : `<span class="act-amt ded">−${Math.abs(item.amount).toLocaleString()}</span>`;
+          return `<li><span class="act-dt">${dt}</span><span class="act-lbl">${item.label}${item.note ? `<span class="act-note"> · ${item.note}</span>` : ''}</span>${amtHtml}</li>`;
+        }).join('') +
+        `</ul>`;
     } else {
-      html += `<div class="sig"><b>薪資簽收 / Tanda Terima Gaji</b><br><br>實領金額 / Gaji Bersih：$${p.netSalary.toLocaleString()}<br><br>收件人簽名 / Tanda Tangan：__________________<br><br>日期 / Tanggal：____ 年 ____ 月 ____ 日</div>`;
+      html += `<div style="font-size:12px;color:#bbb;padding:8px 0">本期無特殊異動項目</div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (opts.days) {
+    const workDays = p.days.filter(d => d.isWorkday || d.isHoliday);
+    html += `<div class="sec">
+  <div class="sec-ttl">每日出勤明細 <span class="id">Rincian Kehadiran Harian</span></div>
+  <table class="days">
+    <thead><tr><th>日期</th><th>狀態</th><th>上班</th><th>午休開始</th><th>午休結束</th><th>下班</th></tr></thead>
+    <tbody>` +
+      workDays.map(d => {
+        const punches = (state.punchLog||{})[d.dateStr] || [];
+        const g = t => punches.find(pp => pp.type === t);
+        const ws = g('work_start'), rs = g('rest_start'), re = g('rest_end'), we = g('work_end');
+        const dow = '日一二三四五六'[d.dow];
+        let sc = '', st = '—';
+        if (d.leave)            { st = (d.leaveType?.nameZh || '請假'); sc = 'd-lv'; }
+        else if (d.addedPay > 0){ st = '加班'; sc = 'd-ot'; }
+        else if (d.punched)     { st = '出勤'; sc = 'd-ok'; }
+        else if (d.isHoliday)   { st = '例假'; }
+        return `<tr><td style="color:#777">${d.dateStr.slice(5).replace('-','/')} (${dow})</td><td class="${sc}">${st}</td><td>${ws?ws.at:'—'}</td><td>${rs?rs.at:'—'}</td><td>${re?re.at:'—'}</td><td>${we?we.at:'—'}</td></tr>`;
+      }).join('') +
+    `</tbody></table></div>`;
+  }
+
+  if (opts.receipt) {
+    const r = (state.payrollReceipts||[]).find(rr => rr.periodKey === p.periodKey);
+    if (r) {
+      html += `<div class="sec"><div class="sec-ttl">簽收紀錄 <span class="id">Tanda Terima</span></div>
+  <div class="sig-ok"><div class="sig-ok-badge">✓ 已簽收 · Sudah Diterima</div>
+  <div style="color:#444;font-size:13px">金額 NT$&nbsp;${(r.amount||0).toLocaleString()}　日期 ${r.signedDate}${r.note?` · ${r.note}`:''}</div>
+  ${r.photoDataUrl?`<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:200px;border-radius:6px;border:1px solid #ccc"></div>`:''}</div></div>`;
+    } else {
+      html += `<div class="sec"><div class="sig-box">
+  <div class="sig-ttl">薪資簽收 · Tanda Terima Gaji</div>
+  <div class="sig-amt">本期實領：NT$&nbsp;${p.netSalary.toLocaleString()}</div>
+  <div class="sig-row">
+    <div class="sig-fld">簽名 / Tanda Tangan</div>
+    <div class="sig-fld" style="max-width:160px">日期 / Tanggal</div>
+  </div>
+</div></div>`;
     }
   }
-  html += `</body></html>`;
-  const w = window.open('', '_blank');
+
+  html += `<div class="footer">列印時間 ${new Date().toLocaleString('zh-TW')} · 本單據僅供薪資確認，請妥善保存</div></body></html>`;
+
+  const w = window.open('','_blank');
   if (!w){ alert('請允許彈出視窗才能列印'); return; }
   w.document.write(html);
   w.document.close();
