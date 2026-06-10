@@ -9318,7 +9318,7 @@ function renderManagerSupplyCard(s, group){
   return `
     <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:12px;display:flex;flex-direction:column;gap:9px;">
       <div style="overflow:hidden;">
-        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${catIcon?catIcon+\' \':\'\'}${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${catIcon?catIcon+' ':''}${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         ${statusPill}
