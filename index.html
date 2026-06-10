@@ -3898,6 +3898,7 @@ function getCurrentCycleMenu(){
 }
 
 let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
+let _selectedWSetId = null; // 三區選取中的模板 id
 
 /* ========== 菜單：週狀態一覽 ========== */
 function renderMenuWeekStrip(){
@@ -4040,56 +4041,94 @@ function renderMenuSetSelector(){
   const sets = state.weekMenuSets || [];
   const activeId = state.activeWeekMenuSetId;
   const activeSet = sets.find(s=>s.id===activeId);
-  const cycleSets = sets.filter(s=>s.cycleOn !== false);
-  const isoWeek = (d => {
-    const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
-    return Math.round((t-new Date(t.getFullYear(),0,4))/(7*86400000));
-  })(today());
-  const offset = state.weekMenuCycleOffset || 0;
-  const thisWeekSet = cycleSets.length >= 2
-    ? cycleSets[((( isoWeek + offset) % cycleSets.length) + cycleSets.length) % cycleSets.length]
-    : null;
-  const iconBtnStyle = 'width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
-  let html = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
-  html += `<span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;">菜單設計</span>`;
-  html += sets.map(s => {
-    const isActive = s.id === activeId;
-    const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
-    const inCycle = s.cycleOn !== false;
-    const safeId = s.id.replace(/'/g,"\'");
-    const cycleDot = inCycle
-      ? `<span title="循環中" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:${isActive?'rgba(255,255,255,0.65)':'#6BAF92'};"></span>`
-      : '';
-    const weekBadge = isThisWeek
-      ? `<span style="font-size:10px;font-weight:600;background:${isActive?'rgba(255,255,255,0.22)':'#D8EEE3'};color:${isActive?'#FAF7F2':'#3A7055'};border-radius:4px;padding:1px 5px;flex-shrink:0;">本週</span>`
-      : '';
-    const activeStyle = 'font-size:14px;padding:5px 12px;border-radius:99px;border:1.5px solid var(--ic-caramel);background:var(--ic-caramel);color:#FAF7F2;cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
-    const inactiveStyle = 'font-size:14px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
-    return `<button onclick="switchWeekMenuSet('${safeId}')" ondblclick="event.stopPropagation();openEditWeekMenuSet('${safeId}')" title="單擊切換・雙擊編輯" style="${isActive?activeStyle:inactiveStyle}">${cycleDot}${s.name}${weekBadge}</button>`;
-  }).join('');
-  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>`;
-  if (activeSet) {
-    const safeId = activeSet.id.replace(/'/g,"\'");
-    html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
-      <button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button>
-    </div>`;
-  }
-  html += `</div>`;
-  if (cycleSets.length >= 2 && thisWeekSet) {
-    const navBtn = 'border:none;background:var(--ic-surface);cursor:pointer;font-size:18px;color:var(--ic-choc-mid);padding:3px 10px;border-radius:8px;line-height:1.3;border:0.5px solid var(--ic-vanilla);';
-    const resetBtn = offset !== 0 ? `<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:13px;color:#B05050;padding:0 4px;white-space:nowrap;" title="回復自動">↺ 自動</button>` : '';
-    html += `<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--ic-lemon);">
-      <i class="ti ti-rotate-clockwise" style="font-size:15px;color:#3A7055;flex-shrink:0;" aria-hidden="true"></i>
-      <span style="font-size:14px;font-weight:600;color:var(--ic-choc-mid);flex-shrink:0;">循環・本週套用：</span>
-      <button onclick="shiftCycleOffset(-1)" style="${navBtn}" title="上一組">‹</button>
-      <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;">${thisWeekSet.name}</span>
-      <button onclick="shiftCycleOffset(1)" style="${navBtn}" title="下一組">›</button>
-      ${resetBtn}
-    </div>`;
-  }
-  el.innerHTML = html;
-}
 
+  // Zone classification
+  const leftSets  = sets.filter(s => s.id === activeId);
+  const midSets   = sets.filter(s => s.id !== activeId && s.cycleOn !== false);
+  const rightSets = sets.filter(s => s.id !== activeId && s.cycleOn === false);
+
+  const navBtnSt = 'border:0.5px solid var(--ic-vanilla);background:#fff;cursor:pointer;font-size:18px;color:var(--ic-choc-mid);padding:2px 8px;border-radius:7px;line-height:1.3;';
+
+  function pillHtml(s, zone){
+    const safeId = s.id.replace(/'/g,"\'");
+    const isSel = _selectedWSetId === s.id;
+    const canLeft  = zone === 'mid' || zone === 'right';
+    const canRight = (zone === 'left' && sets.length > 1) || zone === 'mid';
+    const pillBase = 'font-size:14px;padding:6px 13px;border-radius:99px;cursor:pointer;white-space:nowrap;';
+    const pillSt = zone === 'left'
+      ? pillBase + 'background:var(--ic-caramel);color:#FAF7F2;border:none;'
+      : zone === 'mid'
+      ? pillBase + 'background:#E6F2EC;color:#1F6645;border:1px solid #9FCF9F;'
+      : pillBase + 'background:var(--ic-surface);color:#9A8070;border:0.5px solid var(--ic-vanilla);';
+    const selRing = isSel ? 'outline:2.5px solid var(--ic-caramel);outline-offset:2px;' : '';
+    const leftBtn  = (isSel && canLeft)  ? `<button onclick="moveWSet('${safeId}','left')"  style="${navBtnSt}">‹</button>` : '';
+    const rightBtn = (isSel && canRight) ? `<button onclick="moveWSet('${safeId}','right')" style="${navBtnSt}">›</button>` : '';
+    return `<div style="display:inline-flex;align-items:center;gap:3px;margin:0 3px 4px 0;">
+      ${leftBtn}<button onclick="selectWSet('${safeId}')" ondblclick="event.stopPropagation();openEditWeekMenuSet('${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
+    </div>`;
+  }
+
+  const topRow = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+    <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;">菜單設計</span>
+    <button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>
+    ${activeSet ? `<div style="margin-left:auto;"><button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button></div>` : ''}
+  </div>`;
+
+  const hint = _selectedWSetId ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 8px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">‹ › 移動模板・再點一下取消選取・雙擊編輯名稱</div>` : '';
+
+  const emptySpan = `<span style="font-size:12px;color:#B0A090;font-style:italic;">無</span>`;
+  const zoneRow = `<div style="display:flex;border:0.5px solid var(--ic-vanilla);border-radius:14px;overflow:hidden;">
+    <div style="flex:1;min-width:0;background:#FFF9F2;border-right:0.5px solid var(--ic-vanilla);padding:10px 8px;">
+      <div style="font-size:11px;font-weight:700;color:#C67843;letter-spacing:.05em;margin-bottom:8px;">本週</div>
+      <div style="display:flex;flex-wrap:wrap;">${leftSets.map(s=>pillHtml(s,'left')).join('') || emptySpan}</div>
+    </div>
+    <div style="flex:2;min-width:0;background:var(--ic-surface);border-right:0.5px solid var(--ic-vanilla);padding:10px 8px;">
+      <div style="font-size:11px;font-weight:700;color:#1F6645;letter-spacing:.05em;margin-bottom:8px;">循環中</div>
+      <div style="display:flex;flex-wrap:wrap;">${midSets.map(s=>pillHtml(s,'mid')).join('') || emptySpan}</div>
+    </div>
+    <div style="flex:1;min-width:0;background:#F8F4EE;padding:10px 8px;">
+      <div style="font-size:11px;font-weight:700;color:#9A8070;letter-spacing:.05em;margin-bottom:8px;">停用</div>
+      <div style="display:flex;flex-wrap:wrap;">${rightSets.map(s=>pillHtml(s,'right')).join('') || emptySpan}</div>
+    </div>
+  </div>`;
+
+  el.innerHTML = topRow + hint + zoneRow;
+}
+function selectWSet(id){
+  _selectedWSetId = (_selectedWSetId === id) ? null : id;
+  renderMenuSetSelector();
+}
+function moveWSet(id, direction){
+  const sets = state.weekMenuSets || [];
+  const s = sets.find(x=>x.id===id);
+  if (!s) return;
+  const isActive = id === state.activeWeekMenuSetId;
+  const inCycle  = s.cycleOn !== false;
+  _selectedWSetId = null;
+  if (direction === 'left'){
+    if (isActive) return;
+    if (inCycle){
+      // Mid → Left: become this week's template
+      switchWeekMenuSet(id);
+    } else {
+      // Right → Mid: add to cycle
+      s.cycleOn = true;
+      save(); renderMenuSetSelector();
+    }
+  } else {
+    if (isActive){
+      // Left → Mid: return to rotation, pick another as active
+      s.cycleOn = true;
+      const next = sets.find(x=>x.id!==id && x.cycleOn!==false);
+      if (next) switchWeekMenuSet(next.id);
+      // else: only one set, do nothing
+    } else if (inCycle){
+      // Mid → Right: remove from cycle
+      s.cycleOn = false;
+      save(); renderMenuSetSelector();
+    }
+  }
+}
 function toggleWsetMenu(dropId){
   const d=document.getElementById(dropId); if(!d)return;
   const wasHidden=d.classList.contains('hidden');
@@ -4262,14 +4301,14 @@ function renderMenuCell(key, cell, isToday){
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.map((d, di)=>{
     const _dm = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-    const methodLabel = _dm.length ? `<span style="font-size:13px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 8px;line-height:1.5;align-self:flex-start;">${_dm.join('＋')}</span>` : '';
+    const methodLabel = _dm.map(m=>`<span style="font-size:13px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 8px;line-height:1.5;">${m}</span>`).join(' ');
     const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean);
-    const ingLine = ingNames.length ? `<span style="font-size:15px;font-weight:700;color:#2A1508;line-height:1.4;">${ingNames.join('<span style="color:#C67843;font-weight:800;">＋</span>')}</span>` : '';
-    const nameStr = d.dishName ? `<span style="font-size:15px;font-weight:700;color:#2A1508;line-height:1.4;">${d.dishName}</span>` : '';
-    const noteStr = (d.note||d.noteId) ? `<span style="font-size:12px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
+    const ingLine = ingNames.length ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;">${ingNames.join('<span style="color:#C67843;font-weight:800;">＋</span>')}</span>` : '';
+    const nameStr = d.dishName ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;">${d.dishName}</span>` : '';
+    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
     return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
-      ${methodLabel}
+      ${methodLabel?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${methodLabel}</div>`:''}
       ${nameStr}
       ${ingLine}
       ${noteStr}
