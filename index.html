@@ -4048,7 +4048,7 @@ function renderMenuSetSelector(){
   const midSets   = sets.filter(s => s.id !== activeId && s.cycleOn !== false);
   const rightSets = sets.filter(s => s.id !== activeId && s.cycleOn === false);
 
-  const navBtnBase = 'cursor:pointer;border-radius:8px;font-size:12px;font-weight:700;padding:5px 10px;line-height:1.3;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;border:none;';
+  const navBtnBase = 'cursor:pointer;border-radius:10px;font-size:15px;font-weight:800;padding:7px 13px;line-height:1.3;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;border:none;';
 
   function pillHtml(s, zone){
     const safeId = s.id.replace(/'/g,"\'");
@@ -4074,7 +4074,7 @@ function renderMenuSetSelector(){
   }
 
   const topRow = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-    <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;">菜單設計</span>
+    <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-chef-hat" style="font-size:20px;" aria-hidden="true"></i> 菜單設計</span>
     <button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>
     ${activeSet ? `<div style="margin-left:auto;"><button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button></div>` : ''}
   </div>`;
@@ -4082,17 +4082,17 @@ function renderMenuSetSelector(){
   const hint = _selectedWSetId ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 8px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">‹ › 移動模板・再點一下取消選取・雙擊編輯名稱</div>` : '';
 
   const emptySpan = `<span style="font-size:12px;color:#B0A090;font-style:italic;">無</span>`;
-  const zoneRow = `<div style="display:flex;border:0.5px solid var(--ic-vanilla);border-radius:14px;overflow:hidden;">
-    <div style="flex:1;min-width:0;background:#FFF9F2;border-right:0.5px solid var(--ic-vanilla);padding:10px 8px;">
-      <div style="font-size:11px;font-weight:700;color:#C67843;letter-spacing:.05em;margin-bottom:8px;">本週</div>
+  const zoneRow = `<div style="display:flex;border:1px solid var(--ic-vanilla);border-radius:14px;overflow:hidden;">
+    <div style="flex:1;min-width:0;background:#FEF0DC;border-right:1px solid var(--ic-vanilla);padding:12px 10px;">
+      <div style="font-size:15px;font-weight:800;color:#C67843;letter-spacing:.03em;margin-bottom:10px;">本週</div>
       <div style="display:flex;flex-wrap:wrap;">${leftSets.map(s=>pillHtml(s,'left')).join('') || emptySpan}</div>
     </div>
-    <div style="flex:2;min-width:0;background:var(--ic-surface);border-right:0.5px solid var(--ic-vanilla);padding:10px 8px;">
-      <div style="font-size:11px;font-weight:700;color:#1F6645;letter-spacing:.05em;margin-bottom:8px;">循環中</div>
+    <div style="flex:2;min-width:0;background:#E8F5EB;border-right:1px solid var(--ic-vanilla);padding:12px 10px;">
+      <div style="font-size:15px;font-weight:800;color:#1F6645;letter-spacing:.03em;margin-bottom:10px;">循環中</div>
       <div style="display:flex;flex-wrap:wrap;">${midSets.map(s=>pillHtml(s,'mid')).join('') || emptySpan}</div>
     </div>
-    <div style="flex:1;min-width:0;background:#F8F4EE;padding:10px 8px;">
-      <div style="font-size:11px;font-weight:700;color:#9A8070;letter-spacing:.05em;margin-bottom:8px;">停用</div>
+    <div style="flex:1;min-width:0;background:#EDEAE4;padding:12px 10px;">
+      <div style="font-size:15px;font-weight:800;color:#7A6A5A;letter-spacing:.03em;margin-bottom:10px;">停用</div>
       <div style="display:flex;flex-wrap:wrap;">${rightSets.map(s=>pillHtml(s,'right')).join('') || emptySpan}</div>
     </div>
   </div>`;
@@ -4102,6 +4102,24 @@ function renderMenuSetSelector(){
 function selectWSet(id){
   _selectedWSetId = (_selectedWSetId === id) ? null : id;
   renderMenuSetSelector();
+}
+async function autoTranslateNote(i){
+  const noteEl = document.getElementById('dish-note-'+i);
+  const noteIdEl = document.getElementById('dish-noteid-'+i);
+  if (!noteEl || !noteIdEl) return;
+  const text = noteEl.value.trim();
+  if (!text || noteIdEl.value.trim()) return; // 已有翻譯就不覆蓋
+  try {
+    noteIdEl.placeholder = '翻譯中…';
+    const res = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh|id');
+    const json = await res.json();
+    const translated = json?.responseData?.translatedText;
+    if (translated && json.responseStatus === 200) {
+      noteIdEl.value = translated;
+      _cellDishes[i].noteId = translated;
+    }
+  } catch(e) {}
+  noteIdEl.placeholder = 'Catatan (Bahasa Indonesia)';
 }
 function wSetClick(id){
   if (_wSetClickTimer) { clearTimeout(_wSetClickTimer); _wSetClickTimer = null; return; }
@@ -4441,8 +4459,11 @@ function _rebuildDishListUI(){
         </div>
         <div class="mb-1">
           <div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">烹飪備註（選填）</div>
-          <input type="text" value="${d.note||''}" oninput="_cellDishes[${i}].note=this.value" placeholder="例：＊鴻禧菇使用一半就好" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs mb-1" style="background:var(--ic-surface);">
-          <input type="text" value="${d.noteId||''}" oninput="_cellDishes[${i}].noteId=this.value" placeholder="Catatan (Bahasa Indonesia)" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs" style="background:var(--ic-surface);">
+          <input type="text" id="dish-note-${i}" value="${d.note||''}" oninput="_cellDishes[${i}].note=this.value" onblur="autoTranslateNote(${i})" placeholder="例：＊鴻禧菇使用一半就好" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs mb-1" style="background:var(--ic-surface);">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="text" id="dish-noteid-${i}" value="${d.noteId||''}" oninput="_cellDishes[${i}].noteId=this.value" placeholder="Catatan (Bahasa Indonesia)" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs" style="background:var(--ic-surface);flex:1;">
+            <button onclick="autoTranslateNote(${i})" title="自動翻譯" style="flex-shrink:0;background:#E8F0FE;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;color:#3B5BDB;">🌐</button>
+          </div>
         </div>
       </div>
     </div>`;
