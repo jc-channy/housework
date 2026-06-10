@@ -1243,7 +1243,10 @@
       <div class="text-lg font-bold">餐次與情境設定</div>
       <button onclick="document.getElementById('mealConfigModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
-    <h3 class="text-sm font-semibold mb-2" style="color:var(--ic-chocolate);">餐次</h3>
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-sm font-semibold" style="color:var(--ic-chocolate);">餐次</h3>
+      <button onclick="addMealType()" class="text-xs px-3 py-1 rounded-xl border border-dashed" style="border-color:var(--ic-caramel);color:var(--ic-caramel);">＋ 新增餐次</button>
+    </div>
     <div id="mealConfigList" class="space-y-2 mb-3"></div>
     <!-- 烹調方式管理 -->
     <div class="border-t pt-3 mb-3" style="border-color:var(--ic-vanilla);">
@@ -1256,8 +1259,7 @@
         <button onclick="addCookMethod()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">新增</button>
       </div>
     </div>
-    <button onclick="addMealType()" class="text-xs px-3 py-2 rounded-xl border border-dashed w-full mb-5" style="border-color:var(--ic-caramel);color:var(--ic-caramel);">＋ 新增餐次</button>
-    <h3 class="text-sm font-semibold mb-2" style="color:var(--ic-chocolate);">「今天不煮」情境選項</h3>
+    <h3 class="text-sm font-semibold mb-2 mt-3" style="color:var(--ic-chocolate);">「今天不煮」情境選項</h3>
     <div id="skipReasonList" class="space-y-2 mb-3"></div>
     <div class="flex gap-2">
       <input id="newSkipReasonInput" type="text" placeholder="新增情境…" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm" style="min-width:0;">
@@ -3907,7 +3909,7 @@ let _previewSetId = null;   // 停用中預覽模板 id
 function renderMenuWeekStrip(){
   const el = document.getElementById('menuWeekStrip');
   if (!el) return;
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
+  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
   if (!meals.length){ el.innerHTML='<p style="font-size:13px;color:var(--ic-choc-mid);padding:10px 14px;">請先在「基本設定」啟用至少一餐</p>'; return; }
   const todayDow = today().getDay();
   const DOW_ORDER = [1,2,3,4,5,6,0];
@@ -3979,7 +3981,7 @@ function setMenuDay(dow){
 function renderMenuDayDetail(){
   const el = document.getElementById('menuDayDetail');
   if (!el) return;
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
+  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
   const dow = _menuActiveDow !== null ? _menuActiveDow : today().getDay();
   const DOW_ORDER = [1,2,3,4,5,6,0];
   const DOW_LBL = ['日','一','二','三','四','五','六'];
@@ -4342,7 +4344,7 @@ function renderCycleToggle(){
 function renderMenuGrid(){
   const grid = document.getElementById('menuGrid');
   if (!grid) return;
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
+  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
   if (!meals.length){ grid.innerHTML='<p class="text-xs text-gray-400 p-3">請先在「餐次設定」啟用至少一餐</p>'; return; }
   // 直式：行=星期，欄=餐次
   grid.style.gridTemplateColumns = `52px repeat(${meals.length},1fr)`;
@@ -4773,7 +4775,7 @@ function renderTodayMenuCard(){
   const el = document.getElementById('atikaTodayMenu');
   if (!el) return;
   const dow = today().getDay();
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
+  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
   if (!meals.length){ el.classList.add('hidden'); return; }
   const cycleMenu = getCurrentCycleMenu();
   let hasAny = false;
