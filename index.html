@@ -5128,24 +5128,6 @@ function renderTaskCard(t, opts={}){
   const showMode = !opts.hideMode;
   const showLastDone = !opts.hideLastDone;
 
-  // ── Atika 簡化模式 ──
-  if (opts.atikaMode){
-    return `
-    <div class="task-card ${done?'done':''} bg-white border border-gray-200 rounded-xl flex items-stretch min-w-0 overflow-hidden" data-tid="${t.id}">
-      <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:24px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:16px;" aria-hidden="true"></i></span>
-      <div class="flex-1 min-w-0 py-3 px-2 cursor-pointer" onclick="openTaskModal('${t.id}')">
-        <div class="task-title font-bold text-base leading-tight ${primaryClass}">${primary}</div>
-        ${secondary&&secondary!==primary?`<div class="${secondaryClass} text-sm leading-tight" style="color:#9A8A78;">${secondary}</div>`:''}
-      </div>
-      <button class="shrink-0 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform"
-        style="min-width:68px;background:${done?'#6A7840':'#F0E8DC'};color:${done?'#FAF7F2':'#A07040'};border:none;border-left:1px solid ${done?'#5A6830':'#DEC99A'};cursor:pointer;"
-        onclick="event.stopPropagation(); quickToggle('${t.id}',this)">
-        <i class="ti ti-check" style="font-size:28px;"></i>
-        <span style="font-size:12px;font-weight:700;">完成</span>
-      </button>
-    </div>`;
-  }
-
   return `
     <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}" data-tid="${t.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
@@ -5164,7 +5146,7 @@ function renderTaskCard(t, opts={}){
     </div>
   `;
 }
-function renderAdhocCard(a, opts={}){
+function renderAdhocCard(a){
   const lang=getCurrentLang();
   // 雙語相容：新版 a.textZh/a.textId；舊版 a.text 自動兼容
   const tZh=a.textZh || a.text || '';
@@ -5177,25 +5159,6 @@ function renderAdhocCard(a, opts={}){
     ? new Date(a.completedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
     : '';
   const done = a.completed;
-
-  // ── Atika 簡化模式 ──
-  if (opts.atikaMode){
-    return `
-    <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl flex items-stretch min-w-0 overflow-hidden" data-aid="${a.id}">
-      <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:24px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:16px;" aria-hidden="true"></i></span>
-      <div class="flex-1 min-w-0 py-3 px-2">
-        <div class="task-title font-bold text-base leading-tight ${primaryClass}">${primary}</div>
-        ${secondary && secondary!==primary ? `<div class="${secondaryClass} text-sm leading-tight" style="color:#9A8A78;">${secondary}</div>` : ''}
-      </div>
-      <button class="shrink-0 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform"
-        style="min-width:68px;background:${done?'#6A7840':'#F0E8DC'};color:${done?'#FAF7F2':'#A07040'};border:none;border-left:1px solid ${done?'#5A6830':'#DEC99A'};cursor:pointer;"
-        onclick="quickToggleAdhoc('${a.id}',this)">
-        <i class="ti ti-check" style="font-size:28px;"></i>
-        <span style="font-size:12px;font-weight:700;">完成</span>
-      </button>
-    </div>`;
-  }
-
   return `
     <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" data-aid="${a.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
@@ -5478,8 +5441,8 @@ function renderAtikaView(){
 
   // ── 時間分區分組函式 ──
   function getSlot(item){ return item.timeSlot || 'flexible'; }
-  function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a,{atikaMode:true})).join(''); }
-  function slotHtml_tmpl(items){ return items.map(t=>renderTaskCard(t,{atikaMode:true})).join(''); }
+  function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a)).join(''); }
+  function slotHtml_tmpl(items){ return items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''); }
 
   // 合併 incomplete 任務依 slot 分組
   const bySlot = { morning:[], afternoon:[], evening:[], flexible:[] };
@@ -5490,8 +5453,8 @@ function renderAtikaView(){
   function renderSlotItems(slotArr){
     if (!slotArr.length) return '';
     return slotArr.map(({_type, item})=>
-      _type==='adhoc' ? renderAdhocCard(item,{atikaMode:true})
-      : renderTaskCard(item,{atikaMode:true})
+      _type==='adhoc' ? renderAdhocCard(item)
+      : renderTaskCard(item,{hideMode:true,hideLastDone:true})
     ).join('');
   }
   function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
@@ -5526,9 +5489,9 @@ function renderAtikaView(){
 
   // ── 已完成區（折疊）──
   const allDoneItems = [
-    ...adDone.map(a=>renderAdhocCard(a,{atikaMode:true})),
-    ...tdDone.map(t=>renderTaskCard(t,{atikaMode:true})),
-    ...fxDone.map(t=>renderTaskCard(t,{atikaMode:true})),
+    ...adDone.map(a=>renderAdhocCard(a)),
+    ...tdDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
+    ...fxDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
   ];
   const doneOuter = document.getElementById('atikaDoneWrapOuter');
   const doneList  = document.getElementById('atikaDoneList');
@@ -9485,7 +9448,12 @@ function openTaskModal(tid){
   document.getElementById('modalTitleZh').textContent=t.nameZh;
   document.getElementById('modalTitleId').textContent=t.nameId;
   const cat=getCat(t.catId);
-  document.getElementById('modalMeta').innerHTML=`
+  const isHelper = state.currentUser && state.currentUser.role === 'helper';
+  document.getElementById('modalMeta').innerHTML= isHelper ? `
+    <div class="text-gray-500">${t.descZh}</div>
+    <div class="id-text text-gray-500">${t.descId}</div>
+    ${t.mode==='flex' ? `<div class="text-amber-700">${dueInText(t)}</div>` : ''}
+  ` : `
     <div><i class="ti ti-folder" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> ${cat.nameZh} / ${cat.nameId}</div>
     <div>${modeBadgeTiny(t)} ${t.mode==='fixed'?'指定週 '+t.weekdays.map(d=>WD_ZH[d]).join('、'):(t.freqType==='mWeek' ? weekFlagsLabel(t) : t.freqType==='mMonth' ? monthFlagsLabel(t) : (FREQ_ZH[t.freqType]||'')+' / '+(FREQ_ID[t.freqType]||''))}</div>
     <div class="text-gray-500">${t.descZh}</div>
@@ -9500,8 +9468,15 @@ function openTaskModal(tid){
       <div class="text-xs text-gray-500">• ${new Date(v.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})} — ${v.by}</div>
     `).join('')}</div>` : '';
   const btn=document.getElementById('modalToggleBtn');
-  btn.textContent=done?'取消完成 Batalkan':'✓ 標記完成 Tandai Selesai';
-  btn.className=(done?'btn-ghost flex-1':'btn-primary flex-1');
+  if (isHelper && !done){
+    btn.innerHTML='<i class="ti ti-check" style="font-size:26px;vertical-align:-4px;margin-right:6px;" aria-hidden="true"></i> 標記完成 Tandai Selesai';
+    btn.className='btn-primary flex-1';
+    btn.style.cssText='padding-top:16px;padding-bottom:16px;font-size:18px;font-weight:700;';
+  } else {
+    btn.innerHTML=done?'取消完成 Batalkan':'✓ 標記完成 Tandai Selesai';
+    btn.className=(done?'btn-ghost flex-1':'btn-primary flex-1');
+    btn.style.cssText='';
+  }
   btn.onclick=()=>{ toggleDone(t, today(), state.currentUser.name); closeTaskModal(); refreshAll(); };
   // 本期不執行 按鈕僅 flex 工作顯示；本日不執行按鈕在 flex 工作隱藏（主軸用本期）
   const periodBtn=document.getElementById('modalSkipPeriodBtn');
