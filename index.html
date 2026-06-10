@@ -1523,6 +1523,7 @@
     <input id="wmsId" type="hidden">
     <div class="flex gap-2 mt-4">
       <button id="wmsDeleteBtn" onclick="deleteWeekMenuSetFromModal()" class="btn-ghost-danger hidden">刪除</button>
+      <button onclick="copyWeekMenuSetFromModal()" style="padding:11px 14px;border-radius:12px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-copy" style="font-size:14px;" aria-hidden="true"></i> 複製</button>
       <button onclick="saveWeekMenuSetModal()" class="btn-primary flex-1">儲存</button>
     </div>
   </div>
@@ -4100,8 +4101,6 @@ function renderMenuSetSelector(){
     const safeId = activeSet.id.replace(/'/g,"\'");
     html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
       <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
-      <button onclick="copyWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="複製此模板"><i class="ti ti-copy" aria-hidden="true"></i></button>
-      <button onclick="openEditWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="編輯名稱 / 循環設定"><i class="ti ti-pencil" aria-hidden="true"></i></button>
     </div>`;
   }
   html += `</div>`;
@@ -4199,6 +4198,11 @@ function deleteWeekMenuSetFromModal(){
   const id = document.getElementById('wmsId').value;
   closeWeekMenuSetModal();
   deleteWeekMenuSet(id);
+}
+function copyWeekMenuSetFromModal(){
+  const id = document.getElementById('wmsId').value;
+  closeWeekMenuSetModal();
+  copyWeekMenuSet(id);
 }
 function copyWeekMenuSet(id){
   const s = (state.weekMenuSets||[]).find(x=>x.id===id);
