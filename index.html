@@ -3939,11 +3939,14 @@ function renderMenuWeekStrip(){
     <tbody>`;
 
   const _menuSrc = _previewSetId
-    ? ((state.weekMenuSets||[]).find(s=>s.id===_previewSetId)||{}).menu || {}
+    ? (_previewSetId === state.activeWeekMenuSetId
+        ? state.weekMenu  // 本週菜單預覽直接用 live 資料
+        : ((state.weekMenuSets||[]).find(s=>s.id===_previewSetId)||{}).menu || {})
     : state.weekMenu;
   const previewBanner = _previewSetId ? (() => {
     const ps = (state.weekMenuSets||[]).find(s=>s.id===_previewSetId);
-    return ps ? `<div style="font-size:12px;color:#9A8878;background:#F0EAE0;border-radius:8px;padding:5px 12px;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-eye" style="font-size:13px;" aria-hidden="true"></i> 預覽「${ps.name}」菜單內容・點選其他標籤切換</div>` : '';
+    const isActive = _previewSetId === state.activeWeekMenuSetId;
+    return ps ? `<div style="font-size:12px;color:#9A8878;background:#F0EAE0;border-radius:8px;padding:5px 12px;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-eye" style="font-size:13px;" aria-hidden="true"></i> 預覽「${ps.name}」${isActive ? '（本週菜單）' : '菜單內容'}・再點一次取消預覽</div>` : '';
   })() : '';
 
   DOW_ORDER.forEach((dow, idx) => {
@@ -4087,17 +4090,15 @@ function renderMenuSetSelector(){
       : pillBase + 'background:#DDD4C8;color:#7A6A5A;cursor:pointer;';
 
     if (!_arrangeMode) {
-      // 一般模式：單擊切換菜單，雙擊編輯
-      const clickAct = zone === 'mid'   ? `switchWeekMenuSet('${safeId}')`
-                     : zone === 'right' ? `previewMenuSet('${safeId}')`
-                     : '';
-      const tipTxt   = zone === 'left' ? '雙擊編輯名稱'
-                     : zone === 'mid'  ? '點選設為本週菜單・雙擊編輯名稱'
-                     : '點選預覽菜單內容・雙擊編輯名稱';
-      const isPreview = zone === 'right' && _previewSetId === s.id;
+      // 一般模式：單擊預覽菜單（三區統一），雙擊編輯名稱
+      // 切換本週菜單請使用「排列」模式的 « 按鈕
+      const isPreview = _previewSetId === s.id;
       const previewRing = isPreview ? 'outline:2px dashed #9A8878;outline-offset:2px;' : '';
+      const tipTxt = zone === 'left'
+        ? '點選預覽菜單內容・雙擊編輯名稱'
+        : '點選預覽菜單內容・雙擊編輯名稱・排列模式可移區';
       return `<div style="display:inline-flex;align-items:center;margin:0 4px 6px 0;">
-        <button onclick="${clickAct}" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}${previewRing||''}">${s.name}</button>
+        <button onclick="previewMenuSet('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}${previewRing}">${s.name}</button>
       </div>`;
     }
 
