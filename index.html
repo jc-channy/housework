@@ -1062,7 +1062,7 @@
       </div>
 
       <!-- 待購買 -->
-      <div class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <div id="blockReported" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
           <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
           <span id="cntReported" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FAE8E8;color:#B84040;"></span>
@@ -1071,7 +1071,7 @@
       </div>
 
       <!-- 已購買待收納 -->
-      <div class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <div id="blockBought" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
           <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
           <span id="cntBought" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FFF3DC;color:#905820;"></span>
@@ -1080,7 +1080,7 @@
       </div>
 
       <!-- 暫不補充（折疊） -->
-      <details class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <details id="blockPaused" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <summary class="flex items-center justify-between px-4 py-3 cursor-pointer" style="list-style:none;">
           <span style="font-size:15px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
           <span style="display:flex;align-items:center;gap:6px;">
@@ -9075,9 +9075,12 @@ function renderSuppliesManager(){
   if(subR) subR.textContent = helperLabel + ' 標記待補充';
   const subB = document.getElementById('subtitleBought');
   if(subB) subB.textContent = '待 ' + helperLabel + ' 收納';
-  document.getElementById('suppliesReported').innerHTML=reported.length ? reported.map(s=>renderManagerSupplyCard(s,'reported')).join('') : '<div style="padding:14px 16px;font-size:13px;color:var(--ic-choc-mid);font-style:italic;">目前沒有待補充的備品 ✓</div>';
-  document.getElementById('suppliesBought').innerHTML=bought.length ? bought.map(s=>renderManagerSupplyCard(s,'bought')).join('') : '<div style="padding:14px 16px;font-size:13px;color:#B0A090;font-style:italic;">無</div>';
-  document.getElementById('suppliesPaused').innerHTML=paused.length ? paused.map(s=>renderManagerSupplyCard(s,'paused')).join('') : '<div style="padding:12px 16px;font-size:13px;color:#B0A090;font-style:italic;">無</div>';
+  const blkR=document.getElementById('blockReported'); if(blkR) blkR.style.display=reported.length?'':'none';
+  document.getElementById('suppliesReported').innerHTML=reported.map(s=>renderManagerSupplyCard(s,'reported')).join('');
+  const blkB=document.getElementById('blockBought'); if(blkB) blkB.style.display=bought.length?'':'none';
+  document.getElementById('suppliesBought').innerHTML=bought.map(s=>renderManagerSupplyCard(s,'bought')).join('');
+  const blkP=document.getElementById('blockPaused'); if(blkP) blkP.style.display=paused.length?'':'none';
+  document.getElementById('suppliesPaused').innerHTML=paused.map(s=>renderManagerSupplyCard(s,'paused')).join('');
   document.getElementById('suppliesOk').innerHTML=ok.length
     ? ok.map(s=>{
         const cat=getSupplyCat(s.catId);
