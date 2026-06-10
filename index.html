@@ -8234,9 +8234,9 @@ function renderAtikaRestSchedules(){
       ${todayRests.map(rs => {
         const pri = lang==='id' ? rs.nameId : rs.nameZh;
         const sec = lang==='id' ? rs.nameZh : rs.nameId;
-        return `<div style="background:#5A3520;border:1px solid #8A6040;border-radius:8px;padding:5px 12px;font-size:12px;">
-          <span style="font-weight:700;color:#FAD090;">${pri}</span><span style="color:#D4A870;margin-left:5px;">${sec}</span>
-          <span style="color:#FAD090;font-family:monospace;margin-left:6px;font-weight:600;">${rs.startTime}-${rs.endTime}</span>
+        return `<div style="background:#F5ECD8;border:1px solid #C8A96A;border-radius:8px;padding:5px 12px;font-size:12px;">
+          <span style="font-weight:700;color:#6B3D0F;">${pri}</span><span style="color:#8B5E2A;margin-left:5px;">${sec}</span>
+          <span style="color:#5C3310;font-family:monospace;margin-left:6px;font-weight:600;">${rs.startTime}-${rs.endTime}</span>
         </div>`;
       }).join('')}
     </div>
