@@ -1183,7 +1183,7 @@
       </section>
 
       <!-- 詳情區（全部 details 摺疊） -->
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl">
+      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between" style="font-size:15px;">
           <span class="flex items-center gap-1.5"><i class="ti ti-receipt" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 額外項目 / Tambahan</span>
           <button onclick="event.preventDefault(); event.stopPropagation(); openAddAdjustment();" class="btn-sm-primary">＋ 新增</button>
@@ -1191,12 +1191,12 @@
         <div id="payrollAdjList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl">
+      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-pencil-plus" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 薪資簽收 / Tanda Terima</summary>
         <div id="payrollReceiptBox" class="px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl">
+      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between">
           <span class="flex items-center gap-1.5" style="font-size:15px;"><i class="ti ti-calendar-stats" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 請假紀錄 / Riwayat Cuti <span id="leaveHistoryCount" class="text-sm font-bold" style="color:#C4706A;"></span></span>
           <button onclick="event.preventDefault();event.stopPropagation();openAddLeaveForAtika();" class="btn-sm-primary flex items-center gap-1"><i class="ti ti-plus" style="font-size:14px;vertical-align:-1px;" aria-hidden="true"></i> 新增請假</button>
@@ -1204,7 +1204,7 @@
         <div id="leaveHistoryList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl">
+      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-calendar-event" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 當期出勤明細 / Detail Kehadiran</summary>
         <div id="payrollDayList" class="divide-y divide-gray-100 text-sm max-h-96 overflow-y-auto"></div>
       </details>
@@ -6925,7 +6925,7 @@ function renderLeaveLists(viewDate){
         <button onclick="decideLeave('${r.id}','rejected')" class="flex-1 bg-gray-500 text-white text-sm py-2 rounded-lg font-semibold">✗ 拒絕</button>
       </div>
     </div>
-  `).join('') : '<div class="text-xs text-gray-400 italic">無待審核</div>';
+  `).join('') : '';
   document.getElementById('leaveHistoryCount').textContent = inPeriod.length > 0 ? `(${inPeriod.length})` : '';
   const todayStr = ymd(today());
   document.getElementById('leaveHistoryList').innerHTML = inPeriod.length ? inPeriod.map(r=>{
