@@ -3901,6 +3901,7 @@ let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
 let _selectedWSetId = null; // 三區選取中的模板 id
 let _wSetClickTimer = null; // 單擊/雙擊防衝突計時器
 let _arrangeMode = false;   // 排列模式開關
+let _previewSetId = null;   // 停用中預覽模板 id
 
 /* ========== 菜單：週狀態一覽 ========== */
 function renderMenuWeekStrip(){
@@ -3930,10 +3931,18 @@ function renderMenuWeekStrip(){
   }
   let html = `<div style="overflow-x:auto;width:100%;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">
     <thead><tr>
-      <th style="width:46px;${thBase}"></th>
+      <th style="width:62px;${thBase}"></th>
       ${meals.map(m=>mealThHtml(m)).join('')}
     </tr></thead>
     <tbody>`;
+
+  const _menuSrc = _previewSetId
+    ? ((state.weekMenuSets||[]).find(s=>s.id===_previewSetId)||{}).menu || {}
+    : state.weekMenu;
+  const previewBanner = _previewSetId ? (() => {
+    const ps = (state.weekMenuSets||[]).find(s=>s.id===_previewSetId);
+    return ps ? `<div style="font-size:12px;color:#9A8878;background:#F0EAE0;border-radius:8px;padding:5px 12px;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-eye" style="font-size:13px;" aria-hidden="true"></i> 預覽「${ps.name}」菜單內容・點選其他標籤切換</div>` : '';
+  })() : '';
 
   DOW_ORDER.forEach((dow, idx) => {
     const isToday = dow === todayDow;
@@ -3947,13 +3956,13 @@ function renderMenuWeekStrip(){
       </td>`;
     meals.forEach(meal => {
       const key = getMenuKey(dow, meal.id);
-      html += `<td style="padding:5px 4px;vertical-align:top;height:1px;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
+      html += `<td style="padding:5px 4px;vertical-align:top;height:1px;">${renderMenuCell(key, _menuSrc[key], isToday)}</td>`;
     });
     html += `</tr>`;
   });
 
   html += `</tbody></table></div>`;
-  el.innerHTML = html;
+  el.innerHTML = previewBanner + html;
 
   // hide legacy day detail
   const dd = document.getElementById('menuDayDetail');
@@ -4078,13 +4087,15 @@ function renderMenuSetSelector(){
     if (!_arrangeMode) {
       // 一般模式：單擊切換菜單，雙擊編輯
       const clickAct = zone === 'mid'   ? `switchWeekMenuSet('${safeId}')`
-                     : zone === 'right' ? `switchWeekMenuSet('${safeId}')`
+                     : zone === 'right' ? `previewMenuSet('${safeId}')`
                      : '';
       const tipTxt   = zone === 'left' ? '雙擊編輯名稱'
                      : zone === 'mid'  ? '點選設為本週菜單・雙擊編輯名稱'
-                     : '點選設為本週菜單・雙擊編輯名稱';
+                     : '點選預覽菜單內容・雙擊編輯名稱';
+      const isPreview = zone === 'right' && _previewSetId === s.id;
+      const previewRing = isPreview ? 'outline:2px dashed #9A8878;outline-offset:2px;' : '';
       return `<div style="display:inline-flex;align-items:center;margin:0 4px 6px 0;">
-        <button onclick="${clickAct}" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}">${s.name}</button>
+        <button onclick="${clickAct}" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}${previewRing||''}">${s.name}</button>
       </div>`;
     }
 
@@ -4205,7 +4216,12 @@ function toggleWsetMenu(dropId){
   document.querySelectorAll('[id^="wset_drop_"]').forEach(x=>x.classList.add('hidden'));
   if(wasHidden) d.classList.remove('hidden');
 }
+function previewMenuSet(id){
+  _previewSetId = (_previewSetId === id) ? null : id;
+  renderMenuTab();
+}
 function switchWeekMenuSet(id){
+  _previewSetId = null; // 切換時清掉預覽
   // 先把當前 weekMenu 存回 active set
   const cur = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
   if (cur) cur.menu = state.weekMenu;
