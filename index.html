@@ -4816,7 +4816,8 @@ function showMainView(){
   } else {
     document.getElementById('managerView').classList.remove('hidden');
     const _rt1=document.getElementById('mgrRoleTag'); if(_rt1) _rt1.textContent=state.currentUser.name+'（管理者）';
-    switchTab('week');
+    const savedTab = (() => { try { return localStorage.getItem('lastTab'); } catch(e){ return null; } })();
+    switchTab(savedTab || 'week');
     renderManagerView();
     const onboardKey='housework_onboarded_v1';
     if(!localStorage.getItem(onboardKey)) setTimeout(()=>showOnboarding(),600);
@@ -9556,6 +9557,8 @@ function switchTab(tabName){
   const tabEl = document.getElementById('tab-'+tabName);
   if (tabEl) tabEl.classList.remove('hidden');
   if (tabName === 'menu') renderMenuTab();
+  // 記住目前分頁，重新整理後還原
+  try { localStorage.setItem('lastTab', tabName); } catch(e){}
   // 切到頂端（instant 避免縮頁後卡在半空白畫面）
   window.scrollTo({ top:0, behavior:'instant' });
 }
