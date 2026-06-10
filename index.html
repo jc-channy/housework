@@ -4048,31 +4048,28 @@ function renderMenuSetSelector(){
   const midSets   = sets.filter(s => s.id !== activeId && s.cycleOn !== false);
   const rightSets = sets.filter(s => s.id !== activeId && s.cycleOn === false);
 
-  const ICO_BTN = 'background:none;border:none;cursor:pointer;padding:2px 5px;font-size:15px;border-radius:5px;line-height:1;opacity:0.6;vertical-align:middle;';
+  const MOVE_BTN = 'background:none;border:none;outline:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;color:#C07030;font-weight:700;font-size:12px;';
+  const ARR_ST  = 'font-size:26px;font-weight:900;line-height:1;text-decoration:none;';
+  const TXT_ST  = 'text-decoration:underline;text-underline-offset:3px;';
 
   function pillHtml(s, zone){
     const safeId = s.id.replace(/'/g,"\'");
-    const pillBase = 'font-size:14px;padding:5px 12px;border-radius:99px;cursor:pointer;white-space:nowrap;border:none;';
+    const isSel = _selectedWSetId === s.id;
+    const canLeft  = zone === 'mid' || zone === 'right';
+    const canRight = (zone === 'left' && sets.length > 1) || zone === 'mid';
+    const pillBase = 'font-size:14px;padding:6px 13px;border-radius:99px;cursor:pointer;white-space:nowrap;border:none;';
     const pillSt = zone === 'left'
-      ? pillBase + 'background:#C07030;color:#FFF8F0;cursor:default;'
+      ? pillBase + 'background:#C07030;color:#FFF8F0;'
       : zone === 'mid'
       ? pillBase + 'background:#F0E6D8;color:#7A5828;'
       : pillBase + 'background:#DDD4C8;color:#7A6A5A;';
-    const hasOtherCycle = sets.some(x => x.id !== s.id && x.cycleOn !== false);
-    let sideBtn = '';
-    if (zone === 'left' && hasOtherCycle){
-      sideBtn = `<button onclick="moveWSet('${safeId}','right')" title="移回循環菜單" style="${ICO_BTN}color:#C07030;"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>`;
-    } else if (zone === 'mid'){
-      sideBtn = `<button onclick="moveWSet('${safeId}','right')" title="移至停用中" style="${ICO_BTN}color:#9A7A5A;"><i class="ti ti-player-pause" aria-hidden="true"></i></button>`;
-    }
-    const pillOnClick = zone === 'mid'   ? `switchWeekMenuSet('${safeId}')`
-                      : zone === 'right' ? `moveWSet('${safeId}','left')`
-                      : '';
-    const pillTitle   = zone === 'mid'   ? '點選設為本週菜單・雙擊編輯名稱'
-                      : zone === 'right' ? '點選移至循環中・雙擊編輯名稱'
-                      :                   '雙擊編輯名稱';
-    return `<div style="display:inline-flex;align-items:center;gap:2px;margin:0 4px 6px 0;">
-      <button onclick="${pillOnClick}" ondblclick="wSetDblClick(event,'${safeId}')" title="${pillTitle}" style="${pillSt}">${s.name}</button>${sideBtn}
+    const selRing = isSel ? 'outline:2.5px solid #C07030;outline-offset:2px;' : '';
+    const leftLabel  = zone === 'mid'   ? '設為本週菜單' : '移至循環';
+    const rightLabel = zone === 'left'  ? '移至循環' : '移至停用中';
+    const leftBtn  = (isSel && canLeft)  ? `<span onclick="moveWSet('${safeId}','left')"  style="${MOVE_BTN}"><span style="${ARR_ST}">«</span><span style="${TXT_ST}">${leftLabel}</span></span>` : '';
+    const rightBtn = (isSel && canRight) ? `<span onclick="moveWSet('${safeId}','right')" style="${MOVE_BTN}"><span style="${TXT_ST}">${rightLabel}</span><span style="${ARR_ST}">»</span></span>` : '';
+    return `<div style="display:inline-flex;align-items:center;gap:5px;margin:0 4px 6px 0;flex-wrap:wrap;">
+      ${leftBtn}<button onclick="wSetClick('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
     </div>`;
   }
 
@@ -4082,7 +4079,7 @@ function renderMenuSetSelector(){
     ${activeSet ? `<div style="margin-left:auto;"><button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button></div>` : ''}
   </div>`;
 
-  const hint = '';
+  const hint = _selectedWSetId ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 8px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">‹ › 移動模板・再點一下取消選取・雙擊編輯名稱</div>` : '';
 
   const emptySpan = `<span style="font-size:12px;color:#B0A090;font-style:italic;">無</span>`;
   const zoneRow = `<div style="display:flex;border:1px solid #D4C0A0;border-radius:14px;overflow:hidden;">
