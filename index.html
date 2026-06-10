@@ -1218,6 +1218,7 @@
     </div>
     <!-- 煮：菜色列表 -->
     <div id="cookPanel">
+      <div id="recipePicker" class="mb-3"></div>
       <div id="dishList" class="space-y-3 mb-3"></div>
       <button onclick="addDishToCell()" class="w-full py-2 rounded-xl text-sm border border-dashed" style="border-color:var(--ic-caramel);color:var(--ic-caramel);"><i class="ti ti-plus" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> 新增菜色</button>
     </div>
@@ -2705,6 +2706,7 @@ let state = {
   weekMenuSets: [],
   activeWeekMenuSetId: '',
   weekMenuCycleOffset: 0,
+  recipes: [],
   preferences: {},
   catFilter: 'all',
   supplyCatFilter: 'all',
@@ -2751,6 +2753,7 @@ function load() {
       state.weekMenuSets = d.weekMenuSets || [];
       state.activeWeekMenuSetId = d.activeWeekMenuSetId || '';
       state.weekMenuCycleOffset = d.weekMenuCycleOffset || 0;
+      state.recipes = d.recipes || [];
     } catch(e){}
   }
   // 遷移：舊資料只有 weekMenu，沒有 weekMenuSets → 建立第一組
@@ -2923,6 +2926,7 @@ function save() {
     })(),
     activeWeekMenuSetId: state.activeWeekMenuSetId,
     weekMenuCycleOffset: state.weekMenuCycleOffset || 0,
+    recipes: state.recipes || [],
     savedAt: new Date().toISOString(),
   }));
   // Phase 2 雲端同步勾子（若已連線且非雲端回寫）
@@ -4421,6 +4425,7 @@ function openMenuCellModal(key){
   document.getElementById('menuCellSubtitle').textContent = '設定這個時段的料理安排';
   setMenuCellMode(cell.type==='skip'?'skip':'cook');
   renderDishList(cell.type==='skip'?[]:cell.dishes||[]);
+  renderRecipePicker();
   // skip reason
   const reason = cell.type==='skip'?cell.skipReason:'';
   renderSkipReasonChips(reason);
@@ -4522,6 +4527,12 @@ function _rebuildDishListUI(){
             <button onclick="autoTranslateNote(${i})" title="自動翻譯" style="flex-shrink:0;background:#E8F0FE;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;color:#3B5BDB;">🌐</button>
           </div>
         </div>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--ic-vanilla);display:flex;justify-content:flex-end;">
+          <button type="button" onclick="toggleSaveToRecipe(${i})" style="font-size:11px;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:${isInRecipes(d)?'#C07030':'#9A7A5A'};">
+            <i class="ti ti-star" style="font-size:13px;" aria-hidden="true"></i>
+            ${isInRecipes(d)?'★ 已加入常用菜譜':'☆ 加入常用菜譜'}
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -4579,6 +4590,77 @@ function _syncCmChips(i){
 function addDishToCell(){
   _cellDishes.push({ id:'dish_'+Date.now(), dishName:'', ingredientIds:[], cookMethods:[], note:'', noteId:'' });
   _rebuildDishListUI();
+}
+
+// ── 常用菜譜 ──
+function isInRecipes(dish){
+  if (!dish.dishName) return false;
+  return (state.recipes||[]).some(r=>r.dishName===dish.dishName);
+}
+function renderRecipePicker(){
+  const el = document.getElementById('recipePicker');
+  if (!el) return;
+  const recipes = state.recipes||[];
+  if (!recipes.length){ el.innerHTML=''; return; }
+  const allIngs = state.ingredients||[];
+  const cards = recipes.map(r=>{
+    const ingNames = (r.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('・');
+    const methods = (r.cookMethods||[]).slice(0,2).join('・');
+    const sid = r.id.replace(/'/g,"\'");
+    return `<div style="position:relative;flex-shrink:0;max-width:130px;">
+      <button type="button" onclick="addRecipeToCell('${sid}')" style="width:100%;background:#FEF0D8;border:0.5px solid #E8DDD0;border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;">
+        <div style="font-size:13px;font-weight:700;color:#4A2008;margin-bottom:3px;padding-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.dishName||'未命名'}</div>
+        ${methods?`<div style="font-size:10px;color:#C07030;margin-bottom:1px;">${methods}</div>`:''}
+        ${ingNames?`<div style="font-size:10px;color:#9A7A5A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ingNames}</div>`:''}
+      </button>
+      <button type="button" onclick="removeRecipe('${sid}')" style="position:absolute;top:3px;right:4px;background:none;border:none;cursor:pointer;font-size:13px;color:#B0A090;line-height:1;" title="移除常用">×</button>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div style="margin-bottom:6px;display:flex;align-items:center;gap:5px;">
+    <i class="ti ti-star" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
+    <span style="font-size:12px;font-weight:700;color:#7A3A08;">常用菜譜</span>
+    <span style="font-size:10px;color:#9A7A5A;">點選快速加入</span>
+  </div>
+  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">${cards}</div>
+  <div style="height:1px;background:#E8DDD0;margin:10px 0 2px;"></div>`;
+}
+function addRecipeToCell(recipeId){
+  const r = (state.recipes||[]).find(x=>x.id===recipeId);
+  if (!r) return;
+  _cellDishes.push({
+    id:'dish_'+Date.now(),
+    dishName: r.dishName||'',
+    ingredientIds: [...(r.ingredientIds||[])],
+    cookMethods: [...(r.cookMethods||[])],
+    note: r.note||'',
+    noteId: r.noteId||'',
+  });
+  _rebuildDishListUI();
+}
+function toggleSaveToRecipe(dishIdx){
+  const d = _cellDishes[dishIdx];
+  if (!d) return;
+  if (!state.recipes) state.recipes=[];
+  if (isInRecipes(d)){
+    state.recipes = state.recipes.filter(r=>r.dishName!==d.dishName);
+  } else {
+    state.recipes.push({
+      id:'recipe_'+Date.now(),
+      dishName: d.dishName||'',
+      ingredientIds: [...(d.ingredientIds||[])],
+      cookMethods: [...(d.cookMethods||[])],
+      note: d.note||'',
+      noteId: d.noteId||'',
+    });
+  }
+  save();
+  renderRecipePicker();
+  _rebuildDishListUI();
+}
+function removeRecipe(recipeId){
+  state.recipes = (state.recipes||[]).filter(r=>r.id!==recipeId);
+  save();
+  renderRecipePicker();
 }
 function clearMenuCell(){
   if (!_menuCellKey) return;
