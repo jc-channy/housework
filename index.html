@@ -1043,53 +1043,61 @@
     <!-- 備品 -->
     <div id="tab-supplies" class="tab-content hidden">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-3 gap-2">
+      <div class="flex items-center mb-3">
         <h3 class="font-bold" style="font-size:17px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i> 備品 / Perlengkapan</h3>
-        <button onclick="openManageSuppliesModal()" class="btn-sm-secondary flex items-center gap-1.5"><i class="ti ti-settings" style="font-size:15px;" aria-hidden="true"></i> 管理備品</button>
       </div>
 
       <!-- 分類篩選 -->
-      <div id="supplyCatFilters" class="flex gap-2 mb-4 overflow-x-auto" style="scrollbar-width:none;padding-bottom:3px;">
-        <button class="sc-filter whitespace-nowrap font-semibold border" style="padding:6px 14px;border-radius:99px;font-size:12px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+      <div class="mb-1">
+        <div id="supplyCatFilters" class="flex flex-wrap gap-2 mb-1">
+          <button class="sc-filter font-semibold border" style="padding:6px 14px;border-radius:99px;font-size:17px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+        </div>
+        <div class="flex items-center justify-between mt-2 mb-3">
+          <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
+          <button onclick="openAddSupplyCatModal()" style="font-size:14px;font-weight:600;color:var(--ic-caramel-dk);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px;padding:0;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增分類</button>
+        </div>
       </div>
 
       <!-- 待購買 -->
-      <div id="blockReported" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <div id="blockReported" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
+          <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:19px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
           <span id="cntReported" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FAE8E8;color:#B84040;"></span>
         </div>
-        <div id="suppliesReported" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;"></div>
+        <div id="suppliesReported" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
       </div>
 
       <!-- 已購買待收納 -->
-      <div id="blockBought" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <div id="blockBought" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
+          <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:19px;" aria-hidden="true"></i> 已購買・待收納</span>
           <span id="cntBought" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FFF3DC;color:#905820;"></span>
         </div>
-        <div id="suppliesBought" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;"></div>
+        <div id="suppliesBought" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
       </div>
 
       <!-- 暫不補充（折疊） -->
-      <details id="blockPaused" class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
+      <details id="blockPaused" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <summary class="flex items-center justify-between px-4 py-3 cursor-pointer" style="list-style:none;">
-          <span style="font-size:15px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
+          <span style="font-size:17px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:19px;" aria-hidden="true"></i> 暫不補充</span>
           <span style="display:flex;align-items:center;gap:6px;">
             <span id="cntPaused" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#F0EDE8;color:#7A7060;"></span>
             <i class="ti ti-chevron-down" style="font-size:16px;color:#B0A090;" aria-hidden="true"></i>
           </span>
         </summary>
-        <div style="border-top:1px solid #F0E8DC;"><div id="suppliesPaused" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;"></div></div>
+        <div style="border-top:1px solid #F0E8DC;"><div id="suppliesPaused" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div></div>
       </details>
 
-      <!-- 庫存正常 -->
+      <!-- 備品庫 -->
       <div class="rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:15px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 庫存正常</span>
-          <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
+          <span style="font-size:17px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:19px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
+            <button onclick="openAddSupplyModal()" class="btn-sm-primary flex items-center gap-1" style="font-size:13px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增備品</button>
+          </div>
         </div>
-        <div id="suppliesOk" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px;"></div>
+        <div id="suppliesOk" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
       </div>
     </div>
 
@@ -9071,6 +9079,7 @@ function renderSupplyCatFilters(){
   state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
     b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
+    b.style.fontSize='17px'; b.style.padding='6px 14px';
     if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='var(--ic-lemon)'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='var(--ic-vanilla)'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
@@ -9080,9 +9089,12 @@ function renderSupplyCatFilters(){
     b.onclick=()=>{
       state.supplyCatFilter=b.dataset.cat;
       wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='var(--ic-lemon)'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='var(--ic-vanilla)'; });
-      b.classList.remove('bg-gray-200'); b.classList.add('bg-gray-900','text-white');
+      b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)';
       renderSuppliesManager();
     };
+    if(b.dataset.cat!=='all'){
+      b.ondblclick=(e)=>{ e.stopPropagation(); openEditSupplyCat(b.dataset.cat); };
+    }
   });
 }
 function renderSupplyCatManager(){
@@ -9138,12 +9150,12 @@ function renderSuppliesManager(){
   document.getElementById('suppliesPaused').innerHTML=paused.map(s=>renderManagerSupplyCard(s,'paused')).join('');
   document.getElementById('suppliesOk').innerHTML=ok.length
     ? ok.map(s=>{
-        return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:10px 12px;display:flex;align-items:center;gap:8px;">
+        return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:11px 12px;display:flex;align-items:center;gap:8px;">
           <div style="flex:1;min-width:0;overflow:hidden;">
-            <div style="font-size:14px;font-weight:600;color:#2A1A08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.nameZh}</div>
-            <div style="font-size:12px;color:#B0A090;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.nameId}</div>
+            <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
           </div>
-          <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="padding:0 8px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
         </div>`;
       }).join('')
     : `<div style="grid-column:1/-1;padding:14px;font-size:13px;color:#B0A090;font-style:italic;text-align:center;">目前無庫存品項</div>`;
@@ -9155,38 +9167,37 @@ function renderManagerSupplyCard(s, group){
   const reportPillColor={half:'#FFF3DC;color:#905820',third:'#FFE8D0;color:#A04010',low:'#FAE8E8;color:#B84040',out:'#2A1A08;color:#FFFFFF'};
   const rpc=reportPillColor[s.reportStatus]||'#EEE;color:#555';
   const rpcBg=rpc.split(';color:')[0]; const rpcTxt=rpc.split(';color:')[1];
-  const statusPill=s.reportStatus?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:${rpcBg};color:${rpcTxt};">${REPORT_LABEL[s.reportStatus]}</span>`:'';
+  const statusPill=s.reportStatus?`<span style="font-size:12px;padding:3px 9px;border-radius:99px;background:${rpcBg};color:${rpcTxt};">${REPORT_LABEL[s.reportStatus]}</span>`:'';
   let actionsHtml='';
   if (group==='reported'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:13px;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 10px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='bought'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="flex:1;font-size:13px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>補好了</button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="flex:1;font-size:14px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>補好了</button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='paused'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:13px;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   }
   const firstChar=[...cat.nameZh][0]||'';
   const catIcon=firstChar.codePointAt(0)>0x2000?firstChar:'';
   return `
-    <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:11px 12px;display:flex;flex-direction:column;gap:8px;">
+    <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:12px;display:flex;flex-direction:column;gap:9px;">
       <div style="overflow:hidden;">
-        <div style="font-size:14px;font-weight:700;color:#2A1A08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${catIcon?catIcon+' ':''}${s.nameZh}</div>
-        <div style="font-size:12px;color:#B0A090;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.nameId}</div>
+        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${catIcon?catIcon+\' \':\'\'}${s.nameZh}</span><span style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         ${statusPill}
-        ${repAt?`<span style="font-size:11px;color:#A08070;white-space:nowrap;"><i class="ti ti-clock" style="font-size:11px;" aria-hidden="true"></i> ${repAt}</span>`:''}
-        ${s.handleStatus&&hdAt?`<span style="font-size:11px;color:#7070A0;white-space:nowrap;">${hdAt}</span>`:''}
+        ${repAt?`<span style="font-size:12px;color:#A08070;white-space:nowrap;"><i class="ti ti-clock" style="font-size:12px;" aria-hidden="true"></i> ${repAt}</span>`:''}
+        ${s.handleStatus&&hdAt?`<span style="font-size:12px;color:#7070A0;white-space:nowrap;">${hdAt}</span>`:''}
       </div>
-      ${s.notes?`<div style="font-size:11px;color:#9A8878;font-style:italic;">${s.notes}</div>`:''}
-      <div style="display:flex;gap:5px;">${actionsHtml}</div>
+      ${s.notes?`<div style="font-size:12px;color:#9A8878;font-style:italic;">${s.notes}</div>`:''}
+      <div style="display:flex;gap:6px;">${actionsHtml}</div>
     </div>
   `;
 }
