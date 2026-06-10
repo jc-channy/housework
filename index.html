@@ -3914,11 +3914,24 @@ function renderMenuWeekStrip(){
   const DOW_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const todayIdx = DOW_ORDER.indexOf(todayDow);
 
-  const thStyle = 'padding:10px 4px;text-align:center;font-size:17px;font-weight:600;color:var(--ic-chocolate);border-bottom:1px solid var(--ic-vanilla);background:var(--ic-surface);';
+  const thBase = 'padding:8px 8px;border-bottom:2px solid #E8DDD0;background:var(--ic-surface);';
+  function mealThHtml(m){
+    const isLunch = m.id==='lunch' || m.name==='午餐';
+    const bg    = isLunch ? '#FEF0D8' : '#EDE0D4';
+    const color = isLunch ? '#7A3A08' : '#4A2008';
+    const tcolor= isLunch ? '#C07030' : '#6B4020';
+    const icon  = isLunch ? 'ti-sun'  : 'ti-moon';
+    const inner = `<div style="display:flex;align-items:center;gap:6px;background:${bg};border-radius:8px;padding:6px 10px;">
+      <i class="ti ${icon}" style="font-size:15px;color:${tcolor};flex-shrink:0;" aria-hidden="true"></i>
+      <span style="font-size:16px;font-weight:800;color:${color};flex:1;">${m.name}</span>
+      ${m.mealTime?`<span style="font-size:12px;font-weight:700;color:${tcolor};white-space:nowrap;">${m.mealTime}</span>`:''}
+    </div>`;
+    return `<th style="${thBase}">${inner}</th>`;
+  }
   let html = `<div style="overflow-x:auto;width:100%;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">
     <thead><tr>
-      <th style="width:46px;${thStyle}"></th>
-      ${meals.map(m=>`<th style="${thStyle}">${m.name}${m.mealTime?`<br><span style="font-size:12px;font-weight:400;color:var(--ic-choc-mid);">${m.mealTime}</span>`:''}</th>`).join('')}
+      <th style="width:46px;${thBase}"></th>
+      ${meals.map(m=>mealThHtml(m)).join('')}
     </tr></thead>
     <tbody>`;
 
