@@ -3899,6 +3899,7 @@ function getCurrentCycleMenu(){
 
 let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
 let _selectedWSetId = null; // 三區選取中的模板 id
+let _wSetClickTimer = null; // 單擊/雙擊防衝突計時器
 
 /* ========== 菜單：週狀態一覽 ========== */
 function renderMenuWeekStrip(){
@@ -4064,7 +4065,7 @@ function renderMenuSetSelector(){
     const leftBtn  = (isSel && canLeft)  ? `<button onclick="moveWSet('${safeId}','left')"  style="${navBtnSt}">‹</button>` : '';
     const rightBtn = (isSel && canRight) ? `<button onclick="moveWSet('${safeId}','right')" style="${navBtnSt}">›</button>` : '';
     return `<div style="display:inline-flex;align-items:center;gap:3px;margin:0 3px 4px 0;">
-      ${leftBtn}<button onclick="selectWSet('${safeId}')" ondblclick="event.stopPropagation();openEditWeekMenuSet('${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
+      ${leftBtn}<button onclick="wSetClick('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
     </div>`;
   }
 
@@ -4097,6 +4098,15 @@ function renderMenuSetSelector(){
 function selectWSet(id){
   _selectedWSetId = (_selectedWSetId === id) ? null : id;
   renderMenuSetSelector();
+}
+function wSetClick(id){
+  if (_wSetClickTimer) { clearTimeout(_wSetClickTimer); _wSetClickTimer = null; return; }
+  _wSetClickTimer = setTimeout(()=>{ _wSetClickTimer = null; selectWSet(id); }, 240);
+}
+function wSetDblClick(e, id){
+  e.stopPropagation();
+  if (_wSetClickTimer) { clearTimeout(_wSetClickTimer); _wSetClickTimer = null; }
+  openEditWeekMenuSet(id);
 }
 function moveWSet(id, direction){
   const sets = state.weekMenuSets || [];
