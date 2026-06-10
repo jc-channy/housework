@@ -651,20 +651,6 @@
 
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
-    <!-- ═══ 本日提醒（最上方）═══ -->
-    <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
-      <div class="flex items-stretch">
-        <div style="background:var(--ic-strawberry);padding:16px 18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="ti ti-bell-ringing" style="font-size:56px;color:#FAF7F2;" aria-hidden="true"></i>
-        </div>
-        <div class="flex-1 p-4" style="background:var(--ic-straw-lt);">
-          <div class="text-xs font-bold mb-2" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</div>
-          <div id="atikaReminderZh" class="font-semibold leading-relaxed" style="font-size:15px;color:var(--ic-chocolate);"></div>
-          <div id="atikaReminderId" class="id-text text-sm leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- ═══ 聚焦卡：現在要做 ═══ -->
     <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
       <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
@@ -711,10 +697,24 @@
       <div id="atikaCalendarInfo" class="space-y-2 hidden mt-3"></div>
     </section>
 
+    <!-- ═══ 本日提醒（打卡下方）═══ -->
+    <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
+      <div class="flex items-stretch">
+        <div style="background:var(--ic-strawberry);padding:16px 18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-bell" style="font-size:52px;color:#FAF7F2;" aria-hidden="true"></i>
+        </div>
+        <div class="flex-1 p-4" style="background:var(--ic-straw-lt);">
+          <div class="text-xs font-bold mb-2" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</div>
+          <div id="atikaReminderZh" class="font-semibold leading-relaxed" style="font-size:15px;color:var(--ic-chocolate);"></div>
+          <div id="atikaReminderId" class="id-text text-sm leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ 卡片 1.5：今日菜單 ═══ -->
     <section id="atikaTodayMenu" class="hidden rounded-2xl border overflow-hidden" style="background:#FBF3E4;border-color:#DEC99A;">
       <button onclick="toggleTodayMenu()" class="w-full flex items-center justify-between px-4 py-3" style="background:#FBF3E4;border:none;text-align:left;cursor:pointer;">
-        <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日料理 / Masakan Hari Ini</h2>
+        <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 菜單 / Menu</h2>
         <i id="todayMenuChevron" class="ti ti-chevron-down" style="font-size:16px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
       </button>
       <div id="atikaTodayMenuBody" style="padding:6px 14px 14px;display:flex;flex-direction:column;gap:0;"></div>
@@ -725,15 +725,15 @@
 
       <!-- 標題列 + 新增按鈕 -->
       <div class="flex items-center justify-between px-4 pt-3 pb-2">
-        <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日工作 / Tugas Hari Ini</span>
-        <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增工作</button>
+        <span class="text-sm font-bold" style="color:var(--ic-chocolate);">工作 / Kerja</span>
+        <button onclick="openAddAdhocModal()" class="btn-sm-danger" style="font-size:14px;font-weight:600;height:38px;"><i class="ti ti-plus" style="font-size:13px;vertical-align:-1px;"></i> 新增工作</button>
       </div>
 
       <!-- Capsule tab bar -->
       <div class="px-4 pb-2">
         <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;">
-          <button id="atikaTabRoutine" onclick="switchAtikaTab('routine')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行工作</button>
-          <button id="atikaTabFlex" onclick="switchAtikaTab('flexible')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性工作</button>
+          <button id="atikaTabRoutine" onclick="switchAtikaTab('routine')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行</button>
+          <button id="atikaTabFlex" onclick="switchAtikaTab('flexible')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性</button>
         </div>
       </div>
 
@@ -751,7 +751,7 @@
       <div id="atikaFlexSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
         <div class="atika-time-hdr">
           <i class="ti ti-arrows-shuffle" style="font-size:14px;color:var(--ic-choc-mid);" aria-hidden="true"></i>
-          <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性工作 / Fleksibel</span>
+          <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性 / Fleksibel</span>
           <div class="atika-time-line"></div>
         </div>
         <div id="atikaFlexTasks" class="space-y-2 sortable-list"></div>
@@ -4652,19 +4652,18 @@ function renderTodayMenuCard(){
       const catColors = state.mealConfig?.ingCategoryColors||{};
       const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
       const dishRows = dishes.map(d=>{
-        const ingParts = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel=ing.nameId?` / ${ing.nameId}`:''; return `<span style="font-size:13px;padding:3px 8px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;">${ing.name}${idLabel}</span>`; }).filter(Boolean);
-        const ingNames = ingParts.join('<span style="font-size:13px;color:#A07040;font-weight:700;padding:0 2px;">＋</span>');
+        const ingParts = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel=ing.nameId?` / ${ing.nameId}`:''; return `<span style="font-size:15px;padding:3px 9px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;">${ing.name}${idLabel}</span>`; }).filter(Boolean);
+        const ingNames = ingParts.join('<span style="font-size:15px;color:#A07040;font-weight:700;padding:0 2px;">＋</span>');
         const name = d.dishName||'';
         const noteDisplay = d.noteId||d.note||'';
         const _atm = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-        const cookChips = _atm.map(m=>{ const idL=_cookIdMap[m]||''; return `<span style="font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;flex-shrink:0;background:#7A4020;color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
+        const cookChips = _atm.map(m=>{ const idL=_cookIdMap[m]||''; return `<span style="font-size:14px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:#7A4020;color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
         return `<div style="display:flex;align-items:flex-start;gap:7px;">
-          <span style="width:5px;height:5px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:8px;"></span>
-          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0;">
-            ${cookChips}
-            ${name?`<span style="font-size:14px;font-weight:600;color:#3D2010;">${name}</span>`:''}
-            ${ingNames}
-            ${noteDisplay?`<span style="font-size:13px;font-style:italic;color:#9A7A58;">${noteDisplay}</span>`:''}
+          <span style="width:6px;height:6px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:10px;"></span>
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
+            ${cookChips?`<div style="display:flex;gap:5px;flex-wrap:wrap;">${cookChips}</div>`:''}
+            ${name||ingParts.length?`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${name?`<span style="font-size:16px;font-weight:600;color:#3D2010;">${name}</span>`:''}${ingNames}</div>`:''}
+            ${noteDisplay?`<div><span style="font-size:15px;font-style:italic;color:#9A7A58;">${noteDisplay}</span></div>`:''}
           </div>
         </div>`;
       }).join('');
@@ -5126,9 +5125,27 @@ function renderTaskCard(t, opts={}){
   const primaryClass=lang==='id'?'id-text':'';
   const secondaryClass=lang==='id'?'':'id-text';
   const parityBadge = parityBadgeHtml(t, 'short');
-  // 本日工作 section（hideMode + hideLastDone）會隱藏冗餘標籤
   const showMode = !opts.hideMode;
   const showLastDone = !opts.hideLastDone;
+
+  // ── Atika 簡化模式 ──
+  if (opts.atikaMode){
+    return `
+    <div class="task-card ${done?'done':''} bg-white border border-gray-200 rounded-xl flex items-stretch min-w-0 overflow-hidden" data-tid="${t.id}">
+      <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:24px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:16px;" aria-hidden="true"></i></span>
+      <div class="flex-1 min-w-0 py-3 px-2 cursor-pointer" onclick="openTaskModal('${t.id}')">
+        <div class="task-title font-bold text-base leading-tight ${primaryClass}">${primary}</div>
+        ${secondary&&secondary!==primary?`<div class="${secondaryClass} text-sm leading-tight" style="color:#9A8A78;">${secondary}</div>`:''}
+      </div>
+      <button class="shrink-0 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform"
+        style="min-width:68px;background:${done?'#6A7840':'#F0E8DC'};color:${done?'#FAF7F2':'#A07040'};border:none;border-left:1px solid ${done?'#5A6830':'#DEC99A'};cursor:pointer;"
+        onclick="event.stopPropagation(); quickToggle('${t.id}',this)">
+        <i class="ti ti-check" style="font-size:28px;"></i>
+        <span style="font-size:12px;font-weight:700;">完成</span>
+      </button>
+    </div>`;
+  }
+
   return `
     <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}" data-tid="${t.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
@@ -5147,7 +5164,7 @@ function renderTaskCard(t, opts={}){
     </div>
   `;
 }
-function renderAdhocCard(a){
+function renderAdhocCard(a, opts={}){
   const lang=getCurrentLang();
   // 雙語相容：新版 a.textZh/a.textId；舊版 a.text 自動兼容
   const tZh=a.textZh || a.text || '';
@@ -5159,11 +5176,31 @@ function renderAdhocCard(a){
   const compStamp = a.completed && a.completedAt
     ? new Date(a.completedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
     : '';
+  const done = a.completed;
+
+  // ── Atika 簡化模式 ──
+  if (opts.atikaMode){
+    return `
+    <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl flex items-stretch min-w-0 overflow-hidden" data-aid="${a.id}">
+      <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:24px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:16px;" aria-hidden="true"></i></span>
+      <div class="flex-1 min-w-0 py-3 px-2">
+        <div class="task-title font-bold text-base leading-tight ${primaryClass}">${primary}</div>
+        ${secondary && secondary!==primary ? `<div class="${secondaryClass} text-sm leading-tight" style="color:#9A8A78;">${secondary}</div>` : ''}
+      </div>
+      <button class="shrink-0 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform"
+        style="min-width:68px;background:${done?'#6A7840':'#F0E8DC'};color:${done?'#FAF7F2':'#A07040'};border:none;border-left:1px solid ${done?'#5A6830':'#DEC99A'};cursor:pointer;"
+        onclick="quickToggleAdhoc('${a.id}',this)">
+        <i class="ti ti-check" style="font-size:28px;"></i>
+        <span style="font-size:12px;font-weight:700;">完成</span>
+      </button>
+    </div>`;
+  }
+
   return `
-    <div class="task-card stripe-adhoc ${a.completed?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" data-aid="${a.id}">
+    <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" data-aid="${a.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
-      <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${a.completed?'background:#6A7840;border-color:#6A7840;color:#FAF7F2':'border-color:#D0C4B0;'}"
-              onclick="quickToggleAdhoc('${a.id}',this)">${a.completed?'<i class="ti ti-check" style="font-size:16px;"></i>':''}</button>
+      <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${done?'background:#6A7840;border-color:#6A7840;color:#FAF7F2':'border-color:#D0C4B0;'}"
+              onclick="quickToggleAdhoc('${a.id}',this)">${done?'<i class="ti ti-check" style="font-size:16px;"></i>':''}</button>
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-1 flex-wrap">
           <span class="task-title font-bold text-base ${primaryClass} leading-tight">${primary}</span>
@@ -5171,7 +5208,7 @@ function renderAdhocCard(a){
         </div>
         ${secondary && secondary!==primary ? `<div class="${secondaryClass} text-sm text-gray-500 leading-tight">${secondary}</div>` : ''}
         <div class="text-xs text-gray-500 mt-1">${
-          a.completed
+          done
             ? `✓ 完成於 ${compStamp} · ${a.completedBy||a.by}`
             : `由 ${a.by} 新增`
         }</div>
@@ -5441,8 +5478,8 @@ function renderAtikaView(){
 
   // ── 時間分區分組函式 ──
   function getSlot(item){ return item.timeSlot || 'flexible'; }
-  function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a)).join(''); }
-  function slotHtml_tmpl(items){ return items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''); }
+  function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a,{atikaMode:true})).join(''); }
+  function slotHtml_tmpl(items){ return items.map(t=>renderTaskCard(t,{atikaMode:true})).join(''); }
 
   // 合併 incomplete 任務依 slot 分組
   const bySlot = { morning:[], afternoon:[], evening:[], flexible:[] };
@@ -5453,8 +5490,8 @@ function renderAtikaView(){
   function renderSlotItems(slotArr){
     if (!slotArr.length) return '';
     return slotArr.map(({_type, item})=>
-      _type==='adhoc' ? renderAdhocCard(item)
-      : renderTaskCard(item,{hideMode:true,hideLastDone:true})
+      _type==='adhoc' ? renderAdhocCard(item,{atikaMode:true})
+      : renderTaskCard(item,{atikaMode:true})
     ).join('');
   }
   function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
@@ -5489,9 +5526,9 @@ function renderAtikaView(){
 
   // ── 已完成區（折疊）──
   const allDoneItems = [
-    ...adDone.map(a=>renderAdhocCard(a)),
-    ...tdDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
-    ...fxDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})),
+    ...adDone.map(a=>renderAdhocCard(a,{atikaMode:true})),
+    ...tdDone.map(t=>renderTaskCard(t,{atikaMode:true})),
+    ...fxDone.map(t=>renderTaskCard(t,{atikaMode:true})),
   ];
   const doneOuter = document.getElementById('atikaDoneWrapOuter');
   const doneList  = document.getElementById('atikaDoneList');
@@ -5540,8 +5577,8 @@ function renderAtikaView(){
     const flexCount = (bySlot['flexible']||[]).length;
     const rb = document.getElementById('atikaTabRoutine');
     const fb = document.getElementById('atikaTabFlex');
-    if (rb) rb.innerHTML = routineCount > 0 ? `例行工作 <span style="color:#C4706A;font-size:15px;">(${routineCount})</span>` : '例行工作';
-    if (fb) fb.innerHTML = flexCount > 0 ? `彈性工作 <span style="color:#C4706A;font-size:15px;">(${flexCount})</span>` : '彈性工作';
+    if (rb) rb.innerHTML = routineCount > 0 ? `例行 <span style="color:#C4706A;font-size:15px;">(${routineCount})</span>` : '例行';
+    if (fb) fb.innerHTML = flexCount > 0 ? `彈性 <span style="color:#C4706A;font-size:15px;">(${flexCount})</span>` : '彈性';
   })();
   initSortable();
   _updateAtikaSupplyBadge();
@@ -8229,14 +8266,14 @@ function renderAtikaRestSchedules(){
   el.classList.remove('hidden');
   const lang = getCurrentLang();
   el.innerHTML = `
-    <div class="text-xs text-gray-600 mb-1">😴 今日休息時段 / Istirahat Hari Ini</div>
+    <div class="text-xs mb-1" style="color:var(--ic-caramel);opacity:0.6;">😴 今日休息時段 / Istirahat Hari Ini</div>
     <div class="flex flex-wrap gap-2">
       ${todayRests.map(rs => {
         const pri = lang==='id' ? rs.nameId : rs.nameZh;
         const sec = lang==='id' ? rs.nameZh : rs.nameId;
-        return `<div class="bg-blue-100 border border-blue-300 rounded-lg px-2 py-1 text-xs">
-          <span class="font-bold">${pri}</span><span class="text-gray-500 ml-1">${sec}</span>
-          <span class="text-blue-700 font-mono ml-1">${rs.startTime}-${rs.endTime}</span>
+        return `<div style="background:#EDD5AA33;border:1px solid #C4A06888;border-radius:8px;padding:4px 10px;font-size:12px;">
+          <span style="font-weight:600;color:var(--ic-caramel);">${pri}</span><span style="color:var(--ic-caramel);opacity:0.7;margin-left:4px;">${sec}</span>
+          <span style="color:var(--ic-caramel);font-family:monospace;margin-left:4px;opacity:0.9;">${rs.startTime}-${rs.endTime}</span>
         </div>`;
       }).join('')}
     </div>
