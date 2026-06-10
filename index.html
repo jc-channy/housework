@@ -4303,7 +4303,7 @@ function renderMenuCell(key, cell, isToday){
     </div>`;
   }
   if (cell.type==='skip'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:72px;border-radius:10px;background:#EDEBE7;border:0.5px solid #D0C8C0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:72px;width:100%;border-radius:10px;background:#EDEBE7;border:0.5px solid #D0C8C0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
       <span style="font-size:13px;font-weight:600;color:#6B5E52;">${cell.skipReason||'今天不煮'}</span>
     </div>`;
   }
@@ -4311,11 +4311,11 @@ function renderMenuCell(key, cell, isToday){
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.map((d, di)=>{
     const _dm = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-    const methodLabel = _dm.map(m=>`<span style="font-size:13px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 8px;line-height:1.5;">${m}</span>`).join(' ');
+    const methodLabel = _dm.map(m=>`<span style="font-size:15px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 9px;line-height:1.5;">${m}</span>`).join(' ');
     const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean);
-    const ingLine = ingNames.length ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;">${ingNames.join('<span style="color:#C67843;font-weight:800;">＋</span>')}</span>` : '';
-    const nameStr = d.dishName ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;">${d.dishName}</span>` : '';
-    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
+    const ingLine = ingNames.length ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${ingNames.join('<span style="color:#C67843;font-weight:800;">＋</span>')}</span>` : '';
+    const nameStr = d.dishName ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
+    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;padding-left:4px;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
     return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
       ${methodLabel?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${methodLabel}</div>`:''}
@@ -4326,7 +4326,7 @@ function renderMenuCell(key, cell, isToday){
   }).join('');
   const more = dishes.length>4 ? `<span style="font-size:12px;color:var(--ic-caramel);">＋${dishes.length-4} 道</span>` : '';
   const bg = isToday ? '#FFF9F2' : 'var(--ic-surface)';
-  return `<div onclick="openMenuCellModal('${key}')" style="border-radius:10px;background:${bg};${border}cursor:pointer;padding:7px 6px;display:flex;flex-direction:column;gap:6px;">
+  return `<div onclick="openMenuCellModal('${key}')" style="border-radius:10px;background:${bg};${border}cursor:pointer;padding:10px 10px;display:flex;flex-direction:column;gap:6px;">
     ${dishHtml||`<div style="display:flex;align-items:center;justify-content:center;min-height:58px;"><span style="font-size:22px;color:#C8B49A;">＋</span></div>`}
     ${more}
   </div>`;
