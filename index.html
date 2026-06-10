@@ -120,10 +120,6 @@
 
   @media (max-width: 480px) { .container-app { padding-left: 10px; padding-right: 10px; } }
 
-  body[data-layout-cols="1"] .layout-grid {
-    grid-template-columns: 1fr !important;
-  }
-
   /* 登入畫面 */
   body.pin-locked { overflow: hidden !important; position: fixed; width: 100%; height: 100%; touch-action: none; overscroll-behavior: none; }
   #loginScreen .pin-key, #loginScreen #pinClear, #loginScreen #pinBack {
@@ -816,8 +812,8 @@
         <div class="flex gap-1 backdrop-blur rounded-xl p-1 overflow-x-auto scrollbar-thin" id="mgrTabBar" style="background:rgba(239,232,216,0.6);">
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg tab-active whitespace-nowrap" data-tab="week"><i class="ti ti-home" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 首頁</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="menu"><i class="ti ti-chef-hat" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 菜單</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 工作</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 備品<span id="suppliesBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 工作</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤<span id="leaveBadge" class="ml-1"></span></button>
         </div>
         <div id="mgrTabFade" class="pointer-events-none absolute right-0 top-0 h-full w-10 rounded-r-xl transition-opacity duration-300" style="background:linear-gradient(to right, transparent, rgba(239,232,216,0.95));opacity:0;"></div>
@@ -2056,16 +2052,6 @@
     <p class="text-xs text-gray-500 mb-4">這些設定只套用在「此裝置」，不會同步到其他人。</p>
 
     <div class="mb-4">
-      <label class="block text-sm font-semibold mb-2">字體大小 / Ukuran Huruf</label>
-      <div class="grid grid-cols-4 gap-2">
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-xs" data-fs="14" onclick="setDeviceFontSize(14)">小</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-sm" data-fs="16" onclick="setDeviceFontSize(16)">中</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-base" data-fs="18" onclick="setDeviceFontSize(18)">大</button>
-        <button class="font-size-btn border border-gray-300 py-2 rounded-lg text-lg" data-fs="20" onclick="setDeviceFontSize(20)">特大</button>
-      </div>
-    </div>
-
-    <div class="mb-4">
       <label class="flex items-center gap-2 cursor-pointer select-none">
         <input type="checkbox" id="prefShowIdText" onchange="setDevicePrefShowIdText(this.checked)" class="w-4 h-4 rounded">
         <span class="text-sm font-semibold">顯示印尼文（雙語模式）</span>
@@ -2073,20 +2059,6 @@
       <p class="text-xs text-gray-400 mt-1">關閉後畫面僅顯示中文，此裝置獨立設定，不會同步。</p>
     </div>
 
-    <div class="mb-3" id="layoutColsSection">
-      <label class="block text-sm font-semibold mb-2">工作卡片欄數 / Kolom</label>
-      <p class="text-xs text-gray-400 mb-2">僅影響管理者視圖 / Hanya untuk tampilan manager</p>
-      <div class="grid grid-cols-2 gap-2">
-        <button class="layout-cols-btn border border-gray-300 py-3 rounded-lg" data-cols="1" onclick="setDeviceLayoutCols(1)">
-          <div class="text-2xl">▮</div>
-          <div class="text-xs">一欄（適合小手機）</div>
-        </button>
-        <button class="layout-cols-btn border border-gray-300 py-3 rounded-lg" data-cols="2" onclick="setDeviceLayoutCols(2)">
-          <div class="text-2xl">▮▮</div>
-          <div class="text-xs">兩欄（電腦/大手機）</div>
-        </button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -2731,7 +2703,7 @@ let state = {
   weekMenuSets: [],
   activeWeekMenuSetId: '',
   weekMenuCycleOffset: 0,
-  preferences: { fontSize: 18 },
+  preferences: {},
   catFilter: 'all',
   supplyCatFilter: 'all',
   selectedTask: null,
@@ -2770,7 +2742,7 @@ function load() {
       state.payrollReceipts = d.payrollReceipts || [];
       state.taskSkips = d.taskSkips || [];
       state.restSchedules = d.restSchedules || [];
-      state.preferences= d.preferences|| { fontSize: 18 };
+      state.preferences= d.preferences|| {};
       if (d.mealConfig) state.mealConfig = Object.assign({}, state.mealConfig, d.mealConfig);
       state.ingredients = d.ingredients || [];
       state.weekMenu = d.weekMenu || {};
@@ -3932,36 +3904,34 @@ function renderMenuWeekStrip(){
   const el = document.getElementById('menuWeekStrip');
   if (!el) return;
   const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled);
-  if (!meals.length){ el.innerHTML='<p style="font-size:12px;color:var(--ic-choc-mid);padding:8px 12px;">請先在「設定餐次」啟用至少一餐</p>'; return; }
+  if (!meals.length){ el.innerHTML='<p style="font-size:13px;color:var(--ic-choc-mid);padding:10px 14px;">請先在「基本設定」啟用至少一餐</p>'; return; }
   const todayDow = today().getDay();
-  const todayDate = today();
   const DOW_ORDER = [1,2,3,4,5,6,0];
-  const DOW_LBL = ['日','一','二','三','四','五','六'];
+  const DOW_ZH = ['日','一','二','三','四','五','六'];
+  const DOW_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const todayIdx = DOW_ORDER.indexOf(todayDow);
 
-  const thStyle = 'padding:8px 4px;text-align:center;font-size:17px;font-weight:600;color:var(--ic-chocolate);border-bottom:0.5px solid var(--ic-vanilla);';
+  const thStyle = 'padding:10px 4px;text-align:center;font-size:17px;font-weight:600;color:var(--ic-chocolate);border-bottom:1px solid var(--ic-vanilla);background:var(--ic-surface);';
   let html = `<div style="overflow-x:auto;width:100%;"><table style="width:100%;border-collapse:collapse;table-layout:fixed;">
     <thead><tr>
-      <th style="width:36px;${thStyle}"></th>
+      <th style="width:46px;${thStyle}"></th>
       ${meals.map(m=>`<th style="${thStyle}">${m.name}${m.mealTime?`<br><span style="font-size:12px;font-weight:400;color:var(--ic-choc-mid);">${m.mealTime}</span>`:''}</th>`).join('')}
     </tr></thead>
     <tbody>`;
 
   DOW_ORDER.forEach((dow, idx) => {
     const isToday = dow === todayDow;
-    const diff = idx - todayIdx;
-    const d = new Date(todayDate); d.setDate(d.getDate()+diff);
-    const dateNum = d.getDate();
     const rowBg = isToday ? 'background:rgba(198,134,66,0.05);' : '';
-    const dowColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-choc-mid)';
+    const dowColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-chocolate)';
+    const enColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-choc-mid)';
     html += `<tr style="${rowBg}border-bottom:0.5px solid var(--ic-vanilla);">
-      <td style="padding:5px 3px;text-align:center;vertical-align:middle;">
-        <div style="font-size:15px;color:${dowColor};font-weight:${isToday?700:400};">${DOW_LBL[dow]}</div>
-        <div style="font-size:17px;color:${dowColor};font-weight:${isToday?700:500};">${dateNum}</div>
+      <td style="padding:6px 2px;text-align:center;vertical-align:middle;">
+        <div style="font-size:17px;color:${dowColor};font-weight:${isToday?800:600};line-height:1.2;">${DOW_ZH[dow]}</div>
+        <div style="font-size:11px;color:${enColor};font-weight:${isToday?700:400};letter-spacing:.02em;">${DOW_EN[dow]}.</div>
       </td>`;
     meals.forEach(meal => {
       const key = getMenuKey(dow, meal.id);
-      html += `<td style="padding:4px;vertical-align:top;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
+      html += `<td style="padding:5px 4px;vertical-align:top;">${renderMenuCell(key, state.weekMenu[key], isToday)}</td>`;
     });
     html += `</tr>`;
   });
@@ -4081,7 +4051,7 @@ function renderMenuSetSelector(){
     : null;
   const iconBtnStyle = 'width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
   let html = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
-  html += `<span style="font-size:14px;font-weight:600;color:var(--ic-choc-mid);white-space:nowrap;flex-shrink:0;">套用模板</span>`;
+  html += `<span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;">菜單設計</span>`;
   html += sets.map(s => {
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
@@ -4097,22 +4067,22 @@ function renderMenuSetSelector(){
     const inactiveStyle = 'font-size:14px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
     return `<button onclick="switchWeekMenuSet('${safeId}')" ondblclick="event.stopPropagation();openEditWeekMenuSet('${safeId}')" title="單擊切換・雙擊編輯" style="${isActive?activeStyle:inactiveStyle}">${cycleDot}${s.name}${weekBadge}</button>`;
   }).join('');
-  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 12px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
+  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>`;
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
     html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
-      <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
+      <button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button>
     </div>`;
   }
   html += `</div>`;
   if (cycleSets.length >= 2 && thisWeekSet) {
-    const navBtn = 'border:none;background:var(--ic-surface);cursor:pointer;font-size:16px;color:var(--ic-choc-mid);padding:2px 7px;border-radius:7px;line-height:1.3;border:0.5px solid var(--ic-vanilla);';
-    const resetBtn = offset !== 0 ? `<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:12px;color:#B05050;padding:0 2px;white-space:nowrap;" title="回復自動">↺ 自動</button>` : '';
-    html += `<div style="display:flex;align-items:center;gap:6px;width:100%;margin-top:8px;padding:6px 10px;border-radius:10px;background:var(--ic-lemon);">
-      <i class="ti ti-rotate-clockwise" style="font-size:12px;color:#3A7055;flex-shrink:0;" aria-hidden="true"></i>
-      <span style="font-size:12px;color:var(--ic-choc-mid);flex-shrink:0;">循環・本週套用：</span>
+    const navBtn = 'border:none;background:var(--ic-surface);cursor:pointer;font-size:18px;color:var(--ic-choc-mid);padding:3px 10px;border-radius:8px;line-height:1.3;border:0.5px solid var(--ic-vanilla);';
+    const resetBtn = offset !== 0 ? `<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:13px;color:#B05050;padding:0 4px;white-space:nowrap;" title="回復自動">↺ 自動</button>` : '';
+    html += `<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--ic-lemon);">
+      <i class="ti ti-rotate-clockwise" style="font-size:15px;color:#3A7055;flex-shrink:0;" aria-hidden="true"></i>
+      <span style="font-size:14px;font-weight:600;color:var(--ic-choc-mid);flex-shrink:0;">循環・本週套用：</span>
       <button onclick="shiftCycleOffset(-1)" style="${navBtn}" title="上一組">‹</button>
-      <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;">${thisWeekSet.name}</span>
+      <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;">${thisWeekSet.name}</span>
       <button onclick="shiftCycleOffset(1)" style="${navBtn}" title="下一組">›</button>
       ${resetBtn}
     </div>`;
@@ -4279,30 +4249,38 @@ function renderMenuGrid(){
 function renderMenuCell(key, cell, isToday){
   const border = isToday ? 'border:1.5px solid var(--ic-caramel);' : 'border:0.5px solid var(--ic-vanilla);';
   if (!cell || cell.type==='empty'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:var(--ic-surface);${border}cursor:pointer;display:flex;align-items:center;justify-content:center;">
-      <span style="font-size:18px;color:var(--ic-vanilla);">＋</span>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:76px;border-radius:10px;background:var(--ic-surface);${border}cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:22px;color:#C8B49A;">＋</span>
     </div>`;
   }
   if (cell.type==='skip'){
-    return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:#F3F4F6;${border}cursor:pointer;padding:8px;display:flex;flex-direction:column;justify-content:center;gap:2px;">
-      <span style="font-size:13px;color:#9CA3AF;">✕ ${cell.skipReason||'不煮'}</span>
+    return `<div onclick="openMenuCellModal('${key}')" style="min-height:76px;border-radius:10px;background:#EEE9E3;${border}cursor:pointer;padding:8px;display:flex;align-items:center;justify-content:center;gap:5px;">
+      <i class="ti ti-x" style="font-size:15px;color:#6B5E52;flex-shrink:0;" aria-hidden="true"></i>
+      <span style="font-size:14px;font-weight:600;color:#4A3C30;">${cell.skipReason||'今天不煮'}</span>
     </div>`;
   }
-  // cook
+  // cook — Atika style
   const dishes = cell.dishes||[];
   const catColors = state.mealConfig?.ingCategoryColors||{};
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.slice(0,3).map(d=>{
     const _dm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
-    const methodChip = _dm.length ? `<span style="font-size:13px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:20px;">${_dm.join('＋')}</span>` : '';
+    const cookChips = _dm.map(m=>`<span style="font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;background:#7A4020;color:#FAF7F2;flex-shrink:0;">${m}</span>`).join('');
     const nameStr = d.dishName || '';
-    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:13px;padding:2px 6px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
-    return `<div style="display:flex;align-items:center;gap:4px;overflow:hidden;margin-bottom:5px;flex-wrap:wrap;">${methodChip}${nameStr?`<span style="font-size:15px;color:var(--ic-chocolate);overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
+    const ingTags = (d.ingredientIds||[]).slice(0,2).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:12px;padding:2px 5px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;flex-shrink:0;">${ing.name}</span>`; }).filter(Boolean).join('');
+    return `<div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:5px;">
+      <span style="width:5px;height:5px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:7px;"></span>
+      <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;">
+        ${cookChips?`<div style="display:flex;gap:3px;flex-wrap:wrap;">${cookChips}</div>`:''}
+        ${nameStr?`<span style="font-size:14px;font-weight:600;color:#3D2010;overflow:hidden;text-overflow:ellipsis;">${nameStr}</span>`:''}
+        ${ingTags?`<div style="display:flex;gap:3px;flex-wrap:wrap;">${ingTags}</div>`:''}
+      </div>
+    </div>`;
   }).join('');
-  const more = dishes.length>3 ? `<span style="font-size:12px;color:var(--ic-caramel);">+${dishes.length-3}</span>` : '';
-  return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:var(--ic-lemon);${border}cursor:pointer;padding:8px;">
+  const more = dishes.length>3 ? `<div style="font-size:12px;color:var(--ic-caramel);padding-left:10px;">+${dishes.length-3} 道</div>` : '';
+  return `<div onclick="openMenuCellModal('${key}')" style="min-height:76px;border-radius:10px;background:var(--ic-lemon);${border}cursor:pointer;padding:8px 7px;">
     ${dishHtml}${more}
-    ${!dishes.length?`<span style="font-size:14px;color:var(--ic-caramel);">＋</span>`:''}
+    ${!dishes.length?`<div style="display:flex;align-items:center;justify-content:center;height:60px;"><span style="font-size:22px;color:#C8B49A;">＋</span></div>`:''}
   </div>`;
 }
 
@@ -8621,12 +8599,6 @@ function applyDevicePrefIdText(){
   if (cb) cb.checked = show;
 }
 function openDevicePrefsModal(){
-  highlightFontSizeButton();
-  highlightLayoutColsButton();
-  // 欄數設定僅對管理者有效，Atika 隱藏
-  const isHelper = state.currentUser?.role === 'helper';
-  const colSection = document.getElementById('layoutColsSection');
-  if (colSection) colSection.style.display = isHelper ? 'none' : '';
   document.getElementById('devicePrefsModal').classList.remove('hidden');
 }
 function closeDevicePrefsModal(){
@@ -10335,73 +10307,18 @@ function renderSnapshotList(){
 }
 /* ===== 裝置本地設定（不上雲，僅存 localStorage） ===== */
 const DEVICE_PREFS_KEY = 'device_prefs_v1';
-function suggestLayoutColsByWidth(){
-  // 小於 720px 自動建議 1 欄（適合手機、直立平板），其餘 2 欄
-  try { return (window.innerWidth || 1024) < 720 ? 1 : 2; } catch(e){ return 2; }
-}
 function loadDevicePrefs(){
   try {
     const raw = localStorage.getItem(DEVICE_PREFS_KEY);
     if (raw) return JSON.parse(raw);
   } catch(e){}
-  // 首次：依視窗寬度自動建議
-  return { fontSize: 18, layoutCols: suggestLayoutColsByWidth() };
+  return {};
 }
 function saveDevicePrefs(p){
   try { localStorage.setItem(DEVICE_PREFS_KEY, JSON.stringify(p)); } catch(e){}
 }
 let devicePrefs = loadDevicePrefs();
-function applyDevicePrefs(){
-  applyFontSize(devicePrefs.fontSize || 18);
-  applyLayoutCols(devicePrefs.layoutCols || 2);
-}
-function applyFontSize(px){
-  document.documentElement.style.fontSize = px + 'px';
-}
-function applyLayoutCols(cols){
-  document.body.dataset.layoutCols = String(cols);
-}
-function setDeviceFontSize(px){
-  devicePrefs.fontSize = px;
-  applyFontSize(px);
-  saveDevicePrefs(devicePrefs);
-  highlightFontSizeButton();
-}
-function setDeviceLayoutCols(cols){
-  devicePrefs.layoutCols = cols;
-  applyLayoutCols(cols);
-  saveDevicePrefs(devicePrefs);
-  highlightLayoutColsButton();
-  // 重新渲染以套用 grid 變化
-  if (state.currentUser?.role==='manager') renderManagerView();
-  else if (state.currentUser?.role==='helper') renderAtikaView();
-}
-function highlightFontSizeButton(){
-  const cur = devicePrefs.fontSize || 18;
-  document.querySelectorAll('.font-size-btn').forEach(b=>{
-    if (parseInt(b.dataset.fs) === cur) {
-      b.classList.add('bg-blue-600','text-white','border-blue-600');
-      b.classList.remove('border');
-    } else {
-      b.classList.remove('bg-blue-600','text-white','border-blue-600');
-      b.classList.add('border');
-    }
-  });
-}
-function highlightLayoutColsButton(){
-  const cur = devicePrefs.layoutCols || 2;
-  document.querySelectorAll('.layout-cols-btn').forEach(b=>{
-    if (parseInt(b.dataset.cols) === cur){
-      b.classList.add('bg-blue-600','text-white','border-blue-600');
-      b.classList.remove('border');
-    } else {
-      b.classList.remove('bg-blue-600','text-white','border-blue-600');
-      b.classList.add('border');
-    }
-  });
-}
-// 舊呼叫相容
-function setFontSize(px){ setDeviceFontSize(px); }
+function applyDevicePrefs(){}
 function closeSettingsModal(){ document.getElementById('settingsModal').classList.add('hidden'); }
 function renderUserList(){
   document.getElementById('userList').innerHTML=state.users.map(u=>`
