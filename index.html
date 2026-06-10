@@ -1152,25 +1152,23 @@
 
     <!-- 出勤與薪資（緊湊版） -->
     <div id="tab-payroll" class="tab-content hidden">
-      <!-- 標題 + 操作 + 週期切換併為一行 -->
-      <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
-        <div class="flex items-center gap-2 flex-wrap">
-          <h3 class="font-bold text-base"><i class="ti ti-cash" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 出勤與薪資</h3>
-          <div class="flex items-center text-xs bg-white border border-gray-200 rounded-lg">
-            <button onclick="payrollPrevPeriod()" class="px-2 py-1 hover:bg-gray-100">‹</button>
-            <div class="text-center px-2 leading-tight">
-              <div id="payrollPeriodTitle" class="font-bold"></div>
-              <div id="payrollPeriodRange" class="text-[10px] text-gray-500"></div>
-            </div>
-            <button onclick="payrollNextPeriod()" class="px-2 py-1 hover:bg-gray-100">›</button>
-            <button onclick="payrollCurrentPeriod()" class="text-[10px] text-blue-600 underline px-2 py-1">當期</button>
-          </div>
+      <!-- 標題列 + 操作按鈕 -->
+      <div class="flex items-center justify-between mb-2 gap-2">
+        <h3 class="font-bold text-base"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤與薪資</h3>
+        <div class="flex gap-1.5">
+          <button onclick="printPayroll()" class="btn-sm-secondary flex items-center gap-1"><i class="ti ti-printer" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i><span>列印</span></button>
+          <button onclick="openPayrollSettings()" class="btn-sm-secondary flex items-center gap-1"><i class="ti ti-settings" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i><span>基本設定</span></button>
         </div>
-        <div class="flex gap-1">
-          <button onclick="openAddLeaveForAtika()" class="btn-sm-primary">＋ 代申請</button>
-          <button onclick="printPayroll()" class="btn-sm-secondary"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
-          <button onclick="openPayrollSettings()" class="btn-sm-secondary"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      </div>
+      <!-- 週期切換（獨立一行） -->
+      <div class="flex items-center bg-white border border-gray-200 rounded-xl mb-3" style="overflow:hidden;">
+        <button onclick="payrollPrevPeriod()" class="px-3 py-2 text-lg hover:bg-gray-100 font-bold" style="color:var(--ic-chocolate);">‹</button>
+        <div class="flex-1 text-center py-2 leading-tight">
+          <div id="payrollPeriodTitle" class="font-bold text-sm" style="color:var(--ic-chocolate);"></div>
+          <div id="payrollPeriodRange" class="text-xs" style="color:var(--ic-choc-mid);margin-top:1px;"></div>
         </div>
+        <button onclick="payrollNextPeriod()" class="px-3 py-2 text-lg hover:bg-gray-100 font-bold" style="color:var(--ic-chocolate);">›</button>
+        <button onclick="payrollCurrentPeriod()" class="text-xs font-semibold px-3 py-2 border-l border-gray-200" style="color:var(--ic-caramel-dk);text-decoration:underline;">當期</button>
       </div>
 
       <!-- 摘要（緊湊一行） -->
@@ -1186,25 +1184,28 @@
 
       <!-- 詳情區（全部 details 摺疊） -->
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
-        <summary class="cursor-pointer px-3 py-2 text-sm font-semibold flex items-center justify-between">
-          <span class="flex items-center gap-1.5"><i class="ti ti-receipt" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 額外項目 / Tambahan</span>
+        <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between" style="font-size:15px;">
+          <span class="flex items-center gap-1.5"><i class="ti ti-receipt" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 額外項目 / Tambahan</span>
           <button onclick="event.preventDefault(); event.stopPropagation(); openAddAdjustment();" class="btn-sm-primary">＋ 新增</button>
         </summary>
         <div id="payrollAdjList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
-        <summary class="cursor-pointer px-3 py-2 text-sm font-semibold"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 薪資簽收 / Tanda Terima</summary>
+        <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-pencil-plus" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 薪資簽收 / Tanda Terima</summary>
         <div id="payrollReceiptBox" class="px-3 pb-3"></div>
       </details>
 
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
-        <summary class="cursor-pointer px-3 py-2 text-sm font-semibold"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 已審核請假紀錄 <span id="leaveHistoryCount" class="text-xs text-gray-400"></span></summary>
+        <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between">
+          <span class="flex items-center gap-1.5" style="font-size:15px;"><i class="ti ti-calendar-stats" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 請假紀錄 <span id="leaveHistoryCount" class="text-sm font-bold" style="color:#C4706A;"></span></span>
+          <button onclick="event.preventDefault();event.stopPropagation();openAddLeaveForAtika();" class="btn-sm-primary flex items-center gap-1"><i class="ti ti-plus" style="font-size:14px;vertical-align:-1px;" aria-hidden="true"></i> 新增請假</button>
+        </summary>
         <div id="leaveHistoryList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
-        <summary class="cursor-pointer px-3 py-2 text-sm font-semibold"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 當期出勤明細</summary>
+        <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-calendar-event" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 當期出勤明細</summary>
         <div id="payrollDayList" class="divide-y divide-gray-100 text-sm max-h-96 overflow-y-auto"></div>
       </details>
     </div>
@@ -6700,14 +6701,14 @@ function renderPayrollTab(){
     <div class="rounded-2xl p-4 mb-3" style="background:var(--ic-choc-dk);color:var(--ic-lemon);">
       <div class="text-xs mb-0.5" style="color:var(--ic-vanilla);opacity:0.7;">預估實領薪資</div>
       <div class="text-4xl font-black tabular-nums tracking-tight mb-3">${fmt$(p.netSalary)}</div>
-      <div class="flex flex-wrap gap-1.5">
-        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.12);color:var(--ic-lemon);">底薪 ${fmt$(p.baseSalary)}</span>
-        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.12);color:var(--ic-lemon);">日薪 ${fmt$(p.dailyRate)}</span>
-        <span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(107,175,107,0.3);color:#B7F0B7;">出勤 ${p.actualWorkdays}/${p.scheduledWorkdays} 天</span>
-        ${p.leavePay?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(229,100,90,0.3);color:#FFCCC9;">請假 -${p.leavePay.toLocaleString()} (${p.leaveDays}日)</span>`:''}
-        ${p.overtimePay?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(107,175,107,0.3);color:#B7F0B7;">加班 +${p.overtimePay.toLocaleString()} (${p.overtimeDays}日)</span>`:''}
-        ${p.adjAdd?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(100,160,220,0.3);color:#CCE8FF;">加項 +${p.adjAdd.toLocaleString()}</span>`:''}
-        ${p.adjDeduct?`<span class="text-[11px] px-2 py-0.5 rounded-full" style="background:rgba(229,100,90,0.3);color:#FFCCC9;">扣項 -${p.adjDeduct.toLocaleString()}</span>`:''}
+      <div class="flex flex-wrap gap-2">
+        <span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,0.12);color:var(--ic-lemon);font-weight:600;">底薪 ${fmt$(p.baseSalary)}</span>
+        <span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,0.12);color:var(--ic-lemon);font-weight:600;">日薪 ${fmt$(p.dailyRate)}</span>
+        <span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(107,175,107,0.3);color:#B7F0B7;font-weight:600;">出勤 ${p.actualWorkdays}/${p.scheduledWorkdays} 天</span>
+        ${p.leavePay?`<span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(229,100,90,0.3);color:#FFCCC9;font-weight:600;">請假 -${p.leavePay.toLocaleString()} (${p.leaveDays}日)</span>`:''}
+        ${p.overtimePay?`<span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(107,175,107,0.3);color:#B7F0B7;font-weight:600;">加班 +${p.overtimePay.toLocaleString()} (${p.overtimeDays}日)</span>`:''}
+        ${p.adjAdd?`<span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(100,160,220,0.3);color:#CCE8FF;font-weight:600;">加項 +${p.adjAdd.toLocaleString()}</span>`:''}
+        ${p.adjDeduct?`<span style="font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(229,100,90,0.3);color:#FFCCC9;font-weight:600;">扣項 -${p.adjDeduct.toLocaleString()}</span>`:''}
       </div>
     </div>
   `;
@@ -6750,23 +6751,23 @@ function renderPayrollTab(){
       }
       const [,,dd2] = d.dateStr.split('-');
       const ring = isToday ? 'outline:2.5px solid var(--ic-caramel-dk);outline-offset:1px;' : '';
-      return `<div title="${d.dateStr}" style="display:flex;flex-direction:column;align-items:center;gap:1px;">
-        <div style="width:30px;height:30px;border-radius:8px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${txtColor};">${label}</div>
-        <div style="font-size:9px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
+      return `<div title="${d.dateStr}" style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <div style="width:36px;height:36px;border-radius:9px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${txtColor};">${label}</div>
+        <div style="font-size:11px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
       </div>`;
     }).join('');
     const [yy3,mm3] = days[0].dateStr.split('-');
     hm.innerHTML = `
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold" style="color:var(--ic-chocolate);">出勤日曆</span>
-        <div class="flex items-center gap-2 text-[10px]" style="color:var(--ic-choc-mid);">
-          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--ic-caramel);display:inline-block;"></span>出勤</span>
-          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#E5ADA8;display:inline-block;"></span>請假</span>
-          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#D8D7B2;display:inline-block;"></span>例休</span>
-          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:10px;height:10px;border-radius:3px;background:#EDE8E0;display:inline-block;"></span>未打卡</span>
+        <span class="text-sm font-bold" style="color:var(--ic-chocolate);">出勤日曆</span>
+        <div class="flex items-center gap-3" style="color:var(--ic-choc-mid);font-size:12px;">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--ic-caramel);display:inline-block;"></span>出勤</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:#E5ADA8;display:inline-block;"></span>請假</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:#D8D7B2;display:inline-block;"></span>例休</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:#EDE8E0;display:inline-block;"></span>未打卡</span>
         </div>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;">${cells}</div>`;
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;">${cells}</div>`;
   })();
   // 額外項目清單
   renderAdjustments(p);
@@ -6925,7 +6926,7 @@ function renderLeaveLists(viewDate){
       </div>
     </div>
   `).join('') : '<div class="text-xs text-gray-400 italic">無待審核</div>';
-  document.getElementById('leaveHistoryCount').textContent = `(${inPeriod.length})`;
+  document.getElementById('leaveHistoryCount').textContent = inPeriod.length > 0 ? `(${inPeriod.length})` : '';
   const todayStr = ymd(today());
   document.getElementById('leaveHistoryList').innerHTML = inPeriod.length ? inPeriod.map(r=>{
     const stColor = r.status==='approved'?'text-green-700 bg-green-50 border-green-200':'text-gray-600 bg-gray-50 border-gray-200';
@@ -6963,12 +6964,12 @@ function renderLeaveLists(viewDate){
   if (badge){
     const unsignedCount = state.leaveRequests.filter(r=>r.status==='approved' && !r.signedFormImg).length;
     if (pending.length){
-      badge.textContent = `(${pending.length})`;
+      badge.textContent = pending.length;
       badge.className='ml-1 inline-block text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full';badge.style.background='var(--ic-strawberry)';
       badge.title = `${pending.length} 筆待審核`;
     } else if (unsignedCount){
-      badge.textContent = `待簽 ${unsignedCount}`;
-      badge.className='ml-1 inline-block text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full';badge.style.background='var(--ic-caramel-dk)';
+      badge.textContent = unsignedCount;
+      badge.className='ml-1 inline-block text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full';badge.style.background='var(--ic-strawberry)';
       badge.title = `${unsignedCount} 筆已批准但未上傳簽名單`;
     } else {
       badge.textContent=''; badge.className='ml-1'; badge.style.background='';
