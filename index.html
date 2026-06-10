@@ -1064,8 +1064,8 @@
       <!-- 待購買 -->
       <div class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:6px;"><i class="ti ti-shopping-bag" style="font-size:16px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
-          <span id="cntReported" class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:#FAE8E8;color:#B84040;"></span>
+          <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
+          <span id="cntReported" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FAE8E8;color:#B84040;"></span>
         </div>
         <div id="suppliesReported"></div>
       </div>
@@ -1073,8 +1073,8 @@
       <!-- 已購買待收納 -->
       <div class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:6px;"><i class="ti ti-shopping-cart" style="font-size:16px;" aria-hidden="true"></i> 已購買・待收納</span>
-          <span id="cntBought" class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:#FFF3DC;color:#905820;"></span>
+          <span style="font-size:15px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
+          <span id="cntBought" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FFF3DC;color:#905820;"></span>
         </div>
         <div id="suppliesBought"></div>
       </div>
@@ -1082,10 +1082,10 @@
       <!-- 暫不補充（折疊） -->
       <details class="mb-2 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <summary class="flex items-center justify-between px-4 py-3 cursor-pointer" style="list-style:none;">
-          <span style="font-size:13px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:6px;"><i class="ti ti-player-pause" style="font-size:16px;" aria-hidden="true"></i> 暫不補充</span>
+          <span style="font-size:15px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
           <span style="display:flex;align-items:center;gap:6px;">
-            <span id="cntPaused" class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:#F0EDE8;color:#7A7060;"></span>
-            <i class="ti ti-chevron-down" style="font-size:14px;color:#B0A090;" aria-hidden="true"></i>
+            <span id="cntPaused" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#F0EDE8;color:#7A7060;"></span>
+            <i class="ti ti-chevron-down" style="font-size:16px;color:#B0A090;" aria-hidden="true"></i>
           </span>
         </summary>
         <div style="border-top:1px solid #F0E8DC;"><div id="suppliesPaused"></div></div>
@@ -1094,8 +1094,8 @@
       <!-- 庫存正常 -->
       <div class="rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:13px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:6px;"><i class="ti ti-circle-check" style="font-size:16px;" aria-hidden="true"></i> 庫存正常</span>
-          <span id="cntOk" class="text-xs font-bold px-2 py-0.5 rounded-full" style="background:#EAF3E0;color:#3A6820;"></span>
+          <span style="font-size:15px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 庫存正常</span>
+          <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
         </div>
         <div id="suppliesOk"></div>
       </div>
@@ -9081,14 +9081,17 @@ function renderSuppliesManager(){
   document.getElementById('suppliesOk').innerHTML=ok.length
     ? ok.map(s=>{
         const cat=getSupplyCat(s.catId);
-        return `<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid #F5EDE4;gap:10px;">
+        return `<div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid #F5EDE4;gap:12px;">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:600;color:#2A1A08;">${s.nameZh} <span style="font-size:11px;color:#B0A090;font-weight:400;">${s.nameId}</span></div>
-            <span style="font-size:11px;padding:2px 7px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-chocolate);font-weight:600;">${cat.nameZh}</span>
+            <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:15px;font-weight:700;color:#2A1A08;">${s.nameZh}</span>
+              <span style="font-size:12px;color:#B0A090;">${s.nameId}</span>
+            </div>
+            <span style="font-size:12px;padding:3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-chocolate);font-weight:600;margin-top:5px;display:inline-block;">${cat.nameZh}</span>
           </div>
-          <div style="display:flex;gap:4px;">
-            <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;" title="歷史"><i class="ti ti-history" style="font-size:12px;vertical-align:-1px;"></i></button>
-            <button onclick="openEditSupplyModal('${s.id}')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;" title="編輯"><i class="ti ti-pencil" style="font-size:12px;vertical-align:-1px;"></i></button>
+          <div style="display:flex;gap:5px;flex-shrink:0;">
+            <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="歷史"><i class="ti ti-history" style="font-size:15px;vertical-align:-2px;"></i></button>
+            <button onclick="openEditSupplyModal('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="編輯"><i class="ti ti-pencil" style="font-size:15px;vertical-align:-2px;"></i></button>
           </div>
         </div>`;
       }).join('')
@@ -9099,47 +9102,47 @@ function renderManagerSupplyCard(s, group){
   const hdAt=s.handledAt?new Date(s.handledAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
   const cat=getSupplyCat(s.catId);
   const reportPillColor={half:'#FFF3DC;color:#905820',third:'#FFE8D0;color:#A04010',low:'#FAE8E8;color:#B84040',out:'#2A1A08;color:#FFFFFF'};
-  const statusPill=s.reportStatus?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:${(reportPillColor[s.reportStatus]||'#EEE;color:#555').split(';color:')[0]};color:${(reportPillColor[s.reportStatus]||'#EEE;color:#555').split(';color:')[1]};">${REPORT_LABEL[s.reportStatus]}</span>`:'';
+  const statusPill=s.reportStatus?`<span style="font-size:12px;padding:3px 9px;border-radius:99px;background:${(reportPillColor[s.reportStatus]||'#EEE;color:#555').split(';color:')[0]};color:${(reportPillColor[s.reportStatus]||'#EEE;color:#555').split(';color:')[1]};">${REPORT_LABEL[s.reportStatus]}</span>`:'';
   let actions='';
   if (group==='reported'){
-    actions=`<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="font-size:12px;white-space:nowrap;"><i class="ti ti-shopping-cart" style="font-size:12px;vertical-align:-1px;"></i> 買了</button>
-      <div style="display:flex;gap:4px;">
-        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;"></i></button>
-        <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:12px;vertical-align:-1px;"></i></button>
-        <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;" title="歷史"><i class="ti ti-history" style="font-size:12px;vertical-align:-1px;"></i></button>
+    actions=`<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="font-size:13px;white-space:nowrap;padding:0 14px;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>買了</button>
+      <div style="display:flex;gap:5px;">
+        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;"></i></button>
+        <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 10px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:15px;vertical-align:-2px;"></i></button>
+        <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="歷史"><i class="ti ti-history" style="font-size:15px;vertical-align:-2px;"></i></button>
       </div>
     </div>`;
   } else if (group==='bought'){
-    actions=`<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="font-size:12px;white-space:nowrap;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;"></i> 補好了</button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="font-size:11px;padding:3px 8px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:12px;vertical-align:-1px;"></i> 撤銷</button>
+    actions=`<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="font-size:13px;white-space:nowrap;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>補好了</button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="font-size:13px;"><i class="ti ti-arrow-back-up" style="font-size:14px;vertical-align:-2px;margin-right:3px;"></i>撤銷</button>
     </div>`;
   } else if (group==='paused'){
-    actions=`<div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;">
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="font-size:12px;white-space:nowrap;"><i class="ti ti-shopping-cart" style="font-size:12px;vertical-align:-1px;"></i> 買了</button>
-      <div style="display:flex;gap:4px;">
-        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;"></i></button>
-        <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="font-size:11px;padding:3px 7px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:12px;vertical-align:-1px;"></i></button>
+    actions=`<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="font-size:13px;white-space:nowrap;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;"></i>買了</button>
+      <div style="display:flex;gap:5px;">
+        <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;"></i></button>
+        <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:15px;vertical-align:-2px;"></i></button>
       </div>
     </div>`;
   }
   return `
-    <div style="display:flex;align-items:center;padding:11px 14px;border-bottom:1px solid #F5EDE4;gap:10px;">
+    <div style="display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid #F5EDE4;gap:12px;">
       <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-          <span style="font-size:13px;font-weight:700;color:#2A1A08;">${s.nameZh}</span>
-          <span style="font-size:11px;color:#B0A090;">${s.nameId}</span>
+        <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:15px;font-weight:700;color:#2A1A08;">${s.nameZh}</span>
+          <span style="font-size:12px;color:#B0A090;">${s.nameId}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;">
-          <span style="font-size:11px;padding:2px 7px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-chocolate);font-weight:600;">${cat.nameZh}</span>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap;">
+          <span style="font-size:12px;padding:3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-chocolate);font-weight:600;">${cat.nameZh}</span>
           ${statusPill}
         </div>
-        ${s.notes?`<div style="font-size:11px;color:#9A8878;margin-top:2px;font-style:italic;">${s.notes}</div>`:''}
-        ${repAt?`<div style="font-size:11px;color:#A08070;margin-top:2px;"><i class="ti ti-clock" style="font-size:10px;vertical-align:-1px;" aria-hidden="true"></i> ${s.reportedBy} 回報 · ${repAt}</div>`:''}
-        ${s.handleStatus&&hdAt?`<div style="font-size:11px;color:#7070A0;margin-top:2px;">${s.handledBy} · ${hdAt}</div>`:''}
+        ${s.notes?`<div style="font-size:12px;color:#9A8878;margin-top:3px;font-style:italic;">${s.notes}</div>`:''}
+        ${repAt?`<div style="font-size:12px;color:#A08070;margin-top:3px;"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${s.reportedBy} 回報 · ${repAt}</div>`:''}
+        ${s.handleStatus&&hdAt?`<div style="font-size:12px;color:#7070A0;margin-top:3px;">${s.handledBy} · ${hdAt}</div>`:''}
       </div>
-      <div style="display:flex;gap:5px;shrink:0;">${actions}</div>
+      <div style="display:flex;flex-shrink:0;">${actions}</div>
     </div>
   `;
 }
