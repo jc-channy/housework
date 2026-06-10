@@ -359,7 +359,7 @@
     display: none; position: absolute; right: 0; top: calc(100% + 6px);
     background: var(--ic-surface); border: 1px solid var(--ic-vanilla);
     border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    min-width: 160px; z-index: 200; overflow: hidden;
+    min-width: 190px; z-index: 200; overflow: hidden;
   }
   .hdr-dropdown.open { display: block; }
   .hdr-dropdown button {
@@ -661,28 +661,6 @@
       </div>
     </div>
 
-    <!-- ═══ Hero 進度環 ═══ -->
-    <div id="atikaHeroCard" class="rounded-2xl p-4" style="background:var(--ic-choc-dk);">
-      <div class="flex items-center gap-4">
-        <div style="position:relative;width:68px;height:68px;flex-shrink:0;">
-          <svg width="68" height="68" viewBox="0 0 68 68" aria-hidden="true">
-            <circle cx="34" cy="34" r="27" fill="none" stroke="#725C3F" stroke-width="5.5"/>
-            <circle id="atikaRingFill" cx="34" cy="34" r="27" fill="none" stroke="#D0A77B" stroke-width="5.5"
-              stroke-dasharray="169.6" stroke-dashoffset="169.6" stroke-linecap="round"
-              transform="rotate(-90 34 34)" style="transition:stroke-dashoffset 0.75s ease;"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-            <span id="atikaRingPct" style="font-size:13px;font-weight:800;color:var(--ic-caramel);"></span>
-          </div>
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div id="atikaHeroGreet" style="font-size:11px;color:var(--ic-caramel);opacity:0.85;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgLabel" style="font-size:15px;font-weight:800;color:var(--ic-lemon);line-height:1.3;margin-bottom:3px;"></div>
-          <div id="atikaHeroProgSub" style="font-size:11px;color:var(--ic-vanilla);opacity:0.7;"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- ═══ 聚焦卡：現在要做 ═══ -->
     <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
       <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
@@ -698,18 +676,18 @@
     </div>
 
     <!-- ═══ 卡片 1：出勤 ═══ -->
-    <section id="atikaPunchSection" class="rounded-2xl p-4 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+    <section id="atikaPunchSection" class="rounded-2xl p-4" style="background:var(--ic-choc-dk);border:none;">
       <!-- 標題行（常駐） -->
       <div class="flex items-center justify-between" id="punchHeaderRow">
         <div class="flex items-center gap-2 flex-1 min-w-0">
           <div>
-            <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);">Absensi Hari Ini</h2>
+            <h2 class="font-bold text-sm" style="color:var(--ic-caramel);">Absensi Hari Ini</h2>
           </div>
           <!-- 縮合時的狀態摘要 -->
           <div id="punchCompactStatus" class="hidden flex-1 min-w-0"></div>
         </div>
         <div class="flex items-center gap-2">
-          <span id="punchSummary" class="text-xs" style="color:var(--ic-choc-mid);"></span>
+          <span id="punchSummary" class="text-xs" style="color:var(--ic-caramel);"></span>
           <button id="punchExpandBtn" onclick="togglePunchSection()" class="rounded-full w-7 h-7 flex items-center justify-center hidden" style="background:var(--ic-lemon);color:var(--ic-chocolate);" aria-label="展開/收合出勤">
             <i class="ti ti-chevron-down" style="font-size:14px;"></i>
           </button>
@@ -771,7 +749,6 @@
           <i class="ti ti-arrows-shuffle" style="font-size:14px;color:var(--ic-choc-mid);" aria-hidden="true"></i>
           <span class="atika-time-label" style="color:var(--ic-choc-mid);">彈性工作 / Fleksibel</span>
           <div class="atika-time-line"></div>
-          <span class="atika-time-badge" style="color:var(--ic-choc-mid);background:var(--ic-vanilla);">空檔安排</span>
         </div>
         <div id="atikaFlexTasks" class="space-y-2 sortable-list"></div>
       </div>
@@ -782,7 +759,6 @@
           <i class="ti ti-sunrise" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">早上 / Pagi</span>
           <div class="atika-time-line"></div>
-          <span id="atikaMorningBadge" class="atika-time-badge"></span>
         </div>
         <div id="atikaMorningTasks" class="space-y-2 sortable-list"></div>
       </div>
@@ -793,7 +769,6 @@
           <i class="ti ti-sun" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">下午 / Siang</span>
           <div class="atika-time-line"></div>
-          <span id="atikaAfternoonBadge" class="atika-time-badge"></span>
         </div>
         <div id="atikaAfternoonTasks" class="space-y-2 sortable-list"></div>
       </div>
@@ -804,7 +779,6 @@
           <i class="ti ti-moon" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i>
           <span class="atika-time-label">晚上 / Malam</span>
           <div class="atika-time-line"></div>
-          <span id="atikaEveningBadge" class="atika-time-badge"></span>
         </div>
         <div id="atikaEveningTasks" class="space-y-2 sortable-list"></div>
       </div>
@@ -1420,21 +1394,9 @@
         <input id="adhocId" type="text" data-lang="id" data-pair="adhocZh" class="id-text w-full border border-gray-300 rounded-lg p-2 text-sm bi-input" placeholder="Misalnya: Mengelap jendela">
       </div>
     </div>
-    <div class="flex gap-2">
-      <div class="flex-1">
-        <label class="block text-sm font-semibold mb-1">時間分段 / Waktu</label>
-        <select id="adhocTimeSlot" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-          <option value="flexible">彈性（空檔安排）</option>
-          <option value="morning">早上 Pagi</option>
-          <option value="afternoon">下午 Siang</option>
-          <option value="evening">晚上 Malam</option>
-        </select>
-      </div>
-      <div class="w-28">
-        <label class="block text-sm font-semibold mb-1">截止時間</label>
-        <input id="adhocDeadline" type="time" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
-      </div>
-    </div>
+    <!-- adhocTimeSlot + adhocDeadline hidden for Atika simplicity; defaults to flexible -->
+    <input id="adhocTimeSlot" type="hidden" value="flexible">
+    <input id="adhocDeadline" type="hidden" value="">
     <p class="text-xs text-gray-500 mt-2 mb-3">💡 輸入完按 Tab 或點下一格，會自動翻譯</p>
     <button onclick="saveAdhoc()" class="w-full text-white py-3 rounded-xl font-semibold" style="background:#C4706A;">加入今天 / Tambah</button>
   </div>
@@ -4684,23 +4646,23 @@ function renderTodayMenuCard(){
       html += `<div style="padding:10px 0;border-top:0.5px solid #EDE0CC;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
-          <span style="font-size:13px;font-weight:700;color:var(--ic-caramel);">${meal.name}</span>
-          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:#F0E4D0;color:#7A5530;"><i class='ti ti-clock' style='font-size:11px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
+          <span style="font-size:15px;font-weight:700;color:var(--ic-caramel);">${meal.name}</span>
+          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:15px;font-weight:600;padding:3px 10px;border-radius:99px;background:#F0E4D0;color:#7A5530;"><i class='ti ti-clock' style='font-size:13px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px;">
         ${dishes.map(d=>{
-          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span style="font-size:14px;padding:3px 8px;border-radius:4px;background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
+          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span style="font-size:14px;padding:3px 8px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;">${ing.name}${idLabel}</span>`; }).join('');
           const name = d.dishName || '';
           const noteDisplay = d.noteId || d.note || '';
           const _atm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
-          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span style="font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:var(--ic-caramel);color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
+          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span style="font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:#7A4020;color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
           return `<div style="display:flex;align-items:flex-start;gap:8px;">
             <span style="width:6px;height:6px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:7px;"></span>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;">
               ${cookChips}
               ${name?`<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);">${name}</span>`:''}
               ${ingNames}
-              ${noteDisplay?`<span style="font-size:12px;font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</span>`:''}
+              ${noteDisplay?`<span style="font-size:14px;font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</span>`:''}
             </div>
           </div>`;
         }).join('')}
@@ -5562,6 +5524,15 @@ function renderAtikaView(){
     // 非慶祝狀態：各 slot 的顯隱已由上方 slotHasAny 決定，不在此重設
   }
 
+  // ── Tab 待執行數字 ──
+  (function(){
+    const routineCount = ['morning','afternoon','evening'].reduce((s,slot)=>s+(bySlot[slot]||[]).length,0);
+    const flexCount = (bySlot['flexible']||[]).length;
+    const rb = document.getElementById('atikaTabRoutine');
+    const fb = document.getElementById('atikaTabFlex');
+    if (rb) rb.textContent = routineCount > 0 ? `例行工作（${routineCount}）` : '例行工作';
+    if (fb) fb.textContent = flexCount > 0 ? `彈性工作（${flexCount}）` : '彈性工作';
+  })();
   initSortable();
   _updateAtikaSupplyBadge();
   applyAtikaTab();
@@ -6244,8 +6215,8 @@ function renderPunchSection(){
     mainBtnHTML = `
       <div class="flex flex-col items-center justify-center py-5 gap-1">
         <i class="ti ti-circle-check" style="font-size:48px;color:var(--ic-mint);line-height:1;" aria-hidden="true"></i>
-        <div class="font-bold text-base mt-1" style="color:var(--ic-chocolate)">今日出勤完成</div>
-        <div class="text-xs id-text" style="color:var(--ic-choc-mid)">Absensi selesai hari ini</div>
+        <div class="font-bold text-base mt-1" style="color:var(--ic-lemon)">今日出勤完成</div>
+        <div class="text-xs id-text" style="color:var(--ic-vanilla)">Absensi selesai hari ini</div>
       </div>`;
   } else {
     const isFirst = nextStep.id === 'work_start';
@@ -6333,7 +6304,7 @@ function renderPunchSection(){
     if (allDone) {
       compactHTML = `<span class="text-xs font-semibold" style="color:#6A7840;"><i class="ti ti-circle-check" style="font-size:13px;vertical-align:-1px;"></i> 全勤完成</span>`;
     } else {
-      compactHTML = `<span class="text-xs truncate" style="color:var(--ic-choc-mid);max-width:9rem;">${punchSummaryText(punches)}</span>
+      compactHTML = `<span class="text-xs truncate" style="color:var(--ic-caramel);max-width:9rem;">${punchSummaryText(punches)}</span>
         <button onclick="punchNow('${nextStep.id}')" class="text-xs font-semibold px-2 py-0.5 rounded-lg active:scale-95 transition-transform whitespace-nowrap flex-shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">
           <i class="ti ${nextStep.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${nextStep.zh}
         </button>`;
