@@ -717,7 +717,7 @@
         <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日料理 / Masakan Hari Ini</h2>
         <i id="todayMenuChevron" class="ti ti-chevron-down" style="font-size:16px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
       </button>
-      <div id="atikaTodayMenuBody" style="padding:0 16px 14px;"></div>
+      <div id="atikaTodayMenuBody" style="padding:6px 14px 14px;display:flex;flex-direction:column;gap:0;"></div>
     </section>
 
     <!-- ═══ 卡片 2：今日工作（時間分區）═══ -->
@@ -4639,36 +4639,43 @@ function renderTodayMenuCard(){
     if (!cell) return;
     hasAny = true;
     if (cell.type==='skip'){
-      html += `<div class="flex items-center gap-2 py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
-        <span class="text-xs font-bold px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">${meal.name}${meal.mealTime?` <i class='ti ti-clock' style='font-size:10px;' aria-hidden='true'></i> ${meal.mealTime}`:''}</span>
-        <span class="text-xs" style="color:#9CA3AF;"><i class="ti ti-moon" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${cell.skipReason||'今天不煮'}</span>
+      html += `<div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid #DEC99A;margin-bottom:8px;">
+        <div style="width:5px;background:#C4A068;flex-shrink:0;"></div>
+        <div style="flex:1;padding:9px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:16px;font-weight:800;color:#8B5A2B;">${meal.name}</span>
+          ${meal.mealTime?`<span style="font-size:14px;font-weight:600;color:#A07040;">${meal.mealTime}</span>`:''}
+          <span style="font-size:13px;color:#9A7A58;"><i class='ti ti-moon' style='font-size:12px;vertical-align:-1px;' aria-hidden='true'></i> ${cell.skipReason||'今天不煮'}</span>
+        </div>
       </div>`;
     } else {
       const dishes = cell.dishes||[];
       const catColors = state.mealConfig?.ingCategoryColors||{};
       const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
-      html += `<div style="padding:10px 0;border-top:0.5px solid #DEC99A;">
-        <div style="display:flex;align-items:center;justify-content:space-between;background:#7A4020;border-radius:10px;padding:10px 14px;margin-bottom:10px;">
-          <span style="font-size:17px;font-weight:800;color:#FAF7F2;letter-spacing:0.02em;">${meal.name}</span>
-          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:#F0C880;"><i class='ti ti-clock' style='font-size:13px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px;">
-        ${dishes.map(d=>{
-          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span style="font-size:14px;padding:3px 8px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;">${ing.name}${idLabel}</span>`; }).join('');
-          const name = d.dishName || '';
-          const noteDisplay = d.noteId || d.note || '';
-          const _atm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
-          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span style="font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:#7A4020;color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
-          return `<div style="display:flex;align-items:flex-start;gap:8px;">
-            <span style="width:6px;height:6px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:7px;"></span>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;">
-              ${cookChips}
-              ${name?`<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);">${name}</span>`:''}
-              ${ingNames}
-              ${noteDisplay?`<span style="font-size:14px;font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</span>`:''}
-            </div>
-          </div>`;
-        }).join('')}
+      const dishRows = dishes.map(d=>{
+        const ingParts = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel=ing.nameId?` / ${ing.nameId}`:''; return `<span style="font-size:13px;padding:3px 8px;border-radius:4px;background:${cc}44;color:#3D2010;font-weight:600;">${ing.name}${idLabel}</span>`; }).filter(Boolean);
+        const ingNames = ingParts.join('<span style="font-size:13px;color:#A07040;font-weight:700;padding:0 2px;">＋</span>');
+        const name = d.dishName||'';
+        const noteDisplay = d.noteId||d.note||'';
+        const _atm = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
+        const cookChips = _atm.map(m=>{ const idL=_cookIdMap[m]||''; return `<span style="font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;flex-shrink:0;background:#7A4020;color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
+        return `<div style="display:flex;align-items:flex-start;gap:7px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:8px;"></span>
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0;">
+            ${cookChips}
+            ${name?`<span style="font-size:14px;font-weight:600;color:#3D2010;">${name}</span>`:''}
+            ${ingNames}
+            ${noteDisplay?`<span style="font-size:13px;font-style:italic;color:#9A7A58;">${noteDisplay}</span>`:''}
+          </div>
+        </div>`;
+      }).join('');
+      html += `<div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid #DEC99A;margin-bottom:8px;">
+        <div style="width:5px;background:#7A4020;flex-shrink:0;"></div>
+        <div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:baseline;gap:8px;">
+            <span style="font-size:16px;font-weight:800;color:#5C3310;">${meal.name}</span>
+            ${meal.mealTime?`<span style="font-size:14px;font-weight:600;color:#A07040;">${meal.mealTime}</span>`:''}
+          </div>
+          ${dishRows}
         </div>
       </div>`;
     }
