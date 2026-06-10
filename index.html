@@ -1233,10 +1233,6 @@
           <div id="menuWeekStrip" style="border-bottom:1px solid var(--ic-vanilla);padding:0;"></div>
           <!-- 日詳細 -->
           <div id="menuDayDetail" class="px-4 pt-3 pb-5"></div>
-          <!-- 設定按鈕 -->
-          <div class="px-4 pb-3 flex justify-end" style="border-top:1px solid var(--ic-vanilla);">
-            <button onclick="openMealConfigModal()" class="text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1" style="background:var(--ic-vanilla);color:var(--ic-chocolate);"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 設定餐次</button>
-          </div>
           <!-- 保留 menuGrid（相容用，隱藏） -->
           <div id="menuGrid" class="hidden"></div>
         </div>
@@ -1252,6 +1248,17 @@
               <button onclick="openIngredientModal(null)" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">＋ 新增食材</button>
             </div>
             <div id="ingredientList" class="px-4 pb-4"></div>
+            <!-- 食材分類設定 -->
+            <div class="border-t px-4 pt-3 pb-4" style="border-color:var(--ic-vanilla);">
+              <details>
+                <summary class="text-sm font-semibold cursor-pointer" style="color:var(--ic-chocolate);">食材分類設定</summary>
+                <div id="ingCatList" class="space-y-1 mb-2 mt-3"></div>
+                <div class="flex gap-2 mt-2">
+                  <input id="newIngCatInput" type="text" placeholder="新增分類名稱" class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
+                  <button onclick="addIngCategory()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">新增</button>
+                </div>
+              </details>
+            </div>
           </div>
         </div>
     </div>
@@ -1304,17 +1311,6 @@
     </div>
     <h3 class="text-sm font-semibold mb-2" style="color:var(--ic-chocolate);">餐次</h3>
     <div id="mealConfigList" class="space-y-2 mb-3"></div>
-    <!-- 食材分類管理 -->
-    <div class="border-t pt-3 mb-3" style="border-color:var(--ic-vanilla);">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">食材分類</div>
-      </div>
-      <div id="ingCatList" class="space-y-1 mb-2"></div>
-      <div class="flex gap-2">
-        <input id="newIngCatInput" type="text" placeholder="新增分類名稱" class="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm">
-        <button onclick="addIngCategory()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">新增</button>
-      </div>
-    </div>
     <!-- 烹調方式管理 -->
     <div class="border-t pt-3 mb-3" style="border-color:var(--ic-vanilla);">
       <div class="flex items-center justify-between mb-2">
@@ -2756,6 +2752,7 @@ let state = {
   weekMenu: {},
   weekMenuSets: [],
   activeWeekMenuSetId: '',
+  weekMenuCycleOffset: 0,
   preferences: { fontSize: 18 },
   catFilter: 'all',
   supplyCatFilter: 'all',
@@ -2801,6 +2798,7 @@ function load() {
       state.weekMenu = d.weekMenu || {};
       state.weekMenuSets = d.weekMenuSets || [];
       state.activeWeekMenuSetId = d.activeWeekMenuSetId || '';
+      state.weekMenuCycleOffset = d.weekMenuCycleOffset || 0;
     } catch(e){}
   }
   // 遷移：舊資料只有 weekMenu，沒有 weekMenuSets → 建立第一組
@@ -2972,6 +2970,7 @@ function save() {
       return state.weekMenuSets;
     })(),
     activeWeekMenuSetId: state.activeWeekMenuSetId,
+    weekMenuCycleOffset: state.weekMenuCycleOffset || 0,
     savedAt: new Date().toISOString(),
   }));
   // Phase 2 雲端同步勾子（若已連線且非雲端回寫）
@@ -3141,6 +3140,7 @@ async function cloudPull(){
         if (d.weekMenu           !== undefined) state.weekMenu           = d.weekMenu;
         if (d.weekMenuSets       !== undefined && Array.isArray(d.weekMenuSets) && d.weekMenuSets.length) state.weekMenuSets = d.weekMenuSets;
         if (d.activeWeekMenuSetId!== undefined) state.activeWeekMenuSetId = d.activeWeekMenuSetId;
+        if (d.weekMenuCycleOffset!== undefined) state.weekMenuCycleOffset = d.weekMenuCycleOffset;
         // 拉取後重新同步 active set 的 menu
         // 只有 set.menu 有實際資料時才覆蓋，避免空 set.menu 清掉頂層 weekMenu
         { const _ps = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
@@ -3227,6 +3227,7 @@ async function cloudPushImmediate(){
       weekMenu: state.weekMenu,
       weekMenuSets: state.weekMenuSets,
       activeWeekMenuSetId: state.activeWeekMenuSetId,
+      weekMenuCycleOffset: state.weekMenuCycleOffset || 0,
       mealConfig: state.mealConfig,
     };
     const { error } = await supabaseClient.from('app_state').upsert({
@@ -3934,11 +3935,13 @@ function getCurrentCycleMenu(){
     // 單組：直接用 state.weekMenu（永遠是最新的工作副本）
     return state.weekMenu || {};
   }
-  // 多組循環：按 ISO 週數決定本週用哪一組
+  // 多組循環：按 ISO 週數決定本週用哪一組（可套用 offset 臨時調整）
   const d = today();
   const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
   const isoWeek = Math.round((t - new Date(t.getFullYear(),0,4)) / (7*86400000));
-  const thisSet = cycleSets[isoWeek % cycleSets.length];
+  const offset = state.weekMenuCycleOffset || 0;
+  const idx = ((isoWeek + offset) % cycleSets.length + cycleSets.length) % cycleSets.length;
+  const thisSet = cycleSets[idx];
   // 若本週的組就是目前 active，也用 state.weekMenu
   if (thisSet.id === state.activeWeekMenuSetId) return state.weekMenu || {};
   return thisSet.menu || {};
@@ -4051,7 +4054,8 @@ function renderMenuDayDetail(){
       const dishes=cell.dishes||[];
       const allIngs=state.ingredients||[];
       const dishesHtml=dishes.slice(0,3).map(ds=>{
-        const chip=ds.cookMethod?`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;">${ds.cookMethod}</span>`:'';
+        const _dsm=(ds.cookMethods&&ds.cookMethods.length)?ds.cookMethods:(ds.cookMethod?[ds.cookMethod]:[]);
+        const chip=_dsm.length?`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;">${_dsm.join('＋')}</span>`:'';
         const ingNames=(ds.ingredientIds||[]).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?ing.name:'';}).filter(Boolean).join('＋');
         const label=ds.dishName||ingNames||'未命名';
         const noteHtml=ds.note?`<div style="font-size:10px;font-style:italic;color:var(--ic-choc-mid);margin-top:1px;">${ds.note}</div>`:'';
@@ -4079,6 +4083,7 @@ function toggleIngLib(){
   if (!body || !chev) return;
   body.classList.toggle('hidden');
   chev.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
+  if (!body.classList.contains('hidden')){ renderIngredientList(); renderIngCatList(); }
 }
 
 function renderMenuSetSelector(){
@@ -4101,17 +4106,21 @@ function renderMenuSetSelector(){
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
     const safeId = s.id.replace(/'/g,"\'");
-    const cycleIcon = s.cycleOn ? '<span style="color:#6BAF92;font-size:9px;margin-right:2px;">●</span>' : '';
+    const cycleIcon = s.cycleOn ? '<span style="color:#6BAF92;font-size:9px;margin-right:2px;">●</span>' : '<span style="color:#ccc;font-size:9px;margin-right:2px;">○</span>';
     const badge = isThisWeek ? ' <span style="font-size:9px;opacity:0.85;">★本週</span>' : '';
-    return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;">${cycleIcon}${s.name}${badge}</button>`;
+    return `<button onclick="switchWeekMenuSet('${safeId}')" oncontextmenu="event.preventDefault();toggleSetCycle('${safeId}',${!s.cycleOn})" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;" title="點選切換檢視 / 長按右鍵切換循環啟用">${cycleIcon}${s.name}${badge}</button>`;
   }).join('');
   html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
-  if (cycleCount > 1) html += `<span style="font-size:12px;padding:3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);">${cycleCount} 週循環</span>`;
+  if (cycleCount > 1) {
+    const offset = state.weekMenuCycleOffset || 0;
+    html += `<span style="font-size:12px;padding:3px 4px 3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);display:inline-flex;align-items:center;gap:2px;">${cycleCount} 週循環<button onclick="shiftCycleOffset(-1)" style="border:none;background:none;cursor:pointer;font-size:13px;color:var(--ic-choc-mid);padding:0 2px;" title="上週組">‹</button><button onclick="shiftCycleOffset(1)" style="border:none;background:none;cursor:pointer;font-size:13px;color:var(--ic-choc-mid);padding:0 2px;" title="下週組">›</button>${offset!==0?`<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:10px;color:#B05050;padding:0 2px;" title="重設">↺</button>`:''}</span>`;
+  }
   const activeSet = sets.find(s=>s.id===activeId);
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
     const btnStyle = 'width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
-    html += `<div style="margin-left:auto;display:flex;gap:4px;">
+    html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+      <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
       <button onclick="renameWeekMenuSet('${safeId}')" style="${btnStyle}color:var(--ic-choc-mid);" title="重新命名"><i class="ti ti-pencil" aria-hidden="true"></i></button>
       ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${btnStyle}color:#A0443C;" title="刪除"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
     </div>`;
@@ -4164,6 +4173,11 @@ function deleteWeekMenuSet(id){
 function toggleSetCycle(id, val){
   const s = (state.weekMenuSets||[]).find(s=>s.id===id);
   if (s) { s.cycleOn = val; save(); renderMenuSetSelector(); }
+}
+function shiftCycleOffset(delta, reset=false){
+  if (reset) { state.weekMenuCycleOffset = 0; }
+  else { state.weekMenuCycleOffset = (state.weekMenuCycleOffset || 0) + delta; }
+  save(); renderMenuSetSelector();
 }
 function renameWeekMenuSet(id){
   const s = (state.weekMenuSets||[]).find(s=>s.id===id);
@@ -4241,7 +4255,8 @@ function renderMenuCell(key, cell, isToday){
   const catColors = state.mealConfig?.ingCategoryColors||{};
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.slice(0,3).map(d=>{
-    const methodChip = d.cookMethod ? `<span style="font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:19px;">${d.cookMethod}</span>` : '';
+    const _dm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
+    const methodChip = _dm.length ? `<span style="font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:19px;">${_dm.join('＋')}</span>` : '';
     const nameStr = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '';
     const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:12px;padding:1px 5px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
     return `<div style="display:flex;align-items:center;gap:3px;overflow:hidden;margin-bottom:4px;flex-wrap:nowrap;">${methodChip}${nameStr?`<span style="font-size:14px;color:var(--ic-chocolate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
@@ -4353,8 +4368,8 @@ function _rebuildDishListUI(){
         <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
         <div id="ingPicker_${i}" class="${ingPickerOpen?'':'hidden'} mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
         <div class="mb-2">
-          <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式</div>
-          <div class="flex flex-wrap gap-1">${(state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${(d.cookMethod||'').includes(m)?' cm-active':''}" style="${(d.cookMethod||'').includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')}<button type="button" onclick="_addCookMethod(${i})" class="text-xs px-2 py-0.5 rounded-full border" style="border-style:dashed;color:var(--ic-caramel);border-color:var(--ic-caramel);background:transparent;">＋新增</button></div>
+          <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式（可複選）</div>
+          <div class="flex flex-wrap gap-1">${(()=>{ const _dcm = d.cookMethods && d.cookMethods.length ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []); return (state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${_dcm.includes(m)?' cm-active':''}" style="${_dcm.includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')+'<button type="button" onclick="_addCookMethod('+i+')" class="text-xs px-2 py-0.5 rounded-full border" style="border-style:dashed;color:var(--ic-caramel);border-color:var(--ic-caramel);background:transparent;">＋新增</button>'; })()}</div>
         </div>
         <div class="mb-1">
           <div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">烹飪備註（選填）</div>
@@ -4381,10 +4396,14 @@ function _toggleIngredient(dishIdx, ingId){
   _rebuildDishListUI();
 }
 function _updateDishIng(i, sel){ _cellDishes[i].ingredientIds = Array.from(sel.selectedOptions).map(o=>o.value); _rebuildDishListUI(); }
-function _setCookMethod(i, m, btn){
-  // toggle: if already selected, deselect
-  const cur = _cellDishes[i].cookMethod||'';
-  _cellDishes[i].cookMethod = (cur===m) ? '' : m;
+function _setCookMethod(i, m){
+  const dish = _cellDishes[i];
+  // 升級舊資料：cookMethod string → cookMethods array
+  if (!dish.cookMethods) dish.cookMethods = dish.cookMethod ? [dish.cookMethod] : [];
+  dish.cookMethod = undefined; // 清掉舊欄位
+  const arr = dish.cookMethods;
+  const idx = arr.indexOf(m);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(m);
   _syncCmChips(i);
 }
 function _addCookMethod(i){
@@ -4392,20 +4411,19 @@ function _addCookMethod(i){
   if (!name) return;
   if (!state.mealConfig.cookMethods) state.mealConfig.cookMethods = [];
   if (!state.mealConfig.cookMethods.includes(name)) state.mealConfig.cookMethods.push(name);
-  _cellDishes[i].cookMethod = name;
+  _setCookMethod(i, name);
   _rebuildDishListUI();
 }
 function _syncCmChips(i){
   const dish = _cellDishes[i];
-  const val = dish.cookMethod||'';
-  // Find the cook method chip container by traversing the dish card
+  const methods = dish.cookMethods && dish.cookMethods.length ? dish.cookMethods : (dish.cookMethod ? [dish.cookMethod] : []);
   const el = document.getElementById('dishList');
   if (!el) return;
   const cards = el.children;
   if (!cards[i]) return;
   cards[i].querySelectorAll('.cm-chip').forEach(btn=>{
     const m = btn.textContent.trim();
-    const active = val===m;
+    const active = methods.includes(m);
     btn.classList.toggle('cm-active', active);
     btn.style.background = active?'var(--ic-caramel)':'var(--ic-lemon)';
     btn.style.color = active?'#FAF7F2':'var(--ic-chocolate)';
@@ -4413,7 +4431,7 @@ function _syncCmChips(i){
   });
 }
 function addDishToCell(){
-  _cellDishes.push({ id:'dish_'+Date.now(), dishName:'', ingredientIds:[], cookMethod:'', note:'', noteId:'' });
+  _cellDishes.push({ id:'dish_'+Date.now(), dishName:'', ingredientIds:[], cookMethods:[], note:'', noteId:'' });
   _rebuildDishListUI();
 }
 function clearMenuCell(){
@@ -4437,7 +4455,6 @@ function saveMenuCell(){
 function openMealConfigModal(){
   renderMealConfigList();
   renderSkipReasonListInConfig();
-  renderIngCatList();
   renderCookMethodList();
   document.getElementById('mealConfigModal').classList.remove('hidden');
 }
@@ -4643,9 +4660,10 @@ function renderTodayMenuCard(){
           const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span class="text-xs px-1.5 py-0.5 rounded" style="background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
           const name = d.dishName || '（未命名）';
           const noteDisplay = d.noteId || d.note || '';
-          const cookIdLabel = d.cookMethod ? (_cookIdMap[d.cookMethod] || '') : '';
+          const _atm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
+          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
           return `<div class="flex items-start gap-2">
-            ${d.cookMethod?`<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${d.cookMethod}${cookIdLabel?` / ${cookIdLabel}`:''}</span>`:''}
+            ${cookChips}
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;overflow:hidden;">
                 <span class="text-sm font-semibold shrink-0" style="color:var(--ic-chocolate);">${name}</span>
