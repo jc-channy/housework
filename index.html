@@ -1198,14 +1198,14 @@
 
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
         <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between">
-          <span class="flex items-center gap-1.5" style="font-size:15px;"><i class="ti ti-calendar-stats" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 請假紀錄 <span id="leaveHistoryCount" class="text-sm font-bold" style="color:#C4706A;"></span></span>
+          <span class="flex items-center gap-1.5" style="font-size:15px;"><i class="ti ti-calendar-stats" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 請假紀錄 / Riwayat Cuti <span id="leaveHistoryCount" class="text-sm font-bold" style="color:#C4706A;"></span></span>
           <button onclick="event.preventDefault();event.stopPropagation();openAddLeaveForAtika();" class="btn-sm-primary flex items-center gap-1"><i class="ti ti-plus" style="font-size:14px;vertical-align:-1px;" aria-hidden="true"></i> 新增請假</button>
         </summary>
         <div id="leaveHistoryList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
       <details class="mb-2 bg-white border border-gray-200 rounded-xl">
-        <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-calendar-event" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 當期出勤明細</summary>
+        <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-calendar-event" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 當期出勤明細 / Detail Kehadiran</summary>
         <div id="payrollDayList" class="divide-y divide-gray-100 text-sm max-h-96 overflow-y-auto"></div>
       </details>
     </div>
@@ -6767,7 +6767,7 @@ function renderPayrollTab(){
           <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:#EDE8E0;display:inline-block;"></span>未打卡</span>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;">${cells}</div>`;
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${cells}</div>`;
   })();
   // 額外項目清單
   renderAdjustments(p);
