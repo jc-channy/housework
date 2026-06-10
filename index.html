@@ -652,12 +652,16 @@
   <main class="container-app max-w-5xl mx-auto px-4 py-4 space-y-4">
 
     <!-- ═══ 本日提醒（最上方）═══ -->
-    <div id="atikaReminder" class="hidden rounded-2xl p-4 flex items-start gap-3" style="background:var(--ic-straw-lt);border:2px solid var(--ic-strawberry);">
-      <i class="ti ti-bell-ringing" style="font-size:20px;color:var(--ic-strawberry);flex-shrink:0;margin-top:1px;"></i>
-      <div class="flex-1">
-        <div class="text-xs font-bold mb-1 flex items-center gap-1" style="color:#A85550;"><i class="ti ti-speakerphone" style="font-size:11px;" aria-hidden="true"></i> 今日提醒 / Pengingat Hari Ini</div>
-        <div id="atikaReminderZh" class="text-sm font-medium leading-relaxed" style="color:var(--ic-chocolate);"></div>
-        <div id="atikaReminderId" class="id-text text-xs leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+    <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
+      <div class="flex items-stretch">
+        <div style="background:var(--ic-strawberry);padding:16px 18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-bell-ringing" style="font-size:56px;color:#FAF7F2;" aria-hidden="true"></i>
+        </div>
+        <div class="flex-1 p-4" style="background:var(--ic-straw-lt);">
+          <div class="text-xs font-bold mb-2" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</div>
+          <div id="atikaReminderZh" class="font-semibold leading-relaxed" style="font-size:15px;color:var(--ic-chocolate);"></div>
+          <div id="atikaReminderId" class="id-text text-sm leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+        </div>
       </div>
     </div>
 
@@ -728,8 +732,8 @@
       <!-- Capsule tab bar -->
       <div class="px-4 pb-2">
         <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;">
-          <button id="atikaTabRoutine" onclick="switchAtikaTab('routine')" style="flex:1;border:none;border-radius:99px;padding:7px 0;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行工作</button>
-          <button id="atikaTabFlex" onclick="switchAtikaTab('flexible')" style="flex:1;border:none;border-radius:99px;padding:7px 0;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性工作</button>
+          <button id="atikaTabRoutine" onclick="switchAtikaTab('routine')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行工作</button>
+          <button id="atikaTabFlex" onclick="switchAtikaTab('flexible')" style="flex:1;border:none;border-radius:99px;padding:11px 0;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性工作</button>
         </div>
       </div>
 
@@ -4643,11 +4647,10 @@ function renderTodayMenuCard(){
       const dishes = cell.dishes||[];
       const catColors = state.mealConfig?.ingCategoryColors||{};
       const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
-      html += `<div style="padding:10px 0;border-top:0.5px solid #EDE0CC;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-          <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
-          <span style="font-size:15px;font-weight:700;color:var(--ic-caramel);">${meal.name}</span>
-          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:15px;font-weight:600;padding:3px 10px;border-radius:99px;background:#F0E4D0;color:#7A5530;"><i class='ti ti-clock' style='font-size:13px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
+      html += `<div style="padding:10px 0;border-top:0.5px solid #DEC99A;">
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#7A4020;border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+          <span style="font-size:17px;font-weight:800;color:#FAF7F2;letter-spacing:0.02em;">${meal.name}</span>
+          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:#F0C880;"><i class='ti ti-clock' style='font-size:13px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px;">
         ${dishes.map(d=>{
@@ -5530,8 +5533,8 @@ function renderAtikaView(){
     const flexCount = (bySlot['flexible']||[]).length;
     const rb = document.getElementById('atikaTabRoutine');
     const fb = document.getElementById('atikaTabFlex');
-    if (rb) rb.textContent = routineCount > 0 ? `例行工作（${routineCount}）` : '例行工作';
-    if (fb) fb.textContent = flexCount > 0 ? `彈性工作（${flexCount}）` : '彈性工作';
+    if (rb) rb.innerHTML = routineCount > 0 ? `例行工作 <span style="color:#C4706A;font-size:15px;">(${routineCount})</span>` : '例行工作';
+    if (fb) fb.innerHTML = flexCount > 0 ? `彈性工作 <span style="color:#C4706A;font-size:15px;">(${flexCount})</span>` : '彈性工作';
   })();
   initSortable();
   _updateAtikaSupplyBadge();
