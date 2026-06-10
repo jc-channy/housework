@@ -730,12 +730,12 @@
     </section>
 
     <!-- ═══ 卡片 1.5：今日菜單 ═══ -->
-    <section id="atikaTodayMenu" class="hidden rounded-2xl border overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-      <button onclick="toggleTodayMenu()" class="w-full flex items-center justify-between px-4 py-3" style="background:var(--ic-surface);">
+    <section id="atikaTodayMenu" class="hidden rounded-2xl border overflow-hidden" style="background:#FEFAF5;border-color:#EDE0CC;">
+      <button onclick="toggleTodayMenu()" class="w-full flex items-center justify-between px-4 py-3" style="background:#FEFAF5;border:none;text-align:left;cursor:pointer;">
         <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 今日料理 / Masakan Hari Ini</h2>
         <i id="todayMenuChevron" class="ti ti-chevron-down" style="font-size:16px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
       </button>
-      <div id="atikaTodayMenuBody" class="space-y-2 px-4 pb-4"></div>
+      <div id="atikaTodayMenuBody" style="padding:0 16px 14px;"></div>
     </section>
 
     <!-- ═══ 卡片 2：今日任務（時間分區）═══ -->
@@ -745,6 +745,14 @@
       <div class="flex items-center justify-between px-4 pt-3 pb-2">
         <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日任務 / Tugas Hari Ini</span>
         <button onclick="openAddAdhocModal()" class="btn-sm-danger"><i class="ti ti-plus" style="font-size:12px;vertical-align:-1px;"></i> 新增</button>
+      </div>
+
+      <!-- Capsule tab bar -->
+      <div class="px-4 pb-2">
+        <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;">
+          <button id="atikaTabRoutine" onclick="switchAtikaTab('routine')" style="flex:1;border:none;border-radius:99px;padding:6px 0;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行任務</button>
+          <button id="atikaTabFlex" onclick="switchAtikaTab('flexible')" style="flex:1;border:none;border-radius:99px;padding:6px 0;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性任務</button>
+        </div>
       </div>
 
       <!-- 全部完成慶祝 empty state -->
@@ -4673,27 +4681,26 @@ function renderTodayMenuCard(){
       const dishes = cell.dishes||[];
       const catColors = state.mealConfig?.ingCategoryColors||{};
       const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
-      html += `<div class="py-2 border-b last:border-b-0" style="border-color:var(--ic-vanilla);">
-        <div class="flex items-center gap-1.5 mb-2">
+      html += `<div style="padding:10px 0;border-top:0.5px solid #EDE0CC;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
           <i class="ti ti-chef-hat" style="font-size:13px;color:var(--ic-caramel);" aria-hidden="true"></i>
-          <span class="text-xs font-bold" style="color:var(--ic-caramel);">${meal.name}</span>
-          ${meal.mealTime?`<span class="flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full" style="background:var(--ic-vanilla);color:var(--ic-caramel-dk);"><i class='ti ti-clock' style='font-size:10px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
+          <span style="font-size:13px;font-weight:700;color:var(--ic-caramel);">${meal.name}</span>
+          ${meal.mealTime?`<span style="display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;background:#F0E4D0;color:#7A5530;"><i class='ti ti-clock' style='font-size:11px;' aria-hidden='true'></i> ${meal.mealTime}</span>`:''}
         </div>
-        <div class="space-y-2 pl-1">
+        <div style="display:flex;flex-direction:column;gap:8px;padding-left:4px;">
         ${dishes.map(d=>{
           const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span style="font-size:14px;padding:3px 8px;border-radius:4px;background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
           const name = d.dishName || '';
           const noteDisplay = d.noteId || d.note || '';
           const _atm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
           const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span style="font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:var(--ic-caramel);color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
-          return `<div class="flex items-start gap-2">
-            ${cookChips}
-            <div style="flex:1;min-width:0;">
-              <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;overflow:hidden;">
-                <span class="text-sm font-semibold shrink-0" style="color:var(--ic-chocolate);">${name}</span>
-                ${ingNames}
-              </div>
-              ${noteDisplay?`<div class="text-[10px] mt-0.5" style="font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</div>`:''}
+          return `<div style="display:flex;align-items:flex-start;gap:8px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:7px;"></span>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0;">
+              ${cookChips}
+              ${name?`<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);">${name}</span>`:''}
+              ${ingNames}
+              ${noteDisplay?`<span style="font-size:12px;font-style:italic;color:var(--ic-choc-mid);">${noteDisplay}</span>`:''}
             </div>
           </div>`;
         }).join('')}
@@ -5557,6 +5564,45 @@ function renderAtikaView(){
 
   initSortable();
   _updateAtikaSupplyBadge();
+  applyAtikaTab();
+}
+
+/* ========== switchAtikaTab / applyAtikaTab ========== */
+function switchAtikaTab(tab){
+  window._atikaTaskTab = tab;
+  renderAtikaView();
+}
+
+function applyAtikaTab(){
+  const tab = window._atikaTaskTab || 'routine';
+  const routineBtn = document.getElementById('atikaTabRoutine');
+  const flexBtn    = document.getElementById('atikaTabFlex');
+  const flexSec    = document.getElementById('atikaFlexSection');
+  const mornSec    = document.getElementById('atikaMorningSection');
+  const aftnSec    = document.getElementById('atikaAfternoonSection');
+  const evnSec     = document.getElementById('atikaEveningSection');
+  const activeStyle  = {bg:'white',color:'#7A5530',shadow:'0 1px 4px rgba(0,0,0,0.12)'};
+  const inactiveStyle= {bg:'transparent',color:'#9A7A58',shadow:'none'};
+  function applyBtn(btn, active){
+    if (!btn) return;
+    const s = active ? activeStyle : inactiveStyle;
+    btn.style.background  = s.bg;
+    btn.style.color       = s.color;
+    btn.style.boxShadow   = s.shadow;
+  }
+  if (tab === 'routine') {
+    applyBtn(routineBtn, true);
+    applyBtn(flexBtn, false);
+    if (flexSec) flexSec.style.display = 'none';
+    // morning/afternoon/evening: already set by slotHasAny — leave as-is
+  } else {
+    applyBtn(flexBtn, true);
+    applyBtn(routineBtn, false);
+    if (mornSec) mornSec.style.display = 'none';
+    if (aftnSec) aftnSec.style.display = 'none';
+    if (evnSec)  evnSec.style.display  = 'none';
+    // flex section: already set by slotHasAny — leave as-is
+  }
 }
 
 /* ========== completeFocusTask ========== */
