@@ -4048,7 +4048,7 @@ function renderMenuSetSelector(){
   const midSets   = sets.filter(s => s.id !== activeId && s.cycleOn !== false);
   const rightSets = sets.filter(s => s.id !== activeId && s.cycleOn === false);
 
-  const navBtnSt = 'border:0.5px solid var(--ic-vanilla);background:#fff;cursor:pointer;font-size:18px;color:var(--ic-choc-mid);padding:2px 8px;border-radius:7px;line-height:1.3;';
+  const navBtnBase = 'cursor:pointer;border-radius:8px;font-size:12px;font-weight:700;padding:5px 10px;line-height:1.3;white-space:nowrap;display:inline-flex;align-items:center;gap:3px;border:none;';
 
   function pillHtml(s, zone){
     const safeId = s.id.replace(/'/g,"\'");
@@ -4062,9 +4062,13 @@ function renderMenuSetSelector(){
       ? pillBase + 'background:#E6F2EC;color:#1F6645;border:1px solid #9FCF9F;'
       : pillBase + 'background:var(--ic-surface);color:#9A8070;border:0.5px solid var(--ic-vanilla);';
     const selRing = isSel ? 'outline:2.5px solid var(--ic-caramel);outline-offset:2px;' : '';
-    const leftBtn  = (isSel && canLeft)  ? `<button onclick="moveWSet('${safeId}','left')"  style="${navBtnSt}">‹</button>` : '';
-    const rightBtn = (isSel && canRight) ? `<button onclick="moveWSet('${safeId}','right')" style="${navBtnSt}">›</button>` : '';
-    return `<div style="display:inline-flex;align-items:center;gap:3px;margin:0 3px 4px 0;">
+    const leftLabel  = zone === 'mid'   ? '«  設為本週' : '«  移至啟用';
+    const rightLabel = zone === 'left'  ? '移至循環  »' : '移至停用  »';
+    const leftSt  = navBtnBase + 'background:#FFF3E0;color:#C67843;';
+    const rightSt = zone === 'left' ? navBtnBase + 'background:#E6F2EC;color:#1F6645;' : navBtnBase + 'background:#F0EDE8;color:#9A8070;';
+    const leftBtn  = (isSel && canLeft)  ? `<button onclick="moveWSet('${safeId}','left')"  style="${leftSt}">${leftLabel}</button>` : '';
+    const rightBtn = (isSel && canRight) ? `<button onclick="moveWSet('${safeId}','right')" style="${rightSt}">${rightLabel}</button>` : '';
+    return `<div style="display:inline-flex;align-items:center;gap:4px;margin:0 3px 6px 0;flex-wrap:wrap;">
       ${leftBtn}<button onclick="wSetClick('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
     </div>`;
   }
