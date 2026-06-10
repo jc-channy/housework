@@ -1228,7 +1228,7 @@
         <!-- 週菜單（新版：組別列 + 週狀態一覽 + 日詳細） -->
         <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
           <!-- 組別列 -->
-          <div id="menuSetSelector" class="flex items-center gap-2 px-4 py-3 flex-wrap" style="border-bottom:1px solid var(--ic-vanilla);"></div>
+          <div id="menuSetSelector" class="px-4 py-3" style="border-bottom:1px solid var(--ic-vanilla);"></div>
           <!-- 週狀態一覽 -->
           <div id="menuWeekStrip" style="border-bottom:1px solid var(--ic-vanilla);padding:0;"></div>
           <!-- 日詳細 -->
@@ -4055,11 +4055,11 @@ function renderMenuDayDetail(){
       const allIngs=state.ingredients||[];
       const dishesHtml=dishes.slice(0,3).map(ds=>{
         const _dsm=(ds.cookMethods&&ds.cookMethods.length)?ds.cookMethods:(ds.cookMethod?[ds.cookMethod]:[]);
-        const chip=_dsm.length?`<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;">${_dsm.join('＋')}</span>`:'';
+        const chip=_dsm.length?`<span style="font-size:12px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;">${_dsm.join('＋')}</span>`:'';
         const ingNames=(ds.ingredientIds||[]).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?ing.name:'';}).filter(Boolean).join('＋');
-        const label=ds.dishName||ingNames||'未命名';
+        const label=ds.dishName||'';
         const noteHtml=ds.note?`<div style="font-size:10px;font-style:italic;color:var(--ic-choc-mid);margin-top:1px;">${ds.note}</div>`:'';
-        return `<div style="padding:4px 0;border-bottom:0.5px solid var(--ic-vanilla);"><div style="display:flex;align-items:center;gap:5px;">${chip}<span style="font-size:12px;color:var(--ic-chocolate);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${label}</span></div>${noteHtml}</div>`;
+        return `<div style="padding:5px 0;border-bottom:0.5px solid var(--ic-vanilla);"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${chip}${label?`<span style="font-size:15px;color:var(--ic-chocolate);flex:1;overflow:hidden;text-overflow:ellipsis;">${label}</span>`:''}</div>${noteHtml}</div>`;
       }).join('');
       const more=dishes.length>3?`<div style="font-size:9px;color:var(--ic-caramel);padding-top:2px;">+${dishes.length-3} 道</div>`:'';
       cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px solid ${isToday?'var(--ic-caramel)':'var(--ic-vanilla)'};border-radius:11px;background:var(--ic-surface);cursor:pointer;overflow:hidden;"><div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:0.5px solid var(--ic-vanilla);"><span style="font-size:10px;color:var(--ic-choc-mid);">${meal.mealTime||''}</span><span style="font-size:11px;font-weight:500;color:var(--ic-chocolate);flex:1;">${meal.name}</span><i class="ti ti-pencil" style="font-size:11px;color:var(--ic-choc-mid);" aria-hidden="true"></i></div><div style="padding:4px 10px 8px;">${dishesHtml}${more}${!dishes.length?`<span style="font-size:11px;color:var(--ic-caramel);">＋ 新增菜色</span>`:''}</div></div>`;
@@ -4101,31 +4101,55 @@ function renderMenuSetSelector(){
   const pillStyle = isActive => isActive
     ? 'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);'
     : 'background:var(--ic-surface);color:var(--ic-choc-mid);border-color:var(--ic-vanilla);';
-  let html = `<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);margin-right:4px;">本週菜單</span>`;
-  html += sets.map(s => {
+  const activeSet = sets.find(s=>s.id===activeId);
+  const iconBtnStyle = 'width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
+  // ── Row 1: 選擇正在編輯哪組 ──
+  let r1 = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
+  r1 += `<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);">本週菜單</span>`;
+  r1 += sets.map(s => {
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
     const safeId = s.id.replace(/'/g,"\'");
-    const cycleIcon = s.cycleOn ? '<span style="color:#6BAF92;font-size:9px;margin-right:2px;">●</span>' : '<span style="color:#ccc;font-size:9px;margin-right:2px;">○</span>';
-    const badge = isThisWeek ? ' <span style="font-size:9px;opacity:0.85;">★本週</span>' : '';
-    return `<button onclick="switchWeekMenuSet('${safeId}')" oncontextmenu="event.preventDefault();toggleSetCycle('${safeId}',${!s.cycleOn})" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;" title="點選切換檢視 / 長按右鍵切換循環啟用">${cycleIcon}${s.name}${badge}</button>`;
+    const badge = isThisWeek ? ' <span style="font-size:10px;">★</span>' : '';
+    return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;">${s.name}${badge}</button>`;
   }).join('');
-  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
-  if (cycleCount > 1) {
-    const offset = state.weekMenuCycleOffset || 0;
-    html += `<span style="font-size:12px;padding:3px 4px 3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);display:inline-flex;align-items:center;gap:2px;">${cycleCount} 週循環<button onclick="shiftCycleOffset(-1)" style="border:none;background:none;cursor:pointer;font-size:13px;color:var(--ic-choc-mid);padding:0 2px;" title="上週組">‹</button><button onclick="shiftCycleOffset(1)" style="border:none;background:none;cursor:pointer;font-size:13px;color:var(--ic-choc-mid);padding:0 2px;" title="下週組">›</button>${offset!==0?`<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:10px;color:#B05050;padding:0 2px;" title="重設">↺</button>`:''}</span>`;
-  }
-  const activeSet = sets.find(s=>s.id===activeId);
+  r1 += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
-    const btnStyle = 'width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
-    html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+    r1 += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
       <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
-      <button onclick="renameWeekMenuSet('${safeId}')" style="${btnStyle}color:var(--ic-choc-mid);" title="重新命名"><i class="ti ti-pencil" aria-hidden="true"></i></button>
-      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${btnStyle}color:#A0443C;" title="刪除"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
+      <button onclick="renameWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="重新命名"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:#A0443C;" title="刪除"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
     </div>`;
   }
-  el.innerHTML = html;
+  r1 += `</div>`;
+  // ── Row 2: 循環排程設定（只在多組時顯示）──
+  let r2 = '';
+  if (sets.length > 1) {
+    r2 += `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--ic-vanilla);">`;
+    r2 += `<span style="font-size:12px;font-weight:600;color:var(--ic-choc-mid);white-space:nowrap;flex-shrink:0;">循環排程</span>`;
+    r2 += sets.map(s => {
+      const inCycle = s.cycleOn !== false;
+      const safeId = s.id.replace(/'/g,"\'");
+      return inCycle
+        ? `<button onclick="toggleSetCycle('${safeId}',false)" style="font-size:13px;padding:4px 12px;border-radius:99px;border:1.5px solid #6BAF92;background:#E8F5EE;color:#3A8060;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> ${s.name} 循環中</button>`
+        : `<button onclick="toggleSetCycle('${safeId}',true)" style="font-size:13px;padding:4px 12px;border-radius:99px;border:1.5px dashed #ccc;background:var(--ic-surface);color:#999;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> ${s.name} 加入循環</button>`;
+    }).join('');
+    if (cycleCount > 1) {
+      const offset = state.weekMenuCycleOffset || 0;
+      const thisWeekName = thisWeekSet ? thisWeekSet.name : '？';
+      const navBtnStyle = 'border:none;background:var(--ic-lemon);cursor:pointer;font-size:16px;color:var(--ic-choc-mid);padding:2px 6px;border-radius:6px;line-height:1.2;';
+      r2 += `<div style="margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--ic-lemon);padding:4px 10px;border-radius:99px;">
+        <span style="font-size:12px;color:var(--ic-choc-mid);white-space:nowrap;">本週用</span>
+        <button onclick="shiftCycleOffset(-1)" style="${navBtnStyle}" title="換上一組">‹</button>
+        <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;">${thisWeekName}</span>
+        <button onclick="shiftCycleOffset(1)" style="${navBtnStyle}" title="換下一組">›</button>
+        ${offset!==0?`<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:11px;color:#B05050;padding:0;white-space:nowrap;" title="重設為自動">↺ 重設</button>`:''}
+      </div>`;
+    }
+    r2 += `</div>`;
+  }
+  el.innerHTML = r1 + r2;
 }
 
 function toggleWsetMenu(dropId){
@@ -4256,10 +4280,10 @@ function renderMenuCell(key, cell, isToday){
   const allIngs = state.ingredients||[];
   const dishHtml = dishes.slice(0,3).map(d=>{
     const _dm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
-    const methodChip = _dm.length ? `<span style="font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:19px;">${_dm.join('＋')}</span>` : '';
-    const nameStr = d.dishName || (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋') || '';
-    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:12px;padding:1px 5px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
-    return `<div style="display:flex;align-items:center;gap:3px;overflow:hidden;margin-bottom:4px;flex-wrap:nowrap;">${methodChip}${nameStr?`<span style="font-size:14px;color:var(--ic-chocolate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
+    const methodChip = _dm.length ? `<span style="font-size:13px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;line-height:20px;">${_dm.join('＋')}</span>` : '';
+    const nameStr = d.dishName || '';
+    const ingTags = (d.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span style="font-size:13px;padding:2px 6px;border-radius:3px;background:${cc}22;color:${cc};flex-shrink:0;">${ing.name}</span>`; }).join('');
+    return `<div style="display:flex;align-items:center;gap:4px;overflow:hidden;margin-bottom:5px;flex-wrap:wrap;">${methodChip}${nameStr?`<span style="font-size:15px;color:var(--ic-chocolate);overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0;">${nameStr}</span>`:''}${ingTags}</div>`;
   }).join('');
   const more = dishes.length>3 ? `<span style="font-size:12px;color:var(--ic-caramel);">+${dishes.length-3}</span>` : '';
   return `<div onclick="openMenuCellModal('${key}')" style="min-height:64px;border-radius:8px;background:var(--ic-lemon);${border}cursor:pointer;padding:8px;">
@@ -4362,7 +4386,7 @@ function _rebuildDishListUI(){
       <div class="p-3">
         <div class="mb-2">
           <div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">菜名（選填）</div>
-          <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="${autoName||'預設用食材名'}" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm" style="background:var(--ic-surface);">
+          <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="菜名（選填，空白即可）" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm" style="background:var(--ic-surface);">
         </div>
         ${selTags?`<div class="mb-2"><div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">已選食材</div><div class="flex flex-wrap gap-1">${selTags}</div></div>`:''}
         <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
@@ -4657,11 +4681,11 @@ function renderTodayMenuCard(){
         </div>
         <div class="space-y-2 pl-1">
         ${dishes.map(d=>{
-          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span class="text-xs px-1.5 py-0.5 rounded" style="background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
-          const name = d.dishName || '（未命名）';
+          const ingNames = (d.ingredientIds||[]).map(id=>{ const ing=(state.ingredients||[]).find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; const idLabel = ing.nameId ? ` / ${ing.nameId}` : ''; return `<span style="font-size:14px;padding:3px 8px;border-radius:4px;background:${cc}22;color:${cc};">${ing.name}${idLabel}</span>`; }).join('');
+          const name = d.dishName || '';
           const noteDisplay = d.noteId || d.note || '';
           const _atm = (d.cookMethods && d.cookMethods.length) ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
-          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5" style="background:var(--ic-caramel);color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
+          const cookChips = _atm.map(m=>{ const idL = _cookIdMap[m]||''; return `<span style="font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;flex-shrink:0;background:var(--ic-caramel);color:#FAF7F2;">${m}${idL?' / '+idL:''}</span>`; }).join('');
           return `<div class="flex items-start gap-2">
             ${cookChips}
             <div style="flex:1;min-width:0;">
