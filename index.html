@@ -9209,7 +9209,7 @@ function renderSupplyCatFilters(){
     const b=document.createElement('button');
     b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
     b.style.fontSize='17px'; b.style.padding='6px 14px';
-    if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='white'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='#C0A880'; }
+    if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='#EDE8E0'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='#C8B89A'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
     wrap.appendChild(b);
@@ -9217,7 +9217,7 @@ function renderSupplyCatFilters(){
   wrap.querySelectorAll('.sc-filter').forEach(b=>{
     b.onclick=()=>{
       state.supplyCatFilter=b.dataset.cat;
-      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='white'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='#C0A880'; });
+      wrap.querySelectorAll('.sc-filter').forEach(x=>{ x.style.background='#EDE8E0'; x.style.color='var(--ic-chocolate)'; x.style.borderColor='#C8B89A'; });
       b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)';
       renderSuppliesManager();
     };
@@ -9279,9 +9279,10 @@ function renderSuppliesManager(){
   document.getElementById('suppliesPaused').innerHTML=paused.map(s=>renderManagerSupplyCard(s,'paused')).join('');
   document.getElementById('suppliesOk').innerHTML=ok.length
     ? ok.map(s=>{
+        const cat=getSupplyCat(s.catId);
         return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:11px 12px;display:flex;align-items:center;gap:8px;">
           <div style="flex:1;min-width:0;overflow:hidden;">
-            <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:14px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:7px;padding:2px 8px;flex-shrink:0;">${cat.nameZh}</span><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
           </div>
           <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
           <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
@@ -9317,9 +9318,12 @@ function renderManagerSupplyCard(s, group){
   const catIcon=firstChar.codePointAt(0)>0x2000?firstChar:'';
   return `
     <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:12px;display:flex;flex-direction:column;gap:9px;">
-      <div>
-        <div style="margin-bottom:4px;"><span style="font-size:11px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:5px;padding:2px 7px;">${cat.nameZh}</span></div>
-        <div style="display:flex;align-items:baseline;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:18px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+      <div style="overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          <span style="font-size:15px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:7px;padding:3px 9px;flex-shrink:0;">${cat.nameZh}</span>
+          <span style="font-size:18px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
+          <span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         ${statusPill}
