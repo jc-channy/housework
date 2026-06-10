@@ -3900,6 +3900,7 @@ function getCurrentCycleMenu(){
 let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
 let _selectedWSetId = null; // 三區選取中的模板 id
 let _wSetClickTimer = null; // 單擊/雙擊防衝突計時器
+let _arrangeMode = false;   // 排列模式開關
 
 /* ========== 菜單：週狀態一覽 ========== */
 function renderMenuWeekStrip(){
@@ -4054,15 +4055,30 @@ function renderMenuSetSelector(){
 
   function pillHtml(s, zone){
     const safeId = s.id.replace(/'/g,"\'");
+    const pillBase = 'font-size:14px;padding:6px 13px;border-radius:99px;white-space:nowrap;border:none;';
+    const pillSt = zone === 'left'
+      ? pillBase + 'background:#C07030;color:#FFF8F0;cursor:default;'
+      : zone === 'mid'
+      ? pillBase + 'background:#F0E6D8;color:#7A5828;cursor:pointer;'
+      : pillBase + 'background:#DDD4C8;color:#7A6A5A;cursor:pointer;';
+
+    if (!_arrangeMode) {
+      // 一般模式：單擊切換菜單，雙擊編輯
+      const clickAct = zone === 'mid'   ? `switchWeekMenuSet('${safeId}')`
+                     : zone === 'right' ? `switchWeekMenuSet('${safeId}')`
+                     : '';
+      const tipTxt   = zone === 'left' ? '雙擊編輯名稱'
+                     : zone === 'mid'  ? '點選設為本週菜單・雙擊編輯名稱'
+                     : '點選設為本週菜單・雙擊編輯名稱';
+      return `<div style="display:inline-flex;align-items:center;margin:0 4px 6px 0;">
+        <button onclick="${clickAct}" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}">${s.name}</button>
+      </div>`;
+    }
+
+    // 排列模式：選取後顯示 « » 移動按鈕
     const isSel = _selectedWSetId === s.id;
     const canLeft  = zone === 'mid' || zone === 'right';
     const canRight = (zone === 'left' && sets.length > 1) || zone === 'mid';
-    const pillBase = 'font-size:14px;padding:6px 13px;border-radius:99px;cursor:pointer;white-space:nowrap;border:none;';
-    const pillSt = zone === 'left'
-      ? pillBase + 'background:#C07030;color:#FFF8F0;'
-      : zone === 'mid'
-      ? pillBase + 'background:#F0E6D8;color:#7A5828;'
-      : pillBase + 'background:#DDD4C8;color:#7A6A5A;';
     const selRing = isSel ? 'outline:2.5px solid #C07030;outline-offset:2px;' : '';
     const leftLabel  = zone === 'mid'   ? '設為本週菜單' : '移至循環';
     const rightLabel = zone === 'left'  ? '移至循環' : '移至停用中';
@@ -4073,13 +4089,17 @@ function renderMenuSetSelector(){
     </div>`;
   }
 
+  const arrangeBtnSt = _arrangeMode
+    ? 'font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid #C07030;background:#FEF0D8;color:#C07030;font-weight:700;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;'
+    : 'font-size:13px;padding:6px 12px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;';
   const topRow = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
     <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-chef-hat" style="font-size:20px;" aria-hidden="true"></i> 菜單設計</span>
     <button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>
+    <button onclick="toggleArrangeMode()" style="${arrangeBtnSt}"><i class="ti ti-layout-columns" style="font-size:13px;" aria-hidden="true"></i> ${_arrangeMode ? '排列中 ✓' : '排列'}</button>
     ${activeSet ? `<div style="margin-left:auto;"><button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button></div>` : ''}
   </div>`;
 
-  const hint = _selectedWSetId ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 8px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">‹ › 移動模板・再點一下取消選取・雙擊編輯名稱</div>` : '';
+  const hint = (_arrangeMode && _selectedWSetId) ? `<div style="font-size:12px;color:#C07030;margin-bottom:6px;padding:5px 10px;background:#FEF0D8;border-radius:8px;display:inline-block;">點選 « » 移動・再點一下標籤取消選取・雙擊編輯名稱</div>` : (_arrangeMode ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 10px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">排列模式：點選標籤後用 « » 移動區塊</div>` : '');
 
   const emptySpan = `<span style="font-size:12px;color:#B0A090;font-style:italic;">無</span>`;
   const zoneRow = `<div style="display:flex;border:1px solid #D4C0A0;border-radius:14px;overflow:hidden;">
@@ -4098,6 +4118,11 @@ function renderMenuSetSelector(){
   </div>`;
 
   el.innerHTML = topRow + hint + zoneRow;
+}
+function toggleArrangeMode(){
+  _arrangeMode = !_arrangeMode;
+  _selectedWSetId = null;
+  renderMenuSetSelector();
 }
 function selectWSet(id){
   _selectedWSetId = (_selectedWSetId === id) ? null : id;
