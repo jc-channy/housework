@@ -1503,6 +1503,31 @@
   </div>
 </div>
 
+<!-- ===== 週菜單模板編輯 Modal ===== -->
+<div id="weekMenuSetModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
+    <div class="flex items-start justify-between mb-3">
+      <div class="text-xl font-bold">編輯菜單模板</div>
+      <button onclick="closeWeekMenuSetModal()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <div class="space-y-3 text-sm">
+      <div>
+        <label class="block font-semibold mb-1">模板名稱</label>
+        <input id="wmsName" type="text" class="w-full border border-gray-300 rounded-lg p-2" placeholder="例：第一週菜單">
+      </div>
+      <div class="flex items-center gap-3" style="padding:10px 12px;background:var(--ic-lemon);border-radius:10px;">
+        <input id="wmsCycle" type="checkbox" style="width:18px;height:18px;cursor:pointer;accent-color:var(--ic-caramel);">
+        <label for="wmsCycle" style="cursor:pointer;font-size:14px;color:var(--ic-chocolate);line-height:1.4;">加入循環排程<br><span style="font-size:12px;color:var(--ic-choc-mid);">自動依 ISO 週數輪換此模板</span></label>
+      </div>
+    </div>
+    <input id="wmsId" type="hidden">
+    <div class="flex gap-2 mt-4">
+      <button id="wmsDeleteBtn" onclick="deleteWeekMenuSetFromModal()" class="btn-ghost-danger hidden">刪除</button>
+      <button onclick="saveWeekMenuSetModal()" class="btn-primary flex-1">儲存</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 備品歷史 Modal ===== -->
 <div id="supplyHistoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
@@ -4044,28 +4069,49 @@ function renderMenuSetSelector(){
   const sets = state.weekMenuSets || [];
   const activeId = state.activeWeekMenuSetId;
   const activeSet = sets.find(s=>s.id===activeId);
+  const cycleSets = sets.filter(s=>s.cycleOn !== false);
+  const isoWeek = (d => {
+    const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
+    return Math.round((t-new Date(t.getFullYear(),0,4))/(7*86400000));
+  })(today());
+  const thisWeekSet = cycleSets.length >= 2
+    ? cycleSets[((isoWeek % cycleSets.length) + cycleSets.length) % cycleSets.length]
+    : null;
   const iconBtnStyle = 'width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
   let html = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
   html += `<span style="font-size:14px;font-weight:600;color:var(--ic-choc-mid);white-space:nowrap;flex-shrink:0;">套用模板</span>`;
   html += sets.map(s => {
     const isActive = s.id === activeId;
+    const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
+    const inCycle = s.cycleOn !== false;
     const safeId = s.id.replace(/'/g,"\'");
-    if (isActive) {
-      return `<button onclick="switchWeekMenuSet('${safeId}')" style="font-size:14px;padding:5px 14px;border-radius:99px;border:1.5px solid var(--ic-caramel);background:var(--ic-caramel);color:#FAF7F2;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i>${s.name}</button>`;
-    } else {
-      return `<button onclick="switchWeekMenuSet('${safeId}')" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;">${s.name}</button>`;
-    }
+    const cycleDot = inCycle
+      ? `<span title="循環中" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;background:${isActive?'rgba(255,255,255,0.65)':'#6BAF92'};"></span>`
+      : '';
+    const weekBadge = isThisWeek
+      ? `<span style="font-size:10px;font-weight:600;background:${isActive?'rgba(255,255,255,0.22)':'#D8EEE3'};color:${isActive?'#FAF7F2':'#3A7055'};border-radius:4px;padding:1px 5px;flex-shrink:0;">本週</span>`
+      : '';
+    const activeStyle = 'font-size:14px;padding:5px 12px;border-radius:99px;border:1.5px solid var(--ic-caramel);background:var(--ic-caramel);color:#FAF7F2;cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
+    const inactiveStyle = 'font-size:14px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;';
+    return `<button onclick="switchWeekMenuSet('${safeId}')" ondblclick="event.stopPropagation();openEditWeekMenuSet('${safeId}')" title="單擊切換・雙擊編輯" style="${isActive?activeStyle:inactiveStyle}">${cycleDot}${s.name}${weekBadge}</button>`;
   }).join('');
-  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增模板</button>`;
+  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 12px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
     html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
       <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
-      <button onclick="renameWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="重新命名"><i class="ti ti-pencil" aria-hidden="true"></i></button>
-      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:#A0443C;" title="刪除此模板"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
+      <button onclick="copyWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="複製此模板"><i class="ti ti-copy" aria-hidden="true"></i></button>
+      <button onclick="openEditWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="編輯名稱 / 循環設定"><i class="ti ti-pencil" aria-hidden="true"></i></button>
     </div>`;
   }
   html += `</div>`;
+  if (cycleSets.length >= 2 && thisWeekSet) {
+    html += `<div style="display:flex;align-items:center;gap:6px;width:100%;margin-top:8px;padding:6px 10px;border-radius:10px;background:var(--ic-lemon);">
+      <i class="ti ti-rotate-clockwise" style="font-size:12px;color:#3A7055;" aria-hidden="true"></i>
+      <span style="font-size:12px;color:var(--ic-choc-mid);">循環排程・本週自動套用：</span>
+      <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);">${thisWeekSet.name}</span>
+    </div>`;
+  }
   el.innerHTML = html;
 }
 
@@ -4125,6 +4171,47 @@ function renameWeekMenuSet(id){
   if (!s) return;
   const newName = window.prompt('請輸入新名稱：', s.name);
   if (newName && newName.trim()) { s.name = newName.trim(); save(); renderMenuSetSelector(); }
+}
+function openEditWeekMenuSet(id){
+  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
+  if (!s) return;
+  document.getElementById('wmsId').value = id;
+  document.getElementById('wmsName').value = s.name;
+  document.getElementById('wmsCycle').checked = s.cycleOn !== false;
+  const delBtn = document.getElementById('wmsDeleteBtn');
+  if ((state.weekMenuSets||[]).length <= 1) delBtn.classList.add('hidden');
+  else delBtn.classList.remove('hidden');
+  document.getElementById('weekMenuSetModal').classList.remove('hidden');
+  setTimeout(()=>{ const el=document.getElementById('wmsName'); if(el){el.focus();el.select();} }, 80);
+}
+function closeWeekMenuSetModal(){ document.getElementById('weekMenuSetModal').classList.add('hidden'); }
+function saveWeekMenuSetModal(){
+  const id = document.getElementById('wmsId').value;
+  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
+  if (!s) return;
+  const newName = document.getElementById('wmsName').value.trim();
+  if (!newName) return;
+  s.name = newName;
+  s.cycleOn = document.getElementById('wmsCycle').checked;
+  save(); renderMenuSetSelector(); closeWeekMenuSetModal();
+}
+function deleteWeekMenuSetFromModal(){
+  const id = document.getElementById('wmsId').value;
+  closeWeekMenuSetModal();
+  deleteWeekMenuSet(id);
+}
+function copyWeekMenuSet(id){
+  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
+  if (!s) return;
+  // save current menu back to active set first
+  const cur = (state.weekMenuSets||[]).find(x=>x.id===state.activeWeekMenuSetId);
+  if (cur) cur.menu = state.weekMenu;
+  const newId = 'wset_'+Date.now();
+  const copy = { id: newId, name: s.name+' (複製)', cycleOn: false, menu: JSON.parse(JSON.stringify(s.menu||{})) };
+  state.weekMenuSets.push(copy);
+  state.activeWeekMenuSetId = newId;
+  state.weekMenu = copy.menu;
+  save(); renderMenuTab();
 }
 
 function renderMealChips(){
