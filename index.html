@@ -4043,65 +4043,30 @@ function renderMenuSetSelector(){
   if (!el) return;
   const sets = state.weekMenuSets || [];
   const activeId = state.activeWeekMenuSetId;
-  const cycleCount = sets.filter(s=>s.cycleOn).length;
-  const isoWeek = (d => {
-    const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
-    return Math.round((t-new Date(t.getFullYear(),0,4))/(7*86400000));
-  })(today());
-  const cycleSets = sets.filter(s=>s.cycleOn);
-  const thisWeekSet = cycleSets.length > 1 ? cycleSets[isoWeek % cycleSets.length] : null;
-  const pillStyle = isActive => isActive
-    ? 'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);'
-    : 'background:var(--ic-surface);color:var(--ic-choc-mid);border-color:var(--ic-vanilla);';
   const activeSet = sets.find(s=>s.id===activeId);
   const iconBtnStyle = 'width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
-  // ── Row 1: 選擇正在編輯哪組 ──
-  let r1 = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
-  r1 += `<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);">本週菜單</span>`;
-  r1 += sets.map(s => {
+  let html = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;">`;
+  html += `<span style="font-size:14px;font-weight:600;color:var(--ic-choc-mid);white-space:nowrap;flex-shrink:0;">套用模板</span>`;
+  html += sets.map(s => {
     const isActive = s.id === activeId;
-    const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
     const safeId = s.id.replace(/'/g,"\'");
-    const badge = isThisWeek ? ' <span style="font-size:10px;">★</span>' : '';
-    return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;">${s.name}${badge}</button>`;
+    if (isActive) {
+      return `<button onclick="switchWeekMenuSet('${safeId}')" style="font-size:14px;padding:5px 14px;border-radius:99px;border:1.5px solid var(--ic-caramel);background:var(--ic-caramel);color:#FAF7F2;cursor:pointer;display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i>${s.name}</button>`;
+    } else {
+      return `<button onclick="switchWeekMenuSet('${safeId}')" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;">${s.name}</button>`;
+    }
   }).join('');
-  r1 += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
+  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增模板</button>`;
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
-    r1 += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+    html += `<div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
       <button onclick="openMealConfigModal()" style="font-size:12px;padding:4px 10px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 基本設定</button>
       <button onclick="renameWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:var(--ic-choc-mid);" title="重新命名"><i class="ti ti-pencil" aria-hidden="true"></i></button>
-      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:#A0443C;" title="刪除"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
+      ${sets.length>1?`<button onclick="deleteWeekMenuSet('${safeId}')" style="${iconBtnStyle}color:#A0443C;" title="刪除此模板"><i class="ti ti-trash" aria-hidden="true"></i></button>`:''}
     </div>`;
   }
-  r1 += `</div>`;
-  // ── Row 2: 循環排程設定（只在多組時顯示）──
-  let r2 = '';
-  if (sets.length > 1) {
-    r2 += `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--ic-vanilla);">`;
-    r2 += `<span style="font-size:12px;font-weight:600;color:var(--ic-choc-mid);white-space:nowrap;flex-shrink:0;">循環排程</span>`;
-    r2 += sets.map(s => {
-      const inCycle = s.cycleOn !== false;
-      const safeId = s.id.replace(/'/g,"\'");
-      return inCycle
-        ? `<button onclick="toggleSetCycle('${safeId}',false)" style="font-size:13px;padding:4px 12px;border-radius:99px;border:1.5px solid #6BAF92;background:#E8F5EE;color:#3A8060;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> ${s.name} 循環中</button>`
-        : `<button onclick="toggleSetCycle('${safeId}',true)" style="font-size:13px;padding:4px 12px;border-radius:99px;border:1.5px dashed #ccc;background:var(--ic-surface);color:#999;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> ${s.name} 加入循環</button>`;
-    }).join('');
-    if (cycleCount > 1) {
-      const offset = state.weekMenuCycleOffset || 0;
-      const thisWeekName = thisWeekSet ? thisWeekSet.name : '？';
-      const navBtnStyle = 'border:none;background:var(--ic-lemon);cursor:pointer;font-size:16px;color:var(--ic-choc-mid);padding:2px 6px;border-radius:6px;line-height:1.2;';
-      r2 += `<div style="margin-left:auto;display:flex;align-items:center;gap:6px;background:var(--ic-lemon);padding:4px 10px;border-radius:99px;">
-        <span style="font-size:12px;color:var(--ic-choc-mid);white-space:nowrap;">本週用</span>
-        <button onclick="shiftCycleOffset(-1)" style="${navBtnStyle}" title="換上一組">‹</button>
-        <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;">${thisWeekName}</span>
-        <button onclick="shiftCycleOffset(1)" style="${navBtnStyle}" title="換下一組">›</button>
-        ${offset!==0?`<button onclick="shiftCycleOffset(0,true)" style="border:none;background:none;cursor:pointer;font-size:11px;color:#B05050;padding:0;white-space:nowrap;" title="重設為自動">↺ 重設</button>`:''}
-      </div>`;
-    }
-    r2 += `</div>`;
-  }
-  el.innerHTML = r1 + r2;
+  html += `</div>`;
+  el.innerHTML = html;
 }
 
 function toggleWsetMenu(dropId){
