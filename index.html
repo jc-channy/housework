@@ -4094,17 +4094,17 @@ function renderMenuSetSelector(){
   const pillStyle = isActive => isActive
     ? 'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);'
     : 'background:var(--ic-surface);color:var(--ic-choc-mid);border-color:var(--ic-vanilla);';
-  let html = `<span style="font-size:13px;font-weight:500;color:var(--ic-chocolate);margin-right:4px;">本週菜單</span>`;
+  let html = `<span style="font-size:15px;font-weight:600;color:var(--ic-chocolate);margin-right:4px;">本週菜單</span>`;
   html += sets.map(s => {
     const isActive = s.id === activeId;
     const isThisWeek = thisWeekSet && thisWeekSet.id === s.id;
     const safeId = s.id.replace(/'/g,"\'");
     const cycleIcon = s.cycleOn ? '<span style="color:#6BAF92;font-size:9px;margin-right:2px;">●</span>' : '';
     const badge = isThisWeek ? ' <span style="font-size:9px;opacity:0.85;">★本週</span>' : '';
-    return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:11px;padding:4px 11px;border-radius:99px;border:0.5px solid;cursor:pointer;">${cycleIcon}${s.name}${badge}</button>`;
+    return `<button onclick="switchWeekMenuSet('${safeId}')" style="${pillStyle(isActive)}font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px solid;cursor:pointer;">${cycleIcon}${s.name}${badge}</button>`;
   }).join('');
-  html += `<button onclick="addWeekMenuSet()" style="font-size:11px;padding:4px 11px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:10px;" aria-hidden="true"></i> 新增</button>`;
-  if (cycleCount > 1) html += `<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);">${cycleCount} 週循環</span>`;
+  html += `<button onclick="addWeekMenuSet()" style="font-size:14px;padding:5px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增</button>`;
+  if (cycleCount > 1) html += `<span style="font-size:12px;padding:3px 9px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);">${cycleCount} 週循環</span>`;
   const activeSet = sets.find(s=>s.id===activeId);
   if (activeSet) {
     const safeId = activeSet.id.replace(/'/g,"\'");
@@ -4661,8 +4661,11 @@ function renderTodayMenuCard(){
       </div>`;
     }
   });
-  if (!hasAny){ el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
+  if (!hasAny){
+    document.getElementById('atikaTodayMenuBody').innerHTML = `<div style="font-size:13px;color:var(--ic-choc-mid);padding:8px 0;text-align:center;">今日尚未規劃菜色 / Belum ada menu hari ini</div>`;
+    return;
+  }
   document.getElementById('atikaTodayMenuBody').innerHTML = html;
 }
 
