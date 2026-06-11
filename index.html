@@ -4281,6 +4281,35 @@ function renderMenuMainArea(){
   }
 }
 
+// ── 矩陣格子內容（與舊版 renderMenuCell 同樣呈現） ──
+function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark){
+  if(!cell || cell.type==='empty' || (!cell.type && !dishes.length)){
+    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:20px;color:#C8B49A;">＋</span></div>`;
+  }
+  if(cell.type==='skip'){
+    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:12px;font-weight:600;color:#6B5E52;">${cell.skipReason||'今天不煮'}</span></div>`;
+  }
+  if(!dishes.length){
+    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:20px;color:#C8B49A;">＋</span></div>`;
+  }
+  const shown = dishes.slice(0,3);
+  const dishHtml = shown.map((d,di)=>{
+    const _dm=(d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
+    const methodLabel=_dm.map(m=>`<span style="font-size:11px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:4px;padding:1px 5px;">${m}</span>`).join(' ');
+    const ingPills=(d.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);if(!ing)return null;const cc=catColors[ing.category]||'#A89880';return `<span style="font-size:11px;font-weight:600;padding:1px 5px;border-radius:99px;background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`;}).filter(Boolean).join('');
+    const nameStr=d.dishName?`<span style="font-size:13px;font-weight:700;color:#2A1508;line-height:1.3;">${d.dishName}</span>`:'';
+    const noteStr=(d.note||d.noteId)?`<span style="font-size:10px;color:#9A7A58;font-style:italic;">${d.note||d.noteId}</span>`:'';
+    const isLast=di===shown.length-1;
+    return `<div style="display:flex;flex-direction:column;gap:2px;${isLast?'':'padding-bottom:4px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
+      ${methodLabel?`<div style="display:flex;gap:3px;flex-wrap:wrap;">${methodLabel}${noteStr?` ${noteStr}`:''}</div>`:(noteStr||'')}
+      ${nameStr}
+      ${ingPills?`<div style="display:flex;flex-wrap:wrap;gap:2px;">${ingPills}</div>`:''}
+    </div>`;
+  }).join('');
+  const more=dishes.length>3?`<span style="font-size:10px;color:var(--ic-caramel);">＋${dishes.length-3} 道</span>`:'';
+  return dishHtml+more;
+}
+
 // ── 菜單矩陣共用 ──
 function _renderMenuMatrix(setId, editable){
   const set = (state.weekMenuSets||[]).find(s=>s.id===setId);
@@ -4312,39 +4341,21 @@ function _renderMenuMatrix(setId, editable){
       const cell = menu[key]||{type:'cook',dishes:[]};
       const isSkip = cell.type==='skip';
       const dishes = cell.dishes||[];
-      const hasFilled = dishes.some(d=>(d.dishName||'').trim()||(d.ingredientIds||[]).length);
-      const preview = dishes.slice(0,2).map(d=>{
-        if((d.dishName||'').trim()) return d.dishName.trim();
-        const ic=(d.ingredientIds||[]).length;
-        return ic ? `${ic}項食材` : '';
-      }).filter(Boolean);
-      const cellStyle = `padding:4px;border-radius:6px;min-height:40px;vertical-align:top;`;
+      const allIngs = state.ingredients||[];
+      const catColors = state.mealConfig.ingCategoryColors||{};
+      const cellInnerHtml = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
+      const cellStyle = `padding:4px;vertical-align:top;`;
       if(editable){
         html += `<td style="${cellStyle}">
           <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')"
-            style="min-height:40px;border-radius:6px;border:1px dashed ${isSkip?'#ccc':color+'60'};background:${isSkip?'#F5F5F5':light};cursor:pointer;padding:4px 5px;display:flex;flex-direction:column;gap:2px;"
-          >
-            ${isSkip
-              ? `<span style="font-size:10px;color:#999;">✕ ${cell.skipReason||'略過'}</span>`
-              : preview.length
-                ? preview.map(n=>`<span style="font-size:10px;color:${dark};line-height:1.3;">${n}</span>`).join('')+(dishes.length>2?`<span style="font-size:9px;color:${color};">+${dishes.length-2}</span>`:'')
-                : hasFilled
-                  ? `<span style="font-size:10px;color:${color};">✓ ${dishes.length}道</span>`
-                  : `<span style="font-size:10px;color:${color}60;">+ 填入</span>`
-            }
+            style="min-height:64px;border-radius:10px;border:${isSkip?'0.5px solid #D0C8C0':'0.5px solid #DDD0C0'};background:${isSkip?'#EDEBE7':light};cursor:pointer;padding:8px 8px;display:flex;flex-direction:column;gap:4px;">
+            ${cellInnerHtml}
           </div>
         </td>`;
       } else {
         html += `<td style="${cellStyle}">
-          <div style="min-height:40px;border-radius:6px;background:${isSkip?'#F5F5F5':light};padding:4px 5px;display:flex;flex-direction:column;gap:2px;">
-            ${isSkip
-              ? `<span style="font-size:10px;color:#999;">✕</span>`
-              : preview.length
-                ? preview.map(n=>`<span style="font-size:10px;color:${dark};line-height:1.3;">${n}</span>`).join('')+(dishes.length>2?`<span style="font-size:9px;color:${color};">+${dishes.length-2}</span>`:'')
-                : hasFilled
-                  ? `<span style="font-size:10px;color:${color};">✓ ${dishes.length}道</span>`
-                  : `<span style="font-size:10px;color:#ccc;">—</span>`
-            }
+          <div style="min-height:64px;border-radius:10px;border:0.5px solid #DDD0C0;background:${isSkip?'#EDEBE7':light};padding:8px 8px;display:flex;flex-direction:column;gap:4px;">
+            ${cellInnerHtml}
           </div>
         </td>`;
       }
