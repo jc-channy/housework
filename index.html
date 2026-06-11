@@ -4336,13 +4336,13 @@ function renderMenuMainArea(){
 // ── 矩陣格子內容（與舊版 renderMenuCell 同樣呈現） ──
 function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark){
   if(!cell || cell.type==='empty' || (!cell.type && !dishes.length)){
-    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:20px;color:#C8B49A;">＋</span></div>`;
+    return `<div style="display:flex;align-items:center;justify-content:center;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
   }
   if(cell.type==='skip'){
     return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:12px;font-weight:600;color:#6B5E52;">${cell.skipReason||'今天不煮'}</span></div>`;
   }
   if(!dishes.length){
-    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:20px;color:#C8B49A;">＋</span></div>`;
+    return `<div style="display:flex;align-items:center;justify-content:center;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
   }
   const shown = dishes.slice(0,3);
   const dishHtml = shown.map((d,di)=>{
@@ -4368,6 +4368,7 @@ function _renderMenuMatrix(setId, editable){
   if(!set) return '';
   const meals = (set.meals||[]).filter(m=>m.enabled!==false);
   const days = ['一','二','三','四','五','六','日'];
+  const dayEn = ['Mon.','Tue.','Wed.','Thu.','Fri.','Sat.','Sun.'];
   const dayKeys = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   if(meals.length===0){
     if(!editable) return `<div style="font-size:12px;color:var(--ic-sand);padding:16px;text-align:center;">尚未設定餐次</div>`;
@@ -4391,7 +4392,10 @@ function _renderMenuMatrix(setId, editable){
     </tr></thead><tbody>`;
 
   dayKeys.forEach((dk, di)=>{
-    html += `<tr><td style="padding:4px 8px;color:var(--ic-sand);font-size:12px;font-weight:600;white-space:nowrap;vertical-align:top;padding-top:12px;">${days[di]}</td>`;
+    html += `<tr><td style="padding:4px 8px;white-space:nowrap;vertical-align:top;padding-top:10px;text-align:center;">
+      <div style="font-size:13px;font-weight:700;color:var(--ic-text);">週${days[di]}</div>
+      <div style="font-size:10px;color:var(--ic-sand);margin-top:1px;">${dayEn[di]}</div>
+    </td>`;
     meals.forEach(meal=>{
       const key = `${meal.name}_${dk}`;
       const menu = _getSetMenu(setId);
@@ -4399,7 +4403,8 @@ function _renderMenuMatrix(setId, editable){
       const isSkip = cell.type==='skip';
       const dishes = cell.dishes||[];
       const inner = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
-      const cellDiv = `height:80px;overflow-y:auto;border-radius:10px;border:0.5px solid ${isSkip?'#D0C8C0':'#DDD0C0'};background:${isSkip?'#EDEBE7':light};padding:7px 8px;display:flex;flex-direction:column;gap:3px;`;
+      const lightPale = light+'88';
+      const cellDiv = `min-height:56px;border-radius:10px;border:0.5px solid ${isSkip?'#D8D4CF':'#E4DDD4'};background:${isSkip?'#F0EDEA':lightPale};padding:7px 8px;display:flex;flex-direction:column;gap:3px;`;
       if(editable){
         html += `<td style="padding:4px;vertical-align:top;">
           <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')" style="${cellDiv}cursor:pointer;">${inner}</div></td>`;
@@ -4486,7 +4491,7 @@ function renderMenuEditMode(){
           style="flex:1;font-size:14px;font-weight:600;color:${color};padding:5px 10px;border-radius:8px;border:1.5px solid ${color}50;background:${light};min-width:0;">
         <!-- 循環排程 toggle -->
         <label style="display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;" title="循環排程">
-          <div onclick="_toggleSetEnabled(\'${s.id}\')"
+          <div onclick="_toggleSetEnabled(_menuEditTargetSetId)"
             style="width:34px;height:20px;border-radius:99px;background:${disabled?'#D5C5B0':'#3A9A6E'};position:relative;cursor:pointer;transition:background .2s;">
             <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;${disabled?'left:2px':'left:16px'};transition:left .2s;"></div>
           </div>
