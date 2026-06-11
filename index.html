@@ -5005,6 +5005,7 @@ function saveMenuCell(){
   } else {
     state.weekMenu[_menuCellKey] = cellData;
   }
+  console.log('[saveMenuCell] key='+_menuCellKey+' tgtSetId='+(_tgtSet&&_tgtSet.id)+' dishes='+JSON.stringify(cellData.dishes||[])+'  tgtMenu='+JSON.stringify(_tgtSet&&_tgtSet.menu||{}));
   save(); closeMenuCellModal(); renderMenuTab(); renderTodayMenuCard();
 }
 function openMenuCellForSet(setId, key){
