@@ -1061,7 +1061,7 @@
       <!-- 分類篩選 -->
       <div class="mb-1">
         <div id="supplyCatFilters" class="flex flex-wrap gap-2 mb-1">
-          <button class="sc-filter font-semibold border" style="padding:6px 14px;border-radius:99px;font-size:16px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+          <button class="sc-filter font-semibold border" style="padding:4px 12px;border-radius:99px;font-size:13px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
         </div>
         <div class="flex items-center justify-between mt-2 mb-3">
           <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
@@ -9838,7 +9838,7 @@ function renderSupplyCatFilters(){
   state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
     b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
-    b.style.fontSize='17px'; b.style.padding='6px 14px';
+    b.style.fontSize='13px'; b.style.padding='4px 12px';
     if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='#EDE8E0'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='#C8B89A'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
