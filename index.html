@@ -1163,6 +1163,8 @@
         <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
           <!-- 組別列 -->
           <div id="menuSetSelector" class="px-4 py-3" style="border-bottom:1px solid var(--ic-vanilla);"></div>
+          <!-- Context Bar -->
+          <div id="menuContextBar" style="border-bottom:1px solid var(--ic-vanilla);"></div>
           <!-- 週狀態一覽 -->
           <div id="menuWeekStrip" style="border-bottom:1px solid var(--ic-vanilla);padding:0;"></div>
           <!-- 日詳細 -->
@@ -1241,7 +1243,10 @@
 <div id="mealConfigModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-4">
-      <div class="text-lg font-bold">餐次與情境設定</div>
+      <div>
+        <div class="text-lg font-bold">餐次設定</div>
+        <div id="mealConfigSetName" class="text-xs mt-0.5" style="color:var(--ic-choc-mid);"></div>
+      </div>
       <button onclick="document.getElementById('mealConfigModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="flex items-center justify-between mb-2">
@@ -3097,6 +3102,10 @@ async function cloudPull(){
         if (d.weekMenuSets       !== undefined && Array.isArray(d.weekMenuSets) && d.weekMenuSets.length) state.weekMenuSets = d.weekMenuSets;
         if (d.activeWeekMenuSetId!== undefined) state.activeWeekMenuSetId = d.activeWeekMenuSetId;
         if (d.weekMenuCycleOffset!== undefined) state.weekMenuCycleOffset = d.weekMenuCycleOffset;
+        if (d.scheduleRotation    !== undefined) state.scheduleRotation    = d.scheduleRotation;
+        if (d.scheduleOverrides   !== undefined) state.scheduleOverrides   = d.scheduleOverrides;
+        if (d.scheduleBaseWeekKey !== undefined) state.scheduleBaseWeekKey = d.scheduleBaseWeekKey;
+        if (d.scheduleBaseIndex   !== undefined) state.scheduleBaseIndex   = d.scheduleBaseIndex;
         // 拉取後重新同步 active set 的 menu
         // 只有 set.menu 有實際資料時才覆蓋，避免空 set.menu 清掉頂層 weekMenu
         { const _ps = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
@@ -3906,18 +3915,20 @@ function getCurrentCycleMenu(){
   return thisSet.menu || {};
 }
 
-let _menuActiveDow = null;  // 目前選取的星期幾（0=日,1=一...6=六）
-let _selectedWSetId = null; // 三區選取中的模板 id
+let _menuActiveDow = null;  // 目前選取的星期幾
 let _wSetClickTimer = null; // 單擊/雙擊防衝突計時器
-let _arrangeMode = false;   // 排列模式開關
-let _previewSetId = null;   // 停用中預覽模板 id
+let _viewingSetId = null;   // 時間軸選中的組 id（null=本週組）
+let _shopWeekKey = null;    // 購物清單展開中的週 key
+let _selectedWSetId = null; // 管理面板中選取的 id（舊相容）
+let _arrangeMode = false;
+let _previewSetId = null;
 
 /* ========== 菜單：週狀態一覽 ========== */
 function renderMenuWeekStrip(){
   const el = document.getElementById('menuWeekStrip');
   if (!el) return;
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
-  if (!meals.length){ el.innerHTML='<p style="font-size:13px;color:var(--ic-choc-mid);padding:10px 14px;">請先在「基本設定」啟用至少一餐</p>'; return; }
+  const meals = getActiveSetMeals();
+  if (!meals.length){ el.innerHTML='<p style="font-size:13px;color:var(--ic-choc-mid);padding:10px 14px;">請先在「編輯此組設定」啟用至少一餐</p>'; return; }
   const todayDow = today().getDay();
   const DOW_ORDER = [1,2,3,4,5,6,0];
   const DOW_ZH = ['日','一','二','三','四','五','六'];
@@ -4057,6 +4068,7 @@ function renderMenuDayDetail(){
 // ── 渲染 Tab ──
 function renderMenuTab(){
   renderMenuSetSelector();
+  renderMenuContextBar();
   renderMenuWeekStrip();
   renderMenuDayDetail();
   renderIngredientList();
@@ -4071,289 +4083,307 @@ function toggleIngLib(){
   if (!body.classList.contains('hidden')){ renderIngredientList(); renderIngCatList(); }
 }
 
+/* ========== 週期排程 UI 工具 ========== */
+function isoWeekDateRange(wk){
+  const[y,w]=wk.split('-W').map(Number);
+  const jan4=new Date(y,0,4);
+  const thu1=new Date(jan4); thu1.setDate(jan4.getDate()+(4-jan4.getDay()));
+  const mon1=new Date(thu1); mon1.setDate(thu1.getDate()-3);
+  const monW=new Date(mon1); monW.setDate(mon1.getDate()+(w-1)*7);
+  const sunW=new Date(monW); sunW.setDate(monW.getDate()+6);
+  return {start:monW,end:sunW};
+}
+function fmtWeekRange(wk){
+  const{start,end}=isoWeekDateRange(wk);
+  const sm=start.getMonth()+1,sd=start.getDate();
+  const em=end.getMonth()+1,ed=end.getDate();
+  return sm===em?`${sm}/${sd}–${ed}`:`${sm}/${sd}–${em}/${ed}`;
+}
+function getNextNWeekKeys(n){
+  const keys=[];const d=new Date();
+  for(let i=0;i<n;i++){keys.push(getISOWeekKey(d));d.setDate(d.getDate()+7);}
+  return keys;
+}
+function viewWeekInTimeline(wk){
+  const setId=getWeekSetId(wk);
+  if(!setId) return;
+  _viewingSetId=setId;
+  switchWeekMenuSet(setId);
+}
+function openInsertOverride(wk){
+  const sets=state.weekMenuSets||[];
+  if(!sets.length) return;
+  const curId=getWeekSetId(wk);
+  const el=document.getElementById('menuSetSelector');
+  el._pendingOverrideKey=wk;
+  document.getElementById('overrideWeekLabel').textContent=fmtWeekRange(wk);
+  const sel=document.getElementById('overrideSetSelect');
+  sel.innerHTML=sets.map(s=>`<option value="${s.id}"${s.id===curId?' selected':''}>${s.name}</option>`).join('');
+  document.getElementById('overridePanel').classList.remove('hidden');
+}
+function confirmOverride(){
+  const el=document.getElementById('menuSetSelector');
+  const key=el._pendingOverrideKey;
+  const setId=document.getElementById('overrideSetSelect').value;
+  if(!key||!setId) return;
+  document.getElementById('overridePanel').classList.add('hidden');
+  setScheduleOverride(key,setId);
+}
+function cancelOverride(){
+  document.getElementById('overridePanel').classList.add('hidden');
+}
+function rotationMoveUp(idx){
+  const rot=state.scheduleRotation||[];
+  if(idx<=0) return;
+  [rot[idx-1],rot[idx]]=[rot[idx],rot[idx-1]];
+  recalibrateSchedule(); renderMenuTab();
+}
+function rotationMoveDown(idx){
+  const rot=state.scheduleRotation||[];
+  if(idx>=rot.length-1) return;
+  [rot[idx],rot[idx+1]]=[rot[idx+1],rot[idx]];
+  recalibrateSchedule(); renderMenuTab();
+}
+function removeFromRotation(setId){
+  state.scheduleRotation=(state.scheduleRotation||[]).filter(id=>id!==setId);
+  recalibrateSchedule(); save(); renderMenuTab();
+}
+function addToRotation(setId){
+  if(!state.scheduleRotation) state.scheduleRotation=[];
+  if(!state.scheduleRotation.includes(setId)) state.scheduleRotation.push(setId);
+  recalibrateSchedule(); save(); renderMenuTab();
+}
+function getWeekShoppingList(wk){
+  const setId=getWeekSetId(wk);
+  const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
+  const menu=setId===state.activeWeekMenuSetId?state.weekMenu:(s?s.menu||{}:{});
+  const catMap={};
+  Object.values(menu).forEach(cell=>{
+    if(!cell||cell.type==='skip') return;
+    (cell.dishes||[]).forEach(d=>{
+      (d.ingredientIds||[]).forEach(id=>{
+        const ing=(state.ingredients||[]).find(x=>x.id===id);
+        if(!ing) return;
+        const cat=ing.category||'其他';
+        if(!catMap[cat]) catMap[cat]=new Set();
+        catMap[cat].add(ing.name);
+      });
+    });
+  });
+  const result={};
+  Object.entries(catMap).forEach(([cat,set])=>{ result[cat]=[...set]; });
+  return result;
+}
+
+/* ========== Context Bar ========== */
+function renderMenuContextBar(){
+  const el=document.getElementById('menuContextBar');
+  if(!el) return;
+  const sets=state.weekMenuSets||[];
+  const viewId=_viewingSetId||state.activeWeekMenuSetId;
+  const viewSet=sets.find(s=>s.id===viewId);
+  if(!viewSet){el.innerHTML='';return;}
+  const curWk=getISOWeekKey(today());
+  const autoSetId=getWeekSetId(curWk);
+  const isCurrentWeek=(viewId===autoSetId)||(viewId===state.activeWeekMenuSetId&&!_viewingSetId);
+  const override=(state.scheduleOverrides||{})[curWk];
+  const statusBadge=override
+    ?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#FFF0C8;color:#8A5800;border:0.5px solid #D4A020;"><i class="ti ti-replace" style="font-size:10px;" aria-hidden="true"></i> 插隊</span>`
+    :isCurrentWeek
+    ?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#C07030;color:#FEF0D8;"><i class="ti ti-crown" style="font-size:10px;" aria-hidden="true"></i> 本週生效</span>`
+    :`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#FEF0D8;color:#9A5020;border:0.5px solid #C07030;"><i class="ti ti-eye" style="font-size:10px;" aria-hidden="true"></i> 檢視中</span>`;
+  const meals=getSetMealsAll(viewId).filter(m=>m.enabled);
+  const mealNames=meals.map(m=>m.name).join('・')||'尚未設定餐次';
+  const overrideBtn=isCurrentWeek&&!override
+    ?`<button onclick="openInsertOverride('${curWk}')" style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid #D8CEC4;color:#9A7A5A;background:none;cursor:pointer;white-space:nowrap;"><i class="ti ti-replace" style="font-size:11px;" aria-hidden="true"></i> 插隊本週</button>`
+    :override?`<button onclick="removeScheduleOverride('${curWk}')" style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid #D4A020;color:#8A5800;background:none;cursor:pointer;white-space:nowrap;">取消插隊</button>`:'';
+  const safeViewId=viewId.replace(/'/g,"\\'");
+  el.innerHTML=`<div style="background:#FFF8F2;border-left:3px solid #C07030;border-radius:0;padding:9px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">
+      ${statusBadge}
+      <span style="font-size:15px;font-weight:500;color:#4A2008;">${viewSet.name}</span>
+      <span style="font-size:12px;color:#9A7A5A;">${mealNames}</span>
+    </div>
+    ${overrideBtn}
+    <button onclick="openSetMealConfig('${safeViewId}')" style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid #D8CEC4;color:#9A7A5A;background:none;cursor:pointer;white-space:nowrap;"><i class="ti ti-settings" style="font-size:11px;" aria-hidden="true"></i> 編輯此組設定</button>
+  </div>`;
+}
+
+/* ========== 新版 renderMenuSetSelector ========== */
 function renderMenuSetSelector(){
-  const el = document.getElementById('menuSetSelector');
-  if (!el) return;
-  const sets = state.weekMenuSets || [];
-  const activeId = state.activeWeekMenuSetId;
-  const activeSet = sets.find(s=>s.id===activeId);
+  const el=document.getElementById('menuSetSelector');
+  if(!el) return;
+  const sets=state.weekMenuSets||[];
+  const rot=state.scheduleRotation||[];
+  const curWk=getISOWeekKey(today());
+  const weekKeys=getNextNWeekKeys(6);
+  const TS='display:inline-flex;flex-direction:column;gap:2px;min-width:100px;flex:0 0 auto;padding:9px 10px;border-radius:10px;cursor:pointer;border:none;text-align:left;font-family:inherit;';
 
-  // Zone classification
-  const leftSets  = sets.filter(s => s.id === activeId);
-  const midSets   = sets.filter(s => s.id !== activeId && s.cycleOn !== false);
-  const rightSets = sets.filter(s => s.id !== activeId && s.cycleOn === false);
+  const titleRow=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+    <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-chef-hat" style="font-size:20px;" aria-hidden="true"></i> 菜單設計</span>
+    <button onclick="addWeekMenuSet()" style="font-size:13px;padding:5px 12px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:12px;" aria-hidden="true"></i> 新增菜單組</button>
+  </div>`;
 
-  const MOVE_BTN = 'background:none;border:none;outline:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;color:#C07030;font-weight:700;font-size:12px;';
-  const ARR_ST  = 'font-size:26px;font-weight:900;line-height:1;text-decoration:none;';
-  const TXT_ST  = 'text-decoration:underline;text-underline-offset:3px;';
+  const timelineCards=weekKeys.map((wk,i)=>{
+    const setId=getWeekSetId(wk);
+    const s=sets.find(x=>x.id===setId);
+    const isThisWk=wk===curWk;
+    const isOv=!!(state.scheduleOverrides||{})[wk];
+    let st,dc,nc,sc;
+    if(isThisWk){st=TS+'background:#C07030;border:2px solid #C07030;';dc='#FEE8C8';nc='#FFF8F0';sc='#F0C898';}
+    else if(isOv){st=TS+'background:#FFFBEE;border:0.5px solid #D4A020;';dc='#A07820';nc='#7A4A00';sc='#A07820';}
+    else if(i===1){st=TS+'background:#FFF8F2;border:0.5px solid #E0C8A8;';dc='#B09878';nc='#4A2008';sc='#9A7A5A';}
+    else{st=TS+'background:#F5F0EB;border:0.5px solid #E0D8CE;';dc='#C0B0A0';nc='#9A8878';sc='#B8A898';}
+    const badge=isThisWk
+      ?`<span style="font-size:10px;padding:1px 5px;border-radius:99px;background:rgba(255,255,255,0.25);color:#FEF0D8;margin-top:2px;display:inline-block;">本週</span>`
+      :isOv?`<span style="font-size:10px;padding:1px 5px;border-radius:99px;background:#FFF0C8;color:#8A5800;margin-top:2px;display:inline-block;">插隊</span>`
+      :i===1?`<span style="font-size:10px;padding:1px 5px;border-radius:99px;background:#FEF0D8;color:#9A5020;margin-top:2px;display:inline-block;">下週</span>`:'';
+    const mealTxt=s?(s.meals||[]).filter(m=>m.enabled).map(m=>m.name).join('・'):'';
+    const shopIcon=`<button onclick="event.stopPropagation();_shopWeekKey=_shopWeekKey==='${wk}'?null:'${wk}';renderMenuSetSelector();" style="font-size:10px;padding:1px 5px;border-radius:6px;background:rgba(255,255,255,0.15);border:none;cursor:pointer;color:${nc};margin-top:2px;" title="購物清單"><i class="ti ti-shopping-cart" style="font-size:10px;" aria-hidden="true"></i></button>`;
+    return `<button onclick="viewWeekInTimeline('${wk}')" style="${st}">
+      <span style="font-size:10px;color:${dc};">${fmtWeekRange(wk)}</span>
+      <span style="font-size:13px;font-weight:500;color:${nc};">${s?s.name:'（空）'}</span>
+      <span style="font-size:10px;color:${sc};">${mealTxt||'—'}</span>
+      <div style="display:flex;align-items:center;gap:4px;">${badge}${shopIcon}</div>
+    </button>`;
+  }).join('');
 
-  function pillHtml(s, zone){
-    const safeId = s.id.replace(/'/g,"\'");
-    const pillBase = 'font-size:14px;padding:6px 13px;border-radius:99px;white-space:nowrap;border:none;';
-    const pillSt = zone === 'left'
-      ? pillBase + 'background:#C07030;color:#FFF8F0;cursor:default;'
-      : zone === 'mid'
-      ? pillBase + 'background:#F0E6D8;color:#7A5828;cursor:pointer;'
-      : pillBase + 'background:#DDD4C8;color:#7A6A5A;cursor:pointer;';
+  const timeline=`<div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;">
+    ${timelineCards}
+    <button onclick="openInsertOverride('${curWk}')" style="${TS}background:transparent;border:0.5px dashed #D8CEC4;align-items:center;justify-content:center;min-height:72px;" title="插隊本週">
+      <i class="ti ti-replace" style="font-size:16px;color:#C0B0A0;" aria-hidden="true"></i>
+      <span style="font-size:11px;color:#C0B0A0;margin-top:2px;">插隊</span>
+    </button>
+  </div>`;
 
-    if (!_arrangeMode) {
-      // 一般模式：單擊預覽菜單（三區統一），雙擊編輯名稱
-      // 切換本週菜單請使用「排列」模式的 « 按鈕
-      const isPreview = _previewSetId === s.id;
-      const previewRing = isPreview ? 'outline:2px dashed #9A8878;outline-offset:2px;' : '';
-      const tipTxt = zone === 'left'
-        ? '點選預覽菜單內容・雙擊編輯名稱'
-        : '點選預覽菜單內容・雙擊編輯名稱・排列模式可移區';
-      return `<div style="display:inline-flex;align-items:center;margin:0 4px 6px 0;">
-        <button onclick="previewMenuSet('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="${tipTxt}" style="${pillSt}${previewRing}">${s.name}</button>
+  const overridePanel=`<div id="overridePanel" class="hidden" style="background:#FFFBEE;border:0.5px solid #D4A020;border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span style="font-size:13px;color:#7A4A00;"><i class="ti ti-replace" style="font-size:13px;" aria-hidden="true"></i> 插隊 <span id="overrideWeekLabel" style="font-weight:500;"></span></span>
+    <select id="overrideSetSelect" style="font-size:13px;border:0.5px solid #D4A020;border-radius:8px;padding:4px 8px;background:#FFFBEE;color:#4A2008;">${sets.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select>
+    <button onclick="confirmOverride()" style="font-size:12px;padding:4px 12px;border-radius:99px;background:#C07030;color:#FEF0D8;border:none;cursor:pointer;">確認</button>
+    <button onclick="cancelOverride()" style="font-size:12px;padding:4px 10px;border-radius:99px;background:none;border:0.5px solid #D8CEC4;color:#9A7A5A;cursor:pointer;">取消</button>
+  </div>`;
+
+  let shopHtml='';
+  if(_shopWeekKey){
+    const sl=getWeekShoppingList(_shopWeekKey);
+    const ssId=getWeekSetId(_shopWeekKey);
+    const ss=sets.find(s=>s.id===ssId);
+    const catColors=state.mealConfig.ingCategoryColors||{};
+    const rows=Object.entries(sl).map(([cat,items])=>{
+      const cc=catColors[cat]||'#A89880';
+      return `<div style="display:flex;align-items:baseline;gap:6px;padding:4px 0;border-bottom:0.5px solid #F0E8DC;">
+        <span style="font-size:11px;padding:2px 7px;border-radius:99px;background:${cc}22;color:${cc};border:0.5px solid ${cc};white-space:nowrap;flex-shrink:0;">${cat}</span>
+        <span style="font-size:12px;color:#4A2008;">${items.join(' · ')}</span>
       </div>`;
-    }
-
-    // 排列模式：選取後顯示 « » 移動按鈕
-    const isSel = _selectedWSetId === s.id;
-    const canLeft  = zone === 'mid' || zone === 'right';
-    const canRight = (zone === 'left' && sets.length > 1) || zone === 'mid';
-    const selRing = isSel ? 'outline:2.5px solid #C07030;outline-offset:2px;' : '';
-    const leftLabel  = zone === 'mid'   ? '設為本週菜單' : '移至循環';
-    const rightLabel = zone === 'left'  ? '移至循環' : '移至停用中';
-    const leftBtn  = (isSel && canLeft)  ? `<span onclick="moveWSet('${safeId}','left')"  style="${MOVE_BTN}"><span style="${ARR_ST}">«</span><span style="${TXT_ST}">${leftLabel}</span></span>` : '';
-    const rightBtn = (isSel && canRight) ? `<span onclick="moveWSet('${safeId}','right')" style="${MOVE_BTN}"><span style="${TXT_ST}">${rightLabel}</span><span style="${ARR_ST}">»</span></span>` : '';
-    return `<div style="display:inline-flex;align-items:center;gap:5px;margin:0 4px 6px 0;flex-wrap:wrap;">
-      ${leftBtn}<button onclick="wSetClick('${safeId}')" ondblclick="wSetDblClick(event,'${safeId}')" title="點選移動・雙擊編輯" style="${pillSt}${selRing}">${s.name}</button>${rightBtn}
+    }).join('');
+    shopHtml=`<div style="background:#FFFDF9;border:0.5px solid #E8DDD0;border-radius:10px;padding:10px 14px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:500;color:#4A2008;"><i class="ti ti-shopping-cart" style="font-size:14px;color:#C07030;margin-right:4px;" aria-hidden="true"></i>${ss?ss.name:''}（${fmtWeekRange(_shopWeekKey)}）食材需求</span>
+        <button onclick="_shopWeekKey=null;renderMenuSetSelector();" style="font-size:14px;color:#9A7A5A;background:none;border:none;cursor:pointer;" aria-label="關閉"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      ${rows||'<div style="font-size:12px;color:#B09878;padding:4px 0;">此週尚未填入菜色</div>'}
     </div>`;
   }
 
-  const arrangeBtnSt = _arrangeMode
-    ? 'font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid #C07030;background:#FEF0D8;color:#C07030;font-weight:700;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;'
-    : 'font-size:13px;padding:6px 12px;border-radius:8px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;';
-  const topRow = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-    <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:6px;"><i class="ti ti-chef-hat" style="font-size:20px;" aria-hidden="true"></i> 菜單設計</span>
-    <button onclick="addWeekMenuSet()" style="font-size:14px;padding:7px 14px;border-radius:99px;border:0.5px dashed var(--ic-caramel);color:var(--ic-caramel);background:transparent;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增一週菜單</button>
-    <button onclick="toggleArrangeMode()" style="${arrangeBtnSt}"><i class="ti ti-layout-columns" style="font-size:13px;" aria-hidden="true"></i> ${_arrangeMode ? '排列中 ✓' : '排列'}</button>
-    ${activeSet ? `<div style="margin-left:auto;"><button onclick="openMealConfigModal()" style="font-size:14px;padding:7px 14px;border-radius:10px;border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);color:var(--ic-choc-mid);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-settings" style="font-size:14px;" aria-hidden="true"></i> 基本設定</button></div>` : ''}
+  const inRot=rot.map(id=>sets.find(s=>s.id===id)).filter(Boolean);
+  const bench=sets.filter(s=>!rot.includes(s.id));
+  const curSetId=getWeekSetId(curWk);
+  const rotRows=inRot.map((s,i)=>{
+    const isLive=s.id===curSetId;
+    const sid=s.id.replace(/'/g,"\\'");
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid #F0E8DC;">
+      <div style="width:22px;height:22px;border-radius:50%;background:#C07030;color:#FEF0D8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <span style="font-size:13px;font-weight:500;color:#4A2008;">${s.name}</span>
+        ${isLive?'<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:#C07030;color:#FEF0D8;margin-left:5px;">本週</span>':''}
+        <div style="font-size:11px;color:#9A7A5A;">${(s.meals||[]).filter(m=>m.enabled).map(m=>m.name).join('・')||'—'}</div>
+      </div>
+      <div style="display:flex;gap:2px;flex-shrink:0;">
+        <button onclick="rotationMoveUp(${i})" ${i===0?'disabled':''} style="font-size:13px;padding:2px 6px;border-radius:6px;border:0.5px solid #E8DDD0;background:none;cursor:pointer;color:#9A7A5A;">↑</button>
+        <button onclick="rotationMoveDown(${i})" ${i===inRot.length-1?'disabled':''} style="font-size:13px;padding:2px 6px;border-radius:6px;border:0.5px solid #E8DDD0;background:none;cursor:pointer;color:#9A7A5A;">↓</button>
+        <button onclick="openEditWeekMenuSet('${sid}')" style="font-size:11px;padding:2px 7px;border-radius:6px;border:0.5px solid #E8DDD0;background:none;cursor:pointer;color:#9A7A5A;"><i class="ti ti-edit" style="font-size:12px;" aria-hidden="true"></i></button>
+        <button onclick="removeFromRotation('${sid}')" style="font-size:11px;padding:2px 7px;border-radius:6px;border:0.5px solid #F0DADA;background:none;cursor:pointer;color:#C04040;"><i class="ti ti-minus" style="font-size:12px;" aria-hidden="true"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+  const benchRows=bench.map(s=>{
+    const sid=s.id.replace(/'/g,"\\'");
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+      <div style="width:22px;height:22px;border-radius:50%;background:#EDE0D4;color:#9A7A5A;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-archive" style="font-size:12px;" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0;">
+        <span style="font-size:13px;color:#7A6A5A;">${s.name}</span>
+        <div style="font-size:11px;color:#B09878;">${(s.meals||[]).filter(m=>m.enabled).map(m=>m.name).join('・')||'—'}</div>
+      </div>
+      <button onclick="addToRotation('${sid}')" style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid #C07030;color:#C07030;background:none;cursor:pointer;white-space:nowrap;">加入排程</button>
+      <button onclick="openEditWeekMenuSet('${sid}')" style="font-size:11px;padding:2px 7px;border-radius:6px;border:0.5px solid #E8DDD0;background:none;cursor:pointer;color:#9A7A5A;"><i class="ti ti-edit" style="font-size:12px;" aria-hidden="true"></i></button>
+    </div>`;
+  }).join('');
+
+  const mgmtContent=`<div>
+    <div style="font-size:11px;letter-spacing:.06em;color:#B09878;text-transform:uppercase;margin-bottom:6px;">循環排程</div>
+    <div>${rotRows||'<div style="font-size:12px;color:#B09878;padding:6px 0;">尚無排程組別</div>'}</div>
+    ${bench.length?`<div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #EDE0D4;">
+      <div style="font-size:11px;letter-spacing:.06em;color:#B09878;text-transform:uppercase;margin-bottom:6px;">備用（未排程）</div>
+      <div>${benchRows}</div>
+    </div>`:''}
   </div>`;
 
-  const hint = (_arrangeMode && _selectedWSetId) ? `<div style="font-size:12px;color:#C07030;margin-bottom:6px;padding:5px 10px;background:#FEF0D8;border-radius:8px;display:inline-block;">點選 « » 移動・再點一下標籤取消選取・雙擊編輯名稱</div>` : (_arrangeMode ? `<div style="font-size:12px;color:var(--ic-choc-mid);margin-bottom:6px;padding:5px 10px;background:var(--ic-lemon);border-radius:8px;display:inline-block;">排列模式：點選標籤後用 « » 移動區塊</div>` : '');
-
-  const emptySpan = `<span style="font-size:12px;color:#B0A090;font-style:italic;">無</span>`;
-  const zoneRow = `<div style="display:flex;border:1px solid #D4C0A0;border-radius:14px;overflow:hidden;">
-    <div style="flex:1;min-width:0;background:#FEF0D8;border-right:1px solid #D4C0A0;padding:12px 10px;">
-      <div style="font-size:13px;font-weight:800;color:#C07030;letter-spacing:.03em;margin-bottom:10px;">本週菜單</div>
-      <div style="display:flex;flex-wrap:wrap;">${leftSets.map(s=>pillHtml(s,'left')).join('') || emptySpan}</div>
-    </div>
-    <div style="flex:2;min-width:0;background:#FAF5EE;border-right:1px solid #D4C0A0;padding:12px 10px;">
-      <div style="font-size:13px;font-weight:800;color:#9A7A5A;letter-spacing:.03em;margin-bottom:10px;">下週循環菜單</div>
-      <div style="display:flex;flex-wrap:wrap;">${midSets.map(s=>pillHtml(s,'mid')).join('') || emptySpan}</div>
-    </div>
-    <div style="flex:1;min-width:0;background:#F0EAE0;padding:12px 10px;">
-      <div style="font-size:13px;font-weight:800;color:#9A8878;letter-spacing:.03em;margin-bottom:10px;">停用中</div>
-      <div style="display:flex;flex-wrap:wrap;">${rightSets.map(s=>pillHtml(s,'right')).join('') || emptySpan}</div>
-    </div>
+  const mgmtPanel=`<div style="margin-top:10px;border-top:0.5px solid #EDE0D4;padding-top:8px;">
+    <button onclick="const b=this.nextElementSibling;const open=b.style.display!=='none';b.style.display=open?'none':'block';this.querySelector('.mc').style.transform=open?'':'rotate(180deg)';" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0 0 6px 0;">
+      <span style="font-size:13px;font-weight:500;color:#4A2008;display:inline-flex;align-items:center;gap:5px;"><i class="ti ti-repeat" style="font-size:14px;color:#C07030;" aria-hidden="true"></i>菜單組管理</span>
+      <i class="ti ti-chevron-down mc" style="font-size:14px;color:#9A7A5A;transition:transform 0.2s;transform:rotate(180deg);" aria-hidden="true"></i>
+    </button>
+    <div>${mgmtContent}</div>
   </div>`;
 
-  el.innerHTML = topRow + hint + zoneRow;
+  el.innerHTML=titleRow+timeline+overridePanel+shopHtml+mgmtPanel;
 }
-function toggleArrangeMode(){
-  _arrangeMode = !_arrangeMode;
-  _selectedWSetId = null;
-  renderMenuSetSelector();
-}
-function selectWSet(id){
-  _selectedWSetId = (_selectedWSetId === id) ? null : id;
-  renderMenuSetSelector();
-}
-async function autoTranslateNote(i){
-  const noteEl = document.getElementById('dish-note-'+i);
-  const noteIdEl = document.getElementById('dish-noteid-'+i);
-  if (!noteEl || !noteIdEl) return;
-  const text = noteEl.value.trim();
-  if (!text || noteIdEl.value.trim()) return; // 已有翻譯就不覆蓋
-  try {
-    noteIdEl.placeholder = '翻譯中…';
-    const res = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=zh|id');
-    const json = await res.json();
-    const translated = json?.responseData?.translatedText;
-    if (translated && json.responseStatus === 200) {
-      noteIdEl.value = translated;
-      _cellDishes[i].noteId = translated;
-    }
-  } catch(e) {}
-  noteIdEl.placeholder = 'Catatan (Bahasa Indonesia)';
-}
+
+/* ========== 保留的舊函數 ========== */
+function toggleArrangeMode(){ /* no-op kept for compat */ }
+function selectWSet(id){ /* no-op */ }
+function previewMenuSet(id){ _viewingSetId=id; renderMenuTab(); }
 function wSetClick(id){
-  if (_wSetClickTimer) { clearTimeout(_wSetClickTimer); _wSetClickTimer = null; return; }
-  _wSetClickTimer = setTimeout(()=>{ _wSetClickTimer = null; selectWSet(id); }, 240);
+  if(_wSetClickTimer){clearTimeout(_wSetClickTimer);_wSetClickTimer=null;return;}
+  _wSetClickTimer=setTimeout(()=>{_wSetClickTimer=null;},240);
 }
-function wSetDblClick(e, id){
+function wSetDblClick(e,id){
   e.stopPropagation();
-  if (_wSetClickTimer) { clearTimeout(_wSetClickTimer); _wSetClickTimer = null; }
+  if(_wSetClickTimer){clearTimeout(_wSetClickTimer);_wSetClickTimer=null;}
   openEditWeekMenuSet(id);
 }
-function moveWSet(id, direction){
-  const sets = state.weekMenuSets || [];
-  const s = sets.find(x=>x.id===id);
-  if (!s) return;
-  const isActive = id === state.activeWeekMenuSetId;
-  const inCycle  = s.cycleOn !== false;
-  _selectedWSetId = null;
-  if (direction === 'left'){
-    if (isActive) return;
-    if (inCycle){
-      // Mid → Left: become this week's template
-      switchWeekMenuSet(id);
-    } else {
-      // Right → Mid: add to cycle
-      s.cycleOn = true;
-      save(); renderMenuSetSelector();
-    }
-  } else {
-    if (isActive){
-      // Left → Mid: return to rotation, pick another as active
-      s.cycleOn = true;
-      const next = sets.find(x=>x.id!==id && x.cycleOn!==false);
-      if (next) switchWeekMenuSet(next.id);
-      // else: only one set, do nothing
-    } else if (inCycle){
-      // Mid → Right: remove from cycle
-      s.cycleOn = false;
-      save(); renderMenuSetSelector();
-    }
-  }
+function moveWSet(id,direction){ /* removed: use rotation list */ }
+function toggleWsetMenu(id){ /* removed */ }
+function toggleSetCycle(id,val){
+  if(val) addToRotation(id); else removeFromRotation(id);
 }
-function toggleWsetMenu(dropId){
-  const d=document.getElementById(dropId); if(!d)return;
-  const wasHidden=d.classList.contains('hidden');
-  document.querySelectorAll('[id^="wset_drop_"]').forEach(x=>x.classList.add('hidden'));
-  if(wasHidden) d.classList.remove('hidden');
-}
-function previewMenuSet(id){
-  _previewSetId = (_previewSetId === id) ? null : id;
-  renderMenuTab();
-}
-function switchWeekMenuSet(id){
-  _previewSetId = null; // 切換時清掉預覽
-  // 先把當前 weekMenu 存回 active set
-  const cur = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
-  if (cur) cur.menu = state.weekMenu;
-  // 切換
-  state.activeWeekMenuSetId = id;
-  const next = (state.weekMenuSets||[]).find(s=>s.id===id);
-  state.weekMenu = next ? (next.menu || {}) : {};
-  save(); renderMenuTab();
-}
-
-function addWeekMenuSet(){
-  // 先存當前
-  const cur = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
-  if (cur) cur.menu = state.weekMenu;
-  const newId = 'wset_'+Date.now();
-  const n = (state.weekMenuSets||[]).length + 1;
-  state.weekMenuSets.push({ id: newId, name: '第'+n+'週', cycleOn: true, menu: {} });
-  state.activeWeekMenuSetId = newId;
-  state.weekMenu = {};
-  save(); renderMenuTab();
-}
-
-function deleteWeekMenuSet(id){
-  if ((state.weekMenuSets||[]).length <= 1) return;
-  customConfirm('確定刪除這組週菜單？').then(ok=>{
-    if (!ok) return;
-    state.weekMenuSets = state.weekMenuSets.filter(s=>s.id!==id);
-    if (state.activeWeekMenuSetId === id){
-      state.activeWeekMenuSetId = state.weekMenuSets[0].id;
-      state.weekMenu = state.weekMenuSets[0].menu || {};
-    }
-    save(); renderMenuTab();
-  });
-}
-
-function toggleSetCycle(id, val){
-  const s = (state.weekMenuSets||[]).find(s=>s.id===id);
-  if (s) { s.cycleOn = val; save(); renderMenuSetSelector(); }
-}
-function shiftCycleOffset(delta, reset=false){
-  if (reset) { state.weekMenuCycleOffset = 0; }
-  else { state.weekMenuCycleOffset = (state.weekMenuCycleOffset || 0) + delta; }
-  save(); renderMenuSetSelector();
-}
+function shiftCycleOffset(delta,reset=false){ /* removed: use rotation order */ }
 function renameWeekMenuSet(id){
-  const s = (state.weekMenuSets||[]).find(s=>s.id===id);
-  if (!s) return;
-  const newName = window.prompt('請輸入新名稱：', s.name);
-  if (newName && newName.trim()) { s.name = newName.trim(); save(); renderMenuSetSelector(); }
+  const s=(state.weekMenuSets||[]).find(s=>s.id===id);
+  if(!s) return;
+  const n=window.prompt('請輸入新名稱：',s.name);
+  if(n&&n.trim()){s.name=n.trim();save();renderMenuTab();}
 }
-function openEditWeekMenuSet(id){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
-  if (!s) return;
-  document.getElementById('wmsId').value = id;
-  document.getElementById('wmsName').value = s.name;
-  document.getElementById('wmsCycle').checked = s.cycleOn !== false;
-  const delBtn = document.getElementById('wmsDeleteBtn');
-  if ((state.weekMenuSets||[]).length <= 1) delBtn.classList.add('hidden');
-  else delBtn.classList.remove('hidden');
-  document.getElementById('weekMenuSetModal').classList.remove('hidden');
-  setTimeout(()=>{ const el=document.getElementById('wmsName'); if(el){el.focus();el.select();} }, 80);
-}
-function closeWeekMenuSetModal(){ document.getElementById('weekMenuSetModal').classList.add('hidden'); }
-function saveWeekMenuSetModal(){
-  const id = document.getElementById('wmsId').value;
-  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
-  if (!s) return;
-  const newName = document.getElementById('wmsName').value.trim();
-  if (!newName) return;
-  s.name = newName;
-  s.cycleOn = document.getElementById('wmsCycle').checked;
-  save(); renderMenuSetSelector(); closeWeekMenuSetModal();
-}
-function deleteWeekMenuSetFromModal(){
-  const id = document.getElementById('wmsId').value;
-  closeWeekMenuSetModal();
-  deleteWeekMenuSet(id);
-}
-function copyWeekMenuSetFromModal(){
-  const id = document.getElementById('wmsId').value;
-  closeWeekMenuSetModal();
-  copyWeekMenuSet(id);
-}
-function copyWeekMenuSet(id){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===id);
-  if (!s) return;
-  // save current menu back to active set first
-  const cur = (state.weekMenuSets||[]).find(x=>x.id===state.activeWeekMenuSetId);
-  if (cur) cur.menu = state.weekMenu;
-  const newId = 'wset_'+Date.now();
-  const copy = { id: newId, name: s.name+' (複製)', cycleOn: false, menu: JSON.parse(JSON.stringify(s.menu||{})) };
-  state.weekMenuSets.push(copy);
-  state.activeWeekMenuSetId = newId;
-  state.weekMenu = copy.menu;
-  save(); renderMenuTab();
-}
-
 function renderMealChips(){
-  const el = document.getElementById('mealChips');
-  if (!el) return;
-  el.innerHTML = (state.mealConfig.meals||[]).map(m=>`
-    <span class="text-xs px-3 py-1 rounded-full font-semibold"
-      style="${m.enabled ? 'background:var(--ic-caramel);color:#FAF7F2;' : 'background:var(--ic-vanilla);color:var(--ic-choc-mid);'}">
-      ${m.name}
-    </span>
-  `).join('');
+  const el=document.getElementById('mealChips');
+  if(!el) return;
+  const viewId=_viewingSetId||state.activeWeekMenuSetId;
+  const meals=getSetMealsAll(viewId);
+  el.innerHTML=meals.map(m=>`<span class="text-xs px-3 py-1 rounded-full font-semibold" style="${m.enabled?'background:var(--ic-caramel);color:#FAF7F2;':'background:var(--ic-vanilla);color:var(--ic-choc-mid);'}">${m.name}</span>`).join('');
 }
-
 function renderCycleToggle(){
-  const track = document.getElementById('cycleTrack');
-  const thumb = document.getElementById('cycleThumb');
-  if (!track||!thumb) return;
-  const on = state.mealConfig.cycleEnabled;
-  track.style.background = on ? 'var(--ic-caramel)' : 'var(--ic-vanilla)';
-  thumb.style.left = on ? '18px' : '2px';
+  const track=document.getElementById('cycleTrack');
+  const thumb=document.getElementById('cycleThumb');
+  if(!track||!thumb) return;
+  const on=state.mealConfig.cycleEnabled;
+  track.style.background=on?'var(--ic-caramel)':'var(--ic-vanilla)';
+  thumb.style.left=on?'18px':'2px';
 }
-
 function renderMenuGrid(){
   const grid = document.getElementById('menuGrid');
   if (!grid) return;
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
-  if (!meals.length){ grid.innerHTML='<p class="text-xs text-gray-400 p-3">請先在「餐次設定」啟用至少一餐</p>'; return; }
+  const meals = getActiveSetMeals();
+  if (!meals.length){ grid.innerHTML='<p class="text-xs text-gray-400 p-3">請先在「編輯此組設定」啟用至少一餐</p>'; return; }
   // 直式：行=星期，欄=餐次
   grid.style.gridTemplateColumns = `52px repeat(${meals.length},1fr)`;
   grid.style.minWidth = `${52 + meals.length * 140}px`;
@@ -4683,36 +4713,52 @@ function saveMenuCell(){
 }
 
 // ── Meal Config Modal ──
-function openMealConfigModal(){
+let _editingSetIdForMeals = null;
+function _getMealEditingSet(){
+  if (!_editingSetIdForMeals) return null;
+  return (state.weekMenuSets||[]).find(s=>s.id===_editingSetIdForMeals)||null;
+}
+function _getMealEditingList(){
+  const s = _getMealEditingSet();
+  if (s){ if (!s.meals) s.meals=[]; return s.meals; }
+  return state.mealConfig.meals||[];
+}
+function openSetMealConfig(setId){
+  _editingSetIdForMeals = setId || null;
+  const s = _getMealEditingSet();
+  const nameEl = document.getElementById('mealConfigSetName');
+  if (nameEl) nameEl.textContent = s ? '編輯組別：' + s.name : '全域餐次設定';
   renderMealConfigList();
   renderSkipReasonListInConfig();
   renderCookMethodList();
   document.getElementById('mealConfigModal').classList.remove('hidden');
 }
+function openMealConfigModal(){ openSetMealConfig(null); }
 function renderMealConfigList(){
   const el = document.getElementById('mealConfigList');
   if (!el) return;
-  el.innerHTML = (state.mealConfig.meals||[]).map((m,i)=>`
+  const meals = _getMealEditingList();
+  el.innerHTML = meals.map((m,i)=>`
     <div class="p-2 border rounded-xl" style="border-color:var(--ic-vanilla);background:var(--ic-surface);">
       <div class="flex items-center gap-2 mb-1.5">
-        <input type="text" value="${m.name}" oninput="state.mealConfig.meals[${i}].name=this.value" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;" placeholder="餐次名稱">
+        <input type="text" value="${m.name}" oninput="_getMealEditingList()[${i}].name=this.value" class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-sm" style="min-width:0;" placeholder="餐次名稱">
         <label class="flex items-center gap-1 text-xs shrink-0" style="color:var(--ic-choc-mid);">
-          <input type="checkbox" ${m.enabled?'checked':''} onchange="state.mealConfig.meals[${i}].enabled=this.checked;save();renderMenuTab();">
+          <input type="checkbox" ${m.enabled?'checked':''} onchange="_getMealEditingList()[${i}].enabled=this.checked;save();renderMenuTab();">
           啟用
         </label>
         <button onclick="_deleteMeal(${i})" class="text-red-400 shrink-0"><i class="ti ti-trash" style="font-size:14px;" aria-hidden="true"></i></button>
       </div>
       <div class="flex items-center gap-2">
         <i class="ti ti-clock" style="font-size:13px;color:var(--ic-choc-mid);"></i>
-        <input type="time" value="${m.mealTime||''}" oninput="state.mealConfig.meals[${i}].mealTime=this.value;save();renderMenuTab();" class="border border-gray-200 rounded-lg px-2 py-0.5 text-xs" style="color:var(--ic-choc-mid);">
+        <input type="time" value="${m.mealTime||''}" oninput="_getMealEditingList()[${i}].mealTime=this.value;save();renderMenuTab();" class="border border-gray-200 rounded-lg px-2 py-0.5 text-xs" style="color:var(--ic-choc-mid);">
         <span class="text-xs" style="color:var(--ic-choc-mid);">預計用餐時間</span>
       </div>
     </div>
   `).join('');
 }
-function _deleteMeal(i){ state.mealConfig.meals.splice(i,1); save(); renderMenuTab(); renderMealConfigList(); }
+function _deleteMeal(i){ _getMealEditingList().splice(i,1); save(); renderMenuTab(); renderMealConfigList(); }
 function addMealType(){
-  state.mealConfig.meals.push({ id:'meal_'+Date.now(), name:'新餐次', nameId:'', enabled:true });
+  _getMealEditingList().push({ id:'meal_'+Date.now(), name:'新餐次', nameId:'', enabled:true });
   save(); renderMenuTab(); renderMealConfigList();
 }
 function renderSkipReasonListInConfig(){
