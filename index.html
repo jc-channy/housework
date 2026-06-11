@@ -4894,9 +4894,8 @@ function renderTodayMenuCard(){
         return `<div style="display:flex;align-items:flex-start;gap:7px;">
           <span style="width:6px;height:6px;border-radius:50%;background:#A07040;flex-shrink:0;margin-top:10px;"></span>
           <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
-            ${cookChips?`<div style="display:flex;gap:5px;flex-wrap:wrap;">${cookChips}</div>`:''}
+            ${(cookChips||noteDisplay)?`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${cookChips}${noteDisplay?`<span style="font-size:14px;font-style:italic;color:#9A7A58;">${noteDisplay}</span>`:''}</div>`:''}
             ${name||ingParts.length?`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${name?`<span style="font-size:16px;font-weight:600;color:#3D2010;">${name}</span>`:''}${ingNames}</div>`:''}
-            ${noteDisplay?`<div><span style="font-size:15px;font-style:italic;color:#9A7A58;">${noteDisplay}</span></div>`:''}
           </div>
         </div>`;
       }).join('');
@@ -4905,7 +4904,7 @@ function renderTodayMenuCard(){
         <div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;align-items:baseline;gap:8px;">
             <span style="font-size:16px;font-weight:800;color:#5C3310;">${meal.name}</span>
-            ${meal.mealTime?`<span style="font-size:14px;font-weight:600;color:#A07040;">${meal.mealTime}</span>`:''}
+            ${meal.mealTime?`<span style="font-size:17px;font-weight:600;font-style:italic;color:#A07040;">${meal.mealTime}</span>`:''}
           </div>
           ${dishRows}
         </div>
@@ -10332,7 +10331,7 @@ function openSettingsModal(){
   renderScenarioList();
   document.getElementById('backupStatus').textContent='';
   document.getElementById('userError').classList.add('hidden');
-  highlightFontSizeButton();
+  if (typeof highlightFontSizeButton === 'function') highlightFontSizeButton();
   // 提示音目前選項
   const sel=document.getElementById('soundProfileSelect');
   if (sel) sel.value=state.preferences?.soundProfile || 'beep2';
