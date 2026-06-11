@@ -539,36 +539,6 @@
 .ty-id-text      { font-size: 13px; }
 .ty-id-caption   { font-size: 12px; }
 
-/* ── Menu Side Panel ── */
-#menuSidePanel {
-  display: none;
-  flex-direction: column;
-  width: 240px;
-  flex-shrink: 0;
-  border-left: 1px solid #D5C5B0;
-  background: #FAF6F0;
-  padding: 14px;
-  gap: 10px;
-  overflow-y: auto;
-  max-height: 520px;
-}
-#menuSidePanel.open { display: flex; }
-@media (max-width: 767px) {
-  #menuSidePanel.open {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    border-left: none !important;
-    border-top: 1.5px solid #D5C5B0 !important;
-    border-radius: 16px 16px 0 0 !important;
-    max-height: 72vh !important;
-    z-index: 40 !important;
-    padding: 16px !important;
-  }
-}
-
 /* ── Filter Chip (全站統一篩選標籤) ── */
 .filter-chip {
   font-size: 13px;
@@ -1217,14 +1187,19 @@
 
     <div id="tab-menu" class="tab-content hidden">
 
-        <!-- ── 菜單主卡片 ── -->
-        <div class="rounded-2xl overflow-hidden mb-4" style="border:0.5px solid #D5C5B0;">
-          <div id="menuTabBarArea"></div>
-          <div id="menuMainArea" style="display:flex;background:#EDE5D8;min-height:300px;"></div>
-          <div id="menuShoppingBar"></div>
+        <!-- ── 輪替排程時間軸 ── -->
+        <div class="rounded-2xl border mb-3 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+          <div id="menuTimeline" class="px-4 py-3"></div>
         </div>
-        <div id="menuTimeline" class="hidden"></div>
-        <div id="menuColorBar" class="hidden"></div>
+        <!-- ── 菜單編輯區 ── -->
+        <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;">
+            <span style="font-size:15px;font-weight:700;color:#2A1508;"><i class="ti ti-calendar-week" style="font-size:16px;margin-right:6px;vertical-align:-2px;" aria-hidden="true"></i>菜單規劃</span>
+          </div>
+          <div id="menuTabBarArea" class="px-4 pt-3"></div>
+          <div id="menuColorBar" style="display:none;"></div>
+          <div id="menuMainArea"></div>
+        </div>
         <!-- 舊相容 div（隱藏，保留 id 供舊函數使用） -->
         <div id="menuSetSelector" class="hidden"></div>
         <div id="menuContextBar" class="hidden"></div>
@@ -1329,36 +1304,6 @@
     <div class="flex gap-2">
       <input id="newSkipReasonInput" type="text" placeholder="新增情境…" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm" style="min-width:0;">
       <button onclick="addSkipReason()" class="btn-primary shrink-0">新增</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== 菜單組別設定 Modal ===== -->
-<div id="menuSetConfigModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
-  <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
-    <div class="flex items-start justify-between mb-4">
-      <div class="ty-modal-title">組別設定</div>
-      <button onclick="closeMenuSetConfigModal()" class="text-gray-400 text-2xl leading-none">×</button>
-    </div>
-    <div class="mb-4">
-      <div class="text-sm font-semibold mb-1" style="color:var(--ic-chocolate);">組名</div>
-      <input id="setConfigName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="輸入組名" oninput="(()=>{const s=(state.weekMenuSets||[]).find(x=>x.id===_configSetId);if(s)s.name=this.value;save();renderMenuTabBar();})()">
-    </div>
-    <div class="flex items-center justify-between mb-4 pb-4" style="border-bottom:0.5px solid var(--ic-vanilla);">
-      <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">循環排程</div>
-      <button id="setConfigToggle" onclick="toggleSetConfigEnabled()" style="font-size:12px;padding:5px 14px;border-radius:8px;border:none;cursor:pointer;">狀態</button>
-    </div>
-    <div class="mb-4">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-sm font-semibold" style="color:var(--ic-chocolate);">餐次</div>
-        <button onclick="addSetConfigMeal()" class="text-xs px-3 py-1 rounded-xl border border-dashed" style="border-color:var(--ic-caramel);color:var(--ic-caramel);">＋ 新增餐次</button>
-      </div>
-      <div id="setConfigMealList" class="space-y-2"></div>
-    </div>
-    <div class="border-t pt-4" style="border-color:var(--ic-vanilla);">
-      <button onclick="deleteSetConfig()" class="w-full text-sm py-2 rounded-lg" style="background:#FEE2E2;color:#B91C1C;">
-        <i class="ti ti-trash" style="font-size:12px;" aria-hidden="true"></i> 刪除此組別
-      </button>
     </div>
   </div>
 </div>
@@ -4075,10 +4020,6 @@ let _previewSetId = null;
 // ── 新版菜單 UI 狀態 ──
 let _menuEditMode = false;          // 是否在編輯模式
 let _menuEditTargetSetId = null;    // 目前正在編輯的組別 id（cell modal 用）
-let _selectedCellKey = null;       // 兩步編輯：已選取的格子 key
-let _selectedCellSetId = null;     // 兩步編輯：已選取的格子所屬組別
-let _configSetId = null;           // ⚙ 組別設定 modal 目前開著的組 id
-let _menuShoppingOpen = false;     // 購物清單摺疊狀態
 const SET_COLORS = ['#C07030','#3A9A6E','#7B68C8','#D4954A','#2A8FAA','#B85888'];
 const SET_LIGHTS = ['#FEF0D8','#EBF5EF','#EEEDFE','#FDF0E0','#E0F3F8','#F5E8F2'];
 const SET_DARKS  = ['#4A2008','#1D5C3E','#3C3489','#5A3010','#0D4A5A','#4A1838'];
@@ -4250,7 +4191,6 @@ function renderMenuTab(){
   renderMenuTabBar();
   renderMenuMainArea();
   renderIngredientList();
-  renderMenuShoppingBar();
 }
 
 // ── 時間軸渲染 ──
@@ -4297,15 +4237,15 @@ function renderMenuTimeline(){
   el.innerHTML=html;
 }
 
-// ── Tab Bar 渲染 ──
+// ── Tab Bar 渲染（頂框型 style C）──
 function renderMenuTabBar(){
   const el = document.getElementById('menuTabBarArea');
   if(!el) return;
   const sets = state.weekMenuSets||[];
   if(sets.length===0){
-    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#5C3D1E;">
-      <span style="font-size:12px;color:#C8A888;">尚無菜單組</span>
-      <button onclick="addWeekMenuSet()" style="font-size:12px;padding:4px 10px;border-radius:8px;background:#C07030;color:#fff;border:none;cursor:pointer;"><i class="ti ti-plus" aria-hidden="true"></i> 新增</button>
+    el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px;">
+      <span style="font-size:12px;color:var(--ic-sand);">尚無菜單組，新增第一個開始規劃</span>
+      <button onclick="addWeekMenuSet()" style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--ic-caramel);color:#fff;border:none;cursor:pointer;"><i class="ti ti-plus" aria-hidden="true"></i> 新增組別</button>
     </div>`;
     return;
   }
@@ -4314,145 +4254,53 @@ function renderMenuTabBar(){
   }
   const tabsHtml = sets.map(s=>{
     const isActive = s.id===_viewingSetId;
+    const color = _setColor(s.id);
     const disabled = s.cycleOn===false;
+    const activeCss = isActive
+      ? `border:1.5px solid var(--ic-vanilla);border-bottom:1.5px solid var(--ic-surface);background:var(--ic-surface);padding-bottom:10px;margin-bottom:-1.5px;`
+      : `border:1.5px solid transparent;border-bottom:none;background:transparent;padding-bottom:8px;`;
     return `<div
       draggable="true"
       ondragstart="_tabDragStart(event,\'${s.id}\')"
       ondragover="_tabDragOver(event)"
       ondrop="_tabDrop(event,\'${s.id}\')"
       ondragend="_tabDragEnd(event)"
-      onclick="_viewingSetId=\'${s.id}\';_selectedCellKey=null;_selectedCellSetId=null;renderMenuTab();"
-      style="display:inline-flex;align-items:center;gap:4px;padding:8px 10px 7px;cursor:pointer;border-bottom:2.5px solid ${isActive?'#C07030':'transparent'};margin-right:1px;transition:border-color .2s;user-select:none;flex-shrink:0;"
+      onclick="_viewingSetId=\'${s.id}\';renderMenuTab();"
+      style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;cursor:pointer;${activeCss}border-radius:8px 8px 0 0;user-select:none;${disabled?'opacity:0.4;':''}"
     >
-      <span style="font-size:13px;color:${isActive?'#FFFFFF':disabled?'#8A7060':'#C8A888'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
-      <button onclick="event.stopPropagation();openMenuSetConfigModal(\'${s.id}\')" style="font-size:11px;color:${isActive?'#C8A888':'#7A6050'};background:none;border:none;cursor:pointer;padding:1px 3px;line-height:1;" title="組別設定">
-        <i class="ti ti-settings" aria-hidden="true"></i>
-      </button>
+      <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+      <span style="font-size:13px;color:${isActive?color:'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
     </div>`;
   }).join('');
-  el.innerHTML=`<div style="display:flex;align-items:center;background:#5C3D1E;overflow-x:auto;padding-left:4px;">
+  el.innerHTML=`<div style="display:flex;align-items:flex-end;border-bottom:1.5px solid var(--ic-vanilla);overflow-x:auto;">
     ${tabsHtml}
-    <button onclick="addWeekMenuSet()" style="flex-shrink:0;font-size:13px;color:#8A7060;background:none;border:none;cursor:pointer;padding:8px 10px;" title="新增組別">
+    <button onclick="addWeekMenuSet()" title="新增組別"
+      style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:7px 10px 8px;margin-bottom:-1.5px;">
       <i class="ti ti-plus" aria-hidden="true"></i>
     </button>
   </div>`;
 }
 
-// ── M4: 兩步編輯 / 側邊欄 / 組別設定 Modal ──
-function selectMenuCell(setId, key){
-  if(_selectedCellKey===key && _selectedCellSetId===setId){
-    _selectedCellKey=null; _selectedCellSetId=null;
-  } else {
-    _selectedCellKey=key; _selectedCellSetId=setId;
-  }
-  renderMenuViewMode();
-}
-function closeMenuSidePanel(){
-  _selectedCellKey=null; _selectedCellSetId=null;
-  renderMenuViewMode();
-}
-function clearMenuCellForSet(setId, key){
-  const m = _getSetMenu(setId);
-  if(m) delete m[key];
-  save(); closeMenuSidePanel(); renderMenuTab(); renderTodayMenuCard();
-}
-
-// ── 組別設定 Modal ──
-function openMenuSetConfigModal(setId){
-  _configSetId = setId;
-  renderMenuSetConfigModal();
-  document.getElementById('menuSetConfigModal').classList.remove('hidden');
-}
-function closeMenuSetConfigModal(){
-  document.getElementById('menuSetConfigModal').classList.add('hidden');
-  _configSetId = null;
-}
-function renderMenuSetConfigModal(){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===_configSetId);
-  if(!s) return;
-  const nameEl = document.getElementById('setConfigName');
-  if(nameEl) nameEl.value = s.name||'';
-  const tog = document.getElementById('setConfigToggle');
-  if(tog){
-    const dis = s.cycleOn===false;
-    tog.textContent = dis ? '▶ 啟用' : '⏸ 停用';
-    tog.style.background = dis ? '#E8E8E8' : '#E8F5EE';
-    tog.style.color = dis ? '#666' : '#2A7A50';
-  }
-  const list = document.getElementById('setConfigMealList');
-  if(list){
-    list.innerHTML = (s.meals||[]).map((m,i)=>`
-      <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
-        <input value="${m.name}" oninput="(()=>{const _s=(state.weekMenuSets||[]).find(x=>x.id==='${s.id}');if(_s&&_s.meals[${i}]){_s.meals[${i}].name=this.value;save();renderMenuTabBar();}})()"
-          style="flex:1;font-size:13px;padding:5px 8px;border-radius:6px;border:1px solid #D5C5B0;background:#fff;">
-        <label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--ic-sand);white-space:nowrap;cursor:pointer;">
-          <input type="checkbox" ${m.enabled!==false?'checked':''} onchange="(()=>{const _s=(state.weekMenuSets||[]).find(x=>x.id==='${s.id}');if(_s&&_s.meals[${i}]){_s.meals[${i}].enabled=this.checked;save();renderMenuTab();}})()">啟用
-        </label>
-        <button onclick="_delSetConfigMeal(${i})" style="font-size:14px;color:#C07030;background:none;border:none;cursor:pointer;padding:0 3px;" title="刪除餐次">
-          <i class="ti ti-trash" aria-hidden="true"></i>
-        </button>
-      </div>`).join('');
-  }
-}
-function toggleSetConfigEnabled(){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===_configSetId);
-  if(!s) return;
-  s.cycleOn = s.cycleOn===false ? true : false;
-  save(); renderMenuSetConfigModal(); renderMenuTabBar(); renderMenuTimeline();
-}
-function addSetConfigMeal(){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===_configSetId);
-  if(!s) return;
-  if(!s.meals) s.meals=[];
-  s.meals.push({id:'meal_'+Date.now(),name:'餐次'+(s.meals.length+1),enabled:true});
-  save(); renderMenuSetConfigModal(); renderMenuTab();
-}
-function _delSetConfigMeal(i){
-  const s = (state.weekMenuSets||[]).find(x=>x.id===_configSetId);
-  if(!s||!s.meals) return;
-  s.meals.splice(i,1);
-  save(); renderMenuSetConfigModal(); renderMenuTab();
-}
-function deleteSetConfig(){
-  if(!_configSetId) return;
-  const name = ((state.weekMenuSets||[]).find(x=>x.id===_configSetId)||{}).name||'';
-  if(!confirm('確定要刪除「'+name+'」？')) return;
-  state.weekMenuSets = (state.weekMenuSets||[]).filter(x=>x.id!==_configSetId);
-  if(_viewingSetId===_configSetId) _viewingSetId=null;
-  recalibrateSchedule(); save(); closeMenuSetConfigModal(); renderMenuTab();
-}
-
-// ── 購物清單折疊列 ──
-function renderMenuShoppingBar(){
-  const el = document.getElementById('menuShoppingBar');
-  if(!el) return;
-  if(!_viewingSetId){ el.innerHTML=''; return; }
-  const menu = _getSetMenu(_viewingSetId);
-  if(!menu){ el.innerHTML=''; return; }
-  const allIngs = state.ingredients||[];
-  const catColors = (state.mealConfig&&state.mealConfig.ingCategoryColors)||{};
-  const ingCount = {};
-  Object.values(menu).forEach(cell=>{
-    if(cell&&cell.type!=='skip'){
-      (cell.dishes||[]).forEach(d=>{
-        (d.ingredientIds||[]).forEach(id=>{ ingCount[id]=(ingCount[id]||0)+1; });
-      });
-    }
-  });
-  const ingList = Object.keys(ingCount).map(id=>allIngs.find(x=>x.id===id)).filter(Boolean);
-  if(ingList.length===0){ el.innerHTML=''; return; }
-  const isOpen = _menuShoppingOpen;
-  el.innerHTML=`
-    <div style="border-top:0.5px solid #D5C5B0;background:#FAF6F0;border-radius:0 0 12px 12px;">
-      <button onclick="_menuShoppingOpen=!_menuShoppingOpen;renderMenuShoppingBar();"
-        style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:none;border:none;cursor:pointer;text-align:left;">
-        <span style="font-size:12px;font-weight:600;color:#5C3D1E;"><i class="ti ti-shopping-cart" style="font-size:13px;margin-right:5px;" aria-hidden="true"></i>本週食材（${ingList.length} 項）</span>
-        <i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:13px;color:#9A8070;" aria-hidden="true"></i>
-      </button>
-      ${isOpen?`<div style="padding:4px 14px 12px;display:flex;flex-wrap:wrap;gap:5px;">
-        ${ingList.map(ing=>{const cc=catColors[ing.category]||'#A89880';return `<span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`;}).join('')}
-      </div>`:''}
-    </div>`;
+function addWeekMenuSet(){
+  const n = window.prompt('新組別名稱：', '新組別');
+  if(!n||!n.trim()) return;
+  const newSet = {
+    id: 'set_'+Date.now(),
+    name: n.trim(),
+    meals: [
+      {id:'meal_'+Date.now()+'_1', name:'早餐', time:'07:30', enabled:true},
+      {id:'meal_'+Date.now()+'_2', name:'午餐', time:'12:00', enabled:true},
+      {id:'meal_'+Date.now()+'_3', name:'晚餐', time:'18:30', enabled:true}
+    ],
+    menu: {},
+    cycleOn: true
+  };
+  if(!state.weekMenuSets) state.weekMenuSets=[];
+  state.weekMenuSets.push(newSet);
+  if(!state.scheduleRotation) state.scheduleRotation=[];
+  state.scheduleRotation.push(newSet.id);
+  _viewingSetId = newSet.id;
+  save(); renderMenuTab();
 }
 
 let _dragSrcId = null;
@@ -4514,14 +4362,13 @@ function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, da
   return dishHtml+more;
 }
 
-// ── 菜單矩陣共用（列=星期，欄=餐次）──
+// ── 菜單矩陣（列=星期，欄=餐次，固定格高）──
 function _renderMenuMatrix(setId, editable){
   const set = (state.weekMenuSets||[]).find(s=>s.id===setId);
   if(!set) return '';
   const meals = (set.meals||[]).filter(m=>m.enabled!==false);
   const days = ['一','二','三','四','五','六','日'];
   const dayKeys = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const todayDow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
   if(meals.length===0){
     if(!editable) return `<div style="font-size:12px;color:var(--ic-sand);padding:16px;text-align:center;">尚未設定餐次</div>`;
     return `<div style="font-size:12px;color:var(--ic-sand);padding:16px;text-align:center;">請先在上方新增餐次</div>`;
@@ -4532,49 +4379,33 @@ function _renderMenuMatrix(setId, editable){
   const allIngs = state.ingredients||[];
   const catColors = (state.mealConfig&&state.mealConfig.ingCategoryColors)||{};
 
+  // 欄頭：餐次名稱 + 時間
+  const mealHeaders = meals.map(m=>`<th style="padding:6px 4px 8px;text-align:center;min-width:100px;">
+    <div style="font-size:13px;font-weight:600;color:${dark};">${m.name}</div>
+    ${m.time?`<div style="font-size:11px;color:var(--ic-sand);margin-top:1px;">${m.time}</div>`:''}
+  </th>`).join('');
+
   let html = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
     <thead><tr>
-      <th style="padding:6px 6px 6px 8px;text-align:left;color:var(--ic-sand);font-weight:500;min-width:40px;"></th>
-      ${meals.map(m=>`<th style="padding:6px 4px;text-align:center;color:${dark};font-weight:600;min-width:80px;font-size:12px;">${m.name}</th>`).join('')}
-    </tr></thead>
-    <tbody>`;
+      <th style="padding:6px 8px;min-width:32px;"></th>${mealHeaders}
+    </tr></thead><tbody>`;
 
   dayKeys.forEach((dk, di)=>{
-    const isToday = dk===todayDow;
-    const rowBg = isToday ? '#F5E6D0' : 'transparent';
-    html += `<tr style="background:${rowBg};">
-      <td style="padding:5px 4px 5px 8px;vertical-align:middle;white-space:nowrap;">
-        <div style="display:flex;align-items:center;gap:4px;">
-          <span style="font-size:12px;font-weight:${isToday?700:500};color:${isToday?'#5C3D1E':'var(--ic-sand)'};">${days[di]}</span>
-          ${isToday?`<span style="font-size:10px;font-weight:700;background:#C07030;color:#fff;border-radius:99px;padding:1px 5px;line-height:1.5;">今</span>`:''}
-        </div>
-      </td>`;
+    html += `<tr><td style="padding:4px 8px;color:var(--ic-sand);font-size:12px;font-weight:600;white-space:nowrap;vertical-align:top;padding-top:12px;">${days[di]}</td>`;
     meals.forEach(meal=>{
       const key = `${meal.name}_${dk}`;
       const menu = _getSetMenu(setId);
       const cell = menu[key]||{type:'cook',dishes:[]};
       const isSkip = cell.type==='skip';
       const dishes = cell.dishes||[];
-      const isSelected = !editable && _selectedCellKey===key && _selectedCellSetId===setId;
-      const cellInnerHtml = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
-      const selBorder = isSelected
-        ? 'border:2px solid #C07030;'
-        : `border:0.5px solid ${isSkip?'#D0C8C0':'#DDD0C0'};`;
-      const cellBg = isSelected ? '#FFF0D8' : isSkip ? '#EDEBE7' : isToday ? `${color}12` : light;
+      const inner = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
+      const cellDiv = `height:80px;overflow-y:auto;border-radius:10px;border:0.5px solid ${isSkip?'#D0C8C0':'#DDD0C0'};background:${isSkip?'#EDEBE7':light};padding:7px 8px;display:flex;flex-direction:column;gap:3px;`;
       if(editable){
         html += `<td style="padding:4px;vertical-align:top;">
-          <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')"
-            style="min-height:56px;border-radius:10px;${selBorder}background:${cellBg};cursor:pointer;padding:8px;display:flex;flex-direction:column;gap:4px;">
-            ${cellInnerHtml}
-          </div>
-        </td>`;
+          <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')" style="${cellDiv}cursor:pointer;">${inner}</div></td>`;
       } else {
         html += `<td style="padding:4px;vertical-align:top;">
-          <div onclick="selectMenuCell(\'${setId}\',\'${key}\')"
-            style="min-height:56px;border-radius:10px;${selBorder}background:${cellBg};cursor:pointer;padding:8px;display:flex;flex-direction:column;gap:4px;transition:border-color .15s;">
-            ${cellInnerHtml}
-          </div>
-        </td>`;
+          <div style="${cellDiv}">${inner}</div></td>`;
       }
     });
     html += `</tr>`;
@@ -4583,7 +4414,7 @@ function _renderMenuMatrix(setId, editable){
   return html;
 }
 
-// ── 檢視模式（含側邊欄）──
+// ── 檢視模式 ──
 function renderMenuViewMode(){
   const el = document.getElementById('menuMainArea');
   if(!el) return;
@@ -4592,56 +4423,24 @@ function renderMenuViewMode(){
   if(!_viewingSetId||!sets.find(s=>s.id===_viewingSetId)) _viewingSetId=sets[0].id;
   const s = sets.find(x=>x.id===_viewingSetId);
   if(!s){ el.innerHTML=''; return; }
-
-  const hasSel = _selectedCellKey && _selectedCellSetId===_viewingSetId;
-  const selCell = hasSel ? (_getSetMenu(_viewingSetId)[_selectedCellKey]||null) : null;
-
-  let sidePanelContent = '';
-  if(selCell){
-    const parts = _selectedCellKey.split('_');
-    const selDk = parts[parts.length-1];
-    const selMeal = parts.slice(0,-1).join('_');
-    const dayNames = {Mon:'週一',Tue:'週二',Wed:'週三',Thu:'週四',Fri:'週五',Sat:'週六',Sun:'週日'};
-    const allIngs = state.ingredients||[];
-    const catColors = (state.mealConfig&&state.mealConfig.ingCategoryColors)||{};
-    const color = _setColor(_viewingSetId);
-    const light = _setLight(_viewingSetId);
-    const dark = _setDark(_viewingSetId);
-    const dishes = selCell.dishes||[];
-    const previewHtml = _renderMenuCellInner(selCell, dishes, allIngs, catColors, color, light, dark);
-    sidePanelContent = `
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;">
-        <div style="font-size:13px;font-weight:600;color:#5C3D1E;">${dayNames[selDk]||selDk} · ${selMeal}</div>
-        <button onclick="closeMenuSidePanel()" style="font-size:20px;color:#9A8070;background:none;border:none;cursor:pointer;line-height:1;padding:0 2px;">×</button>
-      </div>
-      <div style="font-size:11px;color:var(--ic-sand);margin-bottom:8px;flex-shrink:0;">
-        ${selCell.type==='skip'?'今天不煮':'共 '+dishes.length+' 道菜色'}
-      </div>
-      <div style="flex:1;overflow-y:auto;padding:8px;background:#F5F0E8;border-radius:8px;margin-bottom:10px;min-height:48px;">
-        ${previewHtml}
-      </div>
-      <button onclick="openMenuCellForSet(\'${_viewingSetId}\',\'${_selectedCellKey}\')"
-        style="width:100%;padding:9px;border-radius:10px;background:#C07030;color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;">
-        <i class="ti ti-edit" aria-hidden="true"></i> 編輯
-      </button>
-      <button onclick="clearMenuCellForSet(\'${_viewingSetId}\',\'${_selectedCellKey}\')"
-        style="width:100%;padding:7px;border-radius:10px;background:none;color:#9A7A58;border:1px solid #D5C5B0;font-size:12px;cursor:pointer;margin-top:6px;flex-shrink:0;">
-        清空格子
-      </button>`;
-  } else {
-    sidePanelContent = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:#C8B49A;padding:20px 0;min-height:80px;">
-        <i class="ti ti-hand-click" style="font-size:28px;" aria-hidden="true"></i>
-        <div style="font-size:12px;text-align:center;line-height:1.6;">點選格子<br>查看或編輯</div>
-      </div>`;
-  }
-
+  const color = _setColor(s.id);
+  const disabled = s.cycleOn===false;
   el.innerHTML=`
-    <div style="flex:1;overflow-x:auto;padding:8px 0 8px 4px;min-width:0;">
-      ${_renderMenuMatrix(_viewingSetId, false)}
-    </div>
-    <div id="menuSidePanel" class="${hasSel?'open':''}">
-      ${sidePanelContent}
+    <div style="padding:12px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="ty-card-title" style="color:${color};">${s.name}</span>
+          ${disabled?`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:#E8E8E8;color:#999;">停用</span>`:`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:${color}20;color:${color};">啟用中</span>`}
+        </div>
+        <button onclick="_menuEditMode=true;_menuEditTargetSetId=_viewingSetId;renderMenuTab();"
+          style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--ic-caramel);color:#fff;border:none;cursor:pointer;">
+          <i class="ti ti-edit" aria-hidden="true"></i> 編輯菜單
+        </button>
+      </div>
+      <div style="font-size:12px;color:var(--ic-sand);margin-bottom:8px;">
+        餐次：${(s.meals||[]).filter(m=>m.enabled!==false).map(m=>`${m.name}${m.time?'('+m.time+')':''}`).join('・')||'尚未設定'}
+      </div>
+      ${_renderMenuMatrix(s.id, false)}
     </div>`;
 }
 
@@ -4658,42 +4457,57 @@ function renderMenuEditMode(){
   const color = _setColor(s.id);
   const light = _setLight(s.id);
   const disabled = s.cycleOn===false;
+
   const mealsHtml = (s.meals||[]).map((m,i)=>`
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#FAF6F0;border-radius:8px;margin-bottom:6px;">
       <input value="${m.name}" oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').meals[${i}].name=this.value,save())"
-        style="flex:1;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;" placeholder="餐次名稱">
+        style="flex:1;font-size:13px;padding:4px 8px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;" placeholder="餐次名稱">
       <input type="time" value="${m.time||''}" oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').meals[${i}].time=this.value,save())"
-        style="font-size:12px;padding:4px 6px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;">
-      <button onclick="_delSetMeal(\'${s.id}\',${i})" style="font-size:14px;color:#C07030;background:none;border:none;cursor:pointer;" aria-label="刪除"><i class="ti ti-trash" aria-hidden="true"></i></button>
+        style="font-size:12px;padding:4px 6px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;color:var(--ic-text);">
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;" title="${m.enabled!==false?'點擊停用':'點擊啟用'}">
+        <div onclick="(()=>{const _s=state.weekMenuSets.find(x=>x.id===\'${s.id}\');if(_s&&_s.meals[${i}]){_s.meals[${i}].enabled=!(_s.meals[${i}].enabled!==false);save();renderMenuEditMode();}})()"
+          style="width:32px;height:18px;border-radius:99px;background:${m.enabled!==false?'#C07030':'#D5C5B0'};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+          <div style="width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;${m.enabled!==false?'left:16px':'left:2px'};transition:left .2s;"></div>
+        </div>
+      </label>
+      <button onclick="_delSetMeal(\'${s.id}\',${i})" style="font-size:15px;color:#C8A898;background:none;border:none;cursor:pointer;padding:0;" aria-label="刪除餐次"><i class="ti ti-trash" aria-hidden="true"></i></button>
     </div>`).join('');
 
   el.innerHTML=`
     <div style="padding:12px 16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <button onclick="_menuEditMode=false;renderMenuTab();" style="font-size:12px;padding:5px 10px;border-radius:8px;background:var(--ic-surface);color:var(--ic-text);border:1px solid var(--ic-vanilla);cursor:pointer;">
+      <!-- 頂部操作列 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button onclick="_menuEditMode=false;renderMenuTab();"
+          style="font-size:12px;padding:5px 10px;border-radius:8px;background:transparent;color:var(--ic-text);border:1px solid var(--ic-vanilla);cursor:pointer;flex-shrink:0;">
           <i class="ti ti-arrow-left" aria-hidden="true"></i> 返回
         </button>
-        <button onclick="_deleteSetConfirm(\'${s.id}\')" style="font-size:12px;padding:5px 10px;border-radius:8px;background:#FFF0EE;color:#C04030;border:1px solid #F5C0BB;cursor:pointer;">
-          <i class="ti ti-trash" aria-hidden="true"></i> 刪除組別
-        </button>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <input id="editSetName_${s.id}" value="${s.name}"
           oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').name=this.value,save(),renderMenuTabBar(),renderMenuTimeline())"
-          style="font-size:15px;font-weight:600;color:${color};flex:1;padding:5px 10px;border-radius:8px;border:1.5px solid ${color}60;background:${light};">
-        <button onclick="_toggleSetEnabled(\'${s.id}\')"
-          style="font-size:12px;padding:5px 12px;border-radius:8px;border:none;cursor:pointer;background:${disabled?'#E8E8E8':'#E8F5EE'};color:${disabled?'#999':'#2A7A50'};">
-          ${disabled?'<i class=\"ti ti-player-play\" aria-hidden=\"true\"></i> 啟用':'<i class=\"ti ti-player-pause\" aria-hidden=\"true\"></i> 停用'}
+          style="flex:1;font-size:14px;font-weight:600;color:${color};padding:5px 10px;border-radius:8px;border:1.5px solid ${color}50;background:${light};min-width:0;">
+        <!-- 循環排程 toggle -->
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;" title="循環排程">
+          <div onclick="_toggleSetEnabled(\'${s.id}\')"
+            style="width:34px;height:20px;border-radius:99px;background:${disabled?'#D5C5B0':'#3A9A6E'};position:relative;cursor:pointer;transition:background .2s;">
+            <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;${disabled?'left:2px':'left:16px'};transition:left .2s;"></div>
+          </div>
+          <span style="font-size:11px;color:${disabled?'var(--ic-sand)':'#2A7A50'};white-space:nowrap;">${disabled?'停用':'循環中'}</span>
+        </label>
+        <button onclick="_deleteSetConfirm(\'${s.id}\')"
+          style="font-size:12px;padding:5px 8px;border-radius:8px;background:transparent;color:#C04030;border:1px solid #F5C0BB;cursor:pointer;flex-shrink:0;" title="刪除組別">
+          <i class="ti ti-trash" aria-hidden="true"></i>
         </button>
       </div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:12px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">餐次設定</div>
+      <!-- 餐次設定 -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px;color:var(--ic-sand);font-weight:600;margin-bottom:8px;letter-spacing:.03em;">餐次設定</div>
         ${mealsHtml}
-        <button onclick="_addSetMeal(\'${s.id}\')" style="font-size:12px;color:var(--ic-caramel);background:none;border:1px dashed var(--ic-caramel);border-radius:6px;padding:4px 12px;cursor:pointer;width:100%;">
+        <button onclick="_addSetMeal(\'${s.id}\')"
+          style="font-size:12px;color:var(--ic-caramel);background:none;border:1px dashed var(--ic-caramel);border-radius:8px;padding:5px 12px;cursor:pointer;width:100%;">
           <i class="ti ti-plus" aria-hidden="true"></i> 新增餐次
         </button>
       </div>
-      <div style="font-size:12px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">菜色安排</div>
+      <!-- 菜色矩陣 -->
+      <div style="font-size:12px;color:var(--ic-sand);font-weight:600;margin-bottom:8px;letter-spacing:.03em;">菜色安排</div>
       ${_renderMenuMatrix(s.id, true)}
     </div>`;
 }
