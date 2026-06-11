@@ -104,7 +104,7 @@
   .sortable-chosen { box-shadow: 0 4px 12px rgba(114,92,63,.15); }
 
   /* 翻譯按鈕 */
-  .trans-btn { font-size: 11px; color: var(--ic-caramel-dk); }
+  .trans-btn { font-size:12px; color: var(--ic-caramel-dk); }
   .trans-btn:disabled { color: var(--ic-vanilla); cursor: wait; }
   body.translating .save-btn { opacity: .5; pointer-events: none; }
 
@@ -285,13 +285,13 @@
   .ts-col[data-slot="evening"] .ts-col-hdr   { background:#F4F0F8; }
   .ts-col[data-slot="flexible"] .ts-col-hdr  { background:var(--ic-lemon); }
   .ts-list { min-height:48px; padding:7px; flex:1; }
-  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:11px; color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
+  .ts-card { background:var(--ic-surface); border:1px solid var(--ic-vanilla); border-radius:8px; padding:6px 8px; margin-bottom:5px; font-size:12px; color:var(--ic-chocolate); cursor:grab; display:flex; align-items:flex-start; gap:5px; line-height:1.3; touch-action:none; }
   .ts-card:active { cursor:grabbing; }
   .ts-card .ts-dot { width:7px; height:7px; border-radius:50%; background:var(--ic-caramel); flex-shrink:0; margin-top:2px; }
   .ts-card.ts-adhoc .ts-dot { background:var(--ic-strawberry); }
   .ts-card.ts-done { opacity:0.45; }
   .ts-card.ts-done span { text-decoration:line-through; }
-  .ts-empty { font-size:10px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
+  .ts-empty { font-size:12px; color:var(--ic-vanilla); padding:4px 2px; font-style:italic; }
   /* 底部導航 */
 
   .task-sec-hdr {
@@ -306,7 +306,7 @@
     background: #F5F0E8;
   }
   .task-sec-hdr .tsh-pri { font-size: 14px; font-weight: 800; color: #A85550; letter-spacing: -0.01em; }
-  .task-sec-hdr .tsh-sec { font-size: 11px; color: #C48080; margin-top: 2px; }
+  .task-sec-hdr .tsh-sec { font-size:12px; color: #C48080; margin-top: 2px; }
   .task-sec-hdr.regular .tsh-pri { color: var(--ic-chocolate); }
   .task-sec-hdr.regular .tsh-sec { color: var(--ic-choc-mid); }
 
@@ -413,7 +413,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 14px; height: 36px;
     background: var(--ic-caramel); color: #FAF7F2;
-    font-size: 12px; font-weight: 500;
+    font-size:13px; font-weight: 500;
     border: none; border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -426,7 +426,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-surface); color: var(--ic-chocolate);
-    font-size: 12px; font-weight: 500;
+    font-size:13px; font-weight: 500;
     border: 1px solid var(--ic-vanilla); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -439,7 +439,7 @@
     display: inline-flex; align-items: center; justify-content: center;
     padding: 0 12px; height: 36px;
     background: var(--ic-straw-lt); color: #A85550;
-    font-size: 12px; font-weight: 500;
+    font-size:13px; font-weight: 500;
     border: 1px solid var(--ic-strawberry); border-radius: 8px; cursor: pointer;
     transition: background 0.15s;
     white-space: nowrap;
@@ -469,7 +469,7 @@
   .ob-feat { background:var(--ic-lemon); border-radius:12px; padding:10px 12px; font-size:13px; color:var(--ic-chocolate); }
   .ob-feat .of-icon { font-size:18px; margin-bottom:4px; }
   .ob-feat .of-label { font-weight:600; font-size:12px; }
-  .ob-feat .of-sub { font-size:11px; color:var(--ic-choc-mid); }
+  .ob-feat .of-sub { font-size:12px; color:var(--ic-choc-mid); }
   .ob-dots { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
   .ob-dot { width:8px; height:8px; border-radius:50%; background:var(--ic-vanilla); transition:background 0.2s,width 0.2s; }
   .ob-dot.active { background:var(--ic-caramel-dk); width:22px; border-radius:4px; }
@@ -589,14 +589,14 @@
     </div>
     <p id="pinError" class="text-center text-sm mt-3 hidden" style="color:#A85550;">PIN 錯誤，請再試一次 / PIN salah, coba lagi</p>
   </div>
-  <details class="mt-6 max-w-xs w-full" style="font-size:11px;color:var(--ic-choc-mid);">
+  <details class="mt-6 max-w-xs w-full" style="font-size:12px;color:var(--ic-choc-mid);">
     <summary class="cursor-pointer text-center opacity-50 select-none" style="list-style:none;">
-      <i class="ti ti-lock" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 忘記 PIN？點此查看提示
+      <i class="ti ti-lock" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 忘記 PIN？點此查看提示
     </summary>
     <div id="pinHints" class="rounded-xl p-3 mt-2 space-y-1" style="background:var(--ic-surface);border:1px solid var(--ic-vanilla);">
       <!-- 由 JS 填入目前 PIN 設定 -->
     </div>
-    <div class="text-center mt-2 opacity-60">建議登入後至 <i class="ti ti-settings" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 更改預設 PIN</div>
+    <div class="text-center mt-2 opacity-60">建議登入後至 <i class="ti ti-settings" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 更改預設 PIN</div>
   </details>
 </section>
 
@@ -617,8 +617,8 @@
         </div>
         <div class="flex items-center gap-2 mt-1">
           <div id="atikaGreetingHdr" class="text-sm font-semibold" style="color:var(--ic-caramel-dk);"></div>
-          <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="atikaChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
-          <button onclick="openSuppliesModal()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="備品回報 / Stok" aria-label="備品回報"><i class="ti ti-package"></i><span id="atikaSupplyBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
+          <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="atikaChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:12px;"></span></button>
+          <button onclick="openSuppliesModal()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="備品回報 / Stok" aria-label="備品回報"><i class="ti ti-package"></i><span id="atikaSupplyBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:12px;"></span></button>
           <div class="hdr-menu-wrap">
             <button class="hdr-menu-btn" onclick="toggleHdrMenu('atikaMenu')" title="更多" aria-label="更多選項"><i class="ti ti-dots-vertical"></i></button>
             <div id="atikaMenu" class="hdr-dropdown">
@@ -636,14 +636,14 @@
 
     <!-- ═══ 聚焦卡：現在要做 ═══ -->
     <div id="atikaFocusCard" class="hidden rounded-2xl p-3" style="background:var(--ic-chocolate);">
-      <div style="font-size:10px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
-        <i class="ti ti-player-play" style="font-size:10px;" aria-hidden="true"></i> 現在要做 / Sedang dikerjakan
+      <div style="font-size:12px;color:var(--ic-caramel);opacity:0.8;margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+        <i class="ti ti-player-play" style="font-size:12px;" aria-hidden="true"></i> 現在要做 / Sedang dikerjakan
       </div>
       <div id="atikaFocusTask" style="font-size:14px;font-weight:700;color:var(--ic-lemon);margin-bottom:8px;line-height:1.35;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <span id="atikaFocusDeadline" style="font-size:11px;background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
+        <span id="atikaFocusDeadline" style="font-size:12px;background:rgba(255,255,255,0.12);border-radius:20px;padding:3px 10px;color:var(--ic-vanilla);display:flex;align-items:center;gap:4px;"></span>
         <button onclick="completeFocusTask()" style="background:var(--ic-caramel);color:var(--ic-choc-dk);border-radius:20px;border:none;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;">
-          <i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> 完成
+          <i class="ti ti-check" style="font-size:12px;" aria-hidden="true"></i> 完成
         </button>
       </div>
     </div>
@@ -810,7 +810,7 @@
         </div>
         <div class="flex items-center gap-2 mt-1">
           <div id="mgrGreetingHdr" class="text-sm font-semibold" style="color:var(--ic-caramel-dk);"></div>
-          <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="mgrChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:10px;"></span></button>
+          <button onclick="openChatPanel()" class="relative" style="color:var(--ic-choc-mid);font-size:22px;line-height:1;" title="訊息" aria-label="訊息"><i class="ti ti-message-circle"></i><span id="mgrChatBadge" class="absolute -top-1 -right-1 text-white text-xs px-1.5 rounded-full hidden" style="background:var(--ic-strawberry);font-size:12px;"></span></button>
           <div class="hdr-menu-wrap">
             <button class="hdr-menu-btn" onclick="toggleHdrMenu('mgrMenu')" title="更多" aria-label="更多選項"><i class="ti ti-dots-vertical"></i></button>
             <div id="mgrMenu" class="hdr-dropdown">
@@ -878,7 +878,7 @@
                   <button onclick="translateField('mgrReminderId','mgrReminderZh','id','zh')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成中文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
                 </div>
                 <div class="flex justify-end gap-2 mt-2">
-                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:11px;">清除</button>
+                  <button onclick="clearReminder()" class="btn-ghost" style="height:auto;padding:4px 12px;font-size:12px;">清除</button>
                   <button onclick="saveReminder()" class="text-xs bg-amber-600 text-white px-3 py-1 rounded-lg">儲存</button>
                 </div>
                 <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
@@ -1055,16 +1055,16 @@
     <div id="tab-supplies" class="tab-content hidden">
       <!-- Header -->
       <div class="flex items-center mb-3">
-        <h3 class="font-bold" style="font-size:17px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i> 備品 / Perlengkapan</h3>
+        <h3 class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i> 備品 / Perlengkapan</h3>
       </div>
 
       <!-- 分類篩選 -->
       <div class="mb-1">
         <div id="supplyCatFilters" class="flex flex-wrap gap-2 mb-1">
-          <button class="sc-filter font-semibold border" style="padding:6px 14px;border-radius:99px;font-size:17px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+          <button class="sc-filter font-semibold border" style="padding:6px 14px;border-radius:99px;font-size:16px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
         </div>
         <div class="flex items-center justify-between mt-2 mb-3">
-          <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
+          <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
           <button onclick="openAddSupplyCatModal()" style="font-size:14px;font-weight:600;color:var(--ic-caramel-dk);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px;padding:0;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增分類</button>
         </div>
       </div>
@@ -1072,7 +1072,7 @@
       <!-- 待購買 -->
       <div id="blockReported" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:19px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
+          <span style="font-size:16px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
           <span id="cntReported" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FAE8E8;color:#B84040;"></span>
         </div>
         <div id="suppliesReported" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
@@ -1081,7 +1081,7 @@
       <!-- 已購買待收納 -->
       <div id="blockBought" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:17px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:19px;" aria-hidden="true"></i> 已購買・待收納</span>
+          <span style="font-size:16px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
           <span id="cntBought" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FFF3DC;color:#905820;"></span>
         </div>
         <div id="suppliesBought" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
@@ -1090,7 +1090,7 @@
       <!-- 暫不補充（折疊） -->
       <details id="blockPaused" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <summary class="flex items-center justify-between px-4 py-3 cursor-pointer" style="list-style:none;">
-          <span style="font-size:17px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:19px;" aria-hidden="true"></i> 暫不補充</span>
+          <span style="font-size:16px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
           <span style="display:flex;align-items:center;gap:6px;">
             <span id="cntPaused" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#F0EDE8;color:#7A7060;"></span>
             <i class="ti ti-chevron-down" style="font-size:16px;color:#B0A090;" aria-hidden="true"></i>
@@ -1102,7 +1102,7 @@
       <!-- 備品庫 -->
       <div class="rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:17px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:19px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
+          <span style="font-size:16px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
             <button onclick="openAddSupplyModal()" class="btn-sm-primary flex items-center gap-1" style="font-size:13px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增備品</button>
@@ -2108,7 +2108,7 @@
 <div id="manageSuppliesModal" class="hidden fixed inset-0 z-50 flex items-end justify-center modal-backdrop" onclick="if(event.target===this)closeManageSuppliesModal()">
   <div class="modal-sheet w-full rounded-t-2xl max-h-[85vh] flex flex-col" style="max-width:520px;border-top-left-radius:20px;border-top-right-radius:20px;">
     <div class="flex items-center justify-between px-5 py-4 flex-shrink-0" style="border-bottom:1px solid var(--ic-vanilla);">
-      <div class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-settings" style="font-size:17px;" aria-hidden="true"></i> 管理備品</div>
+      <div class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-settings" style="font-size:16px;" aria-hidden="true"></i> 管理備品</div>
       <button onclick="closeManageSuppliesModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="flex flex-shrink-0" style="border-bottom:1px solid var(--ic-vanilla);">
@@ -4078,8 +4078,8 @@ function renderMenuWeekStrip(){
     const enColor = isToday ? 'var(--ic-caramel)' : 'var(--ic-choc-mid)';
     html += `<tr style="${rowBg}border-bottom:0.5px solid var(--ic-vanilla);">
       <td style="padding:6px 2px;text-align:center;vertical-align:middle;">
-        <div style="font-size:17px;color:${dowColor};font-weight:${isToday?800:600};line-height:1.2;">${DOW_ZH[dow]}</div>
-        <div style="font-size:11px;color:${enColor};font-weight:${isToday?700:400};letter-spacing:.02em;">${DOW_EN[dow]}.</div>
+        <div style="font-size:16px;color:${dowColor};font-weight:${isToday?800:600};line-height:1.2;">${DOW_ZH[dow]}</div>
+        <div style="font-size:12px;color:${enColor};font-weight:${isToday?700:400};letter-spacing:.02em;">${DOW_EN[dow]}.</div>
       </td>`;
     meals.forEach(meal => {
       const key = getMenuKey(dow, meal.id);
@@ -4123,8 +4123,8 @@ function renderMenuDayDetail(){
   const navBtnStyle = 'width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:var(--ic-choc-mid);border:0.5px solid var(--ic-vanilla);background:var(--ic-surface);cursor:pointer;';
   let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
     <div>
-      <div style="font-size:13px;font-weight:500;color:var(--ic-chocolate);">週${DOW_LBL[dow]}${isToday?`<span style="margin-left:6px;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--ic-caramel);color:#fff;">今天</span>`:''}</div>
-      <div style="font-size:11px;color:var(--ic-choc-mid);">${dateStr}</div>
+      <div style="font-size:13px;font-weight:500;color:var(--ic-chocolate);">週${DOW_LBL[dow]}${isToday?`<span style="margin-left:6px;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--ic-caramel);color:#fff;">今天</span>`:''}</div>
+      <div style="font-size:12px;color:var(--ic-choc-mid);">${dateStr}</div>
     </div>
     <div style="display:flex;gap:4px;">
       <button onclick="setMenuDay(${prevDow})" style="${navBtnStyle}"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
@@ -4147,9 +4147,9 @@ function renderMenuDayDetail(){
     const ic=MEAL_IC[meal.id]||'var(--ic-caramel-dk)';
     let cardHtml='';
     if(!cell||cell.type==='empty'){
-      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px dashed var(--ic-vanilla);border-radius:11px;background:var(--ic-surface);cursor:pointer;display:flex;align-items:center;gap:6px;padding:12px 10px;color:var(--ic-caramel);"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i><span style="font-size:11px;">點此新增${meal.name}菜色</span></div>`;
+      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px dashed var(--ic-vanilla);border-radius:11px;background:var(--ic-surface);cursor:pointer;display:flex;align-items:center;gap:6px;padding:12px 10px;color:var(--ic-caramel);"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i><span style="font-size:12px;">點此新增${meal.name}菜色</span></div>`;
     } else if(cell.type==='skip'){
-      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px solid var(--ic-vanilla);border-radius:11px;background:#F3F4F6;cursor:pointer;padding:9px 10px;display:flex;align-items:center;gap:5px;"><i class="ti ti-x" style="font-size:13px;color:#9CA3AF;" aria-hidden="true"></i><span style="font-size:11px;color:#6B7280;">不煮</span>${cell.skipReason?`<span style="font-size:10px;color:#9CA3AF;">· ${cell.skipReason}</span>`:''}<i class="ti ti-pencil" style="font-size:11px;color:var(--ic-choc-mid);margin-left:auto;" aria-hidden="true"></i></div>`;
+      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px solid var(--ic-vanilla);border-radius:11px;background:#F3F4F6;cursor:pointer;padding:9px 10px;display:flex;align-items:center;gap:5px;"><i class="ti ti-x" style="font-size:13px;color:#9CA3AF;" aria-hidden="true"></i><span style="font-size:12px;color:#6B7280;">不煮</span>${cell.skipReason?`<span style="font-size:12px;color:#9CA3AF;">· ${cell.skipReason}</span>`:''}<i class="ti ti-pencil" style="font-size:12px;color:var(--ic-choc-mid);margin-left:auto;" aria-hidden="true"></i></div>`;
     } else {
       const dishes=cell.dishes||[];
       const allIngs=state.ingredients||[];
@@ -4158,13 +4158,13 @@ function renderMenuDayDetail(){
         const chip=_dsm.length?`<span style="font-size:12px;font-weight:600;padding:2px 7px;border-radius:99px;background:var(--ic-caramel);color:#fff;flex-shrink:0;">${_dsm.join('＋')}</span>`:'';
         const ingNames=(ds.ingredientIds||[]).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?ing.name:'';}).filter(Boolean).join('＋');
         const label=ds.dishName||'';
-        const noteHtml=ds.note?`<div style="font-size:10px;font-style:italic;color:var(--ic-choc-mid);margin-top:1px;">${ds.note}</div>`:'';
+        const noteHtml=ds.note?`<div style="font-size:12px;font-style:italic;color:var(--ic-choc-mid);margin-top:1px;">${ds.note}</div>`:'';
         return `<div style="padding:5px 0;border-bottom:0.5px solid var(--ic-vanilla);"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${chip}${label?`<span style="font-size:15px;color:var(--ic-chocolate);flex:1;overflow:hidden;text-overflow:ellipsis;">${label}</span>`:''}</div>${noteHtml}</div>`;
       }).join('');
-      const more=dishes.length>3?`<div style="font-size:9px;color:var(--ic-caramel);padding-top:2px;">+${dishes.length-3} 道</div>`:'';
-      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px solid ${isToday?'var(--ic-caramel)':'var(--ic-vanilla)'};border-radius:11px;background:var(--ic-surface);cursor:pointer;overflow:hidden;"><div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:0.5px solid var(--ic-vanilla);"><span style="font-size:10px;color:var(--ic-choc-mid);">${meal.mealTime||''}</span><span style="font-size:11px;font-weight:500;color:var(--ic-chocolate);flex:1;">${meal.name}</span><i class="ti ti-pencil" style="font-size:11px;color:var(--ic-choc-mid);" aria-hidden="true"></i></div><div style="padding:4px 10px 8px;">${dishesHtml}${more}${!dishes.length?`<span style="font-size:11px;color:var(--ic-caramel);">＋ 新增菜色</span>`:''}</div></div>`;
+      const more=dishes.length>3?`<div style="font-size:12px;color:var(--ic-caramel);padding-top:2px;">+${dishes.length-3} 道</div>`:'';
+      cardHtml=`<div onclick="openMenuCellModal('${key}')" style="flex:1;border:0.5px solid ${isToday?'var(--ic-caramel)':'var(--ic-vanilla)'};border-radius:11px;background:var(--ic-surface);cursor:pointer;overflow:hidden;"><div style="display:flex;align-items:center;gap:6px;padding:7px 10px;border-bottom:0.5px solid var(--ic-vanilla);"><span style="font-size:12px;color:var(--ic-choc-mid);">${meal.mealTime||''}</span><span style="font-size:12px;font-weight:500;color:var(--ic-chocolate);flex:1;">${meal.name}</span><i class="ti ti-pencil" style="font-size:12px;color:var(--ic-choc-mid);" aria-hidden="true"></i></div><div style="padding:4px 10px 8px;">${dishesHtml}${more}${!dishes.length?`<span style="font-size:12px;color:var(--ic-caramel);">＋ 新增菜色</span>`:''}</div></div>`;
     }
-    html+=`<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:${isLast?0:8}px;"><div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;padding-top:2px;"><div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:${bg};color:${ic};margin-bottom:3px;"><i class="ti ${iconName}" aria-hidden="true"></i></div><div style="font-size:9px;color:var(--ic-choc-mid);text-align:center;">${meal.mealTime||''}</div>${!isLast?'<div style="flex:1;width:1px;background:var(--ic-vanilla);margin:3px auto;min-height:8px;"></div>':''}</div>${cardHtml}</div>`;
+    html+=`<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:${isLast?0:8}px;"><div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0;padding-top:2px;"><div style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:${bg};color:${ic};margin-bottom:3px;"><i class="ti ${iconName}" aria-hidden="true"></i></div><div style="font-size:12px;color:var(--ic-choc-mid);text-align:center;">${meal.mealTime||''}</div>${!isLast?'<div style="flex:1;width:1px;background:var(--ic-vanilla);margin:3px auto;min-height:8px;"></div>':''}</div>${cardHtml}</div>`;
   });
   el.innerHTML=html;
 }
@@ -4198,7 +4198,7 @@ function renderMenuTimeline(){
     return;
   }
   const html = `
-    <div style="font-size:11px;color:var(--ic-sand);margin-bottom:8px;font-weight:500;letter-spacing:.04em;">輪替排程</div>
+    <div style="font-size:12px;color:var(--ic-sand);margin-bottom:8px;font-weight:500;letter-spacing:.04em;">輪替排程</div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;">
       ${weeks.map(wk=>{
         const setId = getWeekSetId(wk);
@@ -4211,10 +4211,10 @@ function renderMenuTimeline(){
         const label = `W${wn}`;
         const dateRange = fmtWeekRange(wk);
         return `<div style="flex:0 0 auto;min-width:80px;border-radius:10px;padding:8px 10px;background:${isCur?color:light};border:${isCur?'none':'1.5px solid '+color+'40'};text-align:center;">
-          <div style="font-size:10px;color:${isCur?'rgba(255,255,255,0.85)':color};font-weight:${isCur?700:500};">${label}</div>
+          <div style="font-size:12px;color:${isCur?'rgba(255,255,255,0.85)':color};font-weight:${isCur?700:500};">${label}</div>
           <div style="font-size:12px;color:${isCur?'#fff':dark};font-weight:600;margin:2px 0;">${s?s.name:'（空）'}</div>
-          <div style="font-size:9px;color:${isCur?'rgba(255,255,255,0.7)':color+'99'};">${dateRange}</div>
-          ${isCur?`<div style="font-size:9px;color:rgba(255,255,255,0.9);margin-top:2px;">本週</div>`:''}
+          <div style="font-size:12px;color:${isCur?'rgba(255,255,255,0.7)':color+'99'};">${dateRange}</div>
+          ${isCur?`<div style="font-size:12px;color:rgba(255,255,255,0.9);margin-top:2px;">本週</div>`:''}
         </div>`;
       }).join('')}
     </div>`;
@@ -4310,10 +4310,10 @@ function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, da
   const shown = dishes.slice(0,3);
   const dishHtml = shown.map((d,di)=>{
     const _dm=(d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-    const methodLabel=_dm.map(m=>`<span style="font-size:11px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:4px;padding:1px 5px;">${m}</span>`).join(' ');
-    const ingPills=(d.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);if(!ing)return null;const cc=catColors[ing.category]||'#A89880';return `<span style="font-size:11px;font-weight:600;padding:1px 5px;border-radius:99px;background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`;}).filter(Boolean).join('');
+    const methodLabel=_dm.map(m=>`<span style="font-size:12px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:4px;padding:1px 5px;">${m}</span>`).join(' ');
+    const ingPills=(d.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);if(!ing)return null;const cc=catColors[ing.category]||'#A89880';return `<span style="font-size:12px;font-weight:600;padding:1px 5px;border-radius:99px;background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`;}).filter(Boolean).join('');
     const nameStr=d.dishName?`<span style="font-size:13px;font-weight:700;color:#2A1508;line-height:1.3;">${d.dishName}</span>`:'';
-    const noteStr=(d.note||d.noteId)?`<span style="font-size:10px;color:#9A7A58;font-style:italic;">${d.note||d.noteId}</span>`:'';
+    const noteStr=(d.note||d.noteId)?`<span style="font-size:12px;color:#9A7A58;font-style:italic;">${d.note||d.noteId}</span>`:'';
     const isLast=di===shown.length-1;
     return `<div style="display:flex;flex-direction:column;gap:2px;${isLast?'':'padding-bottom:4px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
       ${methodLabel?`<div style="display:flex;gap:3px;flex-wrap:wrap;">${methodLabel}${noteStr?` ${noteStr}`:''}</div>`:(noteStr||'')}
@@ -4321,7 +4321,7 @@ function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, da
       ${ingPills?`<div style="display:flex;flex-wrap:wrap;gap:2px;">${ingPills}</div>`:''}
     </div>`;
   }).join('');
-  const more=dishes.length>3?`<span style="font-size:10px;color:var(--ic-caramel);">＋${dishes.length-3} 道</span>`:'';
+  const more=dishes.length>3?`<span style="font-size:12px;color:var(--ic-caramel);">＋${dishes.length-3} 道</span>`:'';
   return dishHtml+more;
 }
 
@@ -4349,7 +4349,7 @@ function _renderMenuMatrix(setId, editable){
 
   meals.forEach(meal=>{
     html += `<tr>
-      <td style="padding:5px 4px;color:${dark};font-size:11px;font-weight:500;white-space:nowrap;">${meal.name}</td>`;
+      <td style="padding:5px 4px;color:${dark};font-size:12px;font-weight:500;white-space:nowrap;">${meal.name}</td>`;
     dayKeys.forEach(dk=>{
       const key = `${meal.name}_${dk}`;
       const menu = _getSetMenu(setId);
@@ -4397,14 +4397,14 @@ function renderMenuViewMode(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:15px;font-weight:600;color:${color};">${s.name}</span>
-          ${disabled?`<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:#E8E8E8;color:#999;">停用</span>`:`<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:${color}20;color:${color};">啟用中</span>`}
+          ${disabled?`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:#E8E8E8;color:#999;">停用</span>`:`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:${color}20;color:${color};">啟用中</span>`}
         </div>
         <button onclick="_menuEditMode=true;_menuEditTargetSetId=_viewingSetId;renderMenuTab();"
           style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--ic-caramel);color:#fff;border:none;cursor:pointer;">
           <i class="ti ti-edit" aria-hidden="true"></i> 編輯菜單
         </button>
       </div>
-      <div style="font-size:11px;color:var(--ic-sand);margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--ic-sand);margin-bottom:8px;">
         餐次：${(s.meals||[]).filter(m=>m.enabled!==false).map(m=>`${m.name}${m.time?'('+m.time+')':''}`).join('・')||'尚未設定'}
       </div>
       ${_renderMenuMatrix(s.id, false)}
@@ -4453,13 +4453,13 @@ function renderMenuEditMode(){
         </button>
       </div>
       <div style="margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">餐次設定</div>
+        <div style="font-size:12px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">餐次設定</div>
         ${mealsHtml}
         <button onclick="_addSetMeal(\'${s.id}\')" style="font-size:12px;color:var(--ic-caramel);background:none;border:1px dashed var(--ic-caramel);border-radius:6px;padding:4px 12px;cursor:pointer;width:100%;">
           <i class="ti ti-plus" aria-hidden="true"></i> 新增餐次
         </button>
       </div>
-      <div style="font-size:11px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">菜色安排</div>
+      <div style="font-size:12px;color:var(--ic-sand);font-weight:500;margin-bottom:6px;">菜色安排</div>
       ${_renderMenuMatrix(s.id, true)}
     </div>`;
 }
@@ -4750,7 +4750,7 @@ function renderMenuCell(key, cell, isToday){
     const methodLabel = _dm.map(m=>`<span style="font-size:15px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 9px;line-height:1.5;">${m}</span>`).join(' ');
     const ingPills = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return null; const cc=catColors[ing.category]||'#A89880'; return {name:ing.name,cc}; }).filter(Boolean);
     const ingLine = ingPills.length ? `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding-left:2px;">${ingPills.map((p,pi)=>`<span style="font-size:13px;font-weight:600;padding:1px 8px;border-radius:99px;background:${p.cc}22;color:${p.cc};border:1px solid ${p.cc};">${p.name}</span>${pi<ingPills.length-1?'<span style="font-size:14px;font-weight:800;color:#C67843;">＋</span>':''}`).join('')}</div>` : '';
-    const nameStr = d.dishName ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
+    const nameStr = d.dishName ? `<span style="font-size:16px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
     const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
     return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
@@ -4865,7 +4865,7 @@ function _rebuildDishListUI(){
           <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="菜名（選填，空白即可）" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm" style="background:var(--ic-surface);">
         </div>
         ${selTags?`<div class="mb-2"><div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">已選食材</div><div class="flex flex-wrap gap-1">${selTags}</div></div>`:''}
-        <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
+        <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
         <div id="ingPicker_${i}" class="${ingPickerOpen?'':'hidden'} mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
         <div class="mb-2">
           <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式（可複選）</div>
@@ -4876,11 +4876,11 @@ function _rebuildDishListUI(){
           <input type="text" id="dish-note-${i}" value="${d.note||''}" oninput="_cellDishes[${i}].note=this.value" onblur="autoTranslateNote(${i})" placeholder="例：＊鴻禧菇使用一半就好" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs mb-1" style="background:var(--ic-surface);">
           <div style="display:flex;align-items:center;gap:4px;">
             <input type="text" id="dish-noteid-${i}" value="${d.noteId||''}" oninput="_cellDishes[${i}].noteId=this.value" placeholder="Catatan (Bahasa Indonesia)" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs" style="background:var(--ic-surface);flex:1;">
-            <button onclick="autoTranslateNote(${i})" title="自動翻譯" style="flex-shrink:0;background:#E8F0FE;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:11px;color:#3B5BDB;">🌐</button>
+            <button onclick="autoTranslateNote(${i})" title="自動翻譯" style="flex-shrink:0;background:#E8F0FE;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:12px;color:#3B5BDB;">🌐</button>
           </div>
         </div>
         <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--ic-vanilla);display:flex;justify-content:flex-end;">
-          <button type="button" onclick="toggleSaveToRecipe(${i})" style="font-size:11px;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:${isInRecipes(d)?'#C07030':'#9A7A5A'};">
+          <button type="button" onclick="toggleSaveToRecipe(${i})" style="font-size:12px;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:${isInRecipes(d)?'#C07030':'#9A7A5A'};">
             <i class="ti ti-star" style="font-size:13px;" aria-hidden="true"></i>
             ${isInRecipes(d)?'★ 已加入常用菜譜':'☆ 加入常用菜譜'}
           </button>
@@ -4962,8 +4962,8 @@ function renderRecipePicker(){
     return `<div style="position:relative;flex-shrink:0;max-width:130px;">
       <button type="button" onclick="addRecipeToCell('${sid}')" style="width:100%;background:#FEF0D8;border:0.5px solid #E8DDD0;border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;">
         <div style="font-size:13px;font-weight:700;color:#4A2008;margin-bottom:3px;padding-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.dishName||'未命名'}</div>
-        ${methods?`<div style="font-size:10px;color:#C07030;margin-bottom:1px;">${methods}</div>`:''}
-        ${ingNames?`<div style="font-size:10px;color:#9A7A5A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ingNames}</div>`:''}
+        ${methods?`<div style="font-size:12px;color:#C07030;margin-bottom:1px;">${methods}</div>`:''}
+        ${ingNames?`<div style="font-size:12px;color:#9A7A5A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ingNames}</div>`:''}
       </button>
       <button type="button" onclick="removeRecipe('${sid}')" style="position:absolute;top:3px;right:4px;background:none;border:none;cursor:pointer;font-size:13px;color:#B0A090;line-height:1;" title="移除常用">×</button>
     </div>`;
@@ -4971,7 +4971,7 @@ function renderRecipePicker(){
   el.innerHTML = `<div style="margin-bottom:6px;display:flex;align-items:center;gap:5px;">
     <i class="ti ti-star" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
     <span style="font-size:12px;font-weight:700;color:#7A3A08;">常用菜譜</span>
-    <span style="font-size:10px;color:#9A7A5A;">點選快速加入</span>
+    <span style="font-size:12px;color:#9A7A5A;">點選快速加入</span>
   </div>
   <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">${cards}</div>
   <div style="height:1px;background:#E8DDD0;margin:10px 0 2px;"></div>`;
@@ -5285,7 +5285,7 @@ function renderTodayMenuCard(){
         <div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;align-items:baseline;gap:8px;">
             <span style="font-size:16px;font-weight:800;color:#5C3310;">${meal.name}</span>
-            ${meal.mealTime?`<span style="font-size:17px;font-weight:600;font-style:italic;color:#A07040;">${meal.mealTime}</span>`:''}
+            ${meal.mealTime?`<span style="font-size:16px;font-weight:600;font-style:italic;color:#A07040;">${meal.mealTime}</span>`:''}
           </div>
           ${dishRows}
         </div>
@@ -6130,7 +6130,7 @@ function renderAtikaView(){
         ? (focusTask._nameId||focusTask._nameZh||'')
         : (focusTask._nameZh||focusTask._nameId||'');
       const fdEl = document.getElementById('atikaFocusDeadline');
-      if (fdEl) fdEl.innerHTML = `<i class="ti ti-clock" style="font-size:10px;" aria-hidden="true"></i> 需在 ${focusTask.deadline} 前完成`;
+      if (fdEl) fdEl.innerHTML = `<i class="ti ti-clock" style="font-size:12px;" aria-hidden="true"></i> 需在 ${focusTask.deadline} 前完成`;
     } else {
       focusCard.classList.add('hidden');
     }
@@ -6286,7 +6286,7 @@ function renderMgrTimeSlotKanban(){
     const items = allItems.filter(x => x.slot === slot);
     el.innerHTML = items.map(x => {
       const name = lang === 'id' ? (x.nameId || x.nameZh) : (x.nameZh || x.nameId);
-      const dl = x.deadline ? `<span style="font-size:9px;color:var(--ic-choc-mid);margin-left:auto;white-space:nowrap;">${x.deadline}</span>` : '';
+      const dl = x.deadline ? `<span style="font-size:12px;color:var(--ic-choc-mid);margin-left:auto;white-space:nowrap;">${x.deadline}</span>` : '';
       return `<div class="ts-card${x.type==='adhoc'?' ts-adhoc':''}${x.done?' ts-done':''}" data-id="${x.id}" data-type="${x.type}">
         <div class="ts-dot"></div><span style="flex:1;">${name}</span>${dl}
       </div>`;
@@ -6868,7 +6868,7 @@ function renderPunchSection(){
       return `<button onclick="openPunchEdit('${pt.id}')"
         style="${chipStyle}border-radius:10px;padding:5px 10px;display:inline-flex;flex-direction:column;align-items:center;min-width:76px;"
         class="active:scale-95 transition-transform">
-        <span class="text-[11px] text-center whitespace-nowrap" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
+        <span class="text-[11px] text-center whitespace-nowrap" style="color:var(--ic-choc-mid)"><i class="ti ${pt.emoji}" style="font-size:12px;vertical-align:-1px;"></i> ${priLbl(pt)}</span>
         <span class="font-bold tabular-nums text-sm" style="color:var(--ic-chocolate)">${p.at}</span>
         ${bf ? '<span class="text-[9px] font-bold" style="color:#A85550">補打</span>' : ''}
       </button>`;
@@ -6930,7 +6930,7 @@ function renderPunchSection(){
     } else {
       compactHTML = `<span class="text-xs truncate" style="color:var(--ic-caramel);max-width:9rem;">${punchSummaryText(punches)}</span>
         <button onclick="punchNow('${nextStep.id}')" class="text-xs font-semibold px-2 py-0.5 rounded-lg active:scale-95 transition-transform whitespace-nowrap flex-shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">
-          <i class="ti ${nextStep.emoji}" style="font-size:11px;vertical-align:-1px;"></i> ${nextStep.zh}
+          <i class="ti ${nextStep.emoji}" style="font-size:12px;vertical-align:-1px;"></i> ${nextStep.zh}
         </button>`;
     }
     compactStatus.innerHTML = `<div class="flex items-center gap-1.5 min-w-0 overflow-hidden">${compactHTML}</div>`;
@@ -7366,7 +7366,7 @@ function renderPayrollTab(){
       const ring = isToday ? 'outline:2.5px solid var(--ic-caramel-dk);outline-offset:1px;' : '';
       return `<div title="${d.dateStr}" style="display:flex;flex-direction:column;align-items:center;gap:2px;">
         <div style="width:36px;height:36px;border-radius:9px;background:${bg};${ring}display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${txtColor};">${label}</div>
-        <div style="font-size:11px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
+        <div style="font-size:12px;color:var(--ic-choc-mid);font-weight:${isToday?700:400};">${parseInt(dd2)}</div>
       </div>`;
     }).join('');
     const [yy3,mm3] = days[0].dateStr.split('-');
@@ -7618,9 +7618,9 @@ function printLeaveForm(rid){
     td { padding:7px 10px; border:1px solid #ccc; font-size:13px; }
     td:first-child { background:#f5f5f5; font-weight:bold; width:50%; }
     .lbl-zh { display:block; }
-    .lbl-id { display:block; font-size:11px; color:#888; font-weight:normal; }
+    .lbl-id { display:block; font-size:12px; color:#888; font-weight:normal; }
     .val-zh { display:block; }
-    .val-id { display:block; font-size:11px; color:#777; }
+    .val-id { display:block; font-size:12px; color:#777; }
     .section { border:1px solid #ddd; border-radius:8px; padding:14px 16px; margin-bottom:20px; background:#fafaf8; }
     .section-title { font-weight:bold; font-size:14px; margin-bottom:8px; color:#555; border-bottom:1px solid #e0e0e0; padding-bottom:6px; }
     .sign-row { display:flex; gap:40px; margin-top:32px; }
@@ -7645,7 +7645,7 @@ function printLeaveForm(rid){
     <div class="sign-box">員工簽名<br><small style="color:#aaa;">Tanda Tangan Karyawan</small><br><br><br></div>
     <div class="sign-box">管理者確認<br><small style="color:#aaa;">Konfirmasi Majikan</small><br><br><br></div>
   </div>
-  <p style="font-size:11px;color:#aaa;text-align:center;margin-top:32px;">列印日期 / Tanggal Cetak：${new Date().toLocaleDateString('zh-TW')}</p>
+  <p style="font-size:12px;color:#aaa;text-align:center;margin-top:32px;">列印日期 / Tanggal Cetak：${new Date().toLocaleDateString('zh-TW')}</p>
   <div style="text-align:center;margin-top:16px;"><button onclick="window.print()">🖨 列印 / Print</button></div>
   </body></html>`;
   const w = window.open('', '_blank');
@@ -8289,8 +8289,8 @@ body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size
 @media print{body{padding:22px 28px}.no-print{display:none!important}}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:14px;margin-bottom:22px}
 .hd h1{font-size:21px;font-weight:800;letter-spacing:-.5px}
-.hd .sub{font-size:11px;color:#999;margin-top:3px}
-.hd-r{text-align:right;font-size:12.5px;color:#444;line-height:1.8}
+.hd .sub{font-size:12px;color:#999;margin-top:3px}
+.hd-r{text-align:right;font-size:12px;color:#444;line-height:1.8}
 .hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
 .hero{background:#1a1a1a;color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between}
 .hero-lbl{font-size:12px;color:rgba(255,255,255,.8);letter-spacing:.5px;margin-bottom:5px}
@@ -8298,9 +8298,9 @@ body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size
 .hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.85);line-height:2}
 .sec{margin-bottom:22px}
 .sec-ttl{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid #ccc}
-.sec-ttl .id{font-size:11px;color:#555;margin-left:6px;font-weight:500;letter-spacing:.3px}
+.sec-ttl .id{font-size:12px;color:#555;margin-left:6px;font-weight:500;letter-spacing:.3px}
 table.sum{width:100%;border-collapse:collapse}
-table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13.5px}
+table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
 table.sum td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
 table.sum tr:last-child td{border-bottom:none}
 table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px solid #1a1a1a;border-bottom:none}
@@ -8315,9 +8315,9 @@ table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px
 ul.act{list-style:none}
 ul.act li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
 ul.act li:last-child{border-bottom:none}
-.act-dt{font-size:11px;color:#888;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.act-dt{font-size:12px;color:#888;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .act-lbl{flex:1;color:#222}
-.act-note{font-size:11px;color:#888}
+.act-note{font-size:12px;color:#888}
 .act-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
 table.days{width:100%;border-collapse:collapse;font-size:12px}
 table.days th{text-align:left;padding:5px 6px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;font-size:11px;color:#777;font-weight:600}
@@ -8342,7 +8342,7 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 
 <div class="hero">
   <div>
-    <div class="hero-lbl">本期實領 <span style="font-size:11px;opacity:.9">· Gaji Bersih</span></div>
+    <div class="hero-lbl">本期實領 <span style="font-size:12px;opacity:.9">· Gaji Bersih</span></div>
     <div class="hero-amt">NT$ ${p.netSalary.toLocaleString()}</div>
   </div>
   <div class="hero-r">
@@ -8362,7 +8362,7 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     ${breakdown.map(row => {
       const cls = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
       const prefix = row.sign === '+' ? '+' : (row.sign === '-' ? '−' : '');
-      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:11px;color:#888">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
+      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:12px;color:#888">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
     }).join('')}
     <tr class="net"><td>本期實領 <span style="font-size:12px;color:#555;font-weight:500">/ Gaji Bersih</span></td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
   </table>
@@ -8373,10 +8373,10 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     html += `<div class="sec">
   <div class="sec-ttl">出勤摘要 <span class="id">Ringkasan Kehadiran</span></div>
   <div class="att-grid">
-    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤<br><span style="font-size:9px;color:#888">Hari Terjadwal</span></div></div>
-    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤<br><span style="font-size:9px;color:#666">Hadir Aktual</span></div></div>
-    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假<br><span style="font-size:9px;color:#888">Hari Cuti</span></div></div>
-    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班<br><span style="font-size:9px;color:#888">Lembur Libur</span></div></div>
+    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤<br><span style="font-size:12px;color:#888">Hari Terjadwal</span></div></div>
+    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤<br><span style="font-size:12px;color:#666">Hadir Aktual</span></div></div>
+    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假<br><span style="font-size:12px;color:#888">Hari Cuti</span></div></div>
+    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班<br><span style="font-size:12px;color:#888">Lembur Libur</span></div></div>
   </div>
 </div>`;
   }
@@ -8659,10 +8659,10 @@ function _legacy_renderCalendar(){
     if (holidays.length){
       const h=holidays[0];
       const _DOT_ICON = h.type==='outing'
-        ? '<i class="ti ti-walk" style="font-size:10px;color:#F97316;" aria-hidden="true"></i>'
+        ? '<i class="ti ti-walk" style="font-size:12px;color:#F97316;" aria-hidden="true"></i>'
         : h.type==='leave'
-        ? '<i class="ti ti-moon" style="font-size:10px;color:#6B7280;" aria-hidden="true"></i>'
-        : '<i class="ti ti-calendar-event" style="font-size:10px;color:#8B5CF6;" aria-hidden="true"></i>';
+        ? '<i class="ti ti-moon" style="font-size:12px;color:#6B7280;" aria-hidden="true"></i>'
+        : '<i class="ti ti-calendar-event" style="font-size:12px;color:#8B5CF6;" aria-hidden="true"></i>';
       dots.push(_DOT_ICON);
     }
     if (scenarioActs.length) dots.push('<span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>');
@@ -9395,13 +9395,13 @@ function buildScheduleOverviewPrintHTML(lang){
   const mWeekTasks     = all.filter(t=>t.mode==='flex' && t.freqType==='mWeek');
   const mMonthTasks    = all.filter(t=>t.mode==='flex' && (t.freqType==='mMonth' || t.freqType==='quarterly'));
   const nameOf = t => {
-    if (lang==='both') return `${t.nameZh}<br><span style="color:#666;font-size:10px">${t.nameId}</span>`;
+    if (lang==='both') return `${t.nameZh}<br><span style="color:#666;font-size:12px">${t.nameId}</span>`;
     if (lang==='id') return t.nameId;
     return t.nameZh;
   };
   const chipP = t => {
     const cat = getCat(t.catId);
-    return `<div style="background:var(--ic-lemon);border-left:3px solid var(--ic-caramel);padding:2px 4px;margin-bottom:2px;font-size:10px;border-radius:3px;">${nameOf(t)}</div>`;
+    return `<div style="background:var(--ic-lemon);border-left:3px solid var(--ic-caramel);padding:2px 4px;margin-bottom:2px;font-size:12px;border-radius:3px;">${nameOf(t)}</div>`;
   };
   const empty = '<span style="color:#ccc">·</span>';
   const dows = [1,2,3,4,5,6,0];
@@ -9417,7 +9417,7 @@ function buildScheduleOverviewPrintHTML(lang){
   // 表 A
   const tableA = `
     <h3 style="margin-top:16px;">🔵 每週固定（每日 + 指定週幾）</h3>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead><tr style="background:#f3f4f6;">
         <th style="border:1px solid #ddd;padding:4px;width:80px;">頻率</th>
         ${dowH.map(h=>`<th style="border:1px solid #ddd;padding:4px;">${h}</th>`).join('')}
@@ -9436,8 +9436,8 @@ function buildScheduleOverviewPrintHTML(lang){
   `;
   // 表 B: 月內 N 週
   const tableB = `
-    <h3 style="margin-top:16px;">🟣 月內第 N 週 <span style="font-size:11px;color:#666">（本週 = 第 ${wMonNow} 週）</span></h3>
-    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <h3 style="margin-top:16px;">🟣 月內第 N 週 <span style="font-size:12px;color:#666">（本週 = 第 ${wMonNow} 週）</span></h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead><tr style="background:#f3e8ff;">
         ${[1,2,3,4].map(w=>`<th style="border:1px solid #ddd;padding:4px;${w===wMonNow?'background:#e9d5ff;font-weight:bold;':''}">第 ${w} 週</th>`).join('')}
       </tr></thead>
@@ -9453,8 +9453,8 @@ function buildScheduleOverviewPrintHTML(lang){
   `;
   // 表 C: 12 月
   const tableC = `
-    <h3 style="margin-top:16px;">🟢 指定月份 <span style="font-size:11px;color:#666">（本月 = ${mNow} 月）</span></h3>
-    <table style="width:100%;border-collapse:collapse;font-size:10px;">
+    <h3 style="margin-top:16px;">🟢 指定月份 <span style="font-size:12px;color:#666">（本月 = ${mNow} 月）</span></h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead><tr style="background:#dcfce7;">
         ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<th style="border:1px solid #ddd;padding:3px;${m===mNow?'background:#bbf7d0;font-weight:bold;':''}">${MN[m]}</th>`).join('')}
       </tr></thead>
@@ -9483,7 +9483,7 @@ function buildScheduleOverviewPrintHTML(lang){
     <h1>${title}</h1>
     <div class="meta">列印日期：${today_ymd} · 啟用工作 ${all.length} 個</div>
     ${tableA}${tableB}${tableC}
-    <div style="margin-top:14px;font-size:9px;color:#999;">— 家務管理 —</div>
+    <div style="margin-top:14px;font-size:12px;color:#999;">— 家務管理 —</div>
   </body></html>`;
 }
 
@@ -9932,17 +9932,17 @@ function renderManagerSupplyCard(s, group){
   if (group==='reported'){
     actionsHtml=`
       <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='bought'){
     actionsHtml=`
       <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="flex:1;font-size:14px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>補好了</button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='paused'){
     actionsHtml=`
       <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:17px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   }
   const firstChar=[...cat.nameZh][0]||'';
   const catIcon=firstChar.codePointAt(0)>0x2000?firstChar:'';
@@ -10732,7 +10732,7 @@ function renderScenarioList(){
   list.innerHTML = state.scenarios.map(s=>{
     const cnt = (s.templateIds||[]).length;
     const activeBadge = s.active
-      ? '<span class="text-xs px-1.5 py-0.5 rounded-full font-bold" style="background:#6A7840;color:#FAF7F2;"><i class="ti ti-check" style="font-size:11px;vertical-align:-1px;"></i> 啟用中</span>'
+      ? '<span class="text-xs px-1.5 py-0.5 rounded-full font-bold" style="background:#6A7840;color:#FAF7F2;"><i class="ti ti-check" style="font-size:12px;vertical-align:-1px;"></i> 啟用中</span>'
       : '';
     return `
       <div class="border ${s.active?'border-green-400 bg-green-50':'border-gray-200 bg-white'} rounded-xl p-3">
