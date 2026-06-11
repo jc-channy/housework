@@ -538,6 +538,19 @@
 .ty-form-label   { font-size: 14px; font-weight: 600; }
 .ty-id-text      { font-size: 13px; }
 .ty-id-caption   { font-size: 12px; }
+
+/* ── Filter Chip (全站統一篩選標籤) ── */
+.filter-chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -1043,8 +1056,8 @@
       </div>
 
       <!-- 篩選器 -->
-      <div id="catFiltersWrap" style="position:relative;margin-bottom:12px;"><div id="catFilters" class="flex gap-2 text-xs overflow-x-auto scrollbar-thin pb-1" style="mask-image:linear-gradient(to right,black 85%,transparent);-webkit-mask-image:linear-gradient(to right,black 85%,transparent);">
-        <button class="cat-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+      <div id="catFiltersWrap" style="position:relative;margin-bottom:12px;"><div id="catFilters" class="flex gap-2 overflow-x-auto scrollbar-thin pb-1" style="mask-image:linear-gradient(to right,black 85%,transparent);-webkit-mask-image:linear-gradient(to right,black 85%,transparent);">
+        <button class="cat-filter filter-chip" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
       </div>
       </div>
       <div class="text-xs mb-2 flex items-center gap-1.5" style="color:var(--ic-choc-mid);"><i class="ti ti-grip-vertical" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 長按左側拖移可調整順序</div>
@@ -1061,7 +1074,7 @@
       <!-- 分類篩選 -->
       <div class="mb-1">
         <div id="supplyCatFilters" class="flex flex-wrap gap-2 mb-1">
-          <button class="sc-filter font-semibold border" style="padding:4px 12px;border-radius:99px;font-size:13px;background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+          <button class="sc-filter filter-chip" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
         </div>
         <div class="flex items-center justify-between mt-2 mb-3">
           <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
@@ -6388,7 +6401,7 @@ function filterTaskLib(cat){
   _libFilter = cat;
   document.querySelectorAll('.lib-filter-btn').forEach(b=>{
     const active = b.textContent.includes(cat) || (cat==='all' && b.id==='libFilterAll');
-    b.className = `lib-filter-btn px-2 py-0.5 rounded-full text-xs ${active?'bg-gray-900 text-white':'bg-gray-100 text-gray-700'}`;
+    b.className = `lib-filter-btn filter-chip ${active?'bg-gray-900 text-white':'bg-gray-100 text-gray-700'}`;
   });
   renderTaskLibraryList();
 }
@@ -9499,7 +9512,7 @@ function renderCatFilters(){
   state.categories.sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
     const active=state.catFilter===c.id;
-    b.className='cat-filter px-3 py-1 rounded-full whitespace-nowrap text-xs font-semibold border transition-colors';
+    b.className='cat-filter filter-chip';
     b.style.background = active ? 'var(--ic-caramel)' : 'var(--ic-lemon)';
     b.style.color = active ? '#FAF7F2' : 'var(--ic-chocolate)';
     b.style.borderColor = active ? 'var(--ic-caramel)' : 'var(--ic-vanilla)';
@@ -9837,8 +9850,7 @@ function renderSupplyCatFilters(){
   wrap.appendChild(allBtn);
   state.supplyCats.slice().sort((a,b)=>(a.order||0)-(b.order||0)).forEach(c=>{
     const b=document.createElement('button');
-    b.className='sc-filter px-3 py-1 rounded-full whitespace-nowrap font-semibold border';
-    b.style.fontSize='13px'; b.style.padding='4px 12px';
+    b.className='sc-filter filter-chip';
     if(state.supplyCatFilter===c.id){ b.style.background='var(--ic-chocolate)'; b.style.color='var(--ic-surface)'; b.style.borderColor='var(--ic-chocolate)'; } else { b.style.background='#EDE8E0'; b.style.color='var(--ic-chocolate)'; b.style.borderColor='#C8B89A'; }
     b.dataset.cat=c.id;
     b.textContent=c.nameZh;
@@ -11352,12 +11364,12 @@ init();
     </div>
     <div class="px-3 py-2 border-b flex gap-2 items-center flex-wrap" style="background:var(--ic-surface);">
       <span class="text-xs text-gray-500">篩選分類：</span>
-      <button onclick="filterTaskLib('all')" id="libFilterAll" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-900 text-white">全部</button>
-      <button onclick="filterTaskLib('清潔整理')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">清潔</button>
-      <button onclick="filterTaskLib('烹飪餐飲')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">烹飪</button>
-      <button onclick="filterTaskLib('洗衣燙衣')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">洗衣</button>
-      <button onclick="filterTaskLib('照護服務')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">照護</button>
-      <button onclick="filterTaskLib('採買雜務')" class="lib-filter-btn px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">採買</button>
+      <button onclick="filterTaskLib('all')" id="libFilterAll" class="lib-filter-btn filter-chip bg-gray-900 text-white">全部</button>
+      <button onclick="filterTaskLib('清潔整理')" class="lib-filter-btn filter-chip bg-gray-100 text-gray-700">清潔</button>
+      <button onclick="filterTaskLib('烹飪餐飲')" class="lib-filter-btn filter-chip bg-gray-100 text-gray-700">烹飪</button>
+      <button onclick="filterTaskLib('洗衣燙衣')" class="lib-filter-btn filter-chip bg-gray-100 text-gray-700">洗衣</button>
+      <button onclick="filterTaskLib('照護服務')" class="lib-filter-btn filter-chip bg-gray-100 text-gray-700">照護</button>
+      <button onclick="filterTaskLib('採買雜務')" class="lib-filter-btn filter-chip bg-gray-100 text-gray-700">採買</button>
     </div>
     <div id="taskLibList" class="flex-1 overflow-y-auto px-3 py-2 space-y-1"></div>
     <div class="px-4 py-3 border-t flex gap-2 items-center justify-between flex-wrap" style="background:var(--ic-surface);border-radius:0 0 16px 16px;">
