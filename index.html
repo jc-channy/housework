@@ -34,7 +34,7 @@
     --bg: var(--ic-lemon);
     --ink: var(--ic-chocolate);
   }
-  html { font-size: 18px; }
+  html { font-size: 16px; }
   html, body { background: var(--bg); color: var(--ink); font-family: 'Noto Sans TC','Noto Sans', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
   /* iOS safe-area */
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -109,10 +109,7 @@
   body.translating .save-btn { opacity: .5; pointer-events: none; }
 
   /* 管理者視角印尼文 */
-  #managerView .id-text {
-    font-size: 0.80em !important;
-    line-height: 1.3 !important;
-  }
+  #managerView /* id-text font-size moved to .ty-id-text (13px) */
 
   /* 捲軸 */
   .scrollbar-thin::-webkit-scrollbar { height: 6px; }
@@ -523,6 +520,24 @@
   #punchExpandBtn.expanded { transform: rotate(180deg); }
   #punchCollapsible { overflow:hidden; transition: max-height 0.35s ease, opacity 0.3s ease; }
   #punchCollapsible.collapsed { max-height:0 !important; opacity:0; pointer-events:none; margin-top:0 !important; }
+/* ══════════════════════════════════════════
+   Homii Care Typography System
+   ══════════════════════════════════════════ */
+.ty-brand        { font-size: 22px; font-weight: 800; }
+.ty-page-title   { font-size: 20px; font-weight: 700; }
+.ty-section-title{ font-size: 16px; font-weight: 700; }
+.ty-card-title   { font-size: 15px; font-weight: 600; }
+.ty-body         { font-size: 14px; font-weight: 400; }
+.ty-secondary    { font-size: 13px; font-weight: 400; }
+.ty-caption      { font-size: 12px; font-weight: 400; }
+.ty-button       { font-size: 14px; font-weight: 600; }
+.ty-button-sm    { font-size: 13px; font-weight: 500; }
+.ty-chip         { font-size: 12px; font-weight: 500; }
+.ty-badge        { font-size: 11px; font-weight: 700; }
+.ty-modal-title  { font-size: 18px; font-weight: 700; }
+.ty-form-label   { font-size: 14px; font-weight: 600; }
+.ty-id-text      { font-size: 13px; }
+.ty-id-caption   { font-size: 12px; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
@@ -1307,7 +1322,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div class="flex-1">
-        <div id="modalTitleZh" class="text-xl font-bold"></div>
+        <div id="modalTitleZh" class="ty-modal-title"></div>
         <div id="modalTitleId" class="id-text text-sm text-gray-500"></div>
       </div>
       <button onclick="closeTaskModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1342,7 +1357,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">新增臨時工作</div>
+        <div class="ty-modal-title">新增臨時工作</div>
         <div class="id-text text-sm text-gray-500">Tambah Tugas Tambahan</div>
       </div>
       <button onclick="closeAdhocModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1370,7 +1385,7 @@
   <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold" id="punchEditTitle">打卡時間</div>
+        <div class="ty-modal-title" id="punchEditTitle">打卡時間</div>
         <div id="punchEditSubtitle" class="text-sm text-gray-500"></div>
       </div>
       <button onclick="closePunchEdit()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1394,7 +1409,7 @@
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品狀態回報</div>
+        <div class="ty-modal-title"><i class="ti ti-package" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 備品狀態回報</div>
         <div class="id-text text-sm text-gray-500">Laporkan Status Stok</div>
       </div>
       <button onclick="closeSuppliesModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1449,7 +1464,7 @@
 <div id="supplyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div id="supplyModalTitle" class="text-xl font-bold">新增備品項目</div>
+      <div id="supplyModalTitle" class="ty-modal-title">新增備品項目</div>
       <button onclick="closeSupplyModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1489,7 +1504,7 @@
 <div id="supplyCatModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div id="supplyCatModalTitle" class="text-xl font-bold">新增備品分類</div>
+      <div id="supplyCatModalTitle" class="ty-modal-title">新增備品分類</div>
       <button onclick="closeSupplyCatModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1514,7 +1529,7 @@
 <div id="weekMenuSetModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div class="text-xl font-bold">編輯菜單模板</div>
+      <div class="ty-modal-title">編輯菜單模板</div>
       <button onclick="closeWeekMenuSetModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1541,7 +1556,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold flex items-center gap-2"><i class="ti ti-history" style="font-size:18px;vertical-align:-2px;" aria-hidden="true"></i> 備品歷史</div>
+        <div class="ty-modal-title flex items-center gap-2"><i class="ti ti-history" style="font-size:18px;vertical-align:-2px;" aria-hidden="true"></i> 備品歷史</div>
         <div id="supHistName" class="text-sm text-gray-500 mt-1"></div>
       </div>
       <button onclick="closeSupplyHistory()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1555,7 +1570,7 @@
 <div id="templateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div id="tmplModalTitle" class="text-xl font-bold">新增工作模板</div>
+      <div id="tmplModalTitle" class="ty-modal-title">新增工作模板</div>
       <button onclick="closeTemplateModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1679,7 +1694,7 @@
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 設定</div>
+        <div class="ty-modal-title"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 設定</div>
         <div class="id-text text-sm text-gray-500">Pengaturan</div>
       </div>
       <button onclick="closeSettingsModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1785,7 +1800,7 @@
 <div id="catModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div id="catModalTitle" class="text-xl font-bold">新增分類</div>
+      <div id="catModalTitle" class="ty-modal-title">新增分類</div>
       <button onclick="closeCatModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1810,7 +1825,7 @@
 <div id="eventModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div id="eventModalTitle" class="text-xl font-bold">新增家庭事件</div>
+      <div id="eventModalTitle" class="ty-modal-title">新增家庭事件</div>
       <button onclick="closeEventModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1857,7 +1872,7 @@
 <div id="holidayModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div id="holidayModalTitle" class="text-xl font-bold">新增假期 / 不在家</div>
+      <div id="holidayModalTitle" class="ty-modal-title">新增假期 / 不在家</div>
       <button onclick="closeHolidayModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -1901,7 +1916,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div id="dayDetailTitle" class="text-xl font-bold"></div>
+        <div id="dayDetailTitle" class="ty-modal-title"></div>
         <div id="dayDetailSubtitle" class="id-text text-sm text-gray-500"></div>
       </div>
       <button onclick="closeDayDetail()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1920,7 +1935,7 @@
 <div id="payrollSettingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div class="text-xl font-bold"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 薪資設定</div>
+      <div class="ty-modal-title"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 薪資設定</div>
       <button onclick="closePayrollSettings()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -2011,7 +2026,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 請假申請</div>
+        <div class="ty-modal-title"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 請假申請</div>
         <div class="id-text text-sm text-gray-500">Pengajuan Cuti</div>
       </div>
       <button onclick="closeLeaveModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2055,7 +2070,7 @@
   <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">⚙ 顯示設定</div>
+        <div class="ty-modal-title">⚙ 顯示設定</div>
         <div class="id-text text-sm text-gray-500">Tampilan (perangkat ini)</div>
       </div>
       <button onclick="closeDevicePrefsModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2078,7 +2093,7 @@
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-folder" style="font-size:18px;vertical-align:-2px;"></i> 管理分類</div>
+        <div class="ty-modal-title"><i class="ti ti-folder" style="font-size:18px;vertical-align:-2px;"></i> 管理分類</div>
         <div class="id-text text-sm text-gray-500">Kategori</div>
       </div>
       <button onclick="closeCategoryManageModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2119,7 +2134,7 @@
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-folder" style="font-size:18px;vertical-align:-2px;"></i> 管理備品分類</div>
+        <div class="ty-modal-title"><i class="ti ti-folder" style="font-size:18px;vertical-align:-2px;"></i> 管理備品分類</div>
         <div class="id-text text-sm text-gray-500">Kategori Perlengkapan</div>
       </div>
       <button onclick="closeSupplyCategoryManageModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2134,7 +2149,7 @@
   <div class="modal-sheet w-full max-w-6xl sm:rounded-2xl p-4 sm:m-4 self-start">
     <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽</div>
+        <div class="ty-modal-title"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程總覽</div>
         <div class="id-text text-sm text-gray-500">Ringkasan Jadwal Mingguan</div>
       </div>
       <div class="flex items-center gap-1.5 flex-wrap">
@@ -2158,7 +2173,7 @@
 <div id="restScheduleModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div id="rsModalTitle" class="text-xl font-bold">新增小憩時段</div>
+      <div id="rsModalTitle" class="ty-modal-title">新增小憩時段</div>
       <button onclick="closeRestScheduleModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -2204,7 +2219,7 @@
 <div id="postponeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div class="text-xl font-bold"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 移至指定日</div>
+      <div class="ty-modal-title"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 移至指定日</div>
       <button onclick="closePostponeModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <p class="text-sm text-gray-600 mb-2">選擇要把這個工作移到的日期：</p>
@@ -2224,7 +2239,7 @@
   <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div id="reasonModalTitle" class="text-xl font-bold">跳過工作</div>
+        <div id="reasonModalTitle" class="ty-modal-title">跳過工作</div>
         <div id="reasonModalSub" class="id-text text-sm text-gray-500"></div>
       </div>
       <button onclick="closeReasonModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2242,7 +2257,7 @@
 <div id="adjustmentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div id="adjModalTitle" class="text-xl font-bold">新增額外項目</div>
+      <div id="adjModalTitle" class="ty-modal-title">新增額外項目</div>
       <button onclick="closeAdjustmentModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -2277,7 +2292,7 @@
 <div id="leaveTypeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div id="ltModalTitle" class="text-xl font-bold">新增假別</div>
+      <div id="ltModalTitle" class="ty-modal-title">新增假別</div>
       <button onclick="closeLeaveTypeModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -2309,7 +2324,7 @@
 <div id="receiptModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div class="text-xl font-bold"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 薪資簽收</div>
+      <div class="ty-modal-title"><i class="ti ti-pencil-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 薪資簽收</div>
       <button onclick="closeReceiptModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-3 text-sm">
@@ -2340,7 +2355,7 @@
 <div id="printOptionsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-3">
-      <div class="text-xl font-bold"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 列印薪資單</div>
+      <div class="ty-modal-title"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 列印薪資單</div>
       <button onclick="closePrintOptions()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <p class="text-xs mb-3" style="color:#9CA3AF;">預設輸出人性化閱讀版；勾選「每日明細」可附完整打卡紀錄。</p>
@@ -2360,7 +2375,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">編輯打卡時間</div>
+        <div class="ty-modal-title">編輯打卡時間</div>
         <div id="dayPunchDate" class="text-sm text-gray-500"></div>
       </div>
       <button onclick="closeDayPunchEdit()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2379,7 +2394,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold">📆 出勤紀錄 / Catatan Kehadiran</div>
+        <div class="ty-modal-title">📆 出勤紀錄 / Catatan Kehadiran</div>
         <div id="myPayrollPeriod" class="text-xs text-gray-500"></div>
       </div>
       <button onclick="closeMyPayroll()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2411,7 +2426,7 @@
   <div class="modal-sheet w-full max-w-md mx-4 rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="text-center mb-4">
       <div class="text-4xl mb-2">☁️</div>
-      <div class="text-xl font-bold">建立或加入家庭</div>
+      <div class="ty-modal-title">建立或加入家庭</div>
       <div class="id-text text-sm text-gray-500 mt-1">Buat atau Gabung Keluarga</div>
     </div>
     <p class="text-sm text-gray-600 mb-4">這台裝置首次連接雲端。請選擇：</p>
@@ -2432,7 +2447,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-4 max-h-[90vh] flex flex-col">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div class="text-xl font-bold"><i class="ti ti-message-circle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 對話 / Pesan</div>
+        <div class="ty-modal-title"><i class="ti ti-message-circle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 對話 / Pesan</div>
         <div id="chatModalSubtitle" class="text-xs text-gray-500"></div>
       </div>
       <div class="flex items-center gap-2">
@@ -6835,7 +6850,7 @@ function renderPunchSection(){
         style="background:var(--ic-caramel);color:#FAF7F2;border:none;"
         class="w-full rounded-2xl py-5 flex flex-col items-center gap-1 active:scale-95 transition-transform cursor-pointer">
         <i class="ti ${nextStep.emoji}" style="font-size:44px;line-height:1;" aria-hidden="true"></i>
-        <div class="font-bold text-xl mt-2">${priLbl(nextStep)}</div>
+        <div class="ty-modal-title mt-2">${priLbl(nextStep)}</div>
         <div class="text-sm id-text opacity-80">${secLbl(nextStep)}</div>
         <div class="text-xs opacity-70 mt-1 tabular-nums" id="punchBigClock">${nowHHMM()}</div>
       </button>`;
