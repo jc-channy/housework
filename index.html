@@ -563,7 +563,7 @@
         <circle cx="36" cy="15" r="3.5" fill="#E5ADA8"/>
       </svg>
     </div>
-    <h1 class="text-2xl font-bold tracking-tight" style="color:var(--ic-choc-dk);">Homii Care</h1>
+    <h1 class="ty-brand tracking-tight" style="color:var(--ic-choc-dk);">Homii Care</h1>
     <p class="id-text text-sm mt-1" style="color:var(--ic-choc-mid);">家居管理平台</p>
   </div>
   <div class="w-full max-w-xs rounded-2xl p-6 border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
@@ -1072,7 +1072,7 @@
       <!-- 待購買 -->
       <div id="blockReported" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:16px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
+          <span class="ty-section-title" style="color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-bag" style="font-size:18px;" aria-hidden="true"></i> 待購買 · Perlu dibeli</span>
           <span id="cntReported" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FAE8E8;color:#B84040;"></span>
         </div>
         <div id="suppliesReported" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
@@ -1081,7 +1081,7 @@
       <!-- 已購買待收納 -->
       <div id="blockBought" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:16px;font-weight:700;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
+          <span class="ty-section-title" style="color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-shopping-cart" style="font-size:18px;" aria-hidden="true"></i> 已購買・待收納</span>
           <span id="cntBought" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#FFF3DC;color:#905820;"></span>
         </div>
         <div id="suppliesBought" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
@@ -1090,7 +1090,7 @@
       <!-- 暫不補充（折疊） -->
       <details id="blockPaused" class="mb-3 rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <summary class="flex items-center justify-between px-4 py-3 cursor-pointer" style="list-style:none;">
-          <span style="font-size:16px;font-weight:700;color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
+          <span class="ty-section-title" style="color:#9A8070;display:flex;align-items:center;gap:7px;"><i class="ti ti-player-pause" style="font-size:18px;" aria-hidden="true"></i> 暫不補充</span>
           <span style="display:flex;align-items:center;gap:6px;">
             <span id="cntPaused" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#F0EDE8;color:#7A7060;"></span>
             <i class="ti ti-chevron-down" style="font-size:16px;color:#B0A090;" aria-hidden="true"></i>
@@ -1102,7 +1102,7 @@
       <!-- 備品庫 -->
       <div class="rounded-2xl overflow-hidden" style="border:1px solid #E5D8CC;background:white;">
         <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid #F0E8DC;">
-          <span style="font-size:16px;font-weight:700;color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
+          <span class="ty-section-title" style="color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
             <button onclick="openAddSupplyModal()" class="btn-sm-primary flex items-center gap-1" style="font-size:13px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增備品</button>
@@ -1226,7 +1226,7 @@
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
       <div>
-        <div id="menuCellTitle" class="text-lg font-bold"></div>
+        <div id="menuCellTitle" class="ty-modal-title"></div>
         <div id="menuCellSubtitle" class="text-xs text-gray-500 mt-0.5"></div>
       </div>
       <button onclick="closeMenuCellModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1262,7 +1262,7 @@
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-4">
       <div>
-        <div class="text-lg font-bold">餐次設定</div>
+        <div class="ty-modal-title">餐次設定</div>
         <div id="mealConfigSetName" class="text-xs mt-0.5" style="color:var(--ic-choc-mid);"></div>
       </div>
       <button onclick="document.getElementById('mealConfigModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
@@ -1296,7 +1296,7 @@
 <div id="ingredientModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
     <div class="flex items-start justify-between mb-4">
-      <div id="ingredientModalTitle" class="text-lg font-bold">新增食材</div>
+      <div id="ingredientModalTitle" class="ty-modal-title">新增食材</div>
       <button onclick="document.getElementById('ingredientModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <div class="space-y-2 mb-2">
@@ -2492,7 +2492,7 @@
         <div id="chatNotifFrom" class="font-bold text-base"></div>
       </div>
     </div>
-    <div id="chatNotifPri" class="text-lg font-bold mb-1 leading-snug"></div>
+    <div id="chatNotifPri" class="ty-modal-title mb-1 leading-snug"></div>
     <div id="chatNotifSec" class="id-text text-base text-gray-600 leading-snug mb-4"></div>
     <div class="grid grid-cols-2 gap-2">
       <button id="chatNotifAck" class="btn-secondary">👀 收到<br><span class="id-text text-xs font-normal">Diterima</span></button>
@@ -4396,7 +4396,7 @@ function renderMenuViewMode(){
     <div style="padding:12px 16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:15px;font-weight:600;color:${color};">${s.name}</span>
+          <span class="ty-card-title" style="color:${color};">${s.name}</span>
           ${disabled?`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:#E8E8E8;color:#999;">停用</span>`:`<span style="font-size:12px;padding:2px 7px;border-radius:99px;background:${color}20;color:${color};">啟用中</span>`}
         </div>
         <button onclick="_menuEditMode=true;_menuEditTargetSetId=_viewingSetId;renderMenuTab();"
@@ -4750,7 +4750,7 @@ function renderMenuCell(key, cell, isToday){
     const methodLabel = _dm.map(m=>`<span style="font-size:15px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 9px;line-height:1.5;">${m}</span>`).join(' ');
     const ingPills = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return null; const cc=catColors[ing.category]||'#A89880'; return {name:ing.name,cc}; }).filter(Boolean);
     const ingLine = ingPills.length ? `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding-left:2px;">${ingPills.map((p,pi)=>`<span style="font-size:13px;font-weight:600;padding:1px 8px;border-radius:99px;background:${p.cc}22;color:${p.cc};border:1px solid ${p.cc};">${p.name}</span>${pi<ingPills.length-1?'<span style="font-size:14px;font-weight:800;color:#C67843;">＋</span>':''}`).join('')}</div>` : '';
-    const nameStr = d.dishName ? `<span style="font-size:16px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
+    const nameStr = d.dishName ? `<span class="ty-section-title" style="color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
     const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
     return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
@@ -9951,7 +9951,7 @@ function renderManagerSupplyCard(s, group){
       <div style="overflow:hidden;">
         <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
           <span style="font-size:15px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:7px;padding:3px 9px;flex-shrink:0;">${cat.nameZh}</span>
-          <span style="font-size:18px;font-weight:700;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
+          <span class="ty-modal-title" style="color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
           <span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span>
         </div>
       </div>
