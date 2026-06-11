@@ -2790,8 +2790,28 @@ function load() {
   }
   // 載入時確保 weekMenu 指向 active set（只有 set.menu 非空時才覆蓋，避免空 set 清掉頂層資料）
   const _activeSet = state.weekMenuSets.find(s => s.id === state.activeWeekMenuSetId);
-  if (_activeSet) { const _m = _activeSet.menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
-  else { state.activeWeekMenuSetId = state.weekMenuSets[0].id; const _m = state.weekMenuSets[0].menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
+  if (_activeSet) {
+    if(!_activeSet.menu) _activeSet.menu={};
+    // Merge: if saved menu has data, use it; otherwise keep weekMenu data
+    const _savedMenu = _activeSet.menu;
+    const _weekMenu = state.weekMenu || {};
+    if(Object.keys(_savedMenu).length > 0) {
+      // Merge weekMenu into savedMenu (savedMenu wins for conflicts)
+      Object.assign(_weekMenu, _savedMenu);
+      state.weekMenu = _savedMenu;
+      _activeSet.menu = _savedMenu;
+    } else {
+      // savedMenu empty: use weekMenu, sync back to set
+      _activeSet.menu = _weekMenu;
+      state.weekMenu = _weekMenu;
+    }
+  } else if(state.weekMenuSets.length > 0) {
+    state.activeWeekMenuSetId = state.weekMenuSets[0].id;
+    const _s0 = state.weekMenuSets[0];
+    if(!_s0.menu) _s0.menu={};
+    if(Object.keys(_s0.menu).length > 0) state.weekMenu = _s0.menu;
+    else { _s0.menu = state.weekMenu || {}; state.weekMenu = _s0.menu; }
+  }
   // 遷移：每組 meals 若缺就從 global 補
   (state.weekMenuSets||[]).forEach(s => {
     if (!s.meals || !s.meals.length) {
@@ -3977,15 +3997,19 @@ function _setColor(id){ return SET_COLORS[_setColorIdx(id)%SET_COLORS.length]; }
 function _setLight(id){ return SET_LIGHTS[_setColorIdx(id)%SET_LIGHTS.length]; }
 function _setDark(id)  { return SET_DARKS [_setColorIdx(id)%SET_DARKS.length];  }
 function _getEditTargetMenu(){
-  if(!_menuEditTargetSetId||_menuEditTargetSetId===state.activeWeekMenuSetId) return state.weekMenu;
-  const s=(state.weekMenuSets||[]).find(x=>x.id===_menuEditTargetSetId);
-  if(s){ if(!s.menu)s.menu={}; return s.menu; }
-  return state.weekMenu;
+  const setId = _menuEditTargetSetId;
+  if(!setId) return state.weekMenu;
+  const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
+  if(!s) return state.weekMenu;
+  if(!s.menu) s.menu={};
+  return s.menu;
 }
 function _getSetMenu(setId){
-  if(!setId||setId===state.activeWeekMenuSetId) return state.weekMenu;
+  if(!setId) return state.weekMenu;
   const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
-  return s ? (s.menu||{}) : state.weekMenu;
+  if(!s) return state.weekMenu;
+  if(!s.menu) s.menu={};
+  return s.menu;
 }
 
 /* ========== 菜單：週狀態一覽 ========== */
@@ -4962,16 +4986,25 @@ function clearMenuCell(){
 }
 function saveMenuCell(){
   if (!_menuCellKey) return;
-  const tm = _getEditTargetMenu();
+  let cellData;
   if (_menuCellMode==='skip'){
     const reason = document.getElementById('skipReasonCustom').value.trim();
-    tm[_menuCellKey] = { type:'skip', skipReason: reason };
+    cellData = { type:'skip', skipReason: reason };
   } else {
     const dishes = _cellDishes.filter(d=>d.dishName.trim()||((d.ingredientIds||[]).length));
-    tm[_menuCellKey] = { type:'cook', dishes };
+    cellData = { type:'cook', dishes };
   }
-  // sync back to weekMenu if editing active set
-  if(_menuEditTargetSetId && _menuEditTargetSetId===state.activeWeekMenuSetId) state.weekMenu[_menuCellKey]=tm[_menuCellKey];
+  // Write to set's own menu
+  const _tgtSet = _menuEditTargetSetId
+    ? (state.weekMenuSets||[]).find(x=>x.id===_menuEditTargetSetId) : null;
+  if(_tgtSet){
+    if(!_tgtSet.menu) _tgtSet.menu={};
+    _tgtSet.menu[_menuCellKey] = cellData;
+    // Also sync to state.weekMenu for active set (for today card etc.)
+    if(_tgtSet.id===state.activeWeekMenuSetId) state.weekMenu[_menuCellKey]=cellData;
+  } else {
+    state.weekMenu[_menuCellKey] = cellData;
+  }
   save(); closeMenuCellModal(); renderMenuTab(); renderTodayMenuCard();
 }
 function openMenuCellForSet(setId, key){
