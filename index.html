@@ -4312,7 +4312,12 @@ function _renderMenuMatrix(setId, editable){
       const cell = menu[key]||{type:'cook',dishes:[]};
       const isSkip = cell.type==='skip';
       const dishes = cell.dishes||[];
-      const preview = dishes.slice(0,2).map(d=>d.dishName||'').filter(Boolean);
+      const hasFilled = dishes.some(d=>(d.dishName||'').trim()||(d.ingredientIds||[]).length);
+      const preview = dishes.slice(0,2).map(d=>{
+        if((d.dishName||'').trim()) return d.dishName.trim();
+        const ic=(d.ingredientIds||[]).length;
+        return ic ? `${ic}項食材` : '';
+      }).filter(Boolean);
       const cellStyle = `padding:4px;border-radius:6px;min-height:40px;vertical-align:top;`;
       if(editable){
         html += `<td style="${cellStyle}">
@@ -4323,7 +4328,9 @@ function _renderMenuMatrix(setId, editable){
               ? `<span style="font-size:10px;color:#999;">✕ ${cell.skipReason||'略過'}</span>`
               : preview.length
                 ? preview.map(n=>`<span style="font-size:10px;color:${dark};line-height:1.3;">${n}</span>`).join('')+(dishes.length>2?`<span style="font-size:9px;color:${color};">+${dishes.length-2}</span>`:'')
-                : `<span style="font-size:10px;color:${color}60;">+ 填入</span>`
+                : hasFilled
+                  ? `<span style="font-size:10px;color:${color};">✓ ${dishes.length}道</span>`
+                  : `<span style="font-size:10px;color:${color}60;">+ 填入</span>`
             }
           </div>
         </td>`;
@@ -4334,7 +4341,9 @@ function _renderMenuMatrix(setId, editable){
               ? `<span style="font-size:10px;color:#999;">✕</span>`
               : preview.length
                 ? preview.map(n=>`<span style="font-size:10px;color:${dark};line-height:1.3;">${n}</span>`).join('')+(dishes.length>2?`<span style="font-size:9px;color:${color};">+${dishes.length-2}</span>`:'')
-                : `<span style="font-size:10px;color:#ccc;">—</span>`
+                : hasFilled
+                  ? `<span style="font-size:10px;color:${color};">✓ ${dishes.length}道</span>`
+                  : `<span style="font-size:10px;color:#ccc;">—</span>`
             }
           </div>
         </td>`;
@@ -5005,7 +5014,6 @@ function saveMenuCell(){
   } else {
     state.weekMenu[_menuCellKey] = cellData;
   }
-  console.log('[saveMenuCell] key='+_menuCellKey+' tgtSetId='+(_tgtSet&&_tgtSet.id)+' dishes='+JSON.stringify(cellData.dishes||[])+'  tgtMenu='+JSON.stringify(_tgtSet&&_tgtSet.menu||{}));
   save(); closeMenuCellModal(); renderMenuTab(); renderTodayMenuCard();
 }
 function openMenuCellForSet(setId, key){
