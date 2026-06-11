@@ -3891,14 +3891,17 @@ function getCurrentCycleMenu(){
     // 單組：直接用 state.weekMenu（永遠是最新的工作副本）
     return state.weekMenu || {};
   }
-  // 多組循環：按 ISO 週數決定本週用哪一組（可套用 offset 臨時調整）
+  // 多組循環：activeWeekMenuSetId 就是本週使用的組別
+  // state.weekMenu 是它的最新即時副本，直接使用即可
+  const activeInCycle = cycleSets.find(s => s.id === state.activeWeekMenuSetId);
+  if (activeInCycle) return state.weekMenu || {};
+  // fallback：active 組不在循環中時，按 ISO 週數決定
   const d = today();
   const t = new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7);
   const isoWeek = Math.round((t - new Date(t.getFullYear(),0,4)) / (7*86400000));
   const offset = state.weekMenuCycleOffset || 0;
   const idx = ((isoWeek + offset) % cycleSets.length + cycleSets.length) % cycleSets.length;
   const thisSet = cycleSets[idx];
-  // 若本週的組就是目前 active，也用 state.weekMenu
   if (thisSet.id === state.activeWeekMenuSetId) return state.weekMenu || {};
   return thisSet.menu || {};
 }
@@ -4399,13 +4402,12 @@ function renderMenuCell(key, cell, isToday){
     const ingPills = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return null; const cc=catColors[ing.category]||'#A89880'; return {name:ing.name,cc}; }).filter(Boolean);
     const ingLine = ingPills.length ? `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding-left:2px;">${ingPills.map((p,pi)=>`<span style="font-size:13px;font-weight:600;padding:1px 8px;border-radius:99px;background:${p.cc}22;color:${p.cc};border:1px solid ${p.cc};">${p.name}</span>${pi<ingPills.length-1?'<span style="font-size:14px;font-weight:800;color:#C67843;">＋</span>':''}`).join('')}</div>` : '';
     const nameStr = d.dishName ? `<span style="font-size:17px;font-weight:700;color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
-    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;padding-left:4px;">${d.note||d.noteId}</span>` : '';
+    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
     return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
-      ${methodLabel?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${methodLabel}</div>`:''}
+      ${(methodLabel||noteStr)?`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${methodLabel}${noteStr}</div>`:''}
       ${nameStr}
       ${ingLine}
-      ${noteStr}
     </div>`;
   }).join('');
   const more = dishes.length>4 ? `<span style="font-size:12px;color:var(--ic-caramel);">＋${dishes.length-4} 道</span>` : '';
