@@ -2493,6 +2493,20 @@ const SUPABASE_CONFIG = {
 };
 const CLOUD_ENABLED = !!(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
 
+
+/* ========== ISO Week Helpers ========== */
+function _isoThursday(d){ const t=new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7); return t; }
+function getISOWeekNum(d){ const t=_isoThursday(d); return Math.round((t-new Date(t.getFullYear(),0,4))/(7*86400000)); }
+function getISOYear(d){ return _isoThursday(d).getFullYear(); }
+function getISOWeekKey(d){ return getISOYear(d)+'-W'+String(getISOWeekNum(d)).padStart(2,'0'); }
+function isoWeekKeyToNum(k){ return parseInt(k.split('-W')[1],10); }
+function isoWeekKeyYear(k){ return parseInt(k.split('-W')[0],10); }
+function isoWeekKeyDist(fromKey,toKey){
+  const fy=isoWeekKeyYear(fromKey), fw=isoWeekKeyToNum(fromKey);
+  const ty=isoWeekKeyYear(toKey),   tw=isoWeekKeyToNum(toKey);
+  return (ty-fy)*52+(tw-fw);
+}
+
 /* ========== 預設資料 ========== */
 const DEFAULT_USERS = [
   { id:'m1', role:'manager', name:'你',    pin:'111111', lang:'zh' },
@@ -2711,6 +2725,10 @@ let state = {
   weekMenuSets: [],
   activeWeekMenuSetId: '',
   weekMenuCycleOffset: 0,
+  scheduleRotation: [],
+  scheduleOverrides: {},
+  scheduleBaseWeekKey: '',
+  scheduleBaseIndex: 0,
   recipes: [],
   preferences: {},
   catFilter: 'all',
@@ -2771,7 +2789,26 @@ function load() {
   const _activeSet = state.weekMenuSets.find(s => s.id === state.activeWeekMenuSetId);
   if (_activeSet) { const _m = _activeSet.menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
   else { state.activeWeekMenuSetId = state.weekMenuSets[0].id; const _m = state.weekMenuSets[0].menu || {}; if (Object.keys(_m).length) state.weekMenu = _m; }
-  if (!state.users.length) state.users = DEFAULT_USERS.map(u=>({...u}));
+  // 遷移：每組 meals 若缺就從 global 補
+  (state.weekMenuSets||[]).forEach(s => {
+    if (!s.meals || !s.meals.length) {
+      s.meals = JSON.parse(JSON.stringify(state.mealConfig.meals || []));
+    }
+  });
+  // 遷移：scheduleRotation 若空，從 cycleOn 建立
+  if (!state.scheduleRotation || !state.scheduleRotation.length) {
+    const _cycleSets = (state.weekMenuSets||[]).filter(s => s.cycleOn !== false);
+    const _active = (state.weekMenuSets||[]).find(s=>s.id===state.activeWeekMenuSetId);
+    const _ordered = _active && _cycleSets.includes(_active)
+      ? [_active, ..._cycleSets.filter(s=>s.id!==_active.id)]
+      : _cycleSets;
+    state.scheduleRotation = _ordered.map(s => s.id);
+    state.scheduleBaseWeekKey = getISOWeekKey(new Date());
+    state.scheduleBaseIndex = 0;
+  }
+  if (!state.scheduleOverrides) state.scheduleOverrides = {};
+  if (!state.scheduleBaseWeekKey) { state.scheduleBaseWeekKey = getISOWeekKey(new Date()); state.scheduleBaseIndex = 0; }
+    if (!state.users.length) state.users = DEFAULT_USERS.map(u=>({...u}));
   // 遷移：舊使用者沒有 lang 欄位
   state.users.forEach(u=>{ if (!u.lang) u.lang = u.role==='helper'?'id':'zh'; });
   // 遷移：舊的 weekly/biweekly/monthly → mWeek + weekFlags
@@ -2931,6 +2968,10 @@ function save() {
     })(),
     activeWeekMenuSetId: state.activeWeekMenuSetId,
     weekMenuCycleOffset: state.weekMenuCycleOffset || 0,
+    scheduleRotation: state.scheduleRotation || [],
+    scheduleOverrides: state.scheduleOverrides || {},
+    scheduleBaseWeekKey: state.scheduleBaseWeekKey || '',
+    scheduleBaseIndex: state.scheduleBaseIndex || 0,
     recipes: state.recipes || [],
     savedAt: new Date().toISOString(),
   }));
@@ -4081,6 +4122,61 @@ function toggleIngLib(){
   body.classList.toggle('hidden');
   chev.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
   if (!body.classList.contains('hidden')){ renderIngredientList(); renderIngCatList(); }
+}
+
+/* ========== 核心排程函數 ========== */
+function getWeekSetId(isoWeekKey){
+  const ov=(state.scheduleOverrides||{})[isoWeekKey];
+  if(ov) return ov;
+  const rot=state.scheduleRotation||[];
+  if(!rot.length) return state.activeWeekMenuSetId||'';
+  const baseKey=state.scheduleBaseWeekKey||getISOWeekKey(today());
+  const baseIdx=state.scheduleBaseIndex||0;
+  const dist=isoWeekKeyDist(baseKey,isoWeekKey);
+  const idx=((baseIdx+dist)%rot.length+rot.length)%rot.length;
+  return rot[idx];
+}
+function getActiveSetId(){ return getWeekSetId(getISOWeekKey(today())); }
+function getCurrentCycleMenuBySchedule(){
+  const setId=getActiveSetId();
+  if(!setId||setId===state.activeWeekMenuSetId) return state.weekMenu||{};
+  const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
+  return s?(s.menu||{}):(state.weekMenu||{});
+}
+function getActiveSetMeals(){
+  const viewId=typeof _viewingSetId!=='undefined'?_viewingSetId:null;
+  const setId=viewId||getActiveSetId()||state.activeWeekMenuSetId;
+  const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
+  const meals=(s&&s.meals&&s.meals.length)?s.meals:(state.mealConfig.meals||[]);
+  return meals.filter(m=>m.enabled).sort((a,b)=>{
+    const ta=a.mealTime||'99:99', tb=b.mealTime||'99:99';
+    return ta<tb?-1:ta>tb?1:0;
+  });
+}
+function getSetMealsAll(setId){
+  const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
+  if(s&&s.meals&&s.meals.length) return s.meals;
+  return state.mealConfig.meals||[];
+}
+function setScheduleOverride(isoWeekKey,setId){
+  if(!state.scheduleOverrides) state.scheduleOverrides={};
+  state.scheduleOverrides[isoWeekKey]=setId;
+  save(); renderMenuTab();
+}
+function removeScheduleOverride(isoWeekKey){
+  if(state.scheduleOverrides) delete state.scheduleOverrides[isoWeekKey];
+  save(); renderMenuTab();
+}
+function recalibrateSchedule(){
+  const curWk=getISOWeekKey(today());
+  const curSetId=getActiveSetId();
+  const rot=state.scheduleRotation||[];
+  const idx=rot.indexOf(curSetId);
+  if(idx>=0){
+    state.scheduleBaseWeekKey=curWk;
+    state.scheduleBaseIndex=idx;
+  }
+  save();
 }
 
 /* ========== 週期排程 UI 工具 ========== */
