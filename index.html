@@ -1187,15 +1187,13 @@
 
     <div id="tab-menu" class="tab-content hidden">
 
-        <!-- ── 輪替排程時間軸 ── -->
-        <div class="rounded-2xl border mb-3 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div id="menuTimeline" class="px-4 py-3"></div>
+        <!-- 頁面標題 -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px;">
+          <i class="ti ti-calendar-week" style="font-size:18px;color:var(--ic-caramel);" aria-hidden="true"></i>
+          <span style="font-size:16px;font-weight:700;color:#2A1508;">菜單規劃</span>
         </div>
         <!-- ── 菜單編輯區 ── -->
         <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 0;">
-            <span style="font-size:15px;font-weight:700;color:#2A1508;"><i class="ti ti-calendar-week" style="font-size:16px;margin-right:6px;vertical-align:-2px;" aria-hidden="true"></i>菜單規劃</span>
-          </div>
           <div id="menuTabBarArea" class="px-4 pt-3"></div>
           <div id="menuColorBar" style="display:none;"></div>
           <div id="menuMainArea"></div>
@@ -1206,6 +1204,21 @@
         <div id="menuWeekStrip" class="hidden"></div>
         <div id="menuDayDetail" class="hidden"></div>
         <div id="menuGrid" class="hidden"></div>
+
+        <!-- 烹飪方式（可收合） -->
+        <div class="rounded-2xl border mb-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+          <button onclick="toggleCookMethodBlock()" class="w-full flex items-center justify-between px-4 pt-4 pb-2 text-left">
+            <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-flame" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 烹飪方式</h2>
+            <i id="cookMethodChevron" class="ti ti-chevron-down" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
+          </button>
+          <div id="cookMethodBlockBody" class="hidden px-4 pb-4">
+            <div id="cookMethodBlockList" class="flex flex-wrap gap-2 mb-3"></div>
+            <div class="flex gap-2">
+              <input id="newCookMethodBlockInput" type="text" placeholder="新增烹飪方式" class="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm" style="background:#fff;">
+              <button onclick="addCookMethodFromBlock()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">新增</button>
+            </div>
+          </div>
+        </div>
 
         <!-- 食材庫（可收合） -->
         <div class="rounded-2xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
@@ -1276,6 +1289,37 @@
   </div>
 </div>
 
+<!-- ===== 菜單組別設定 Modal ===== -->
+<div id="setConfigModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-start justify-between mb-4">
+      <div id="setConfigModalTitle" class="ty-modal-title">新增菜單組</div>
+      <button onclick="document.getElementById('setConfigModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+    <div class="mb-3">
+      <label class="text-xs font-semibold block mb-1" style="color:var(--ic-choc-mid);">菜單主題</label>
+      <input id="setConfigName" type="text" placeholder="健康飲食週" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" style="background:var(--ic-surface);">
+    </div>
+    <div class="mb-3">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-xs font-semibold" style="color:var(--ic-choc-mid);">餐次設定</div>
+        <button onclick="_setConfigAddMeal()" class="text-xs px-2 py-1 rounded-lg" style="color:var(--ic-caramel);background:var(--ic-lemon);border:none;cursor:pointer;">＋ 新增</button>
+      </div>
+      <div id="setConfigMealList"></div>
+    </div>
+    <div class="mb-4 flex items-center gap-3">
+      <div class="text-xs font-semibold" style="color:var(--ic-choc-mid);">加入循環排程</div>
+      <div id="setConfigCycleToggle" onclick="_setConfigToggleCycle()" style="width:34px;height:20px;border-radius:99px;background:#3A9A6E;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
+        <div id="setConfigCycleKnob" style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:16px;transition:left .2s;"></div>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button id="setConfigDeleteBtn" onclick="_deleteSetFromConfig()" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEE2E2;color:#B91C1C;"><i class="ti ti-trash" style="font-size:12px;" aria-hidden="true"></i> 刪除</button>
+      <button onclick="saveSetConfig()" class="btn-primary flex-1">儲存</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 工作詳細 Modal ===== -->
 <!-- ===== 菜單 Cell Edit Modal ===== -->
 <div id="menuCellModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
@@ -1298,12 +1342,11 @@
       <div id="dishList" class="space-y-3 mb-3"></div>
       <button onclick="addDishToCell()" class="w-full py-2 rounded-xl text-sm border border-dashed" style="border-color:var(--ic-caramel);color:var(--ic-caramel);"><i class="ti ti-plus" style="font-size:13px;vertical-align:-1px;" aria-hidden="true"></i> 新增菜色</button>
     </div>
-    <!-- 不煮：原因選擇 -->
+    <!-- 不煮：確認 -->
     <div id="skipPanel" class="hidden">
-      <p class="text-sm mb-2" style="color:var(--ic-choc-mid);">選擇原因</p>
-      <div id="skipReasonChips" class="flex flex-wrap gap-2 mb-3"></div>
-      <div class="flex gap-2">
-        <input id="skipReasonCustom" type="text" placeholder="或自行輸入原因…" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm" style="min-width:0;">
+      <div style="display:flex;align-items:center;justify-content:center;padding:16px 0;gap:8px;">
+        <span style="font-size:32px;">✕</span>
+        <span style="font-size:15px;font-weight:600;color:#6B5E52;">不煮</span>
       </div>
     </div>
     <div class="flex gap-2 mt-4">
@@ -4227,10 +4270,10 @@ function renderMenuDayDetail(){
 
 // ── 渲染 Tab ──
 function renderMenuTab(){
-  renderMenuTimeline();
   renderMenuTabBar();
   renderMenuMainArea();
   renderIngredientList();
+  if(document.getElementById('cookMethodBlockBody')&&!document.getElementById('cookMethodBlockBody').classList.contains('hidden')) renderCookMethodBlock();
   if(document.getElementById('recipeLibBody')&&!document.getElementById('recipeLibBody').classList.contains('hidden')) renderRecipeLibrary();
 }
 
@@ -4286,20 +4329,22 @@ function renderMenuTabBar(){
   if(sets.length===0){
     el.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0 10px;">
       <span style="font-size:12px;color:var(--ic-sand);">尚無菜單組，新增第一個開始規劃</span>
-      <button onclick="addWeekMenuSet()" style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--ic-caramel);color:#fff;border:none;cursor:pointer;"><i class="ti ti-plus" aria-hidden="true"></i> 新增組別</button>
+      <button onclick="openSetConfigModal(null)" style="font-size:12px;padding:5px 12px;border-radius:8px;background:var(--ic-caramel);color:#fff;border:none;cursor:pointer;"><i class="ti ti-plus" aria-hidden="true"></i> 新增組別</button>
     </div>`;
     return;
   }
   if(!_viewingSetId || !sets.find(s=>s.id===_viewingSetId)){
     _viewingSetId = sets[0].id;
   }
+  const thisWeekSetId = getActiveSetId();
   const tabsHtml = sets.map(s=>{
     const isActive = s.id===_viewingSetId;
-    const color = _setColor(s.id);
+    const isThisWeek = s.id===thisWeekSetId;
     const disabled = s.cycleOn===false;
     const activeCss = isActive
       ? `border:1.5px solid var(--ic-vanilla);border-bottom:1.5px solid var(--ic-surface);background:var(--ic-surface);padding-bottom:10px;margin-bottom:-1.5px;`
       : `border:1.5px solid transparent;border-bottom:none;background:transparent;padding-bottom:8px;`;
+    const thisWeekBadge = isThisWeek ? `<span style="font-size:11px;color:var(--ic-caramel);font-weight:600;">(本週)</span>` : '';
     return `<div
       draggable="true"
       ondragstart="_tabDragStart(event,\'${s.id}\')"
@@ -4307,15 +4352,16 @@ function renderMenuTabBar(){
       ondrop="_tabDrop(event,\'${s.id}\')"
       ondragend="_tabDragEnd(event)"
       onclick="_viewingSetId=\'${s.id}\';renderMenuTab();"
+      ondblclick="openSetConfigModal(\'${s.id}\')"
       style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;cursor:pointer;${activeCss}border-radius:8px 8px 0 0;user-select:none;${disabled?'opacity:0.4;':''}"
     >
-      <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span>
-      <span style="font-size:13px;color:${isActive?color:'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
+      <span style="font-size:13px;color:${isActive?'var(--ic-chocolate)':'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
+      ${thisWeekBadge}
     </div>`;
   }).join('');
   el.innerHTML=`<div style="display:flex;align-items:flex-end;border-bottom:1.5px solid var(--ic-vanilla);overflow-x:auto;">
     ${tabsHtml}
-    <button onclick="addWeekMenuSet()" title="新增組別"
+    <button onclick="openSetConfigModal(null)" title="新增組別"
       style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:7px 10px 8px;margin-bottom:-1.5px;">
       <i class="ti ti-plus" aria-hidden="true"></i>
     </button>
@@ -4374,32 +4420,34 @@ function renderMenuMainArea(){
   }
 }
 
-// ── 矩陣格子內容（與舊版 renderMenuCell 同樣呈現） ──
+// ── 矩陣格子內容 ──
 function _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark){
   if(!cell || cell.type==='empty' || (!cell.type && !dishes.length)){
-    return `<div style="display:flex;align-items:center;justify-content:center;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
+    return `<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
   }
   if(cell.type==='skip'){
-    return `<div style="display:flex;align-items:center;justify-content:center;min-height:48px;"><span style="font-size:12px;font-weight:600;color:#6B5E52;">${cell.skipReason||'今天不煮'}</span></div>`;
+    return `<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:44px;"><span style="font-size:13px;font-weight:600;color:#9A8A80;">✕ 不煮</span></div>`;
   }
   if(!dishes.length){
-    return `<div style="display:flex;align-items:center;justify-content:center;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
+    return `<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:44px;"><span style="font-size:11px;color:#C8B49A;letter-spacing:.04em;">尚未設定</span></div>`;
   }
   const shown = dishes.slice(0,3);
   const dishHtml = shown.map((d,di)=>{
     const _dm=(d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-    const methodLabel=_dm.map(m=>`<span style="font-size:12px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:4px;padding:1px 5px;">${m}</span>`).join(' ');
-    const ingPills=(d.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);if(!ing)return null;const cc=catColors[ing.category]||'#A89880';return `<span style="font-size:12px;font-weight:600;padding:1px 5px;border-radius:99px;background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`;}).filter(Boolean).join('');
-    const nameStr=d.dishName?`<span style="font-size:13px;font-weight:700;color:#2A1508;line-height:1.3;">${d.dishName}</span>`:'';
-    const noteStr=(d.note||d.noteId)?`<span style="font-size:12px;color:#9A7A58;font-style:italic;">${d.note||d.noteId}</span>`:'';
+    const methodTags=_dm.map(m=>`<span style="font-size:11px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:3px;padding:1px 4px;">${m}</span>`).join('');
+    const noteStr=(d.note||d.noteId)?`<span style="font-size:11px;color:#9A7A58;font-style:italic;">${d.note||d.noteId}</span>`:'';
+    const ings=(d.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?ing.name:null;}).filter(Boolean);
+    const ingStr=ings.length?ings.join('＋'):'';
     const isLast=di===shown.length-1;
-    return `<div style="display:flex;flex-direction:column;gap:2px;${isLast?'':'padding-bottom:4px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
-      ${methodLabel?`<div style="display:flex;gap:3px;flex-wrap:wrap;">${methodLabel}${noteStr?` ${noteStr}`:''}</div>`:(noteStr||'')}
-      ${nameStr}
-      ${ingPills?`<div style="display:flex;flex-wrap:wrap;gap:2px;">${ingPills}</div>`:''}
+    return `<div style="${isLast?'':'margin-bottom:4px;padding-bottom:4px;border-bottom:0.5px solid #E8DDD0;'}">
+      <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:700;color:#2A1508;flex-shrink:0;">${di+1}.</span>
+        ${methodTags}${noteStr?` ${noteStr}`:''}
+      </div>
+      ${ingStr?`<div style="font-size:11px;color:#9A7A58;margin-left:14px;margin-top:1px;">${ingStr}</div>`:''}
     </div>`;
   }).join('');
-  const more=dishes.length>3?`<span style="font-size:12px;color:var(--ic-caramel);">＋${dishes.length-3} 道</span>`:'';
+  const more=dishes.length>3?`<span style="font-size:11px;color:var(--ic-caramel);">＋${dishes.length-3} 道</span>`:'';
   return dishHtml+more;
 }
 
@@ -4445,12 +4493,12 @@ function _renderMenuMatrix(setId, editable){
       const dishes = cell.dishes||[];
       const inner = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
       const lightPale = light+'88';
-      const cellDiv = `min-height:56px;border-radius:10px;border:0.5px solid ${isSkip?'#D8D4CF':'#E4DDD4'};background:${isSkip?'#F0EDEA':lightPale};padding:7px 8px;display:flex;flex-direction:column;gap:3px;`;
+      const cellDiv = `border-radius:10px;border:0.5px solid ${isSkip?'#D8D4CF':'#E4DDD4'};background:${isSkip?'#F0EDEA':lightPale};padding:7px 8px;display:flex;flex-direction:column;gap:3px;height:100%;box-sizing:border-box;`;
       if(editable){
-        html += `<td style="padding:4px;vertical-align:top;">
+        html += `<td style="padding:4px;height:1px;">
           <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')" style="${cellDiv}cursor:pointer;">${inner}</div></td>`;
       } else {
-        html += `<td style="padding:4px;vertical-align:top;">
+        html += `<td style="padding:4px;height:1px;">
           <div style="${cellDiv}">${inner}</div></td>`;
       }
     });
@@ -4484,7 +4532,7 @@ function renderMenuViewMode(){
         </button>
       </div>
       <div style="font-size:12px;color:var(--ic-sand);margin-bottom:8px;">
-        餐次：${(s.meals||[]).filter(m=>m.enabled!==false).map(m=>`${m.name}${m.time?'('+m.time+')':''}`).join('・')||'尚未設定'}
+        ＊雙擊上方標籤可以編輯餐次及菜單名稱。
       </div>
       ${_renderMenuMatrix(s.id, false)}
     </div>`;
@@ -4500,60 +4548,15 @@ function renderMenuEditMode(){
   }
   const s = sets.find(x=>x.id===_menuEditTargetSetId);
   if(!s){ el.innerHTML=''; return; }
-  const color = _setColor(s.id);
-  const light = _setLight(s.id);
-  const disabled = s.cycleOn===false;
-
-  const mealsHtml = (s.meals||[]).map((m,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#FAF6F0;border-radius:8px;margin-bottom:6px;">
-      <input value="${m.name}" oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').meals[${i}].name=this.value,save())"
-        style="flex:1;font-size:13px;padding:4px 8px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;" placeholder="餐次名稱">
-      <input type="time" value="${m.time||''}" oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').meals[${i}].time=this.value,save())"
-        style="font-size:12px;padding:4px 6px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;color:var(--ic-text);">
-      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;" title="${m.enabled!==false?'點擊停用':'點擊啟用'}">
-        <div onclick="(()=>{const _s=state.weekMenuSets.find(x=>x.id===\'${s.id}\');if(_s&&_s.meals[${i}]){_s.meals[${i}].enabled=!(_s.meals[${i}].enabled!==false);save();renderMenuEditMode();}})()"
-          style="width:32px;height:18px;border-radius:99px;background:${m.enabled!==false?'#C07030':'#D5C5B0'};position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;">
-          <div style="width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;${m.enabled!==false?'left:16px':'left:2px'};transition:left .2s;"></div>
-        </div>
-      </label>
-      <button onclick="_delSetMeal(\'${s.id}\',${i})" style="font-size:15px;color:#C8A898;background:none;border:none;cursor:pointer;padding:0;" aria-label="刪除餐次"><i class="ti ti-trash" aria-hidden="true"></i></button>
-    </div>`).join('');
-
   el.innerHTML=`
     <div style="padding:12px 16px;">
-      <!-- 頂部操作列 -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <button onclick="_menuEditMode=false;renderMenuTab();"
           style="font-size:12px;padding:5px 10px;border-radius:8px;background:transparent;color:var(--ic-text);border:1px solid var(--ic-vanilla);cursor:pointer;flex-shrink:0;">
           <i class="ti ti-arrow-left" aria-hidden="true"></i> 返回
         </button>
-        <input id="editSetName_${s.id}" value="${s.name}"
-          oninput="(state.weekMenuSets.find(x=>x.id===\'${s.id}\').name=this.value,save(),renderMenuTabBar(),renderMenuTimeline())"
-          style="flex:1;font-size:14px;font-weight:600;color:${color};padding:5px 10px;border-radius:8px;border:1.5px solid ${color}50;background:${light};min-width:0;">
-        <!-- 循環排程 toggle -->
-        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;" title="循環排程">
-          <div onclick="_toggleSetEnabled(_menuEditTargetSetId)"
-            style="width:34px;height:20px;border-radius:99px;background:${disabled?'#D5C5B0':'#3A9A6E'};position:relative;cursor:pointer;transition:background .2s;">
-            <div style="width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;${disabled?'left:2px':'left:16px'};transition:left .2s;"></div>
-          </div>
-          <span style="font-size:11px;color:${disabled?'var(--ic-sand)':'#2A7A50'};white-space:nowrap;">${disabled?'停用':'循環中'}</span>
-        </label>
-        <button onclick="_deleteSetConfirm(\'${s.id}\')"
-          style="font-size:12px;padding:5px 8px;border-radius:8px;background:transparent;color:#C04030;border:1px solid #F5C0BB;cursor:pointer;flex-shrink:0;" title="刪除組別">
-          <i class="ti ti-trash" aria-hidden="true"></i>
-        </button>
+        <span style="font-size:14px;font-weight:600;color:var(--ic-chocolate);">編輯菜單：${s.name}</span>
       </div>
-      <!-- 餐次設定 -->
-      <div style="margin-bottom:16px;">
-        <div style="font-size:12px;color:var(--ic-sand);font-weight:600;margin-bottom:8px;letter-spacing:.03em;">餐次設定</div>
-        ${mealsHtml}
-        <button onclick="_addSetMeal(\'${s.id}\')"
-          style="font-size:12px;color:var(--ic-caramel);background:none;border:1px dashed var(--ic-caramel);border-radius:8px;padding:5px 12px;cursor:pointer;width:100%;">
-          <i class="ti ti-plus" aria-hidden="true"></i> 新增餐次
-        </button>
-      </div>
-      <!-- 菜色矩陣 -->
-      <div style="font-size:12px;color:var(--ic-sand);font-weight:600;margin-bottom:8px;letter-spacing:.03em;">菜色安排</div>
       ${_renderMenuMatrix(s.id, true)}
     </div>`;
 }
@@ -4588,6 +4591,135 @@ function _deleteSetConfirm(setId){
   if(_viewingSetId===setId) _viewingSetId=null;
   _menuEditMode=false;
   save(); renderMenuTab();
+}
+
+// ── 菜單組別設定 Modal ──
+let _setConfigId = null;
+let _setConfigMeals = [];
+let _setConfigCycleOn = true;
+
+function openSetConfigModal(setId){
+  _setConfigId = setId;
+  const sets = state.weekMenuSets||[];
+  const s = setId ? sets.find(x=>x.id===setId) : null;
+  document.getElementById('setConfigModalTitle').textContent = setId ? '編輯菜單組' : '新增菜單組';
+  document.getElementById('setConfigName').value = s ? s.name : '健康飲食週';
+  _setConfigMeals = s ? JSON.parse(JSON.stringify(s.meals||[])) : [
+    {id:'meal_'+Date.now()+'_1', name:'早餐', time:'07:30', enabled:true},
+    {id:'meal_'+Date.now()+'_2', name:'午餐', time:'12:00', enabled:true},
+    {id:'meal_'+Date.now()+'_3', name:'晚餐', time:'18:30', enabled:true}
+  ];
+  _setConfigCycleOn = s ? (s.cycleOn!==false) : true;
+  document.getElementById('setConfigDeleteBtn').classList.toggle('hidden', !setId);
+  _renderSetConfigMealList();
+  _renderSetConfigCycleToggle();
+  document.getElementById('setConfigModal').classList.remove('hidden');
+}
+
+function _renderSetConfigMealList(){
+  const el = document.getElementById('setConfigMealList');
+  if(!el) return;
+  el.innerHTML = _setConfigMeals.map((m,i)=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--ic-lemon);border-radius:8px;margin-bottom:5px;">
+      <input value="${m.name}" oninput="_setConfigMeals[${i}].name=this.value"
+        style="flex:1;font-size:13px;padding:3px 7px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;min-width:0;" placeholder="餐次名稱">
+      <input type="time" value="${m.time||''}" oninput="_setConfigMeals[${i}].time=this.value"
+        style="font-size:12px;padding:3px 5px;border-radius:6px;border:1px solid var(--ic-vanilla);background:#fff;color:var(--ic-text);">
+      <div onclick="_setConfigMeals[${i}].enabled=!(_setConfigMeals[${i}].enabled!==false);_renderSetConfigMealList()"
+        style="width:30px;height:17px;border-radius:99px;background:${m.enabled!==false?'#C07030':'#D5C5B0'};position:relative;cursor:pointer;flex-shrink:0;">
+        <div style="width:13px;height:13px;border-radius:50%;background:#fff;position:absolute;top:2px;${m.enabled!==false?'left:15px':'left:2px'};transition:left .2s;"></div>
+      </div>
+      <button onclick="_setConfigMeals.splice(${i},1);_renderSetConfigMealList()" style="font-size:14px;color:#C8A898;background:none;border:none;cursor:pointer;padding:0;flex-shrink:0;"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`).join('');
+}
+
+function _setConfigAddMeal(){
+  _setConfigMeals.push({id:'meal_'+Date.now(), name:'新餐次', time:'', enabled:true});
+  _renderSetConfigMealList();
+}
+
+function _setConfigToggleCycle(){
+  _setConfigCycleOn = !_setConfigCycleOn;
+  _renderSetConfigCycleToggle();
+}
+
+function _renderSetConfigCycleToggle(){
+  const tog = document.getElementById('setConfigCycleToggle');
+  const knob = document.getElementById('setConfigCycleKnob');
+  if(!tog||!knob) return;
+  tog.style.background = _setConfigCycleOn ? '#3A9A6E' : '#D5C5B0';
+  knob.style.left = _setConfigCycleOn ? '16px' : '2px';
+}
+
+function saveSetConfig(){
+  const name = (document.getElementById('setConfigName').value||'').trim() || '健康飲食週';
+  if(!state.weekMenuSets) state.weekMenuSets=[];
+  if(_setConfigId){
+    const s = state.weekMenuSets.find(x=>x.id===_setConfigId);
+    if(s){ s.name=name; s.meals=_setConfigMeals; s.cycleOn=_setConfigCycleOn; }
+  } else {
+    const newSet = { id:'set_'+Date.now(), name, meals:_setConfigMeals, menu:{}, cycleOn:_setConfigCycleOn };
+    state.weekMenuSets.push(newSet);
+    if(!state.scheduleRotation) state.scheduleRotation=[];
+    _viewingSetId = newSet.id;
+  }
+  state.scheduleRotation = (state.weekMenuSets||[]).filter(x=>x.cycleOn!==false).map(x=>x.id);
+  save();
+  document.getElementById('setConfigModal').classList.add('hidden');
+  renderMenuTab();
+}
+
+function _deleteSetFromConfig(){
+  if(!_setConfigId) return;
+  const s = (state.weekMenuSets||[]).find(x=>x.id===_setConfigId);
+  if(!confirm(`確定要刪除「${s?s.name:'此組別'}」嗎？此動作無法復原。`)) return;
+  state.weekMenuSets=(state.weekMenuSets||[]).filter(x=>x.id!==_setConfigId);
+  state.scheduleRotation=(state.scheduleRotation||[]).filter(id=>id!==_setConfigId);
+  if(_menuEditTargetSetId===_setConfigId) _menuEditTargetSetId=null;
+  if(_viewingSetId===_setConfigId) _viewingSetId=null;
+  _menuEditMode=false;
+  save();
+  document.getElementById('setConfigModal').classList.add('hidden');
+  renderMenuTab();
+}
+
+// ── 烹飪方式區塊 ──
+function toggleCookMethodBlock(){
+  const body = document.getElementById('cookMethodBlockBody');
+  const chev = document.getElementById('cookMethodChevron');
+  if(!body||!chev) return;
+  body.classList.toggle('hidden');
+  chev.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
+  if(!body.classList.contains('hidden')) renderCookMethodBlock();
+}
+
+function renderCookMethodBlock(){
+  const el = document.getElementById('cookMethodBlockList');
+  if(!el) return;
+  const cms = state.mealConfig.cookMethods||[];
+  el.innerHTML = cms.map((m,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:99px;background:#FAEEDA;color:#854F0B;font-weight:600;">
+    ${m}<button onclick="deleteCookMethodFromBlock(${i})" style="font-size:12px;color:#B07040;background:none;border:none;cursor:pointer;line-height:1;padding:0;margin-left:2px;">×</button>
+  </span>`).join('');
+}
+
+function addCookMethodFromBlock(){
+  const inp = document.getElementById('newCookMethodBlockInput');
+  const v = (inp.value||'').trim();
+  if(!v) return;
+  if(!state.mealConfig.cookMethods) state.mealConfig.cookMethods=[];
+  if(!state.mealConfig.cookMethods.includes(v)){
+    state.mealConfig.cookMethods.push(v);
+    save(); renderCookMethodBlock();
+    // also update the modal list if it's open
+    if(document.getElementById('cookMethodList')) renderCookMethodList();
+  }
+  inp.value='';
+}
+
+function deleteCookMethodFromBlock(i){
+  state.mealConfig.cookMethods.splice(i,1);
+  save(); renderCookMethodBlock();
+  if(document.getElementById('cookMethodList')) renderCookMethodList();
 }
 
 function toggleIngLib(){
@@ -4872,10 +5004,6 @@ function openMenuCellModal(key){
   setMenuCellMode(cell.type==='skip'?'skip':'cook');
   renderDishList(cell.type==='skip'?[]:cell.dishes||[]);
   renderRecipePicker();
-  // skip reason
-  const reason = cell.type==='skip'?cell.skipReason:'';
-  renderSkipReasonChips(reason);
-  document.getElementById('skipReasonCustom').value = reason;
   document.getElementById('menuCellModal').classList.remove('hidden');
 }
 function closeMenuCellModal(){ document.getElementById('menuCellModal').classList.add('hidden'); _menuCellKey=null; _openIngPickers.clear(); }
@@ -5227,8 +5355,7 @@ function saveMenuCell(){
   if (!_menuCellKey) return;
   let cellData;
   if (_menuCellMode==='skip'){
-    const reason = document.getElementById('skipReasonCustom').value.trim();
-    cellData = { type:'skip', skipReason: reason };
+    cellData = { type:'skip', skipReason: '' };
   } else {
     const dishes = _cellDishes.filter(d=>d.dishName.trim()||((d.ingredientIds||[]).length));
     cellData = { type:'cook', dishes };
