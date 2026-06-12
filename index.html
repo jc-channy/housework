@@ -4107,9 +4107,9 @@ const SET_COLORS = ['#C07030','#3A9A6E','#7B68C8','#D4954A','#2A8FAA','#B85888']
 const SET_LIGHTS = ['#FEF0D8','#EBF5EF','#EEEDFE','#FDF0E0','#E0F3F8','#F5E8F2'];
 const SET_DARKS  = ['#4A2008','#1D5C3E','#3C3489','#5A3010','#0D4A5A','#4A1838'];
 function _setColorIdx(setId){ return Math.max(0,(state.weekMenuSets||[]).findIndex(s=>s.id===setId)); }
-function _setColor(id){ return SET_COLORS[_setColorIdx(id)%SET_COLORS.length]; }
-function _setLight(id){ return SET_LIGHTS[_setColorIdx(id)%SET_LIGHTS.length]; }
-function _setDark(id)  { return SET_DARKS [_setColorIdx(id)%SET_DARKS.length];  }
+function _setColor(id){ return SET_COLORS[0]; }
+function _setLight(id){ return SET_LIGHTS[0]; }
+function _setDark(id)  { return SET_DARKS[0];  }
 function _getEditTargetMenu(){
   const setId = _menuEditTargetSetId;
   if(!setId) return state.weekMenu;
@@ -4475,15 +4475,24 @@ function _renderMenuMatrix(setId, editable){
     ${m.time?`<div style="font-size:11px;color:var(--ic-sand);margin-top:1px;">${m.time}</div>`:''}
   </th>`).join('');
 
+  const todayDow = today().getDay();
+  const todayDk = dayKeys[(todayDow+6)%7]; // 0=Sun→6, 1=Mon→0 ...
+
   let html = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">
     <thead><tr>
       <th style="padding:6px 8px;min-width:32px;"></th>${mealHeaders}
     </tr></thead><tbody>`;
 
   dayKeys.forEach((dk, di)=>{
-    html += `<tr><td style="padding:4px 8px;white-space:nowrap;vertical-align:top;padding-top:10px;text-align:center;">
-      <div style="font-size:13px;font-weight:700;color:var(--ic-text);">週${days[di]}</div>
+    const isToday = dk===todayDk;
+    const dayLabelStyle = isToday
+      ? `font-size:13px;font-weight:800;color:${color};`
+      : `font-size:13px;font-weight:700;color:var(--ic-text);`;
+    const todayDot = isToday ? `<div style="width:5px;height:5px;border-radius:50%;background:${color};margin:2px auto 0;"></div>` : '';
+    html += `<tr${isToday?` style="background:${light}22;"`:''}><td style="padding:4px 8px;white-space:nowrap;vertical-align:top;padding-top:10px;text-align:center;">
+      <div style="${dayLabelStyle}">週${days[di]}</div>
       <div style="font-size:10px;color:var(--ic-sand);margin-top:1px;">${dayEn[di]}</div>
+      ${todayDot}
     </td>`;
     meals.forEach(meal=>{
       const key = `${meal.name}_${dk}`;
@@ -4491,9 +4500,13 @@ function _renderMenuMatrix(setId, editable){
       const cell = menu[key]||{type:'cook',dishes:[]};
       const isSkip = cell.type==='skip';
       const dishes = cell.dishes||[];
+      const isEmpty = !isSkip && (!dishes.length);
       const inner = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
       const lightPale = light+'88';
-      const cellDiv = `border-radius:10px;border:0.5px solid ${isSkip?'#D8D4CF':'#E4DDD4'};background:${isSkip?'#F0EDEA':lightPale};padding:7px 8px;display:flex;flex-direction:column;gap:3px;height:100%;box-sizing:border-box;`;
+      const neutral = '#F0EDEA';
+      const cellBg = (isSkip||isEmpty) ? neutral : lightPale;
+      const cellBorder = (isSkip||isEmpty) ? '#D8D4CF' : '#E4DDD4';
+      const cellDiv = `border-radius:10px;border:0.5px solid ${cellBorder};background:${cellBg};padding:7px 8px;display:flex;flex-direction:column;gap:3px;height:100%;box-sizing:border-box;`;
       if(editable){
         html += `<td style="padding:4px;height:1px;">
           <div onclick="openMenuCellForSet(\'${setId}\',\'${key}\')" style="${cellDiv}cursor:pointer;">${inner}</div></td>`;
@@ -4532,7 +4545,7 @@ function renderMenuViewMode(){
         </button>
       </div>
       <div style="font-size:12px;color:var(--ic-sand);margin-bottom:8px;">
-        ＊雙擊上方標籤可以編輯餐次及菜單名稱。
+        ＊拖移上方標籤調整菜單循環順序。雙擊可以編輯餐次及菜單名稱。
       </div>
       ${_renderMenuMatrix(s.id, false)}
     </div>`;
@@ -5580,14 +5593,27 @@ function renderTodayMenuCard(){
   const el = document.getElementById('atikaTodayMenu');
   if (!el) return;
   const dow = today().getDay();
-  const meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
+  const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const todayDk = dayKeyArr[dow];
+
+  // 使用新的 weekMenuSets 結構
+  const setId = getActiveSetId();
+  const activeSet = setId ? (state.weekMenuSets||[]).find(x=>x.id===setId) : null;
+  let meals, menuObj;
+  if(activeSet){
+    meals = (activeSet.meals||[]).filter(m=>m.enabled!==false).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+    menuObj = activeSet.menu||{};
+  } else {
+    meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
+    menuObj = getCurrentCycleMenu();
+  }
   if (!meals.length){ el.classList.add('hidden'); return; }
-  const cycleMenu = getCurrentCycleMenu();
   let hasAny = false;
   let html = '';
   meals.forEach(meal=>{
-    const key = getMenuKey(dow, meal.id);
-    const cell = cycleMenu[key];
+    const key = activeSet ? `${meal.name}_${todayDk}` : getMenuKey(dow, meal.id);
+    const cell = menuObj[key];
+    const mealTimeDisplay = meal.time || meal.mealTime || '';
     if (!cell) return;
     hasAny = true;
     if (cell.type==='skip'){
@@ -5595,8 +5621,8 @@ function renderTodayMenuCard(){
         <div style="width:5px;background:#C4A068;flex-shrink:0;"></div>
         <div style="flex:1;padding:9px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span style="font-size:16px;font-weight:800;color:#8B5A2B;">${meal.name}</span>
-          ${meal.mealTime?`<span style="font-size:14px;font-weight:600;color:#A07040;">${meal.mealTime}</span>`:''}
-          <span style="font-size:13px;color:#9A7A58;"><i class='ti ti-moon' style='font-size:12px;vertical-align:-1px;' aria-hidden='true'></i> ${cell.skipReason||'今天不煮'}</span>
+          ${mealTimeDisplay?`<span style="font-size:14px;font-weight:600;color:#A07040;">${mealTimeDisplay}</span>`:''}
+          <span style="font-size:13px;color:#9A7A58;">✕ 不煮</span>
         </div>
       </div>`;
     } else {
@@ -5623,7 +5649,7 @@ function renderTodayMenuCard(){
         <div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
           <div style="display:flex;align-items:baseline;gap:8px;">
             <span style="font-size:16px;font-weight:800;color:#5C3310;">${meal.name}</span>
-            ${meal.mealTime?`<span style="font-size:16px;font-weight:600;font-style:italic;color:#A07040;">${meal.mealTime}</span>`:''}
+            ${mealTimeDisplay?`<span style="font-size:16px;font-weight:600;font-style:italic;color:#A07040;">${mealTimeDisplay}</span>`:''}
           </div>
           ${dishRows}
         </div>
