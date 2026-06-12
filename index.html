@@ -4342,9 +4342,9 @@ function renderMenuTabBar(){
     const isThisWeek = s.id===thisWeekSetId;
     const disabled = s.cycleOn===false;
     const activeCss = isActive
-      ? `background:var(--ic-caramel);border-radius:8px;`
-      : `background:transparent;border-radius:8px;`;
-    const thisWeekBadge = isThisWeek ? `<span style="font-size:11px;color:${isActive?'rgba(255,255,255,0.8)':'var(--ic-caramel)'};font-weight:600;">(本週)</span>` : '';
+      ? `border:1.5px solid var(--ic-vanilla);border-bottom:1.5px solid var(--ic-surface);background:var(--ic-surface);padding-bottom:10px;margin-bottom:-1.5px;`
+      : `border:1.5px solid transparent;border-bottom:none;background:transparent;padding-bottom:8px;`;
+    const thisWeekBadge = isThisWeek ? `<span style="font-size:11px;color:var(--ic-caramel);font-weight:600;">(本週)</span>` : '';
     return `<div
       draggable="true"
       ondragstart="_tabDragStart(event,\'${s.id}\')"
@@ -4353,16 +4353,16 @@ function renderMenuTabBar(){
       ondragend="_tabDragEnd(event)"
       onclick="_viewingSetId=\'${s.id}\';renderMenuTab();"
       ondblclick="openSetConfigModal(\'${s.id}\')"
-      style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;cursor:pointer;${activeCss}user-select:none;flex-shrink:0;${disabled?'opacity:0.4;':''}"
+      style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;cursor:pointer;${activeCss}border-radius:8px 8px 0 0;user-select:none;${disabled?'opacity:0.4;':''}"
     >
-      <span style="font-size:13px;color:${isActive?'#FAF6F0':'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
+      <span style="font-size:13px;color:${isActive?'var(--ic-chocolate)':'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
       ${thisWeekBadge}
     </div>`;
   }).join('');
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:4px;padding-bottom:10px;overflow-x:auto;overflow-y:hidden;">
+  el.innerHTML=`<div style="display:flex;align-items:flex-end;border-bottom:1.5px solid var(--ic-vanilla);overflow-x:auto;overflow-y:hidden;">
     ${tabsHtml}
     <button onclick="openSetConfigModal(null)" title="新增組別"
-      style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:4px 8px;">
+      style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:7px 10px 8px;margin-bottom:-1.5px;">
       <i class="ti ti-plus" aria-hidden="true"></i>
     </button>
   </div>`;
