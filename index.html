@@ -4342,9 +4342,9 @@ function renderMenuTabBar(){
     const isThisWeek = s.id===thisWeekSetId;
     const disabled = s.cycleOn===false;
     const activeCss = isActive
-      ? `border:1.5px solid var(--ic-vanilla);border-bottom:1.5px solid var(--ic-surface);background:var(--ic-surface);padding-bottom:10px;margin-bottom:-1.5px;`
-      : `border:1.5px solid transparent;border-bottom:none;background:transparent;padding-bottom:8px;`;
-    const thisWeekBadge = isThisWeek ? `<span style="font-size:11px;color:var(--ic-caramel);font-weight:600;">(本週)</span>` : '';
+      ? `background:var(--ic-caramel);border-radius:8px;`
+      : `background:transparent;border-radius:8px;`;
+    const thisWeekBadge = isThisWeek ? `<span style="font-size:11px;color:${isActive?'rgba(255,255,255,0.8)':'var(--ic-caramel)'};font-weight:600;">(本週)</span>` : '';
     return `<div
       draggable="true"
       ondragstart="_tabDragStart(event,\'${s.id}\')"
@@ -4353,16 +4353,16 @@ function renderMenuTabBar(){
       ondragend="_tabDragEnd(event)"
       onclick="_viewingSetId=\'${s.id}\';renderMenuTab();"
       ondblclick="openSetConfigModal(\'${s.id}\')"
-      style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;cursor:pointer;${activeCss}border-radius:8px 8px 0 0;user-select:none;${disabled?'opacity:0.4;':''}"
+      style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;cursor:pointer;${activeCss}user-select:none;flex-shrink:0;${disabled?'opacity:0.4;':''}"
     >
-      <span style="font-size:13px;color:${isActive?'var(--ic-chocolate)':'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
+      <span style="font-size:13px;color:${isActive?'#FAF6F0':'var(--ic-text)'};font-weight:${isActive?600:400};${disabled?'text-decoration:line-through;':''}">${s.name}</span>
       ${thisWeekBadge}
     </div>`;
   }).join('');
-  el.innerHTML=`<div style="display:flex;align-items:flex-end;border-bottom:1.5px solid var(--ic-vanilla);overflow-x:auto;">
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:4px;padding-bottom:10px;overflow-x:auto;overflow-y:hidden;">
     ${tabsHtml}
     <button onclick="openSetConfigModal(null)" title="新增組別"
-      style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:7px 10px 8px;margin-bottom:-1.5px;">
+      style="flex-shrink:0;font-size:14px;color:var(--ic-sand);background:none;border:none;cursor:pointer;padding:4px 8px;">
       <i class="ti ti-plus" aria-hidden="true"></i>
     </button>
   </div>`;
@@ -4564,18 +4564,41 @@ function renderMenuEditMode(){
   if(!s){ el.innerHTML=''; return; }
   el.innerHTML=`
     <div style="padding:12px 16px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--ic-chocolate);">編輯菜單：${s.name}</span>
         <button onclick="_menuEditMode=false;renderMenuTab();"
           style="font-size:12px;padding:5px 10px;border-radius:8px;background:transparent;color:var(--ic-text);border:1px solid var(--ic-vanilla);cursor:pointer;flex-shrink:0;">
           <i class="ti ti-arrow-left" aria-hidden="true"></i> 返回
         </button>
-        <span style="font-size:14px;font-weight:600;color:var(--ic-chocolate);">編輯菜單：${s.name}</span>
+      </div>
+      <div style="margin-bottom:10px;">
+        <button onclick="_fillEmptyWithSkip(\'${s.id}\')"
+          style="font-size:12px;padding:5px 12px;border-radius:8px;background:#F5EDE8;color:#7A4020;border:1px dashed #C8A090;cursor:pointer;">
+          <i class="ti ti-x" style="font-size:11px;vertical-align:-1px;" aria-hidden="true"></i> 空白欄位一鍵設為不煮
+        </button>
       </div>
       ${_renderMenuMatrix(s.id, true)}
     </div>`;
 }
 
 // ── 輔助函數 ──
+function _fillEmptyWithSkip(setId){
+  const s = (state.weekMenuSets||[]).find(x=>x.id===setId);
+  if(!s) return;
+  if(!s.menu) s.menu={};
+  const meals = (s.meals||[]).filter(m=>m.enabled!==false);
+  const dayKeys = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  meals.forEach(meal=>{
+    dayKeys.forEach(dk=>{
+      const key = `${meal.name}_${dk}`;
+      const cell = s.menu[key];
+      const isEmpty = !cell || (cell.type==='cook' && (!cell.dishes||!cell.dishes.length));
+      if(isEmpty) s.menu[key] = {type:'skip', skipReason:''};
+    });
+  });
+  save(); renderMenuEditMode();
+}
+
 function _toggleSetEnabled(setId){
   const s=(state.weekMenuSets||[]).find(x=>x.id===setId);
   if(!s) return;
