@@ -4504,8 +4504,9 @@ function _renderMenuMatrix(setId, editable){
       const inner = _renderMenuCellInner(cell, dishes, allIngs, catColors, color, light, dark);
       const lightPale = light+'88';
       const neutral = '#F0EDEA';
-      const cellBg = (isSkip||isEmpty) ? neutral : lightPale;
-      const cellBorder = (isSkip||isEmpty) ? '#D8D4CF' : '#E4DDD4';
+      const muted = '#EDEAE5';
+      const cellBg = (isSkip||isEmpty) ? neutral : (isToday ? lightPale : muted);
+      const cellBorder = (isSkip||isEmpty) ? '#D8D4CF' : (isToday ? '#E4DDD4' : '#D9D5CF');
       const cellDiv = `border-radius:10px;border:0.5px solid ${cellBorder};background:${cellBg};padding:7px 8px;display:flex;flex-direction:column;gap:3px;height:100%;box-sizing:border-box;`;
       if(editable){
         html += `<td style="padding:4px;height:1px;">
