@@ -903,23 +903,6 @@
             </div>
           </div>
 
-          <!-- Atika 今日進度 -->
-          <div id="mgrAtikaDayCard" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
-            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
-              <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="ti ti-user-check" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
-              </div>
-              <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
-              <span id="mgrAtikaDayPct" class="ml-auto text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
-            </div>
-            <div class="px-4 py-3">
-              <div class="rounded-full overflow-hidden mb-1" style="height:10px;background:var(--ic-vanilla);">
-                <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
-              </div>
-              <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
-            </div>
-          </div>
-
           <!-- 今日菜單 -->
           <div id="mgrTodayMenuCard" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
             <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
@@ -943,8 +926,25 @@
           </div>
         </div>
 
-        <!-- 右欄：今日時間軸 -->
-        <section>
+        <!-- 右欄：Atika 今日進度 + 今日時間軸 -->
+        <section class="space-y-3">
+          <!-- Atika 今日進度 -->
+          <div id="mgrAtikaDayCard" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-user-check" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
+              </div>
+              <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+              <span id="mgrAtikaDayPct" class="ml-auto text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+            </div>
+            <div class="px-4 py-3">
+              <div class="rounded-full overflow-hidden mb-1" style="height:10px;background:var(--ic-vanilla);">
+                <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+              </div>
+              <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
+            </div>
+          </div>
+          <!-- 今日時間軸 -->
           <div class="overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
             <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
               <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
