@@ -899,6 +899,15 @@
             </div>
           </div>
 
+          <!-- 今日菜單 -->
+          <div id="mgrTodayMenuCard" class="hidden rounded-2xl overflow-hidden" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
+            <div class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ic-vanilla);">
+              <span class="text-sm font-bold flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日菜單</span>
+              <button onclick="switchTab('menu')" class="text-xs font-semibold" style="color:var(--ic-caramel-dk);">前往菜單 ›</button>
+            </div>
+            <div id="mgrTodayMenuBody" class="px-4 py-3 space-y-2"></div>
+          </div>
+
           <!-- 需要你處理 -->
           <div id="mgrActionBlock" class="hidden rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
             <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
@@ -5688,6 +5697,80 @@ function renderTodayMenuCard(){
   document.getElementById('atikaTodayMenuBody').innerHTML = html;
 }
 
+// ── 管理者首頁今日菜單卡 ──
+function renderMgrTodayMenuCard(){
+  const card = document.getElementById('mgrTodayMenuCard');
+  const body = document.getElementById('mgrTodayMenuBody');
+  if (!card || !body) return;
+
+  const dow = today().getDay();
+  const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const todayDk = dayKeyArr[dow];
+
+  const setId = getActiveSetId();
+  const activeSet = setId ? (state.weekMenuSets||[]).find(x=>x.id===setId) : null;
+  let meals, menuObj;
+  if (activeSet){
+    meals = (activeSet.meals||[]).filter(m=>m.enabled!==false).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+    menuObj = activeSet.menu||{};
+  } else {
+    meals = (state.mealConfig?.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
+    menuObj = getCurrentCycleMenu();
+  }
+  if (!meals.length){ card.classList.add('hidden'); return; }
+
+  let html = '';
+  let hasAny = false;
+  meals.forEach(meal=>{
+    const key = activeSet ? `${meal.name}_${todayDk}` : getMenuKey(dow, meal.id);
+    const cell = menuObj[key];
+    const mealTime = meal.time || meal.mealTime || '';
+
+    if (!cell || (cell.type!=='skip' && !(cell.dishes||[]).length)){
+      // 尚未設定 — 顯示空白列
+      html += `<div class="flex items-center gap-2 py-1" style="border-bottom:0.5px solid var(--ic-vanilla);">
+        <span class="text-sm font-bold" style="color:var(--ic-chocolate);min-width:40px;">${meal.name}</span>
+        ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
+        <span class="text-xs ml-auto" style="color:#C8B49A;">尚未設定</span>
+      </div>`;
+      return;
+    }
+
+    hasAny = true;
+    if (cell.type==='skip'){
+      html += `<div class="flex items-center gap-2 py-1" style="border-bottom:0.5px solid var(--ic-vanilla);">
+        <span class="text-sm font-bold" style="color:var(--ic-chocolate);min-width:40px;">${meal.name}</span>
+        ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
+        <span class="text-xs ml-auto" style="color:#9A8A80;">✕ 不煮</span>
+      </div>`;
+    } else {
+      const dishes = cell.dishes||[];
+      const dishNames = dishes.map(d=>{
+        const methods = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
+        const mTag = methods.length ? `<span style="font-size:11px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:3px;padding:1px 4px;margin-right:3px;">${methods[0]}</span>` : '';
+        const nm = d.dishName||'';
+        const ings = (d.ingredientIds||[]).slice(0,3).map(id=>{const i=(state.ingredients||[]).find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
+        return `<div class="flex items-center flex-wrap gap-1" style="margin-bottom:2px;">${mTag}<span style="font-size:12px;color:var(--ic-chocolate);">${nm||ings||''}</span></div>`;
+      }).join('');
+      html += `<div class="py-1.5" style="border-bottom:0.5px solid var(--ic-vanilla);">
+        <div class="flex items-baseline gap-2 mb-1">
+          <span class="text-sm font-bold" style="color:var(--ic-chocolate);">${meal.name}</span>
+          ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
+          <span class="text-xs ml-auto" style="color:var(--ic-caramel-dk);">${dishes.length} 道</span>
+        </div>
+        <div style="padding-left:4px;">${dishNames}</div>
+      </div>`;
+    }
+  });
+
+  card.classList.remove('hidden');
+  if (!hasAny){
+    body.innerHTML = `<div class="text-xs text-center py-2" style="color:var(--ic-choc-mid);">今日尚未規劃菜色</div>`;
+    return;
+  }
+  body.innerHTML = html;
+}
+
 /* ========== 日期 ========== */
 const WD_ZH = ['日','一','二','三','四','五','六'];
 const WD_ID = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -7091,6 +7174,7 @@ function renderManagerView(){
   renderMgrTimeSlotKanban();
   renderMgrPunchStatus();
   renderMgrTomorrowOff();
+  renderMgrTodayMenuCard();
   renderWeekWorkload();
   renderTodayTimeline();
   renderCatFilters();
