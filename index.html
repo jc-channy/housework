@@ -1214,23 +1214,27 @@
         <div id="menuDayDetail" class="hidden"></div>
         <div id="menuGrid" class="hidden"></div>
 
-        <!-- 烹飪方式（可收合） -->
+        <!-- 菜譜庫（預設展開） -->
         <div class="rounded-2xl border mb-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <button onclick="toggleCookMethodBlock()" class="w-full flex items-center justify-between px-4 pt-4 pb-2 text-left">
-            <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-flame" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 烹飪方式</h2>
-            <i id="cookMethodChevron" class="ti ti-chevron-down" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
-          </button>
-          <div id="cookMethodBlockBody" class="hidden px-4 pb-4">
-            <div id="cookMethodBlockList" class="flex flex-wrap gap-2 mb-3"></div>
-            <div class="flex gap-2">
-              <input id="newCookMethodBlockInput" type="text" placeholder="新增烹飪方式" class="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm" style="background:#fff;">
-              <button onclick="addCookMethodFromBlock()" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">新增</button>
+          <div class="flex items-center justify-between px-4 pt-4 pb-2">
+            <h2 class="font-bold text-sm flex items-center gap-1.5" style="color:var(--ic-chocolate);">
+              <i class="ti ti-book" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 菜譜庫
+            </h2>
+            <div class="flex items-center gap-2">
+              <button onclick="openRecipeModal(null)" class="text-xs px-3 py-1 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">＋ 新增菜譜</button>
+              <button onclick="toggleRecipeLib()" style="background:none;border:none;cursor:pointer;padding:2px;">
+                <i id="recipeLibChevron" class="ti ti-chevron-up" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
+              </button>
             </div>
+          </div>
+          <div id="recipeLibBody">
+            <div id="recipeLibCatTabs" class="px-4 pb-2 flex gap-2 overflow-x-auto" style="scrollbar-width:none;"></div>
+            <div id="recipeLibList" class="px-4 pb-4"></div>
           </div>
         </div>
 
-        <!-- 食材庫（可收合） -->
-        <div class="rounded-2xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+        <!-- 食材庫（可收合，設定用） -->
+        <div class="rounded-2xl border mb-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
           <button onclick="toggleIngLib()" class="w-full flex items-center justify-between px-4 pt-4 pb-2 text-left">
             <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-basket" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 食材庫</h2>
             <i id="ingLibChevron" class="ti ti-chevron-down" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
@@ -1240,7 +1244,6 @@
               <button onclick="openIngredientModal(null)" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">＋ 新增食材</button>
             </div>
             <div id="ingredientList" class="px-4 pb-4"></div>
-            <!-- 食材分類設定 -->
             <div class="border-t px-4 pt-3 pb-4" style="border-color:var(--ic-vanilla);">
               <details>
                 <summary class="text-sm font-semibold cursor-pointer" style="color:var(--ic-chocolate);">食材分類設定</summary>
@@ -1254,42 +1257,63 @@
           </div>
         </div>
 
-        <!-- 常用菜譜（可收合） -->
-        <div class="rounded-2xl border mt-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <button onclick="toggleRecipeLib()" class="w-full flex items-center justify-between px-4 pt-4 pb-2 text-left">
-            <h2 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-star" style="font-size:14px;vertical-align:-2px;color:var(--ic-caramel);" aria-hidden="true"></i> 常用菜譜</h2>
-            <i id="recipeLibChevron" class="ti ti-chevron-down" style="font-size:14px;color:var(--ic-choc-mid);transition:transform 0.2s;"></i>
-          </button>
-          <div id="recipeLibBody" class="hidden">
-            <div class="px-4 pb-2 flex justify-end">
-              <button onclick="openRecipeModal(null)" class="text-xs px-3 py-1.5 rounded-lg" style="background:var(--ic-caramel);color:#FAF7F2;">＋ 新增菜譜</button>
-            </div>
-            <div id="recipeLibList" class="px-4 pb-4"></div>
-          </div>
-        </div>
+        <!-- 烹飪方式（隱藏殼，保留 id 供 JS 存取不報錯） -->
+        <div id="cookMethodBlockBody" class="hidden"><div id="cookMethodBlockList"></div><input id="newCookMethodBlockInput" type="hidden"><i id="cookMethodChevron"></i></div>
     </div>
 
   </main>
 </section>
 
-<!-- ===== 常用菜譜編輯 Modal ===== -->
+<!-- ===== 菜譜編輯 Modal ===== -->
 <div id="recipeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-4">
       <div id="recipeModalTitle" class="ty-modal-title">新增菜譜</div>
       <button onclick="document.getElementById('recipeModal').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
-    <div class="mb-3">
-      <label class="text-xs font-semibold block mb-1" style="color:var(--ic-choc-mid);">菜名（選填）</label>
-      <input id="recipeModalName" type="text" placeholder="留空也可以" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" style="background:var(--ic-surface);">
+    <!-- 菜名 + 分類 -->
+    <div class="flex gap-2 mb-3">
+      <div class="flex-1">
+        <label class="text-xs font-semibold block mb-1" style="color:var(--ic-choc-mid);">菜名（選填）</label>
+        <input id="recipeModalName" type="text" placeholder="留空也可以" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" style="background:var(--ic-surface);">
+      </div>
+      <div>
+        <label class="text-xs font-semibold block mb-1" style="color:var(--ic-choc-mid);">分類</label>
+        <input id="recipeModalCat" type="text" placeholder="快炒／清蒸…" list="recipeCatDatalist" class="border border-gray-200 rounded-lg px-3 py-2 text-sm" style="width:100px;background:var(--ic-surface);">
+        <datalist id="recipeCatDatalist"></datalist>
+      </div>
     </div>
+    <!-- 烹飪方式 -->
     <div class="mb-3">
-      <div class="text-xs font-semibold mb-1.5" style="color:var(--ic-choc-mid);">烹調方式（可複選）</div>
+      <div class="text-xs font-semibold mb-1.5 flex items-center justify-between" style="color:var(--ic-choc-mid);">
+        <span>烹飪方式（可複選）</span>
+        <div class="flex gap-1">
+          <input id="newRecipeMethodInput" type="text" placeholder="新增方式" class="border border-gray-200 rounded-lg px-2 py-1" style="font-size:11px;width:80px;background:var(--ic-surface);">
+          <button onclick="_addMethodFromRecipeModal()" style="font-size:11px;padding:2px 8px;border-radius:6px;background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">＋</button>
+        </div>
+      </div>
       <div id="recipeModalMethods" class="flex flex-wrap gap-1.5"></div>
     </div>
+    <!-- 食材（格狀，分類 tab） -->
+    <div class="mb-3">
+      <div class="text-xs font-semibold mb-1.5 flex items-center justify-between" style="color:var(--ic-choc-mid);">
+        <span>食材</span>
+        <div class="flex gap-1">
+          <input id="newRecipeIngInput" type="text" placeholder="新增食材" class="border border-gray-200 rounded-lg px-2 py-1" style="font-size:11px;width:80px;background:var(--ic-surface);">
+          <button onclick="_addIngFromRecipeModal()" style="font-size:11px;padding:2px 8px;border-radius:6px;background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">＋</button>
+        </div>
+      </div>
+      <!-- 分類 tab -->
+      <div id="recipeIngCatTabs" class="flex gap-1.5 mb-2 overflow-x-auto pb-1" style="scrollbar-width:none;"></div>
+      <!-- 格狀食材 -->
+      <div id="recipeModalIngs" class="rounded-lg border p-2" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);max-height:160px;overflow-y:auto;"></div>
+      <!-- 已選綠列 -->
+      <div id="recipeModalIngSelected" class="hidden mt-2 rounded-lg px-3 py-2 flex flex-wrap gap-1.5 items-center" style="background:#EAF3DE;border:0.5px solid #639922;min-height:32px;"></div>
+    </div>
+    <!-- 備註 -->
     <div class="mb-4">
-      <div class="text-xs font-semibold mb-1.5" style="color:var(--ic-choc-mid);">食材</div>
-      <div id="recipeModalIngs" class="max-h-48 overflow-y-auto rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);"></div>
+      <label class="text-xs font-semibold block mb-1" style="color:var(--ic-choc-mid);">備註／做法說明（給 Atika 看）</label>
+      <textarea id="recipeModalNote" rows="2" placeholder="例：蛋先炒熟起鍋，再炒番茄加少許糖" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" style="background:var(--ic-surface);"></textarea>
     </div>
     <div class="flex gap-2">
       <button id="recipeDeleteBtn" onclick="_deleteRecipeFromLib(_editingRecipeId)" class="hidden text-xs px-3 py-2 rounded-xl" style="background:#FEE2E2;color:#B91C1C;"><i class="ti ti-trash" style="font-size:12px;" aria-hidden="true"></i></button>
@@ -5212,6 +5236,12 @@ function addDishToCell(){
   _rebuildDishListUI();
 }
 
+// ── 菜譜庫 狀態 ──
+let _recipeLibCatFilter = '全部';
+let _recipeCellSearch = '';
+let _recipeCellCatFilter = '全部';
+let _recipeIngCatFilter = '全部';
+
 // ── 常用菜譜 ──
 function isInRecipes(dish){
   if (!dish.dishName) return false;
@@ -5219,30 +5249,51 @@ function isInRecipes(dish){
 }
 function renderRecipePicker(){
   const el = document.getElementById('recipePicker');
-  if (!el) return;
+  if(!el) return;
   const recipes = state.recipes||[];
-  if (!recipes.length){ el.innerHTML=''; return; }
+  if(!recipes.length){ el.innerHTML=''; return; }
   const allIngs = state.ingredients||[];
-  const cards = recipes.map(r=>{
-    const ingNames = (r.ingredientIds||[]).slice(0,3).map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('・');
-    const methods = (r.cookMethods||[]).slice(0,2).join('・');
-    const sid = r.id.replace(/'/g,"\'");
-    return `<div style="position:relative;flex-shrink:0;max-width:130px;">
-      <button type="button" onclick="addRecipeToCell('${sid}')" style="width:100%;background:#FEF0D8;border:0.5px solid #E8DDD0;border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;">
-        ${r.dishName?`<div style="font-size:13px;font-weight:700;color:#4A2008;margin-bottom:3px;padding-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.dishName}</div>`:''}
-        ${methods?`<div style="font-size:12px;color:#C07030;margin-bottom:1px;">${methods}</div>`:''}
-        ${ingNames?`<div style="font-size:12px;color:#9A7A5A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${ingNames}</div>`:''}
-      </button>
-      <button type="button" onclick="removeRecipe('${sid}')" style="position:absolute;top:3px;right:4px;background:none;border:none;cursor:pointer;font-size:13px;color:#B0A090;line-height:1;" title="移除常用">×</button>
+  const currentDishNames = _cellDishes.map(d=>d.dishName).filter(Boolean);
+  // 分類清單
+  const cats = ['全部', ...new Set(recipes.map(r=>r.category||'').filter(Boolean))];
+  // 搜尋 + 分類過濾
+  const filtered = recipes.filter(r=>{
+    const catOk = _recipeCellCatFilter==='全部' || (r.category||'')=== _recipeCellCatFilter;
+    const q = _recipeCellSearch.toLowerCase();
+    const searchOk = !q
+      || (r.dishName||'').toLowerCase().includes(q)
+      || (r.cookMethods||[]).some(m=>m.toLowerCase().includes(q))
+      || (r.ingredientIds||[]).some(id=>{const i=allIngs.find(x=>x.id===id);return i&&i.name.toLowerCase().includes(q);});
+    return catOk && searchOk;
+  });
+  const catTabsHtml = cats.length>1 ? cats.map(c=>`<button type="button" onclick="_recipeCellCatFilter='${c.replace(/'/g,"\\'")}';renderRecipePicker();"
+    style="font-size:11px;padding:2px 8px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+    ${_recipeCellCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'border-color:var(--ic-vanilla);color:var(--ic-choc-mid);background:transparent;'}">${c}</button>`).join('') : '';
+  const listHtml = filtered.map(r=>{
+    const inCell = currentDishNames.includes(r.dishName);
+    const methods = (r.cookMethods||[]).slice(0,1).map(m=>`<span style="font-size:10px;padding:1px 5px;border-radius:99px;background:#FAEEDA;border:0.5px solid #EF9F27;color:#633806;">${m}</span>`).join('');
+    const ings = (r.ingredientIds||[]).slice(0,3).map(id=>{const i=allIngs.find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
+    const sid = r.id.replace(/'/g,"\\'");
+    return `<div onclick="addRecipeToCell('${sid}')" style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--ic-vanilla);cursor:pointer;">
+      <div style="width:16px;height:16px;border-radius:4px;flex-shrink:0;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:10px;color:#FAEEDA;
+        ${inCell?'background:#854F0B;border-color:#854F0B;':'border-color:var(--ic-vanilla);'}">
+        ${inCell?'✓':''}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:${inCell?600:500};color:${inCell?'#854F0B':'var(--ic-chocolate)'};">${r.dishName||'（未命名）'}</div>
+        <div style="display:flex;gap:3px;margin-top:1px;align-items:center;">${methods}${ings?`<span style="font-size:10px;color:var(--ic-sand);">${ings}</span>`:''}</div>
+      </div>
     </div>`;
   }).join('');
-  el.innerHTML = `<div style="margin-bottom:6px;display:flex;align-items:center;gap:5px;">
-    <i class="ti ti-star" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
-    <span style="font-size:12px;font-weight:700;color:#7A3A08;">常用菜譜</span>
-    <span style="font-size:12px;color:#9A7A5A;">點選快速加入</span>
-  </div>
-  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">${cards}</div>
-  <div style="height:1px;background:#E8DDD0;margin:10px 0 2px;"></div>`;
+  el.innerHTML = `
+    <div style="font-size:12px;font-weight:600;color:var(--ic-chocolate);margin-bottom:6px;">從菜譜庫選（可多選）</div>
+    <input type="search" placeholder="搜尋菜譜…" oninput="_recipeCellSearch=this.value;renderRecipePicker();" value="${_recipeCellSearch}"
+      style="width:100%;font-size:12px;padding:5px 10px;border-radius:99px;border:0.5px solid var(--ic-vanilla);background:var(--ic-lemon);margin-bottom:6px;">
+    ${catTabsHtml?`<div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none;">${catTabsHtml}</div>`:''}
+    <div style="max-height:160px;overflow-y:auto;border:0.5px solid var(--ic-vanilla);border-radius:10px;padding:0 10px;margin-top:4px;margin-bottom:10px;">
+      ${listHtml||'<div style="font-size:12px;color:var(--ic-sand);padding:10px 0;text-align:center;">沒有符合的菜譜</div>'}
+    </div>
+    <div style="height:0.5px;background:var(--ic-vanilla);margin-bottom:8px;"></div>`;
 }
 function addRecipeToCell(recipeId){
   const r = (state.recipes||[]).find(x=>x.id===recipeId);
@@ -5292,30 +5343,46 @@ function toggleRecipeLib(){
   const body = document.getElementById('recipeLibBody');
   const chev = document.getElementById('recipeLibChevron');
   if(!body||!chev) return;
+  const isHidden = body.classList.contains('hidden');
   body.classList.toggle('hidden');
-  chev.style.transform = body.classList.contains('hidden') ? '' : 'rotate(180deg)';
-  if(!body.classList.contains('hidden')) renderRecipeLibrary();
+  chev.style.transform = isHidden ? '' : 'rotate(180deg)';
+  if(isHidden) renderRecipeLibrary();
 }
 function renderRecipeLibrary(){
   const el = document.getElementById('recipeLibList');
+  const tabsEl = document.getElementById('recipeLibCatTabs');
   if(!el) return;
   const recipes = state.recipes||[];
-  if(!recipes.length){
-    el.innerHTML='<p style="font-size:12px;color:var(--ic-sand);padding-bottom:4px;">尚未建立任何菜譜，點右上角新增</p>';
+  const allIngs = state.ingredients||[];
+  // 分類清單
+  const cats = ['全部', ...new Set(recipes.map(r=>r.category||'').filter(Boolean))];
+  if(tabsEl){
+    tabsEl.innerHTML = cats.map(c=>`<button onclick="_recipeLibCatFilter='${c.replace(/'/g,"\\'")}';renderRecipeLibrary();"
+      style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+      ${_recipeLibCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'background:transparent;border-color:var(--ic-vanilla);color:var(--ic-choc-mid);'}">${c}</button>`).join('');
+  }
+  const filtered = _recipeLibCatFilter==='全部' ? recipes : recipes.filter(r=>(r.category||'')=== _recipeLibCatFilter);
+  if(!filtered.length){
+    el.innerHTML='<p style="font-size:12px;color:var(--ic-sand);">尚未建立菜譜，點右上角新增</p>';
     return;
   }
-  const allIngs = state.ingredients||[];
-  el.innerHTML = recipes.map(r=>{
-    const methods = (r.cookMethods||[]).map(m=>`<span style="font-size:11px;padding:1px 6px;border-radius:99px;background:#FAEEDA;color:#854F0B;">${m}</span>`).join('');
-    const ings = (r.ingredientIds||[]).slice(0,5).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?`<span style="font-size:11px;padding:1px 6px;border-radius:99px;background:#F0EAE0;color:#9A7A58;">${ing.name}</span>`:''}).filter(Boolean).join('');
-    const nameHtml = r.dishName ? `<div style="font-size:13px;font-weight:700;color:#2A1508;margin-bottom:3px;">${r.dishName}</div>` : '';
+  el.innerHTML = filtered.map(r=>{
+    const methods = (r.cookMethods||[]).map(m=>`<span style="font-size:11px;padding:1px 6px;border-radius:99px;background:#FAEEDA;border:0.5px solid #EF9F27;color:#633806;">${m}</span>`).join('');
+    const ings = (r.ingredientIds||[]).slice(0,4).map(id=>{const ing=allIngs.find(x=>x.id===id);return ing?ing.name:null;}).filter(Boolean).join('＋');
+    const catBadge = r.category ? `<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);border:0.5px solid var(--ic-vanilla);">${r.category}</span>` : '';
     const sid = r.id.replace(/'/g,"\\'");
-    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--ic-vanilla);">
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--ic-vanilla);">
       <div style="flex:1;min-width:0;">
-        ${nameHtml}
-        <div style="display:flex;flex-wrap:wrap;gap:3px;">${methods}${ings}</div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px;">
+          ${r.dishName?`<span style="font-size:13px;font-weight:600;color:var(--ic-chocolate);">${r.dishName}</span>`:''}
+          ${catBadge}
+        </div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center;">
+          ${methods}
+          ${ings?`<span style="font-size:11px;color:var(--ic-sand);">${ings}</span>`:''}
+        </div>
       </div>
-      <button onclick="openRecipeModal('${sid}')" style="flex-shrink:0;font-size:14px;color:#C8A898;background:none;border:none;cursor:pointer;" title="編輯"><i class="ti ti-pencil" aria-hidden="true"></i></button>
+      <button onclick="openRecipeModal('${sid}')" style="flex-shrink:0;font-size:15px;color:#C8A898;background:none;border:none;cursor:pointer;" title="編輯"><i class="ti ti-pencil" aria-hidden="true"></i></button>
     </div>`;
   }).join('');
 }
@@ -5324,38 +5391,76 @@ function openRecipeModal(id){
   const r = id ? (state.recipes||[]).find(x=>x.id===id) : null;
   _recipeEditMethods = r ? [...(r.cookMethods||[])] : [];
   _recipeEditIngIds  = r ? [...(r.ingredientIds||[])] : [];
+  _recipeIngCatFilter = '全部';
   document.getElementById('recipeModalTitle').textContent = r ? '編輯菜譜' : '新增菜譜';
   document.getElementById('recipeModalName').value = r ? (r.dishName||'') : '';
+  document.getElementById('recipeModalCat').value = r ? (r.category||'') : '';
+  document.getElementById('recipeModalNote').value = r ? (r.note||'') : '';
   document.getElementById('recipeDeleteBtn').classList.toggle('hidden', !r);
+  // 更新分類 datalist
+  const dl = document.getElementById('recipeCatDatalist');
+  if(dl){
+    const cats = [...new Set((state.recipes||[]).map(x=>x.category||'').filter(Boolean))];
+    dl.innerHTML = cats.map(c=>`<option value="${c}">`).join('');
+  }
   _renderRecipeModalPickers();
   document.getElementById('recipeModal').classList.remove('hidden');
 }
 function _renderRecipeModalPickers(){
-  // 烹調方式
+  // 烹飪方式
   const mEl = document.getElementById('recipeModalMethods');
   if(mEl){
     const cms = state.mealConfig.cookMethods||[];
-    mEl.innerHTML = cms.map(m=>`<button type="button" onclick="_toggleRecipeMethod('${m.replace(/'/g,"\\'")}')"
-      style="font-size:12px;padding:2px 10px;border-radius:99px;border:1px solid;cursor:pointer;transition:all .15s;${_recipeEditMethods.includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('');
+    mEl.innerHTML = cms.map(m=>{
+      const on = _recipeEditMethods.includes(m);
+      return `<button type="button" onclick="_toggleRecipeMethod('${m.replace(/'/g,"\\'")}')"
+        style="font-size:12px;padding:3px 10px;border-radius:99px;border:0.5px solid;cursor:pointer;
+        ${on?'background:#FAEEDA;border-color:#EF9F27;color:#633806;font-weight:600;':'background:var(--ic-lemon);color:var(--ic-choc-mid);border-color:var(--ic-vanilla);'}">${m}</button>`;
+    }).join('');
   }
-  // 食材
+  // 食材分類 tab
+  const tabsEl = document.getElementById('recipeIngCatTabs');
+  const cats = state.mealConfig.ingCategories||[];
+  const allIngs = state.ingredients||[];
+  if(tabsEl){
+    const tabCats = ['全部', ...cats];
+    tabsEl.innerHTML = tabCats.map(c=>`<button type="button" onclick="_recipeIngCatFilter='${c.replace(/'/g,"\\'")}';_renderRecipeModalPickers();"
+      style="font-size:11px;padding:2px 9px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+      ${_recipeIngCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'background:transparent;border-color:var(--ic-vanilla);color:var(--ic-choc-mid);'}">${c}</button>`).join('');
+  }
+  // 食材格狀
   const iEl = document.getElementById('recipeModalIngs');
   if(iEl){
-    const cats = state.mealConfig.ingCategories||[];
     const catColors = state.mealConfig.ingCategoryColors||{};
-    const allIngs = state.ingredients||[];
-    let html='';
-    cats.forEach(cat=>{
-      const group = allIngs.filter(i=>i.category===cat);
-      if(!group.length) return;
-      const cc = catColors[cat]||'#A89880';
-      html+=`<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:${cc};margin-bottom:4px;">${cat}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">${group.map(ing=>{
-          const on=_recipeEditIngIds.includes(ing.id);
-          return `<button type="button" onclick="_toggleRecipeIng('${ing.id}')" style="font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid;cursor:pointer;${on?`background:${cc};color:#fff;border-color:${cc};`:`background:${cc}22;color:${cc};border-color:${cc};`}">${ing.name}</button>`;
-        }).join('')}</div></div>`;
-    });
-    iEl.innerHTML = html||'<p style="font-size:12px;color:var(--ic-sand);">先到食材庫新增食材</p>';
+    const visibleIngs = _recipeIngCatFilter==='全部' ? allIngs : allIngs.filter(i=>i.category===_recipeIngCatFilter);
+    if(!visibleIngs.length){
+      iEl.innerHTML='<p style="font-size:12px;color:var(--ic-sand);padding:4px;">此分類無食材，先到食材庫新增</p>';
+    } else {
+      iEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">${
+        visibleIngs.map(ing=>{
+          const on = _recipeEditIngIds.includes(ing.id);
+          const cc = catColors[ing.category]||'#A89880';
+          return `<button type="button" onclick="_toggleRecipeIng('${ing.id}')"
+            style="font-size:12px;padding:4px 6px;border-radius:99px;border:0.5px solid;cursor:pointer;text-align:center;
+            ${on?`background:${cc};color:#fff;border-color:${cc};font-weight:600;`:`background:${cc}22;color:${cc};border-color:${cc}66;`}">${ing.name}</button>`;
+        }).join('')
+      }</div>`;
+    }
+  }
+  // 已選綠列
+  const selEl = document.getElementById('recipeModalIngSelected');
+  if(selEl){
+    if(!_recipeEditIngIds.length){ selEl.classList.add('hidden'); return; }
+    selEl.classList.remove('hidden');
+    selEl.innerHTML = `<span style="font-size:11px;font-weight:600;color:#27500A;margin-right:2px;">已選：</span>`
+      + _recipeEditIngIds.map(id=>{
+          const ing = allIngs.find(x=>x.id===id);
+          if(!ing) return '';
+          return `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#EAF3DE;border:0.5px solid #639922;color:#27500A;display:inline-flex;align-items:center;gap:3px;">
+            ${ing.name}
+            <span onclick="_toggleRecipeIng('${ing.id}')" style="cursor:pointer;color:#639922;font-size:10px;">✕</span>
+          </span>`;
+        }).join('');
   }
 }
 function _toggleRecipeMethod(m){
@@ -5370,17 +5475,51 @@ function _toggleRecipeIng(id){
 }
 function saveRecipeFromModal(){
   const name = document.getElementById('recipeModalName').value.trim();
+  const cat  = document.getElementById('recipeModalCat').value.trim();
+  const note = document.getElementById('recipeModalNote').value.trim();
   if(!state.recipes) state.recipes=[];
   if(_editingRecipeId){
     const r = state.recipes.find(x=>x.id===_editingRecipeId);
-    if(r){ r.dishName=name; r.cookMethods=[..._recipeEditMethods]; r.ingredientIds=[..._recipeEditIngIds]; }
+    if(r){ r.dishName=name; r.cookMethods=[..._recipeEditMethods]; r.ingredientIds=[..._recipeEditIngIds]; r.category=cat; r.note=note; }
   } else {
-    state.recipes.push({id:'recipe_'+Date.now(),dishName:name,cookMethods:[..._recipeEditMethods],ingredientIds:[..._recipeEditIngIds]});
+    state.recipes.push({id:'recipe_'+Date.now(),dishName:name,cookMethods:[..._recipeEditMethods],ingredientIds:[..._recipeEditIngIds],category:cat,note:note});
   }
   save();
   document.getElementById('recipeModal').classList.add('hidden');
   renderRecipeLibrary();
   renderRecipePicker();
+}
+function _addMethodFromRecipeModal(){
+  const inp = document.getElementById('newRecipeMethodInput');
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val) return;
+  if(!(state.mealConfig.cookMethods||[]).includes(val)){
+    if(!state.mealConfig.cookMethods) state.mealConfig.cookMethods=[];
+    state.mealConfig.cookMethods.push(val);
+    save();
+  }
+  if(!_recipeEditMethods.includes(val)) _recipeEditMethods.push(val);
+  inp.value='';
+  _renderRecipeModalPickers();
+}
+function _addIngFromRecipeModal(){
+  const inp = document.getElementById('newRecipeIngInput');
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val) return;
+  const exists = (state.ingredients||[]).find(i=>i.name===val);
+  let id;
+  if(exists){ id=exists.id; }
+  else {
+    id='ing_'+Date.now();
+    if(!state.ingredients) state.ingredients=[];
+    state.ingredients.push({id,name:val,nameId:'',category:_recipeIngCatFilter!=='全部'?_recipeIngCatFilter:''});
+    save();
+  }
+  if(!_recipeEditIngIds.includes(id)) _recipeEditIngIds.push(id);
+  inp.value='';
+  _renderRecipeModalPickers();
 }
 function _deleteRecipeFromLib(id){
   if(!id) return;
