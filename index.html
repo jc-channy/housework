@@ -5267,21 +5267,28 @@ function renderRecipePicker(){
     return catOk && searchOk;
   });
   const catTabsHtml = cats.length>1 ? cats.map(c=>`<button type="button" onclick="_recipeCellCatFilter='${c.replace(/'/g,"\\'")}';renderRecipePicker();"
-    style="font-size:11px;padding:2px 8px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+    style="font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
     ${_recipeCellCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'border-color:var(--ic-vanilla);color:var(--ic-choc-mid);background:transparent;'}">${c}</button>`).join('') : '';
   const listHtml = filtered.map(r=>{
     const inCell = currentDishNames.includes(r.dishName);
-    const methods = (r.cookMethods||[]).slice(0,1).map(m=>`<span style="font-size:10px;padding:1px 5px;border-radius:99px;background:#FAEEDA;border:0.5px solid #EF9F27;color:#633806;">${m}</span>`).join('');
-    const ings = (r.ingredientIds||[]).slice(0,3).map(id=>{const i=allIngs.find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
+    const methods = (r.cookMethods||[]).map(m=>`<span style="font-size:11px;padding:1px 6px;border-radius:99px;background:#FAEEDA;border:0.5px solid #EF9F27;color:#633806;">${m}</span>`).join('');
+    const ings = (r.ingredientIds||[]).slice(0,4).map(id=>{const i=allIngs.find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
+    const catBadge = r.category ? `<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:var(--ic-lemon);color:var(--ic-choc-mid);border:0.5px solid var(--ic-vanilla);">${r.category}</span>` : '';
     const sid = r.id.replace(/'/g,"\\'");
-    return `<div onclick="addRecipeToCell('${sid}')" style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--ic-vanilla);cursor:pointer;">
-      <div style="width:16px;height:16px;border-radius:4px;flex-shrink:0;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:10px;color:#FAEEDA;
+    return `<div onclick="addRecipeToCell('${sid}')" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--ic-vanilla);cursor:pointer;${inCell?'background:#FAF6F0;margin:0 -10px;padding-left:10px;padding-right:10px;':''}">
+      <div style="width:16px;height:16px;border-radius:4px;flex-shrink:0;border:1.5px solid;display:flex;align-items:center;justify-content:center;font-size:10px;color:#FAF6F0;
         ${inCell?'background:#854F0B;border-color:#854F0B;':'border-color:var(--ic-vanilla);'}">
         ${inCell?'✓':''}
       </div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:12px;font-weight:${inCell?600:500};color:${inCell?'#854F0B':'var(--ic-chocolate)'};">${r.dishName||'（未命名）'}</div>
-        <div style="display:flex;gap:3px;margin-top:1px;align-items:center;">${methods}${ings?`<span style="font-size:10px;color:var(--ic-sand);">${ings}</span>`:''}</div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px;">
+          <span style="font-size:13px;font-weight:600;color:${inCell?'#854F0B':'var(--ic-chocolate)'};">${r.dishName||'（未命名）'}</span>
+          ${catBadge}
+        </div>
+        <div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center;">
+          ${methods}
+          ${ings?`<span style="font-size:11px;color:var(--ic-sand);">${ings}</span>`:''}
+        </div>
       </div>
     </div>`;
   }).join('');
