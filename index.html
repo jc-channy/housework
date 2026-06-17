@@ -5123,55 +5123,82 @@ function _rebuildDishListUI(){
   const catColors = state.mealConfig.ingCategoryColors||{};
   el.innerHTML = _cellDishes.map((d,i)=>{
     const selIds = d.ingredientIds||[];
-    // 按分類分組的 chip 選擇器
-    let chipGroups = '';
-    cats.forEach(cat=>{
-      const group = allIngs.filter(ing=>ing.category===cat);
-      if (!group.length) return;
-      const cc = catColors[cat]||'#A89880';
-      chipGroups += `<div class="mb-1.5">
-        <div class="text-[10px] font-semibold mb-1" style="color:${cc};">${cat}</div>
-        <div class="flex flex-wrap gap-1">${group.map(ing=>{
-          const on = selIds.includes(ing.id);
-          return `<button type="button" onclick="_toggleIngredient(${i},'${ing.id}')" class="text-xs px-2 py-0.5 rounded-full border transition-colors" style="${on?`background:${cc};color:#fff;border-color:${cc};`:`background:${cc}22;color:${cc};border-color:${cc};`}">${ing.name}</button>`;
-        }).join('')}</div>
-      </div>`;
-    });
-    // 未分類食材
-    const uncat = allIngs.filter(ing=>!cats.includes(ing.category));
-    if (uncat.length) chipGroups += `<div class="flex flex-wrap gap-1 mb-1">${uncat.map(ing=>{const on=selIds.includes(ing.id);return`<button type="button" onclick="_toggleIngredient(${i},'${ing.id}')" class="text-xs px-2 py-0.5 rounded-full border" style="${on?'background:#888;color:#fff;border-color:#888;':'background:#eee;color:#555;border-color:#ccc;'}">${ing.name}</button>`;}).join('')}</div>`;
-    // 已選標籤（摘要顯示）
-    const selTags = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return''; const cc=catColors[ing.category]||'#A89880'; return `<span class="text-xs px-2 py-0.5 rounded-full" style="background:${cc}22;color:${cc};border:1px solid ${cc};">${ing.name}</span>`; }).join('');
-    // 自動菜名提示
-    const autoName = selIds.map(id=>{ const ing=allIngs.find(x=>x.id===id); return ing?ing.name:''; }).filter(Boolean).join('＋');
-    const ingPickerOpen = _openIngPickers.has(i);
+    const ingCatFilter = d._ingCatFilter||'全部';
+    const dcm = d.cookMethods && d.cookMethods.length ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []);
     const seqLabel = `第 ${i+1} 道菜`;
-    return `<div class="rounded-xl border overflow-hidden" style="background:#F7F0E6;border-color:var(--ic-vanilla);">
+
+    // ── 已選食材綠列（上方） ──
+    const selBar = selIds.length ? `<div style="margin-bottom:8px;border-radius:8px;padding:6px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:#EAF3DE;border:0.5px solid #639922;">
+      <span style="font-size:10px;font-weight:600;color:#27500A;white-space:nowrap;">已選：</span>
+      ${selIds.map(id=>{const ing=allIngs.find(x=>x.id===id);if(!ing)return'';return`<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:#EAF3DE;border:0.5px solid #639922;color:#27500A;display:inline-flex;align-items:center;gap:2px;">${ing.name}<span onclick="_toggleIngredient(${i},'${ing.id}')" style="cursor:pointer;color:#639922;font-size:9px;">✕</span></span>`;}).join('')}
+    </div>` : '';
+
+    // ── 分類 tab ──
+    const tabCats = ['全部', ...cats];
+    const catTabsHtml = tabCats.map(c=>`<button type="button" onclick="_cellDishes[${i}]._ingCatFilter='${c.replace(/'/g,"\\'")}';_rebuildDishListUI();"
+      style="font-size:10px;padding:2px 7px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+      ${ingCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'background:transparent;border-color:var(--ic-vanilla);color:var(--ic-choc-mid);'}">${c}</button>`).join('');
+
+    // ── 食材 4 欄格狀 ──
+    const visibleIngs = ingCatFilter==='全部' ? allIngs : allIngs.filter(x=>x.category===ingCatFilter);
+    const gridHtml = visibleIngs.length
+      ? `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">${visibleIngs.map(ing=>{
+          const on = selIds.includes(ing.id);
+          const cc = catColors[ing.category]||'#A89880';
+          return `<button type="button" onclick="_toggleIngredient(${i},'${ing.id}')"
+            style="font-size:10px;padding:3px 4px;border-radius:99px;border:0.5px solid;cursor:pointer;text-align:center;
+            ${on?`background:${cc};color:#fff;border-color:${cc};font-weight:600;`:`background:${cc}22;color:${cc};border-color:${cc}66;`}">${ing.name}</button>`;
+        }).join('')}</div>`
+      : '<p style="font-size:11px;color:var(--ic-sand);padding:4px;">此分類無食材</p>';
+
+    // ── 方式 chip（同菜譜 modal） ──
+    const methodsHtml = (state.mealConfig.cookMethods||[]).map(m=>{
+      const on = dcm.includes(m);
+      const mSafe = m.replace(/'/g,"\\'");
+      return `<span style="display:inline-flex;align-items:center;border-radius:99px;border:0.5px solid;overflow:hidden;${on?'background:#FAEEDA;border-color:#EF9F27;':'background:var(--ic-lemon);border-color:var(--ic-vanilla);'}">
+        <button type="button" onclick="_setCookMethod(${i},'${mSafe}')"
+          style="font-size:11px;padding:3px 8px;cursor:pointer;background:transparent;border:none;${on?'color:#633806;font-weight:600;':'color:var(--ic-choc-mid);'}">${m}</button>
+      </span>`;
+    }).join('')
+    + `<button type="button" onclick="_addCookMethod(${i})" style="font-size:11px;padding:3px 8px;border-radius:99px;border:0.5px dashed;color:var(--ic-caramel);border-color:var(--ic-caramel);background:transparent;cursor:pointer;">＋新增</button>`;
+
+    return `<div style="border-radius:12px;border:0.5px solid var(--ic-vanilla);overflow:hidden;background:var(--ic-surface);">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#EDE4D4;border-bottom:1px solid var(--ic-vanilla);">
-        <span style="font-size:14px;font-weight:800;color:var(--ic-chocolate);">${seqLabel}</span>
-        <button onclick="_removeDish(${i})" style="color:#B0957A;font-size:14px;line-height:1;"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <span style="font-size:13px;font-weight:700;color:var(--ic-chocolate);">${seqLabel}</span>
+        <button onclick="_removeDish(${i})" style="color:#B0957A;font-size:14px;line-height:1;background:none;border:none;cursor:pointer;"><i class="ti ti-x" aria-hidden="true"></i></button>
       </div>
-      <div class="p-3">
-        <div class="mb-2">
-          <div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">菜名（選填）</div>
-          <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="菜名（選填，空白即可）" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm" style="background:var(--ic-surface);">
+      <div style="padding:12px;">
+        <!-- 菜名 -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:600;color:var(--ic-choc-mid);margin-bottom:4px;">菜名（選填）</div>
+          <input type="text" value="${d.dishName||''}" oninput="_cellDishes[${i}].dishName=this.value" placeholder="留空也可以"
+            class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm" style="background:var(--ic-surface);">
         </div>
-        ${selTags?`<div class="mb-2"><div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">已選食材</div><div class="flex flex-wrap gap-1">${selTags}</div></div>`:''}
-        <button type="button" onclick="_toggleIngPicker(${i})" class="text-xs px-2 py-0.5 rounded-lg mb-2 border" style="color:var(--ic-caramel);border-color:var(--ic-caramel);background:var(--ic-lemon);"><i class="ti ti-basket" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${selIds.length?'編輯食材':'＋ 選擇食材'}</button>
-        <div id="ingPicker_${i}" class="${ingPickerOpen?'':'hidden'} mb-2 max-h-48 overflow-y-auto pr-1 rounded-lg p-2 border" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);">${chipGroups||'<p class="text-xs text-amber-600">先到食材庫新增食材</p>'}</div>
-        <div class="mb-2">
-          <div class="text-xs font-semibold mb-1" style="color:var(--ic-choc-mid);">烹調方式（可複選）</div>
-          <div class="flex flex-wrap gap-1">${(()=>{ const _dcm = d.cookMethods && d.cookMethods.length ? d.cookMethods : (d.cookMethod ? [d.cookMethod] : []); return (state.mealConfig.cookMethods||[]).map(m=>`<button type="button" onclick="_setCookMethod(${i},'${m.replace(/'/g,"\\'")}',this)" class="cm-chip text-xs px-2 py-0.5 rounded-full border transition-colors${_dcm.includes(m)?' cm-active':''}" style="${_dcm.includes(m)?'background:var(--ic-caramel);color:#FAF7F2;border-color:var(--ic-caramel);':'background:var(--ic-lemon);color:var(--ic-chocolate);border-color:var(--ic-vanilla);'}">${m}</button>`).join('')+'<button type="button" onclick="_addCookMethod('+i+')" class="text-xs px-2 py-0.5 rounded-full border" style="border-style:dashed;color:var(--ic-caramel);border-color:var(--ic-caramel);background:transparent;">＋新增</button>'; })()}</div>
+        <!-- 烹飪方式 -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:600;color:var(--ic-choc-mid);margin-bottom:6px;">烹飪方式</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;">${methodsHtml}</div>
         </div>
-        <div class="mb-1">
-          <div class="text-[10px] font-semibold mb-1" style="color:var(--ic-choc-mid);">烹飪備註（選填）</div>
-          <input type="text" id="dish-note-${i}" value="${d.note||''}" oninput="_cellDishes[${i}].note=this.value" onblur="autoTranslateNote(${i})" placeholder="例：＊鴻禧菇使用一半就好" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs mb-1" style="background:var(--ic-surface);">
+        <!-- 食材 -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:10px;font-weight:600;color:var(--ic-choc-mid);margin-bottom:6px;">食材</div>
+          ${selBar}
+          <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-bottom:6px;">${catTabsHtml}</div>
+          <div style="border-radius:8px;border:0.5px solid var(--ic-vanilla);padding:8px;background:var(--ic-lemon);max-height:130px;overflow-y:auto;">${gridHtml}</div>
+        </div>
+        <!-- 備註 -->
+        <div style="margin-bottom:6px;">
+          <div style="font-size:10px;font-weight:600;color:var(--ic-choc-mid);margin-bottom:4px;">烹飪備註（選填）</div>
+          <input type="text" id="dish-note-${i}" value="${d.note||''}" oninput="_cellDishes[${i}].note=this.value" onblur="autoTranslateNote(${i})"
+            placeholder="例：＊鴻禧菇使用一半就好" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs mb-1" style="background:var(--ic-surface);">
           <div style="display:flex;align-items:center;gap:4px;">
-            <input type="text" id="dish-noteid-${i}" value="${d.noteId||''}" oninput="_cellDishes[${i}].noteId=this.value" placeholder="Catatan (Bahasa Indonesia)" class="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs" style="background:var(--ic-surface);flex:1;">
+            <input type="text" id="dish-noteid-${i}" value="${d.noteId||''}" oninput="_cellDishes[${i}].noteId=this.value"
+              placeholder="Catatan (Bahasa Indonesia)" class="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs" style="background:var(--ic-surface);flex:1;">
             <button onclick="autoTranslateNote(${i})" title="自動翻譯" style="flex-shrink:0;background:#E8F0FE;border:none;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:12px;color:#3B5BDB;">🌐</button>
           </div>
         </div>
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--ic-vanilla);display:flex;justify-content:flex-end;">
+        <!-- 加入菜譜 -->
+        <div style="padding-top:8px;border-top:1px solid var(--ic-vanilla);display:flex;justify-content:flex-end;">
           <button type="button" onclick="toggleSaveToRecipe(${i})" style="font-size:12px;background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:${isInRecipes(d)?'#C07030':'#9A7A5A'};">
             <i class="ti ti-star" style="font-size:13px;" aria-hidden="true"></i>
             ${isInRecipes(d)?'★ 已加入常用菜譜':'☆ 加入常用菜譜'}
@@ -5205,7 +5232,7 @@ function _setCookMethod(i, m){
   const arr = dish.cookMethods;
   const idx = arr.indexOf(m);
   if (idx >= 0) arr.splice(idx, 1); else arr.push(m);
-  _syncCmChips(i);
+  _rebuildDishListUI();
 }
 function _addCookMethod(i){
   const name = prompt('新增烹調方式：');
