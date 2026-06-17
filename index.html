@@ -7723,9 +7723,9 @@ function openPunchEdit(type){
   const pt=getPunchMetaByType(type);
   const existing=getPunch(todayPunches(), type);
   document.getElementById('punchEditTitle').innerHTML = `<i class="ti ${pt.emoji}" style="font-size:16px;vertical-align:-2px;"></i> ${pt.zh} / ${pt.id_}`;
-  document.getElementById('punchEditSubtitle').textContent = existing ? '修改打卡時間' : '補打卡（會標記為「<i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 補」）';
+  document.getElementById('punchEditSubtitle').innerHTML = existing ? '修改打卡時間' : '補打卡（會標記為「<i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 補」）';
   document.getElementById('punchEditTime').value = existing ? existing.at : nowHHMM();
-  document.getElementById('punchEditNote').textContent = existing ? '修改現有打卡，不會增加補打標記（若原本是補打仍為補打）' : '此次將標記為「<i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 補打」並留下戳記';
+  document.getElementById('punchEditNote').innerHTML = existing ? '修改現有打卡，不會增加補打標記（若原本是補打仍為補打）' : '此次將標記為「<i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 補打」並留下戳記';
   document.getElementById('punchDeleteBtn').classList.toggle('hidden', !existing);
   document.getElementById('punchEditModal').classList.remove('hidden');
 }
@@ -7851,7 +7851,7 @@ function renderTodayTimeline(){
   // 出勤摘要
   const summary = punchSummaryText(punches);
   const taskCount = events.filter(e=>e.kind!=='punch').length;
-  document.getElementById('timelineCount').textContent = `${taskCount} 項工作 · ${summary}`;
+  document.getElementById('timelineCount').innerHTML = `${taskCount} 項工作 · ${summary}`;
   if (!events.length){
     el.innerHTML='<div class="text-sm text-gray-400 italic text-center py-4">今天還沒有紀錄 / Belum ada catatan</div>';
     return;
@@ -11712,7 +11712,7 @@ function exportData(){
   a.href=url; a.download=`家務管理_備份_${today}.json`;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  document.getElementById('backupStatus').textContent='<i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 已匯出，請存到雲端硬碟';
+  document.getElementById('backupStatus').innerHTML='<i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 已匯出，請存到雲端硬碟';
 }
 async function importData(ev){
   const file=ev.target.files[0];
@@ -11731,7 +11731,7 @@ async function importData(ev){
       if (d.reminders)   state.reminders=d.reminders;
       if (d.supplies)    state.supplies=d.supplies;
       save();
-      document.getElementById('backupStatus').textContent='<i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 已還原，下方頁面會自動刷新';
+      document.getElementById('backupStatus').innerHTML='<i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;color:#6A7840;" aria-hidden="true"></i> 已還原，下方頁面會自動刷新';
       setTimeout(()=>{ location.reload(); }, 800);
     } catch(err) {
       alert('檔案格式錯誤，無法匯入');
