@@ -934,7 +934,7 @@
               <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <i class="ti ti-user-check" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
               </div>
-              <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+              <span id="mgrAtikaDayTitle" class="text-sm font-bold" style="color:var(--ic-chocolate);">今日進度</span>
               <span id="mgrAtikaDayPct" class="ml-auto text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
             </div>
             <div class="px-4 py-3">
@@ -4002,7 +4002,7 @@ function openChatPanel(){
     return;
   }
   document.getElementById('chatModalSubtitle').textContent =
-    state.currentUser?.role==='manager' ? '傳訊給 Atika' : '管理者訊息';
+    state.currentUser?.role==='manager' ? '傳訊給 '+getHelperName() : '管理者訊息';
   // 打開時清零徽章與停止所有重複響鈴
   setLastReadAt();
   stopAllUrgentRings();
@@ -7254,6 +7254,9 @@ async function importTemplatesXlsx(input){
   alert(`匯入完成：新增 ${added} 項，跳過重複 ${skipped} 項 / Impor selesai: ${added} ditambahkan, ${skipped} dilewati`);
 }
 
+/* ========== 工具：取得執行者名稱 ========== */
+function getHelperName(){ return state.users?.find(u=>u.role==='helper')?.name || '執行者'; }
+
 /* ========== 管理者視圖 ========== */
 // call at end of renderAtikaView — find where renderAtikaView calls supply-related renders
 function renderManagerView(){
@@ -7312,7 +7315,9 @@ function renderManagerView(){
     card.classList.remove('hidden');
     bar.style.width=pct+'%';
     pctEl.textContent=pct+'%';
-    const helperName=state.users?.find(u=>u.role==='helper')?.name||'Atika';
+    const helperName=getHelperName();
+    const titleEl=document.getElementById('mgrAtikaDayTitle');
+    if(titleEl) titleEl.textContent=`${helperName} 今日進度`;
     lblEl.textContent=`${helperName}：今日已完成 ${don2} / ${tot2} 項工作`;
   })();
 
@@ -7835,7 +7840,7 @@ function renderTodayTimeline(){
     const dt = new Date(); dt.setHours(h, mm, 0, 0);
     events.push({
       at: dt.toISOString(),
-      by: p.by || 'Atika',
+      by: p.by || getHelperName(),
       nameZh: `<i class="ti ${pt.emoji}" style="font-size:12px;vertical-align:-1px;"></i> ${pt.zh}` + (p.isBackfill?' <i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i>補打':''),
       nameId: pt.id_,
       kind: 'punch',
@@ -8305,7 +8310,7 @@ function renderLeaveLists(viewDate){
 function printLeaveForm(rid){
   const r = state.leaveRequests.find(x=>x.id===rid);
   if (!r) return;
-  const helperName = state.users.find(u=>u.role==='helper')?.name || 'Atika';
+  const helperName = getHelperName();
   const managerName = state.users.find(u=>u.role==='manager')?.name || '管理者';
   const typeName = (state.leaveTypes||[]).find(t=>t.id===r.type)?.nameZh || r.type;
   const PERIOD_ZH = { full:'全天（1日）', am:'上午（0.5日）', pm:'下午（0.5日）' };
@@ -8735,7 +8740,7 @@ function openMyPayroll(){
   const myName = state.currentUser.name;
   // 新審核通知橫幅
   const unnotified = state.leaveRequests.filter(r =>
-    (r.requestedBy===myName || r.requestedBy==='Atika') &&
+    (r.requestedBy===myName || r.requestedBy==='Atika' || r.requestedBy===getHelperName()) &&
     (r.status==='approved'||r.status==='rejected') && r.helperNotified===false
   );
   if (unnotified.length){
@@ -8749,7 +8754,7 @@ function openMyPayroll(){
     save();
   }
   const mine = state.leaveRequests
-    .filter(r => r.requestedBy === myName || r.requestedBy === 'Atika')
+    .filter(r => r.requestedBy === myName || r.requestedBy === 'Atika' || r.requestedBy === getHelperName())
     .sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20);
   const ST = { pending:'⏳ 等待審核 / Menunggu', approved:'✓ 已批准 / Disetujui', rejected:'✗ 已拒絕 / Ditolak' };
   const PERIOD = { full:'全天', am:'上午', pm:'下午' };
@@ -9242,7 +9247,7 @@ const EVENT_TYPES = {
 };
 const HOLIDAY_TYPES = {
   outing: { emoji:'🏖', zh:'全家外出',  id:'Liburan Keluarga', color:'#FB923C' },
-  leave:  { emoji:'😴', zh:'Atika 休假', id:'Atika Cuti',       color:'#9CA3AF' },
+  leave:  { emoji:'😴', get zh(){ return getHelperName()+' 休假'; }, get id(){ return getHelperName()+' Cuti'; }, color:'#9CA3AF' },
   other:  { emoji:'ti ti-dots-circle-horizontal', zh:'其他',       id:'Lainnya',          color:'#A78BFA' },
 };
 
@@ -9731,7 +9736,7 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
   const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
   const days = Math.round((range.end - range.start)/86400000) + 1;
   const lang = isManager ? 'zh' : getCurrentLang();  // 管理者主視角中文
-  const subject = isManager ? 'Atika ' : '';
+  const subject = isManager ? getHelperName()+' ' : '';
   const chipText = days===1
     ? `🎉 ${subject}${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
     : `🎉 ${subject}${lang==='id'?'Libur Berturut':'連休'} ${fmt(range.start)}~${fmt(range.end)} (${days}${lang==='id'?' hari':' 天'})`;
@@ -9788,7 +9793,7 @@ function renderTodayOffChip(chipId, isManager){
   const info = getTodayOffInfo();
   if (!info){ chip.classList.add('hidden'); chip.textContent=''; return; }
   const lang = isManager ? 'zh' : getCurrentLang();
-  const subject = isManager ? 'Atika ' : '';
+  const subject = isManager ? getHelperName()+' ' : '';
   const label = lang==='id' ? 'Libur Hari Ini' : '今日休假';
   chip.classList.remove('hidden');
   chip.textContent = `🏖 ${subject}${label}`;
@@ -11915,7 +11920,7 @@ function renderMgrPunchStatus(){
     el.className='hidden'; el.innerHTML=''; return;
   }
   el.className=`text-sm font-bold inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${info.cls}`;
-  el.innerHTML=`${info.icon} Atika ${info.label}${info.detail?' · '+info.detail:''}`;
+  el.innerHTML=`${info.icon} ${getHelperName()} ${info.label}${info.detail?' · '+info.detail:''}`;
 }
 function tickMinute(){
   const now=new Date();
