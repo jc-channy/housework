@@ -870,28 +870,18 @@
             <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
           </div>
 
-          <!-- Atika 今日進度（含今日提醒） -->
-          <div id="mgrAtikaDayCard" class="hidden rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
-                <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
-              </div>
-              <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+          <!-- 今日提醒（獨立卡片）-->
+          <div id="mgrReminderCard" class="rounded-2xl overflow-hidden" style="border:2px solid #C07030;">
+            <div class="flex items-center gap-2 px-4 py-2.5" style="background:#C07030;">
+              <i class="ti ti-speakerphone" style="font-size:15px;color:#FFF8F0;" aria-hidden="true"></i>
+              <span class="text-sm font-bold" style="color:#FFF8F0;">今日提醒</span>
+              <button onclick="toggleReminderEdit()" class="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:#FAEEDA;color:#854F0B;">編輯</button>
             </div>
-            <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
-              <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
-            </div>
-            <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
-            <!-- 今日提醒（單行嵌入）-->
-            <div class="border-t mt-2 pt-2" style="border-color:var(--ic-vanilla);">
-              <div class="flex items-center gap-2 cursor-pointer py-0.5" onclick="toggleReminderEdit()">
-                <i class="ti ti-speakerphone" style="font-size:13px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
-                <span class="text-xs font-semibold" style="color:var(--ic-chocolate);">今日提醒</span>
-                <span id="reminderPreview" class="text-xs truncate flex-1" style="color:var(--ic-choc-mid);"></span>
-                <span class="text-xs shrink-0" style="color:var(--ic-choc-mid);">編輯 ›</span>
+            <div style="background:#FFFBF2;">
+              <div class="px-4 py-2.5">
+                <span id="reminderPreview" class="text-sm" style="color:var(--ic-chocolate);line-height:1.4;display:block;"></span>
               </div>
-              <div id="reminderInlineEdit" class="hidden mt-2">
+              <div id="reminderInlineEdit" class="hidden px-4 pb-3">
                 <div class="flex gap-2 items-start mb-2">
                   <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
                   <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
@@ -907,6 +897,21 @@
                 <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
               </div>
             </div>
+          </div>
+
+          <!-- Atika 今日進度 -->
+          <div id="mgrAtikaDayCard" class="hidden rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
+                <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+              </div>
+              <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+            </div>
+            <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
+              <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+            </div>
+            <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
           </div>
 
           <!-- 今日菜單 -->
@@ -5945,48 +5950,41 @@ function renderMgrTodayMenuCard(){
   }
   if (!meals.length){ card.classList.add('hidden'); return; }
 
-  let html = '';
+  let rows = '';
   let hasAny = false;
-  meals.forEach(meal=>{
+  meals.forEach((meal, idx)=>{
     const key = activeSet ? `${meal.name}_${todayDk}` : getMenuKey(dow, meal.id);
     const cell = menuObj[key];
     const mealTime = meal.time || meal.mealTime || '';
+    const isLast = idx === meals.length - 1;
+    const bdStyle = isLast ? '' : 'border-bottom:0.5px solid var(--ic-vanilla);';
 
-    if (!cell || (cell.type!=='skip' && !(cell.dishes||[]).length)){
-      // 尚未設定 — 顯示空白列
-      html += `<div class="flex items-center gap-2 py-1" style="border-bottom:0.5px solid var(--ic-vanilla);">
-        <span class="text-sm font-bold" style="color:var(--ic-chocolate);min-width:40px;">${meal.name}</span>
-        ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
-        <span class="text-xs ml-auto" style="color:#C8B49A;">尚未設定</span>
-      </div>`;
-      return;
+    let dishesHtml = `<span style="font-size:11px;color:#C8B49A;font-style:italic;">尚未設定</span>`;
+    if (cell){
+      if (cell.type==='skip'){
+        dishesHtml = `<span style="font-size:11px;color:#9A8A80;">✕ 不煮</span>`;
+      } else {
+        const dishes = cell.dishes||[];
+        if (dishes.length){
+          hasAny = true;
+          dishesHtml = dishes.map(d=>{
+            const methods = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
+            const mTag = methods.length ? `<span style="font-size:10px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:2px;padding:0px 3px;margin-right:2px;">${methods[0]}</span>` : '';
+            const nm = d.dishName||'';
+            const ings = (d.ingredientIds||[]).slice(0,2).map(id=>{const i=(state.ingredients||[]).find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
+            return `<span style="white-space:nowrap;">${mTag}<span style="font-size:11px;color:var(--ic-chocolate);">${nm||ings||''}</span></span>`;
+          }).join(`<span style="color:#C8B49A;margin:0 3px;">·</span>`);
+        }
+      }
     }
 
-    hasAny = true;
-    if (cell.type==='skip'){
-      html += `<div class="flex items-center gap-2 py-1" style="border-bottom:0.5px solid var(--ic-vanilla);">
-        <span class="text-sm font-bold" style="color:var(--ic-chocolate);min-width:40px;">${meal.name}</span>
-        ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
-        <span class="text-xs ml-auto" style="color:#9A8A80;">✕ 不煮</span>
-      </div>`;
-    } else {
-      const dishes = cell.dishes||[];
-      const dishNames = dishes.map(d=>{
-        const methods = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-        const mTag = methods.length ? `<span style="font-size:11px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:3px;padding:1px 4px;margin-right:3px;">${methods[0]}</span>` : '';
-        const nm = d.dishName||'';
-        const ings = (d.ingredientIds||[]).slice(0,3).map(id=>{const i=(state.ingredients||[]).find(x=>x.id===id);return i?i.name:null;}).filter(Boolean).join('＋');
-        return `<div class="flex items-center flex-wrap gap-1" style="margin-bottom:2px;">${mTag}<span style="font-size:12px;color:var(--ic-chocolate);">${nm||ings||''}</span></div>`;
-      }).join('');
-      html += `<div class="py-1.5" style="border-bottom:0.5px solid var(--ic-vanilla);">
-        <div class="flex items-baseline gap-2 mb-1">
-          <span class="text-sm font-bold" style="color:var(--ic-chocolate);">${meal.name}</span>
-          ${mealTime?`<span class="text-xs" style="color:var(--ic-choc-mid);font-style:italic;">${mealTime}</span>`:''}
-          <span class="text-xs ml-auto" style="color:var(--ic-caramel-dk);">${dishes.length} 道</span>
-        </div>
-        <div style="padding-left:4px;">${dishNames}</div>
-      </div>`;
-    }
+    rows += `<tr style="${bdStyle}">
+      <td style="padding:5px 8px 5px 0;vertical-align:middle;white-space:nowrap;">
+        <span style="font-size:10px;font-weight:700;color:#854F0B;padding:1px 7px;border-radius:99px;background:#FAEEDA;border:0.5px solid #EF9F27;">${meal.name}</span>
+      </td>
+      <td style="padding:5px 8px 5px 0;vertical-align:middle;white-space:nowrap;font-size:10px;color:#9A8070;font-style:italic;">${mealTime}</td>
+      <td style="padding:5px 0;vertical-align:middle;line-height:1.5;word-break:break-all;">${dishesHtml}</td>
+    </tr>`;
   });
 
   card.classList.remove('hidden');
@@ -5994,7 +5992,7 @@ function renderMgrTodayMenuCard(){
     body.innerHTML = `<div class="text-xs text-center py-2" style="color:var(--ic-choc-mid);">今日尚未規劃菜色</div>`;
     return;
   }
-  body.innerHTML = html;
+  body.innerHTML = `<table style="width:100%;border-collapse:collapse;">${rows}</table>`;
 }
 
 /* ========== 日期 ========== */
@@ -10309,10 +10307,10 @@ function updateReminderPreview(){
   if(!p) return;
   const text=r.zh||r.id||'';
   if(text){
-    p.textContent=text.length>35?text.slice(0,35)+'…':text;
+    p.textContent=text.length>60?text.slice(0,60)+'…':text;
     p.style.color='var(--ic-chocolate)';
   } else {
-    p.textContent='點此新增今日提醒';
+    p.textContent='點此「編輯」新增今日提醒';
     p.style.color='var(--ic-choc-mid)';
   }
 }
