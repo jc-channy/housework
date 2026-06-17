@@ -7329,33 +7329,36 @@ function renderManagerView(){
         </div>
       </div>`);
     });
-    // 待補品（已回報 + 已購買 兩類）
+    // 待補品（已回報 + 已購買 兩類）— 每項獨立列出
     const reported=(state.supplies||[]).filter(s=>s.reportStatus&&!s.handleStatus);
     const bought=(state.supplies||[]).filter(s=>s.handleStatus==='bought');
-    if (reported.length){
-      items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
+    reported.forEach(s=>{
+      items.push(`<div class="py-2 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <i class="ti ti-package shrink-0" style="font-size:15px;color:#A85550;" aria-hidden="true"></i>
+          <i class="ti ti-package shrink-0" style="font-size:14px;color:#A85550;" aria-hidden="true"></i>
           <div class="min-w-0">
-            <div class="text-xs font-semibold" style="color:#A85550;">${reported.length} 項備品待補充</div>
-            <div class="text-[11px] text-gray-600">${reported.slice(0,3).map(s=>s.name).join('、')}${reported.length>3?'…':''}</div>
+            <div class="text-xs font-semibold truncate" style="color:#A85550;">${s.name||s.nameZh||''}</div>
+            ${s.reportNote?`<div class="text-[10px] text-gray-500 truncate">${s.reportNote}</div>`:''}
           </div>
         </div>
-        <button onclick="switchTab('supplies')" class="text-[11px] px-2 py-1 rounded-lg font-semibold shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">查看</button>
+        <div class="flex gap-1 shrink-0">
+          <button onclick="handleSupply('${s.id}','bought')" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:var(--ic-caramel);color:#FAF7F2;">買了</button>
+          <button onclick="handleSupply('${s.id}','restocked')" class="text-[11px] px-2 py-1 rounded-lg font-semibold" style="background:#EAF3E0;color:#3A6820;border:none;">✓</button>
+        </div>
       </div>`);
-    }
-    if (bought.length){
-      items.push(`<div class="py-2.5 flex items-center justify-between gap-2">
+    });
+    bought.forEach(s=>{
+      items.push(`<div class="py-2 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <i class="ti ti-shopping-cart shrink-0" style="font-size:15px;color:#3A6A7A;" aria-hidden="true"></i>
+          <i class="ti ti-shopping-cart shrink-0" style="font-size:14px;color:#3A6A7A;" aria-hidden="true"></i>
           <div class="min-w-0">
-            <div class="text-xs font-semibold" style="color:#3A6A7A;">${bought.length} 項已購買待收納</div>
-            <div class="text-[11px] text-gray-600">${bought.slice(0,3).map(s=>s.name).join('、')}${bought.length>3?'…':''}</div>
+            <div class="text-xs font-semibold truncate" style="color:#3A6A7A;">${s.name||s.nameZh||''}</div>
+            <div class="text-[10px] text-gray-500">已購買・待收納</div>
           </div>
         </div>
-        <button onclick="switchTab('supplies')" class="text-[11px] px-2 py-1 rounded-lg font-semibold shrink-0" style="background:var(--ic-caramel);color:#FAF7F2;">查看</button>
+        <button onclick="handleSupply('${s.id}','restocked')" class="text-[11px] px-2 py-1 rounded-lg font-semibold shrink-0" style="background:#EAF3E0;color:#3A6820;border:none;">收納好了</button>
       </div>`);
-    }
+    });
     if (items.length===0){ block.classList.add('hidden'); return; }
     block.classList.remove('hidden');
     countEl.textContent=items.length;
