@@ -860,6 +860,16 @@
       <div class="md:grid md:grid-cols-2 md:gap-4 md:items-start mb-4">
         <!-- 左欄 -->
         <div class="space-y-3 mb-3 md:mb-0">
+          <!-- 需要你處理（最上方） -->
+          <div id="mgrActionBlock" class="hidden rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
+            <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
+              <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
+              <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
+              <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
+            </div>
+            <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
+          </div>
+
           <!-- Atika 今日進度（含今日提醒） -->
           <div id="mgrAtikaDayCard" class="hidden rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
             <div class="flex items-center justify-between mb-2">
@@ -906,16 +916,6 @@
               <button onclick="switchTab('menu')" class="text-xs font-semibold" style="color:var(--ic-caramel-dk);">前往菜單 ›</button>
             </div>
             <div id="mgrTodayMenuBody" class="px-4 py-3 space-y-2"></div>
-          </div>
-
-          <!-- 需要你處理 -->
-          <div id="mgrActionBlock" class="hidden rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
-            <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
-              <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
-              <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
-              <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
-            </div>
-            <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
           </div>
 
           <!-- 發薪日提醒 Banner -->
