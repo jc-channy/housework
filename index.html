@@ -1303,12 +1303,12 @@
           <button onclick="_addIngFromRecipeModal()" style="font-size:11px;padding:2px 8px;border-radius:6px;background:var(--ic-caramel);color:#FAF7F2;border:none;cursor:pointer;">＋</button>
         </div>
       </div>
+      <!-- 已選綠列（在上方） -->
+      <div id="recipeModalIngSelected" class="hidden mb-2 rounded-lg px-2 py-1.5 flex flex-wrap gap-1 items-center" style="background:#EAF3DE;border:0.5px solid #639922;min-height:28px;"></div>
       <!-- 分類 tab -->
-      <div id="recipeIngCatTabs" class="flex gap-1.5 mb-2 overflow-x-auto pb-1" style="scrollbar-width:none;"></div>
+      <div id="recipeIngCatTabs" class="flex gap-1 mb-1.5 overflow-x-auto pb-1" style="scrollbar-width:none;"></div>
       <!-- 格狀食材 -->
-      <div id="recipeModalIngs" class="rounded-lg border p-2" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);max-height:160px;overflow-y:auto;"></div>
-      <!-- 已選綠列 -->
-      <div id="recipeModalIngSelected" class="hidden mt-2 rounded-lg px-3 py-2 flex flex-wrap gap-1.5 items-center" style="background:#EAF3DE;border:0.5px solid #639922;min-height:32px;"></div>
+      <div id="recipeModalIngs" class="rounded-lg border p-2" style="background:var(--ic-lemon);border-color:var(--ic-vanilla);max-height:150px;overflow-y:auto;"></div>
     </div>
     <!-- 備註 -->
     <div class="mb-4">
@@ -5407,15 +5407,21 @@ function openRecipeModal(id){
   document.getElementById('recipeModal').classList.remove('hidden');
 }
 function _renderRecipeModalPickers(){
-  // 烹飪方式
+  // 烹飪方式（含 ⋯ 編輯按鈕）
   const mEl = document.getElementById('recipeModalMethods');
   if(mEl){
     const cms = state.mealConfig.cookMethods||[];
     mEl.innerHTML = cms.map(m=>{
       const on = _recipeEditMethods.includes(m);
-      return `<button type="button" onclick="_toggleRecipeMethod('${m.replace(/'/g,"\\'")}')"
-        style="font-size:12px;padding:3px 10px;border-radius:99px;border:0.5px solid;cursor:pointer;
-        ${on?'background:#FAEEDA;border-color:#EF9F27;color:#633806;font-weight:600;':'background:var(--ic-lemon);color:var(--ic-choc-mid);border-color:var(--ic-vanilla);'}">${m}</button>`;
+      const mSafe = m.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      return `<span style="display:inline-flex;align-items:center;border-radius:99px;border:0.5px solid;overflow:hidden;
+        ${on?'background:#FAEEDA;border-color:#EF9F27;':'background:var(--ic-lemon);border-color:var(--ic-vanilla);'}">
+        <button type="button" onclick="_toggleRecipeMethod('${mSafe}')"
+          style="font-size:11px;padding:3px 8px;cursor:pointer;background:transparent;border:none;
+          ${on?'color:#633806;font-weight:600;':'color:var(--ic-choc-mid);'}">${m}</button>
+        <button type="button" onclick="_openMethodEdit(event,'${mSafe}')"
+          style="font-size:10px;padding:2px 5px 2px 0;background:transparent;border:none;cursor:pointer;color:${on?'#C07030':'#B0A090'};line-height:1;">⋯</button>
+      </span>`;
     }).join('');
   }
   // 食材分類 tab
@@ -5425,43 +5431,98 @@ function _renderRecipeModalPickers(){
   if(tabsEl){
     const tabCats = ['全部', ...cats];
     tabsEl.innerHTML = tabCats.map(c=>`<button type="button" onclick="_recipeIngCatFilter='${c.replace(/'/g,"\\'")}';_renderRecipeModalPickers();"
-      style="font-size:11px;padding:2px 9px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
+      style="font-size:10px;padding:2px 7px;border-radius:99px;border:0.5px solid;cursor:pointer;white-space:nowrap;flex-shrink:0;
       ${_recipeIngCatFilter===c?'background:#854F0B;color:#FAEEDA;border-color:#854F0B;':'background:transparent;border-color:var(--ic-vanilla);color:var(--ic-choc-mid);'}">${c}</button>`).join('');
   }
-  // 食材格狀
+  // 食材格狀（縮小）
   const iEl = document.getElementById('recipeModalIngs');
   if(iEl){
     const catColors = state.mealConfig.ingCategoryColors||{};
     const visibleIngs = _recipeIngCatFilter==='全部' ? allIngs : allIngs.filter(i=>i.category===_recipeIngCatFilter);
     if(!visibleIngs.length){
-      iEl.innerHTML='<p style="font-size:12px;color:var(--ic-sand);padding:4px;">此分類無食材，先到食材庫新增</p>';
+      iEl.innerHTML='<p style="font-size:11px;color:var(--ic-sand);padding:4px;">此分類無食材，先到食材庫新增</p>';
     } else {
-      iEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">${
+      iEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">${
         visibleIngs.map(ing=>{
           const on = _recipeEditIngIds.includes(ing.id);
           const cc = catColors[ing.category]||'#A89880';
           return `<button type="button" onclick="_toggleRecipeIng('${ing.id}')"
-            style="font-size:12px;padding:4px 6px;border-radius:99px;border:0.5px solid;cursor:pointer;text-align:center;
+            style="font-size:10px;padding:3px 4px;border-radius:99px;border:0.5px solid;cursor:pointer;text-align:center;
             ${on?`background:${cc};color:#fff;border-color:${cc};font-weight:600;`:`background:${cc}22;color:${cc};border-color:${cc}66;`}">${ing.name}</button>`;
         }).join('')
       }</div>`;
     }
   }
-  // 已選綠列
+  // 已選綠列（上方）
   const selEl = document.getElementById('recipeModalIngSelected');
   if(selEl){
     if(!_recipeEditIngIds.length){ selEl.classList.add('hidden'); return; }
     selEl.classList.remove('hidden');
-    selEl.innerHTML = `<span style="font-size:11px;font-weight:600;color:#27500A;margin-right:2px;">已選：</span>`
+    selEl.innerHTML = `<span style="font-size:10px;font-weight:600;color:#27500A;margin-right:2px;white-space:nowrap;">已選：</span>`
       + _recipeEditIngIds.map(id=>{
           const ing = allIngs.find(x=>x.id===id);
           if(!ing) return '';
-          return `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#EAF3DE;border:0.5px solid #639922;color:#27500A;display:inline-flex;align-items:center;gap:3px;">
+          return `<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:#EAF3DE;border:0.5px solid #639922;color:#27500A;display:inline-flex;align-items:center;gap:2px;">
             ${ing.name}
-            <span onclick="_toggleRecipeIng('${ing.id}')" style="cursor:pointer;color:#639922;font-size:10px;">✕</span>
+            <span onclick="_toggleRecipeIng('${ing.id}')" style="cursor:pointer;color:#639922;font-size:9px;">✕</span>
           </span>`;
         }).join('');
   }
+}
+// 烹飪方式 ⋯ 編輯 popover
+let _methodEditTarget = null;
+function _openMethodEdit(evt, method){
+  evt.stopPropagation();
+  // 關閉舊的
+  const old = document.getElementById('_methodEditPopover');
+  if(old){ old.remove(); if(_methodEditTarget===method){_methodEditTarget=null;return;} }
+  _methodEditTarget = method;
+  const btn = evt.currentTarget;
+  const pop = document.createElement('div');
+  pop.id = '_methodEditPopover';
+  pop.style.cssText = 'position:fixed;z-index:9999;background:#FAF6F0;border:1px solid #D5C5B0;border-radius:12px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);min-width:160px;';
+  pop.innerHTML = `
+    <p style="font-size:10px;color:#A08060;margin-bottom:6px;">編輯烹飪方式</p>
+    <input id="_methodEditInput" value="${method.replace(/"/g,'&quot;')}" style="width:100%;font-size:12px;border:1px solid #D5C5B0;border-radius:8px;padding:4px 8px;background:#fff;margin-bottom:8px;box-sizing:border-box;">
+    <div style="display:flex;gap:6px;">
+      <button onclick="_saveMethodEdit('${method.replace(/'/g,"\\'")}',document.getElementById('_methodEditInput').value)"
+        style="flex:1;font-size:11px;padding:4px;border-radius:8px;background:#C07030;color:#fff;border:none;cursor:pointer;">儲存</button>
+      <button onclick="_deleteMethod('${method.replace(/'/g,"\\'")}','${method.replace(/'/g,"\\'")}',true)"
+        style="font-size:11px;padding:4px 8px;border-radius:8px;background:#FEE2E2;color:#B91C1C;border:none;cursor:pointer;"><i class='ti ti-trash' style='font-size:11px;'></i></button>
+    </div>`;
+  // 定位在按鈕下方
+  const r = btn.getBoundingClientRect();
+  pop.style.top = (r.bottom+4)+'px';
+  pop.style.left = Math.max(8, r.left-60)+'px';
+  document.body.appendChild(pop);
+  // 點外面關閉
+  setTimeout(()=>{ document.addEventListener('click', _closeMethodPopover, {once:true}); }, 0);
+}
+function _closeMethodPopover(){
+  const p = document.getElementById('_methodEditPopover');
+  if(p) p.remove();
+  _methodEditTarget = null;
+}
+function _saveMethodEdit(oldName, newName){
+  newName = newName.trim();
+  if(!newName){ _closeMethodPopover(); return; }
+  const cms = state.mealConfig.cookMethods||[];
+  const idx = cms.indexOf(oldName);
+  if(idx>=0) cms[idx]=newName;
+  // 更新已選
+  const mi = _recipeEditMethods.indexOf(oldName);
+  if(mi>=0) _recipeEditMethods[mi]=newName;
+  saveState();
+  _closeMethodPopover();
+  _renderRecipeModalPickers();
+}
+function _deleteMethod(method){
+  if(!confirm(`確定刪除「${method}」烹飪方式？`)) return;
+  state.mealConfig.cookMethods = (state.mealConfig.cookMethods||[]).filter(m=>m!==method);
+  _recipeEditMethods = _recipeEditMethods.filter(m=>m!==method);
+  saveState();
+  _closeMethodPopover();
+  _renderRecipeModalPickers();
 }
 function _toggleRecipeMethod(m){
   const idx=_recipeEditMethods.indexOf(m);
