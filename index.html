@@ -861,9 +861,11 @@
         <!-- 左欄 -->
         <div class="space-y-3 mb-3 md:mb-0">
           <!-- 需要你處理（最上方） -->
-          <div id="mgrActionBlock" class="hidden rounded-2xl border-2 overflow-hidden" style="border-color:var(--ic-strawberry);background:#FBF0EE;">
-            <div class="flex items-center gap-2 px-4 py-2.5" style="background:var(--ic-straw-lt);border-bottom:1px solid var(--ic-strawberry);">
-              <i class="ti ti-bell-ringing" style="font-size:16px;color:#A85550;" aria-hidden="true"></i>
+          <div id="mgrActionBlock" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #EEDCD8;border-left:4px solid #D89090;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFF7F6;border-bottom:0.5px solid #EEDCD8;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#FAEEF0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-bell-ringing" style="font-size:13px;color:#A85550;" aria-hidden="true"></i>
+              </div>
               <span class="text-sm font-bold" style="color:#A85550;">需要你處理</span>
               <span id="mgrActionCount" class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style="background:#A85550;color:#FAF7F2;"></span>
             </div>
@@ -871,13 +873,15 @@
           </div>
 
           <!-- 今日提醒（獨立卡片）-->
-          <div id="mgrReminderCard" class="rounded-2xl overflow-hidden" style="border:2px solid #C07030;">
-            <div class="flex items-center gap-2 px-4 py-2.5" style="background:#C07030;">
-              <i class="ti ti-speakerphone" style="font-size:15px;color:#FFF8F0;" aria-hidden="true"></i>
-              <span class="text-sm font-bold" style="color:#FFF8F0;">今日提醒</span>
-              <button onclick="toggleReminderEdit()" class="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:#FAEEDA;color:#854F0B;">編輯</button>
+          <div id="mgrReminderCard" class="overflow-hidden" style="border-radius:14px;border:1.5px solid #EDD87A;border-left:4px solid #C9A830;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF0;border-bottom:0.5px solid #EDD87A;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#FFF5C0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-speakerphone" style="font-size:13px;color:#7A5A00;" aria-hidden="true"></i>
+              </div>
+              <span class="text-sm font-bold" style="color:#5C3D1E;">今日提醒</span>
+              <button onclick="toggleReminderEdit()" class="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:#FFF5C0;color:#7A5A00;border:0.5px solid #C9A830;">編輯</button>
             </div>
-            <div style="background:#FFFBF2;">
+            <div style="background:#FFFEFB;">
               <div class="px-4 py-2.5">
                 <span id="reminderPreview" class="text-sm" style="color:var(--ic-chocolate);line-height:1.4;display:block;"></span>
               </div>
@@ -900,27 +904,32 @@
           </div>
 
           <!-- Atika 今日進度 -->
-          <div id="mgrAtikaDayCard" class="hidden rounded-2xl p-4" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <i class="ti ti-user-check" style="font-size:16px;color:var(--ic-caramel-dk);" aria-hidden="true"></i>
-                <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+          <div id="mgrAtikaDayCard" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-user-check" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
               </div>
-              <span id="mgrAtikaDayPct" class="text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
+              <span class="text-sm font-bold" style="color:var(--ic-chocolate);">Atika 今日進度</span>
+              <span id="mgrAtikaDayPct" class="ml-auto text-xl font-black tabular-nums" style="color:var(--ic-caramel-dk);"></span>
             </div>
-            <div class="rounded-full overflow-hidden mb-1" style="height:12px;background:var(--ic-vanilla);">
-              <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+            <div class="px-4 py-3">
+              <div class="rounded-full overflow-hidden mb-1" style="height:10px;background:var(--ic-vanilla);">
+                <div id="mgrAtikaDayBar" class="h-full rounded-full transition-all duration-700" style="width:0%;background:var(--ic-caramel-dk);box-shadow:0 2px 5px rgba(160,100,40,0.35);"></div>
+              </div>
+              <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
             </div>
-            <div id="mgrAtikaDayLabel" class="text-xs" style="color:var(--ic-choc-mid);"></div>
           </div>
 
           <!-- 今日菜單 -->
-          <div id="mgrTodayMenuCard" class="hidden rounded-2xl overflow-hidden" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);">
-            <div class="flex items-center justify-between px-4 py-2.5" style="border-bottom:1px solid var(--ic-vanilla);">
-              <span class="text-sm font-bold flex items-center gap-1.5" style="color:var(--ic-chocolate);"><i class="ti ti-chef-hat" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日菜單</span>
-              <button onclick="switchTab('menu')" class="text-xs font-semibold" style="color:var(--ic-caramel-dk);">前往菜單 ›</button>
+          <div id="mgrTodayMenuCard" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-chef-hat" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
+              </div>
+              <span class="text-sm font-bold" style="color:var(--ic-chocolate);">今日菜單</span>
+              <button onclick="switchTab('menu')" class="ml-auto text-xs font-semibold" style="color:var(--ic-caramel-dk);">前往菜單 ›</button>
             </div>
-            <div id="mgrTodayMenuBody" class="px-4 py-3 space-y-2"></div>
+            <div id="mgrTodayMenuBody" class="px-4 py-3"></div>
           </div>
 
           <!-- 發薪日提醒 Banner -->
@@ -936,11 +945,16 @@
 
         <!-- 右欄：今日時間軸 -->
         <section>
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-chart-gantt" style="font-size:14px;vertical-align:-2px;color:var(--ic-caramel);" aria-hidden="true"></i> 今日時間軸</h3>
-            <span id="timelineCount" class="text-xs text-gray-500"></span>
+          <div class="overflow-hidden" style="border-radius:14px;border:1.5px solid #E5DDD5;border-left:4px solid #C09060;background:#FAF6F0;">
+            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFFDF9;border-bottom:0.5px solid #E5DDD5;">
+              <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="ti ti-chart-gantt" style="font-size:13px;color:#854F0B;" aria-hidden="true"></i>
+              </div>
+              <h3 class="text-sm font-bold" style="color:var(--ic-chocolate);">今日時間軸</h3>
+              <span id="timelineCount" class="ml-auto text-xs" style="color:var(--ic-choc-mid);"></span>
+            </div>
+            <div id="todayTimeline" class="p-3 max-h-96 overflow-y-auto" style="background:white;"></div>
           </div>
-          <div id="todayTimeline" class="bg-white border border-gray-200 rounded-xl p-3 max-h-96 overflow-y-auto"></div>
         </section>
       </div>
 
@@ -10610,10 +10624,10 @@ function renderSuppliesManager(){
         const cat=getSupplyCat(s.catId);
         return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:11px 12px;display:flex;align-items:center;gap:8px;">
           <div style="flex:1;min-width:0;overflow:hidden;">
-            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:14px;font-weight:600;background:var(--ic-surface);color:#7A5840;border-radius:7px;padding:3px 9px;border:1px solid var(--ic-vanilla);flex-shrink:0;">${cat.nameZh}</span><span style="font-size:16px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:12px;font-weight:600;background:var(--ic-surface);color:#7A5840;border-radius:7px;padding:2px 8px;border:1px solid var(--ic-vanilla);flex-shrink:0;">${cat.nameZh}</span><span style="font-size:14px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:12px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
           </div>
-          <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:20px;vertical-align:-2px;" aria-hidden="true"></i></button>
-          <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 9px;min-height:34px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:20px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
         </div>`;
       }).join('')
     : `<div style="grid-column:1/-1;padding:14px;font-size:13px;color:#B0A090;font-style:italic;text-align:center;">目前無庫存品項</div>`;
@@ -10629,18 +10643,18 @@ function renderManagerSupplyCard(s, group){
   let actionsHtml='';
   if (group==='reported'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;min-height:32px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="handleSupply('${s.id}','paused')" class="btn-sm-secondary" style="padding:0 10px;min-height:32px;" title="暫不補充"><i class="ti ti-player-pause" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='bought'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="flex:1;font-size:14px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>補好了</button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="flex:1;font-size:14px;min-height:32px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>補好了</button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;min-height:32px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   } else if (group==='paused'){
     actionsHtml=`
-      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:16px;min-height:36px;"><i class="ti ti-shopping-cart" style="font-size:16px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
-      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
-      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 11px;min-height:34px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
+      <button onclick="handleSupply('${s.id}','bought')" class="btn-sm-primary" style="flex:1;font-size:14px;min-height:34px;"><i class="ti ti-shopping-cart" style="font-size:14px;vertical-align:-2px;margin-right:4px;" aria-hidden="true"></i>買了</button>
+      <button onclick="handleSupply('${s.id}','restocked')" class="btn-sm-secondary" style="padding:0 10px;min-height:32px;background:#EAF3E0;color:#3A6820;border-color:#C5DCA8;" title="已補貨"><i class="ti ti-circle-check" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>
+      <button onclick="revertSupply('${s.id}')" class="btn-sm-secondary" style="padding:0 10px;min-height:32px;" title="撤銷"><i class="ti ti-arrow-back-up" style="font-size:15px;vertical-align:-2px;" aria-hidden="true"></i></button>`;
   }
   const firstChar=[...cat.nameZh][0]||'';
   const catIcon=firstChar.codePointAt(0)>0x2000?firstChar:'';
@@ -10648,9 +10662,9 @@ function renderManagerSupplyCard(s, group){
     <div style="background:white;border-radius:14px;border:0.5px solid #E5D8CC;padding:12px;display:flex;flex-direction:column;gap:9px;">
       <div style="overflow:hidden;">
         <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          <span style="font-size:15px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:7px;padding:3px 9px;flex-shrink:0;">${cat.nameZh}</span>
-          <span class="ty-modal-title" style="color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
-          <span class="id-text" style="font-size:13px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span>
+          <span style="font-size:12px;font-weight:600;background:#EEE4D8;color:#7A5840;border-radius:7px;padding:2px 8px;flex-shrink:0;">${cat.nameZh}</span>
+          <span style="font-size:14px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
+          <span class="id-text" style="font-size:12px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
