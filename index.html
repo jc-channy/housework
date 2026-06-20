@@ -9966,22 +9966,18 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
     }
   }
 
-  // 管理者端：排定休假日但無請假單 → 灰色提示
+  // 管理者端：排定休假日但無請假單 → 灰色 chip（同位置，不同顏色）
   if (isManager && !leaveRange){
-    if (chip){ chip.classList.add('hidden'); chip.textContent=''; }
-    if (banner){
+    if (banner){ banner.classList.add('hidden'); banner.innerHTML=''; }
+    if (chip){
       if (schedOff){
         const tomorrow = new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
         const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
-        banner.classList.remove('hidden');
-        banner.innerHTML = `
-          <div class="flex items-center gap-2 px-1" style="color:#9A8070;">
-            <i class="ti ti-calendar-off" style="font-size:17px;flex-shrink:0;"></i>
-            <span class="text-sm">明天（${fmt(tomorrow)}）是排定休假日，但 ${getHelperName()} 未申請休假。</span>
-          </div>
-        `;
+        chip.classList.remove('hidden');
+        chip.style.cssText = 'background:#EEEBE7;color:#9A8070;border-color:#D8D0C8;';
+        chip.textContent = `📅 明日排定休假（未申請）${fmt(tomorrow)}`;
       } else {
-        banner.classList.add('hidden'); banner.innerHTML='';
+        chip.classList.add('hidden'); chip.style.cssText=''; chip.textContent='';
       }
     }
     return;
@@ -9996,7 +9992,7 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
   const chipText = days===1
     ? `🎉 ${subject}${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
     : `🎉 ${subject}${lang==='id'?'Libur Berturut':'連休'} ${fmt(range.start)}~${fmt(range.end)} (${days}${lang==='id'?' hari':' 天'})`;
-  if (chip){ chip.classList.remove('hidden'); chip.textContent=chipText; }
+  if (chip){ chip.classList.remove('hidden'); chip.style.cssText=''; chip.textContent=chipText; }
   const policyZh = state.payrollConfig?.leavePolicyNote || '';
   const policyId = state.payrollConfig?.leavePolicyNoteId || '';
   const policy = isManager
