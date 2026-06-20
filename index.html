@@ -10652,16 +10652,14 @@ function renderMgrTomorrowOff(){
   _renderTomorrowOffInto('mgrTomorrowOff', 'mgrTomorrowOffBanner', true);
   renderTodayOffChip('mgrTodayOff', true);
 }
-/* 今日休假 chip：當今天為固定休假日或審核通過的全天請假 */
+/* 今日休假 chip：只有審核通過的全天請假才顯示（固定週休不觸發） */
 function getTodayOffInfo(){
   const c = state.payrollConfig;
   if (!c) return null;
-  const t = today();
-  const dStr = ymd(t);
-  const isFixedHoliday = (c.holidays||[]).includes(t.getDay());
+  const dStr = ymd(today());
   const approvedLeave = (state.leaveRequests||[]).find(r=>r.date===dStr && r.status==='approved' && r.period==='full');
-  if (!isFixedHoliday && !approvedLeave) return null;
-  return { isFixedHoliday, leave: approvedLeave };
+  if (!approvedLeave) return null;
+  return { isFixedHoliday: false, leave: approvedLeave };
 }
 function renderTodayOffChip(chipId, isManager){
   const chip = document.getElementById(chipId);
