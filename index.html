@@ -693,6 +693,9 @@
       <div id="atikaCalendarInfo" class="space-y-2 hidden mt-3"></div>
     </section>
 
+    <!-- ═══ 今日情境橫幅（打卡下方）═══ -->
+    <div id="atikaSituationBanner" class="hidden rounded-2xl overflow-hidden" style="border:2px solid #E8B840;"></div>
+
     <!-- ═══ 本日提醒（打卡下方）═══ -->
     <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
       <div class="flex items-stretch">
@@ -860,6 +863,9 @@
       <div class="md:grid md:grid-cols-2 md:gap-4 md:items-start mb-4">
         <!-- 左欄 -->
         <div class="space-y-3 mb-3 md:mb-0">
+          <!-- 今日情境 Bar -->
+          <div id="mgrSituationBar"></div>
+
           <!-- 需要你處理（最上方） -->
           <div id="mgrActionBlock" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #EEDCD8;border-left:4px solid #D89090;background:#FAF6F0;">
             <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFF7F6;border-bottom:0.5px solid #EEDCD8;">
@@ -1552,6 +1558,20 @@
       <button id="punchDeleteBtn" onclick="punchDelete()" class="btn-ghost-danger hidden">刪除</button>
       <button onclick="punchSubmit()" class="btn-primary flex-1">儲存 / Simpan</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== 今日情境 Modal ===== -->
+<div id="situationModal" class="hidden fixed inset-0 z-50 flex items-end justify-center modal-backdrop p-4 pb-6">
+  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:#E5DDD5;">
+      <div>
+        <div class="text-base font-bold" style="color:#5C3D1E;">今日有狀況</div>
+        <div class="text-xs mt-0.5" style="color:#9A8070;">選情境 → 選時段 → 啟動</div>
+      </div>
+      <button onclick="closeSituationModal()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
+    </div>
+    <div id="situationModalBody" class="p-4 max-h-[75vh] overflow-y-auto space-y-3"></div>
   </div>
 </div>
 
@@ -2662,6 +2682,47 @@ const SUPABASE_CONFIG = {
 };
 const CLOUD_ENABLED = !!(SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey);
 
+/* ========== 今日情境包 ========== */
+const SITUATION_PRESETS = [
+  { id:'babysitter_off', icon:'ti-baby-carriage', labelZh:'保母請假',     labelId:'Pengasuh Absen',
+    scopes:['all'],
+    msgZh:'今天保母請假，所有工作彈性處理，育兒優先。',
+    msgId:'Hari ini pengasuh tidak hadir. Semua tugas bersifat fleksibel, utamakan pengasuhan anak.' },
+  { id:'kid_home',        icon:'ti-school',        labelZh:'大寶請假在家',  labelId:'Anak Besar di Rumah',
+    scopes:['all'],
+    msgZh:'大寶今天在家，請多留意，家務彈性處理。',
+    msgId:'Anak sulung di rumah hari ini. Harap perhatikan dan selesaikan pekerjaan rumah secara fleksibel.' },
+  { id:'medical',         icon:'ti-stethoscope',   labelZh:'帶寶寶看診',   labelId:'Bawa Bayi ke Dokter',
+    scopes:['morning','afternoon'],
+    msgZh:'帶寶寶看診，該時段任務彈性處理。',
+    msgId:'Menemani bayi ke dokter. Tugas di sesi tersebut bersifat fleksibel.' },
+  { id:'night_sleep',     icon:'ti-moon',          labelZh:'晚間陪睡',     labelId:'Menemani Tidur Malam',
+    scopes:['evening'],
+    msgZh:'今晚需要你協助陪寶寶睡覺，晚間任務彈性處理。',
+    msgId:'Malam ini tolong bantu menemani bayi tidur. Tugas malam bersifat fleksibel.' },
+];
+const SITUATION_SCOPE_LABELS = { all:'全天', morning:'上午', afternoon:'下午', evening:'晚間' };
+
+function getActiveSituation(){
+  const sm = state.situationMode;
+  if (!sm || !sm.active) return null;
+  if (sm.date !== ymd(new Date())) return null;
+  return sm;
+}
+function situationAffectedSlots(sm){
+  const scope = sm.timeScope;
+  if (scope === 'all') return ['morning','afternoon','evening','flexible'];
+  if (scope === 'morning')   return ['morning'];
+  if (scope === 'afternoon') return ['afternoon'];
+  if (scope === 'evening')   return ['evening'];
+  return [];
+}
+function checkSituationExpiry(){
+  const sm = state.situationMode;
+  if (!sm || !sm.active) return;
+  if (sm.date !== ymd(new Date())){ state.situationMode = null; save(); }
+}
+
 
 /* ========== ISO Week Helpers ========== */
 function _isoThursday(d){ const t=new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+3-(t.getDay()+6)%7); return t; }
@@ -2908,6 +2969,7 @@ let state = {
   editingSupplyId: null,
   editingSupplyCatId: null,
   editingScenarioId: null,
+  situationMode: null,
 };
 
 function load() {
@@ -2946,6 +3008,7 @@ function load() {
       state.activeWeekMenuSetId = d.activeWeekMenuSetId || '';
       state.weekMenuCycleOffset = d.weekMenuCycleOffset || 0;
       state.recipes = d.recipes || [];
+      state.situationMode = d.situationMode || null;
     } catch(e){}
   }
   // 遷移：舊資料只有 weekMenu，沒有 weekMenuSets → 建立第一組
@@ -3162,6 +3225,7 @@ function save() {
     scheduleBaseWeekKey: state.scheduleBaseWeekKey || '',
     scheduleBaseIndex: state.scheduleBaseIndex || 0,
     recipes: state.recipes || [],
+    situationMode: state.situationMode || null,
     savedAt: new Date().toISOString(),
   }));
   // Phase 2 雲端同步勾子（若已連線且非雲端回寫）
@@ -6451,8 +6515,11 @@ function renderTaskCard(t, opts={}){
   const showMode = !opts.hideMode;
   const showLastDone = !opts.hideLastDone;
 
+  const sitFlex = opts.situationFlex && !done;
+  const sitFlexStyle = sitFlex ? 'background:#F5F2EE;opacity:0.85;' : '';
+  const sitFlexBadge = sitFlex ? `<span style="font-size:10px;color:#9A8070;background:#EDE8E0;border-radius:99px;padding:1px 7px;margin-left:4px;">彈性・可順延</span>` : '';
   return `
-    <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}" data-tid="${t.id}">
+    <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}${sitFlexStyle}" data-tid="${t.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
       <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${done?'background:#6A7840;border-color:#6A7840;color:#FAF7F2':'border-color:#D0C4B0;'}"
               onclick="event.stopPropagation(); quickToggle('${t.id}',this)">${done?'<i class="ti ti-check" style="font-size:16px;"></i>':''}</button>
@@ -6461,6 +6528,7 @@ function renderTaskCard(t, opts={}){
           <span class="task-title font-bold text-base ${primaryClass} leading-tight">${primary}</span>
           ${showMode ? modeBadgeTiny(t) : ''}
           ${parityBadge}
+          ${sitFlexBadge}
         </div>
         <div class="${secondaryClass} text-sm text-gray-500 leading-tight">${secondary}</div>
         ${showLastDone ? `<div class="text-xs text-gray-500 mt-1">${done?`<i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;color:#6A7840;"></i> 完成於 ${completionStampText(t)}`:`<i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> ${lastDoneText(t)}`}</div>` : (done?`<div class="text-xs mt-1" style="color:#6A7840;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;"></i> 完成於 ${completionStampText(t)}</div>`:'')}
@@ -6469,7 +6537,7 @@ function renderTaskCard(t, opts={}){
     </div>
   `;
 }
-function renderAdhocCard(a){
+function renderAdhocCard(a, opts={}){
   const lang=getCurrentLang();
   // 雙語相容：新版 a.textZh/a.textId；舊版 a.text 自動兼容
   const tZh=a.textZh || a.text || '';
@@ -6482,8 +6550,11 @@ function renderAdhocCard(a){
     ? new Date(a.completedAt).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
     : '';
   const done = a.completed;
+  const sitFlex = opts.situationFlex && !done;
+  const sitFlexStyle = sitFlex ? 'background:#F5F2EE;opacity:0.85;' : '';
+  const sitFlexBadge = sitFlex ? `<span style="font-size:10px;color:#9A8070;background:#EDE8E0;border-radius:99px;padding:1px 7px;margin-left:4px;">彈性・可順延</span>` : '';
   return `
-    <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" data-aid="${a.id}">
+    <div class="task-card stripe-adhoc ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${sitFlexStyle}" data-aid="${a.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
       <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${done?'background:#6A7840;border-color:#6A7840;color:#FAF7F2':'border-color:#D0C4B0;'}"
               onclick="quickToggleAdhoc('${a.id}',this)">${done?'<i class="ti ti-check" style="font-size:16px;"></i>':''}</button>
@@ -6491,6 +6562,7 @@ function renderAdhocCard(a){
         <div class="flex items-center gap-1 flex-wrap">
           <span class="task-title font-bold text-base ${primaryClass} leading-tight">${primary}</span>
           ${modeBadgeTiny({})}
+          ${sitFlexBadge}
         </div>
         ${secondary && secondary!==primary ? `<div class="${secondaryClass} text-sm text-gray-500 leading-tight">${secondary}</div>` : ''}
         <div class="text-xs text-gray-500 mt-1">${
@@ -6762,6 +6834,28 @@ function renderAtikaView(){
     ? (lang==='id' ? 'Istirahat dulu, sudah kerja keras ☕' : '好好休息，辛苦了 ☕')
     : (lang==='id' ? `Sisa ${totalAll - totalDone} tugas lagi` : `還有 ${totalAll - totalDone} 項待完成`);
 
+  // ── 今日情境包 ──
+  const _activeSit = getActiveSituation();
+  const _affectedSlots = _activeSit ? situationAffectedSlots(_activeSit) : [];
+  const sitBanner = document.getElementById('atikaSituationBanner');
+  if (sitBanner) {
+    if (_activeSit) {
+      const _preset = SITUATION_PRESETS.find(p=>p.id===_activeSit.scenarioId);
+      const _sitMsg = _preset ? (_preset[lang==='id'?'msgId':'msgZh']) : '';
+      const _scopeLabel = SITUATION_SCOPE_LABELS[_activeSit.timeScope]||'';
+      sitBanner.classList.remove('hidden');
+      sitBanner.innerHTML = `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:#FFF9E8;">
+        <i class="ti ti-alert-triangle" style="font-size:20px;color:#8A6A00;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#3A2000;margin-bottom:3px;">${lang==='id'?'Situasi Hari Ini':'今日情境'}：${_preset?(_preset[lang==='id'?'labelId':'labelZh']):''}（${_scopeLabel}）</div>
+          <div style="font-size:12px;color:#6A4A10;line-height:1.6;">${_sitMsg}</div>
+        </div>
+      </div>`;
+    } else {
+      sitBanner.classList.add('hidden');
+    }
+  }
+
   // ── 時間分區分組函式 ──
   function getSlot(item){ return item.timeSlot || 'flexible'; }
   function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a)).join(''); }
@@ -6773,11 +6867,12 @@ function renderAtikaView(){
   tdInc.forEach(t => { const s=getSlot(t); (bySlot[s]||bySlot.flexible).push({_type:'tmpl', item:t}); });
   fxInc.forEach(t => { (bySlot.flexible).push({_type:'flex', item:t}); }); // flex templates → always flexible
 
-  function renderSlotItems(slotArr){
+  function renderSlotItems(slotArr, slot){
     if (!slotArr.length) return '';
+    const isSitFlex = _affectedSlots.includes(slot);
     return slotArr.map(({_type, item})=>
-      _type==='adhoc' ? renderAdhocCard(item)
-      : renderTaskCard(item,{hideMode:true,hideLastDone:true})
+      _type==='adhoc' ? renderAdhocCard(item, {situationFlex:isSitFlex})
+      : renderTaskCard(item,{hideMode:true,hideLastDone:true,situationFlex:isSitFlex})
     ).join('');
   }
   function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
@@ -6806,7 +6901,7 @@ function renderAtikaView(){
     if (!sec || !tasksEl) return;
     const show = slotHasAny(slot);
     sec.style.display = show ? '' : 'none';
-    tasksEl.innerHTML = renderSlotItems(bySlot[slot]);
+    tasksEl.innerHTML = renderSlotItems(bySlot[slot], slot);
     if (badgeEl) badgeEl.textContent = slotProgress(slot, bySlot[slot]);
   });
 
@@ -7257,10 +7352,131 @@ async function importTemplatesXlsx(input){
 /* ========== 工具：取得執行者名稱 ========== */
 function getHelperName(){ return state.users?.find(u=>u.role==='helper')?.name || '執行者'; }
 
+/* ========== 今日情境包 JS ========== */
+function openSituationModal(){
+  const modal = document.getElementById('situationModal');
+  if (!modal) return;
+  renderSituationModal();
+  modal.classList.remove('hidden');
+}
+function closeSituationModal(){
+  const modal = document.getElementById('situationModal');
+  if (modal) modal.classList.add('hidden');
+}
+function renderSituationModal(){
+  const body = document.getElementById('situationModalBody');
+  if (!body) return;
+  const sm = getActiveSituation();
+  const selectedId = window._sitSelectedId || (sm ? sm.scenarioId : null);
+  const selectedScope = window._sitSelectedScope || (sm ? sm.timeScope : null);
+
+  let html = '';
+  SITUATION_PRESETS.forEach(p => {
+    const isSelected = selectedId === p.id;
+    const borderStyle = isSelected ? 'border:2px solid #C07030;' : 'border:0.5px solid #E5DDD5;';
+    const bgStyle = isSelected ? 'background:#FFF4E0;' : 'background:white;';
+
+    let scopeHtml = '';
+    if (isSelected && p.scopes.length > 1) {
+      scopeHtml = `<div style="background:white;border-radius:8px;padding:7px 9px;margin-top:7px;border:0.5px solid #EDD87A;">
+        <div class="text-xs font-semibold mb-2" style="color:#5C3D1E;">影響時段</div>
+        <div style="display:flex;gap:5px;">
+          ${p.scopes.map(s=>{
+            const isScopeSelected = selectedScope === s;
+            return `<button onclick="selectSituationScope('${s}')" style="flex:1;border-radius:7px;padding:5px 0;font-size:11px;cursor:pointer;border:none;${isScopeSelected?'background:#5C3D1E;color:white;font-weight:600;':'background:#FAF0D0;color:#7A5A00;'}">${SITUATION_SCOPE_LABELS[s]}</button>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
+
+    const msgPreview = isSelected ? `<div style="background:white;border-radius:7px;padding:6px 8px;margin-top:6px;border:0.5px solid #EDD87A;font-size:11px;color:#5C3D1E;line-height:1.5;">${p.msgZh}</div>` : '';
+
+    html += `<div onclick="selectSituation('${p.id}')" style="${bgStyle}${borderStyle}border-radius:12px;padding:10px 12px;cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:32px;height:32px;border-radius:10px;${isSelected?'background:#FFE88A;':'background:#F0E8DC;'}display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ${p.icon}" style="font-size:16px;color:${isSelected?'#7A4800':'#854F0B'};" aria-hidden="true"></i>
+        </div>
+        <div class="flex-1">
+          <div class="font-bold text-sm" style="color:${isSelected?'#3A2000':'#5C3D1E'};">${p.labelZh}</div>
+          <div class="text-xs" style="color:#9A8070;">${p.scopes.map(s=>SITUATION_SCOPE_LABELS[s]).join('・')}</div>
+        </div>
+        ${isSelected ? `<i class="ti ti-check" style="font-size:16px;color:#C07030;" aria-hidden="true"></i>` : ''}
+      </div>
+      ${scopeHtml}${msgPreview}
+    </div>`;
+  });
+
+  const canActivate = selectedId && (selectedScope || (SITUATION_PRESETS.find(p=>p.id===selectedId)?.scopes.length === 1));
+  const activeBtnStyle = canActivate ? 'background:#5C3D1E;color:white;cursor:pointer;' : 'background:#D5C5B0;color:#9A8070;cursor:not-allowed;';
+  html += `<button onclick="activateSituation()" style="${activeBtnStyle}width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-top:4px;">啟動情境</button>`;
+  body.innerHTML = html;
+}
+function selectSituation(id){
+  window._sitSelectedId = id;
+  const preset = SITUATION_PRESETS.find(p=>p.id===id);
+  // 若只有一個時段選項，自動選好
+  if (preset && preset.scopes.length === 1) window._sitSelectedScope = preset.scopes[0];
+  else window._sitSelectedScope = null;
+  renderSituationModal();
+}
+function selectSituationScope(scope){
+  window._sitSelectedScope = scope;
+  renderSituationModal();
+}
+function activateSituation(){
+  const id = window._sitSelectedId;
+  const preset = SITUATION_PRESETS.find(p=>p.id===id);
+  if (!preset) return;
+  const scope = window._sitSelectedScope || preset.scopes[0];
+  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()) };
+  save();
+  window._sitSelectedId = null; window._sitSelectedScope = null;
+  closeSituationModal();
+  renderManagerView();
+  renderManagerSituationBar();
+}
+function deactivateSituation(){
+  state.situationMode = null; save();
+  renderManagerView();
+  renderManagerSituationBar();
+}
+function renderManagerSituationBar(){
+  const bar = document.getElementById('mgrSituationBar');
+  if (!bar) return;
+  const sm = getActiveSituation();
+  if (sm) {
+    const preset = SITUATION_PRESETS.find(p=>p.id===sm.scenarioId);
+    const label = preset ? preset.labelZh : '情境中';
+    const scopeLabel = SITUATION_SCOPE_LABELS[sm.timeScope] || '';
+    bar.innerHTML = `<div style="border-radius:14px;border:1.5px solid #E8B840;border-left:4px solid #C9A830;background:#FFF9E8;padding:9px 12px;display:flex;align-items:center;gap:8px;margin-bottom:0;">
+      <div style="width:26px;height:26px;border-radius:50%;background:#FFF5C0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="ti ti-alert-triangle" style="font-size:13px;color:#8A6A00;" aria-hidden="true"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-bold" style="color:#5C3D1E;">今日情境：${label}（${scopeLabel}）</div>
+        <div class="text-xs" style="color:#8A6A00;">今日結束自動解除 · 已通知${getHelperName()}</div>
+      </div>
+      <button onclick="deactivateSituation()" style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:2px 10px;cursor:pointer;white-space:nowrap;">解除</button>
+    </div>`;
+  } else {
+    bar.innerHTML = `<button onclick="openSituationModal()" style="width:100%;border-radius:14px;border:1px dashed #D5C5B0;background:transparent;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left;">
+      <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="ti ti-alert-circle" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
+      </div>
+      <div>
+        <div class="text-sm font-semibold" style="color:#7A5A40;">今日有突發狀況？</div>
+        <div class="text-xs" style="color:#B0A090;">一鍵通知 ${getHelperName()} 並調整工作安排</div>
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:14px;color:#C0A880;margin-left:auto;" aria-hidden="true"></i>
+    </button>`;
+  }
+}
+
 /* ========== 管理者視圖 ========== */
 // call at end of renderAtikaView — find where renderAtikaView calls supply-related renders
 function renderManagerView(){
   const d=today();
+  renderManagerSituationBar();
   document.getElementById('mgrDateZh').textContent=fmtDateZh(d);
   renderFamilyNameTag();
   document.getElementById('mgrDateId').textContent=fmtDateId(d);
@@ -11855,6 +12071,7 @@ function refreshAll(){
 /* ========== 啟動 ========== */
 async function init(){
   load();
+  checkSituationExpiry();
   // 裝置本地設定（不上雲）：字體大小、欄數
   applyDevicePrefs();
   renderPinDots();
