@@ -8312,6 +8312,12 @@ function getPunchMetaByType(type, d=today()){
   const plan = getPunchPlanForDate(d);
   const found = plan.find(p=>p.id===type);
   if (found) return found;
+  // 臨時加段小憩 rest_adhoc_N_start/end
+  if (type.startsWith('rest_adhoc_')){
+    const isStart = type.endsWith('_start');
+    const idx = parseInt((type.match(/rest_adhoc_(\d+)_/) || [])[1] || '1');
+    return { id:type, emoji: isStart?'ti ti-moon':'ti ti-sun-high', zh:`臨時小憩 ${isStart?'開始':'結束'}`, id_:`Istirahat tambahan ${isStart?'mulai':'kembali'}`, kind:'rest' };
+  }
   // 舊資料：rest_<id>_start/end 但今日 schedule 已刪除
   if (type.startsWith('rest_') && (type.endsWith('_start')||type.endsWith('_end'))){
     const isStart = type.endsWith('_start');
@@ -8343,6 +8349,10 @@ function punchSortKey(type){
   if (type==='work_end')   return 9999;
   if (type==='rest_start') return 5000;
   if (type==='rest_end')   return 5001;
+  if (type.startsWith('rest_adhoc_')){
+    const idx = parseInt((type.match(/rest_adhoc_(\d+)_/) || [])[1] || '1');
+    return 6000 + idx*2 + (type.endsWith('_end')?1:0);
+  }
   // 動態 rest_<rsId>_start/end → 依 schedule 開始時間
   const rsId = type.replace(/^rest_/,'').replace(/_(start|end)$/,'');
   const rs = (state.restSchedules||[]).find(x=>x.id===rsId);
@@ -8382,9 +8392,28 @@ function renderPunchSection(){
   const priLbl   = (pt) => lang==='id' ? pt.id_ : pt.zh;
   const secLbl   = (pt) => lang==='id' ? pt.zh  : pt.id_;
 
+  // 偵測臨時加段小憩狀態
+  const restPairs = getRestPairsFromPunches(punches);
+  const adhocInProgressPair = restPairs.find(p => p.startType.startsWith('rest_adhoc_') && p.start && !p.end);
+  const hasCompletedRest = restPairs.some(p => p.start && p.end);
+  const workEnded = !!getPunch(punches, 'work_end');
+  const showAdhocLink = hasCompletedRest && !adhocInProgressPair && !workEnded;
+
   // ── 大按鈕 HTML ──
   let mainBtnHTML = '';
-  if (allDone) {
+  // 若臨時小憩進行中 → 覆蓋主按鈕顯示「結束小憩」
+  if (adhocInProgressPair) {
+    const endType = adhocInProgressPair.endType;
+    mainBtnHTML = `
+      <button onclick="punchNow('${endType}')"
+        style="background:var(--ic-caramel);color:#FAF7F2;border:none;"
+        class="w-full rounded-2xl py-5 flex flex-col items-center gap-1 active:scale-95 transition-transform cursor-pointer">
+        <i class="ti ti-sun-high" style="font-size:44px;line-height:1;" aria-hidden="true"></i>
+        <div class="ty-modal-title mt-2">${lang==='id'?'Kembali Bekerja':'結束小憩，回工作'}</div>
+        <div class="text-sm id-text opacity-80">${lang==='id'?'Istirahat tambahan selesai':'臨時小憩結束'}</div>
+        <div class="text-xs opacity-70 mt-1 tabular-nums" id="punchBigClock">${nowHHMM()}</div>
+      </button>`;
+  } else if (allDone) {
     // 今日全部完成
     mainBtnHTML = `
       <div class="flex flex-col items-center justify-center py-5 gap-1">
@@ -8425,6 +8454,11 @@ function renderPunchSection(){
     })
     .filter(Boolean);
 
+  const adhocLinkHTML = showAdhocLink
+    ? '<div style="text-align:right;margin-top:-4px;"><button onclick="startAdhocRest()" style="background:none;border:none;cursor:pointer;font-size:10px;color:var(--ic-vanilla);text-decoration:underline;text-underline-offset:2px;padding:0;">'+
+      (lang==='id'?'Tambah istirahat?':'臨時再加一段？')+'</button></div>'
+    : '';
+
   grid.className = '';
   grid.innerHTML = `
     <div class="flex flex-col gap-3">
@@ -8433,6 +8467,7 @@ function renderPunchSection(){
         <div class="flex flex-wrap gap-2 justify-center">
           ${doneChips.join('')}
         </div>` : ''}
+      ${adhocLinkHTML}
     </div>`;
 
   // 讓大按鈕上的時間每分鐘更新
@@ -8565,6 +8600,12 @@ function punchSummaryText(punches){
 function punchNow(type){
   setPunch(type, nowHHMM(), false);
   renderAtikaView();
+}
+function startAdhocRest(){
+  const punches = todayPunches();
+  const existing = punches.filter(p=>p.type.startsWith('rest_adhoc_') && p.type.endsWith('_start'));
+  const nextIdx = existing.length + 1;
+  punchNow('rest_adhoc_'+nextIdx+'_start');
 }
 let _punchEditType=null;
 function openPunchEdit(type){
