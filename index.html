@@ -9974,8 +9974,8 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
         const tomorrow = new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
         const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
         chip.classList.remove('hidden');
-        chip.style.cssText = 'background:#EEEBE7;color:#9A8070;border-color:#D8D0C8;';
-        chip.textContent = `📅 明日排定休假（未申請）${fmt(tomorrow)}`;
+        chip.style.cssText = 'background:#DDE8F0;color:#2E5F7A;border-color:#9EC4D8;';
+        chip.textContent = `📅 明日休假日・將出勤 ${fmt(tomorrow)}`;
       } else {
         chip.classList.add('hidden'); chip.style.cssText=''; chip.textContent='';
       }
