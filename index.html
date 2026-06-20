@@ -695,6 +695,8 @@
 
     <!-- ═══ 今日情境橫幅（打卡下方）═══ -->
     <div id="atikaSituationBanner" class="hidden rounded-2xl overflow-hidden" style="border:2px solid #E8B840;"></div>
+    <!-- 情境任務區塊 -->
+    <div id="atikaSituationTasks" class="hidden"></div>
 
     <!-- ═══ 本日提醒（打卡下方）═══ -->
     <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
@@ -1572,6 +1574,31 @@
       <button onclick="closeSituationModal()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
     </div>
     <div id="situationModalBody" class="p-4 max-h-[75vh] overflow-y-auto space-y-3"></div>
+  </div>
+</div>
+
+<!-- ===== 情境設定 Modal ===== -->
+<div id="situationConfigModal" class="hidden fixed inset-0 z-50 flex items-end justify-center modal-backdrop p-4 pb-6">
+  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:#E5DDD5;">
+      <div>
+        <div class="text-base font-bold" style="color:#5C3D1E;">情境設定</div>
+        <div class="text-xs mt-0.5" style="color:#9A8070;">為每個情境預設任務清單與小憩時間</div>
+      </div>
+      <button onclick="closeSituationConfigModal()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
+    </div>
+    <div id="situationConfigBody" class="p-4 max-h-[80vh] overflow-y-auto space-y-4"></div>
+  </div>
+</div>
+
+<!-- ===== 情境任務選工作庫 Modal ===== -->
+<div id="sitTaskPickerModal" class="hidden fixed inset-0 z-[60] flex items-end justify-center modal-backdrop p-4 pb-6">
+  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:#E5DDD5;">
+      <div class="text-sm font-bold" style="color:#5C3D1E;">從工作庫選取</div>
+      <button onclick="closeSitTaskPicker()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
+    </div>
+    <div id="sitTaskPickerBody" class="p-4 max-h-[70vh] overflow-y-auto space-y-2"></div>
   </div>
 </div>
 
@@ -2970,6 +2997,7 @@ let state = {
   editingSupplyCatId: null,
   editingScenarioId: null,
   situationMode: null,
+  situationPresetConfigs: {},  // { [presetId]: { tasks:[{id,nameZh,nameId,source}], restTimeOverride:{startTime,endTime}|null } }
 };
 
 function load() {
@@ -3009,6 +3037,7 @@ function load() {
       state.weekMenuCycleOffset = d.weekMenuCycleOffset || 0;
       state.recipes = d.recipes || [];
       state.situationMode = d.situationMode || null;
+      state.situationPresetConfigs = d.situationPresetConfigs || {};
     } catch(e){}
   }
   // 遷移：舊資料只有 weekMenu，沒有 weekMenuSets → 建立第一組
@@ -3226,6 +3255,7 @@ function save() {
     scheduleBaseIndex: state.scheduleBaseIndex || 0,
     recipes: state.recipes || [],
     situationMode: state.situationMode || null,
+    situationPresetConfigs: state.situationPresetConfigs || {},
     savedAt: new Date().toISOString(),
   }));
   // Phase 2 雲端同步勾子（若已連線且非雲端回寫）
@@ -6856,6 +6886,35 @@ function renderAtikaView(){
     }
   }
 
+  // ── 情境任務區塊 ──
+  const sitTasksEl = document.getElementById('atikaSituationTasks');
+  if (sitTasksEl) {
+    const sm = _activeSit;
+    const activeTasks = sm?.activeTasks || [];
+    if (sm && activeTasks.length) {
+      sitTasksEl.classList.remove('hidden');
+      const taskRows = activeTasks.map((t,i)=>{
+        const nameZh = t.nameZh||'';
+        const nameId = t.nameId||'';
+        const displayName = lang==='id' ? (nameId||nameZh) : nameZh;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${t.done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${t.done?'#D8D0C8':'#EDD87A'};cursor:pointer;" onclick="toggleSituationTask(${i})">
+          <i class="ti ${t.done?'ti-circle-check':'ti-circle'}" style="font-size:18px;color:${t.done?'#4A8A42':'#C9A830'};flex-shrink:0;" aria-hidden="true"></i>
+          <span style="flex:1;font-size:13px;color:${t.done?'#A09080':'#4A2C08'};${t.done?'text-decoration:line-through;':''}">${displayName}</span>
+        </div>`;
+      }).join('');
+      sitTasksEl.innerHTML = `<div style="border:0.5px solid #EDD87A;border-left:3px solid #C9A830;border-radius:0 10px 10px 0;padding:10px 12px;background:white;">
+        <div style="font-size:11px;font-weight:700;color:#854F0B;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
+          <i class="ti ti-list-check" style="font-size:13px;" aria-hidden="true"></i>
+          ${lang==='id'?'Tugas Situasi Hari Ini':'今日情境任務'}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">${taskRows}</div>
+      </div>`;
+    } else {
+      sitTasksEl.classList.add('hidden');
+      sitTasksEl.innerHTML = '';
+    }
+  }
+
   // ── 時間分區分組函式 ──
   function getSlot(item){ return item.timeSlot || 'flexible'; }
   function slotHtml_adhoc(items){ return items.map(a=>renderAdhocCard(a)).join(''); }
@@ -7428,7 +7487,12 @@ function activateSituation(){
   const preset = SITUATION_PRESETS.find(p=>p.id===id);
   if (!preset) return;
   const scope = window._sitSelectedScope || preset.scopes[0];
-  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()) };
+  const cfg = (state.situationPresetConfigs||{})[id] || {};
+  // 複製任務清單（加入完成狀態）
+  const activeTasks = (cfg.tasks||[]).map(t=>({ ...t, done:false }));
+  // 小憩時間覆蓋
+  const activeRestTime = cfg.restTimeOverride || null;
+  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()), activeTasks, activeRestTime };
   save();
   window._sitSelectedId = null; window._sitSelectedScope = null;
   closeSituationModal();
@@ -7439,6 +7503,119 @@ function deactivateSituation(){
   state.situationMode = null; save();
   renderManagerView();
   renderManagerSituationBar();
+}
+/* 情境任務完成切換（幫傭端） */
+function toggleSituationTask(idx){
+  const sm = state.situationMode;
+  if (!sm || !sm.activeTasks) return;
+  sm.activeTasks[idx].done = !sm.activeTasks[idx].done;
+  save();
+  renderAtikaView();
+}
+/* ===== 情境設定 Modal ===== */
+function openSituationConfigModal(){
+  document.getElementById('situationConfigModal').classList.remove('hidden');
+  renderSituationConfigModal();
+}
+function closeSituationConfigModal(){
+  document.getElementById('situationConfigModal').classList.add('hidden');
+}
+function renderSituationConfigModal(){
+  const body = document.getElementById('situationConfigBody');
+  const cfgs = state.situationPresetConfigs || {};
+  let html = '';
+  SITUATION_PRESETS.forEach(p => {
+    const cfg = cfgs[p.id] || { tasks:[], restTimeOverride:null };
+    const tasks = cfg.tasks || [];
+    const rt = cfg.restTimeOverride || { startTime:'', endTime:'' };
+    const taskRows = tasks.length
+      ? tasks.map((t,i)=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#FFFDF5;border-radius:7px;border:0.5px solid #EDD87A;margin-bottom:4px;">
+          <span style="flex:1;font-size:12px;color:#4A2C08;">${t.nameZh}</span>
+          <button onclick="removeSituationTask('${p.id}',${i})" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 4px;" aria-label="移除">✕</button>
+        </div>`).join('')
+      : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">尚未設定任何任務</div>`;
+    html += `
+      <div style="border-radius:12px;border:1px solid #E5DDD5;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#FAF6F0;">
+          <i class="ti ${p.icon}" style="font-size:16px;color:#854F0B;" aria-hidden="true"></i>
+          <span style="font-size:13px;font-weight:700;color:#5C3D1E;flex:1;">${p.labelZh}</span>
+        </div>
+        <div style="padding:10px 12px;">
+          <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;">情境任務</div>
+          ${taskRows}
+          <div style="display:flex;gap:6px;margin-top:7px;">
+            <button onclick="openSitTaskPicker('${p.id}')" style="font-size:11px;color:#4A80C4;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-library" style="font-size:11px;" aria-hidden="true"></i> 從工作庫選</button>
+            <button onclick="openSitTaskCustom('${p.id}')" style="font-size:11px;color:#5C3D1E;background:#F0E8DC;border:0.5px solid #C8A870;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增臨時任務</button>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
+            <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:6px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩時間調整（空白 = 沿用原設定）</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:11px;color:#6A7080;min-width:28px;">開始</label>
+              <input type="time" value="${rt.startTime||''}" onchange="updateSituationRestTime('${p.id}','startTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+              <label style="font-size:11px;color:#6A7080;min-width:28px;">結束</label>
+              <input type="time" value="${rt.endTime||''}" onchange="updateSituationRestTime('${p.id}','endTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+  body.innerHTML = html;
+}
+function removeSituationTask(presetId, idx){
+  if (!state.situationPresetConfigs[presetId]) return;
+  state.situationPresetConfigs[presetId].tasks.splice(idx,1);
+  save(); renderSituationConfigModal();
+}
+function updateSituationRestTime(presetId, field, val){
+  if (!state.situationPresetConfigs[presetId]) state.situationPresetConfigs[presetId] = { tasks:[], restTimeOverride:null };
+  if (!state.situationPresetConfigs[presetId].restTimeOverride) state.situationPresetConfigs[presetId].restTimeOverride = { startTime:'', endTime:'' };
+  state.situationPresetConfigs[presetId].restTimeOverride[field] = val;
+  // 若兩欄都空白，清除 override
+  const rt = state.situationPresetConfigs[presetId].restTimeOverride;
+  if (!rt.startTime && !rt.endTime) state.situationPresetConfigs[presetId].restTimeOverride = null;
+  save();
+}
+/* 從工作庫選 */
+function openSitTaskPicker(presetId){
+  window._sitPickerPresetId = presetId;
+  document.getElementById('sitTaskPickerModal').classList.remove('hidden');
+  const body = document.getElementById('sitTaskPickerBody');
+  const cfgTasks = (state.situationPresetConfigs[presetId]?.tasks || []);
+  const existingIds = new Set(cfgTasks.filter(t=>t.source==='template').map(t=>t.templateId));
+  const templates = (state.taskTemplates||[]);
+  if (!templates.length){ body.innerHTML='<div style="font-size:13px;color:#B0A090;text-align:center;padding:16px;">尚未建立任何工作項目</div>'; return; }
+  body.innerHTML = templates.map(t=>{
+    const already = existingIds.has(t.id);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;border:0.5px solid ${already?'#C9A830':'#E5DDD5'};background:${already?'#FFFDF5':'white'};cursor:${already?'default':'pointer'};" ${already?'':'onclick="addSituationTaskFromTemplate(\''+t.id+'\')"'}>
+      <span style="flex:1;font-size:13px;color:${already?'#9A8070':'#3A2010'};">${t.title||t.titleZh||''}</span>
+      ${already?'<span style="font-size:11px;color:#C9A830;">已加入</span>':'<i class="ti ti-plus" style="font-size:14px;color:#4A80C4;" aria-hidden="true"></i>'}
+    </div>`;
+  }).join('');
+}
+function closeSitTaskPicker(){
+  document.getElementById('sitTaskPickerModal').classList.add('hidden');
+  window._sitPickerPresetId = null;
+}
+function addSituationTaskFromTemplate(templateId){
+  const presetId = window._sitPickerPresetId;
+  if (!presetId) return;
+  const t = (state.taskTemplates||[]).find(x=>x.id===templateId);
+  if (!t) return;
+  if (!state.situationPresetConfigs[presetId]) state.situationPresetConfigs[presetId] = { tasks:[], restTimeOverride:null };
+  state.situationPresetConfigs[presetId].tasks.push({ id:'st_'+Date.now(), templateId:t.id, nameZh:t.title||t.titleZh||'', nameId:t.titleId||'', source:'template' });
+  save();
+  openSitTaskPicker(presetId); // refresh picker
+  renderSituationConfigModal();
+}
+/* 新增臨時任務 */
+function openSitTaskCustom(presetId){
+  const nameZh = prompt('任務名稱（中文）：');
+  if (!nameZh || !nameZh.trim()) return;
+  const nameId = prompt('任務名稱（印尼文，可空白）：') || '';
+  if (!state.situationPresetConfigs[presetId]) state.situationPresetConfigs[presetId] = { tasks:[], restTimeOverride:null };
+  state.situationPresetConfigs[presetId].tasks.push({ id:'st_'+Date.now(), nameZh:nameZh.trim(), nameId:nameId.trim(), source:'custom' });
+  save(); renderSituationConfigModal();
 }
 function renderManagerSituationBar(){
   const bar = document.getElementById('mgrSituationBar');
@@ -7459,16 +7636,21 @@ function renderManagerSituationBar(){
       <button onclick="deactivateSituation()" style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:2px 10px;cursor:pointer;white-space:nowrap;">解除</button>
     </div>`;
   } else {
-    bar.innerHTML = `<button onclick="openSituationModal()" style="width:100%;border-radius:14px;border:1px dashed #D5C5B0;background:transparent;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left;">
-      <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i class="ti ti-alert-circle" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
-      </div>
-      <div>
-        <div class="text-sm font-semibold" style="color:#7A5A40;">今日有突發狀況？</div>
-        <div class="text-xs" style="color:#B0A090;">一鍵通知 ${getHelperName()} 並調整工作安排</div>
-      </div>
-      <i class="ti ti-chevron-right" style="font-size:14px;color:#C0A880;margin-left:auto;" aria-hidden="true"></i>
-    </button>`;
+    bar.innerHTML = `<div style="display:flex;align-items:center;gap:6px;">
+      <button onclick="openSituationModal()" style="flex:1;border-radius:14px;border:1px dashed #D5C5B0;background:transparent;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#F0E8DC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-alert-circle" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="text-sm font-semibold" style="color:#7A5A40;">今日有突發狀況？</div>
+          <div class="text-xs" style="color:#B0A090;">一鍵通知 ${getHelperName()} 並調整工作安排</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:#C0A880;margin-left:auto;" aria-hidden="true"></i>
+      </button>
+      <button onclick="openSituationConfigModal()" style="width:36px;height:36px;border-radius:10px;border:1px solid #D5C5B0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" title="情境設定" aria-label="情境設定">
+        <i class="ti ti-settings" style="font-size:16px;color:#9A8070;" aria-hidden="true"></i>
+      </button>
+    </div>`;
   }
 }
 
@@ -9899,11 +10081,30 @@ async function deleteHoliday(){
 function renderAtikaRestSchedules(){
   const el = document.getElementById('atikaRestSchedules');
   if (!el) return;
+  const lang = getCurrentLang();
+  // 情境覆蓋：若今日情境啟動且有 activeRestTime，優先顯示
+  const sm = getActiveSituation();
+  if (sm && sm.activeRestTime && (sm.activeRestTime.startTime || sm.activeRestTime.endTime)) {
+    const rt = sm.activeRestTime;
+    el.classList.remove('hidden');
+    const preset = SITUATION_PRESETS.find(p=>p.id===sm.scenarioId);
+    const sitLabel = preset ? (lang==='id'?preset.labelId:preset.labelZh) : '情境';
+    el.innerHTML = `
+      <div class="text-xs mb-1" style="color:#4A80C4;font-weight:600;"><i class="ti ti-moon" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${lang==='id'?'Waktu Istirahat (Disesuaikan)':'今日小憩時段（情境調整）'}</div>
+      <div class="flex flex-wrap gap-2">
+        <div style="background:#DDE8F0;border:1px solid #9EC4D8;border-radius:8px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:6px;">
+          <span style="font-weight:700;color:#2D5E9E;">${sitLabel}</span>
+          <span style="color:#2D4A6A;font-family:monospace;font-weight:600;">${rt.startTime||'?'} – ${rt.endTime||'?'}</span>
+          <span style="font-size:10px;color:#4A80C4;background:#EBF2FA;border-radius:99px;padding:1px 6px;">情境</span>
+        </div>
+      </div>`;
+    return;
+  }
+  // 一般邏輯
   const dow = today().getDay();
   const todayRests = (state.restSchedules||[]).filter(rs => (rs.weekdays||[]).includes(dow));
   if (!todayRests.length){ el.classList.add('hidden'); el.innerHTML=''; return; }
   el.classList.remove('hidden');
-  const lang = getCurrentLang();
   el.innerHTML = `
     <div class="text-xs mb-1" style="color:#D4A870;font-weight:600;">😴 今日休息時段 / Istirahat Hari Ini</div>
     <div class="flex flex-wrap gap-2">
