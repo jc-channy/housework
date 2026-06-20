@@ -2716,22 +2716,26 @@ const SITUATION_PRESETS_DEFAULT = [
     scopes:['all'],
     msgZh:'今天保母請假，所有工作彈性處理，育兒優先。',
     msgId:'Hari ini pengasuh tidak hadir. Semua tugas bersifat fleksibel, utamakan pengasuhan anak.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'' },
+    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'kid_home',       icon:'ti-school',        labelZh:'大寶請假在家',  labelId:'Anak Besar di Rumah',
     scopes:['all'],
     msgZh:'大寶今天在家，請多留意，家務彈性處理。',
     msgId:'Anak sulung di rumah hari ini. Harap perhatikan dan selesaikan pekerjaan rumah secara fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'' },
+    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'medical',        icon:'ti-stethoscope',   labelZh:'帶寶寶看診',   labelId:'Bawa Bayi ke Dokter',
     scopes:['morning','afternoon'],
     msgZh:'帶寶寶看診，該時段任務彈性處理。',
     msgId:'Menemani bayi ke dokter. Tugas di sesi tersebut bersifat fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'' },
+    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'night_sleep',    icon:'ti-moon',          labelZh:'晚間陪睡',     labelId:'Menemani Tidur Malam',
     scopes:['evening'],
     msgZh:'今晚需要你協助陪寶寶睡覺，晚間任務彈性處理。',
     msgId:'Malam ini tolong bantu menemani bayi tidur. Tugas malam bersifat fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'' },
+    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
 ];
 const SITUATION_SCOPE_LABELS = { all:'全天', morning:'上午', afternoon:'下午', evening:'晚間' };
 function getSituationPresets(){ return state.situationPresets && state.situationPresets.length ? state.situationPresets : SITUATION_PRESETS_DEFAULT; }
@@ -2759,6 +2763,40 @@ function checkSituationExpiry(){
   const todayStr = ymd(new Date());
   const end = sm.endDate || sm.date;
   if (todayStr > end){ state.situationMode = null; save(); }
+}
+/* 自動啟動：掃描所有 preset 的排程日期，若今天在範圍內且無進行中情境 → 自動啟動 */
+function checkScheduledSituations(){
+  if (state.situationMode && state.situationMode.active) return; // 已有進行中情境，不覆蓋
+  const todayStr = ymd(new Date());
+  const presets = getSituationPresets();
+  for (const preset of presets) {
+    const s = preset.plannedStartDate;
+    const e = preset.plannedEndDate || s;
+    if (!s) continue;
+    if (todayStr >= s && todayStr <= e) {
+      // 自動啟動
+      const scope = preset.scopes[0] || 'all';
+      state.situationMode = {
+        active: true,
+        scenarioId: preset.id,
+        timeScope: scope,
+        startDate: s, endDate: e,
+        date: s,
+        activeTasks: (preset.tasks||[]).map(t=>({...t, done:false})),
+        dailyCompletions: {},
+        suspendedTemplateIds: preset.suspendedTemplateIds || [],
+        activeRestTime: (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null,
+        menuOverride: preset.presetMenuOverride || null
+      };
+      if (preset.reminderZh && preset.reminderZh.trim()) {
+        if (!state.reminders[todayStr] || !state.reminders[todayStr].zh) {
+          state.reminders[todayStr] = { zh: preset.reminderZh.trim(), id: preset.reminderId||'', by:'情境', at: new Date().toISOString() };
+        }
+      }
+      save();
+      break; // 只啟動第一個符合的
+    }
+  }
 }
 /* 多天情境：剩餘天數（含今日） */
 function situationDaysLeft(){
@@ -7791,6 +7829,56 @@ function renderSituationConfigModal(){
             <div style="font-size:11px;font-weight:600;color:#5C3D1E;margin-bottom:6px;"><i class="ti ti-speakerphone" style="font-size:12px;" aria-hidden="true"></i> 啟動時自動填入今日提醒（可留空）</div>
             <textarea rows="2" placeholder="輸入啟動此情境時要顯示的提醒內容…" onchange="updateSituationReminderZh('${p.id}',this.value)" style="width:100%;font-size:12px;padding:6px 8px;border:0.5px solid #C0C8D0;border-radius:7px;resize:none;box-sizing:border-box;">${reminderZh}</textarea>
           </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
+            <div style="font-size:11px;font-weight:600;color:#1E6E3D;margin-bottom:6px;"><i class="ti ti-calendar-event" style="font-size:12px;" aria-hidden="true"></i> 排程日期（已知的多天情境，到日期自動啟動）</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+              <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">開始</label>
+              <input type="date" value="${p.plannedStartDate||''}" onchange="updateSituationPlannedDate('${p.id}','plannedStartDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">結束</label>
+              <input type="date" value="${p.plannedEndDate||''}" min="${p.plannedStartDate||''}" onchange="updateSituationPlannedDate('${p.id}','plannedEndDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+            </div>
+            ${(()=>{
+              const s = p.plannedStartDate, e = p.plannedEndDate;
+              const todayStr = ymd(new Date());
+              if (!s) return '';
+              if (s && e && e < s) return '<div style="font-size:11px;color:#C04040;">結束日期不能早於開始日期</div>';
+              const days = s && e ? (()=>{const sd=new Date(s+'T00:00:00'),ed=new Date(e+'T00:00:00');return Math.round((ed-sd)/86400000)+1;})() : 1;
+              const isCurrent = todayStr >= s && todayStr <= (e||s);
+              const isPast = todayStr > (e||s);
+              const isFuture = todayStr < s;
+              if (isPast) return '<div style="font-size:11px;color:#9A8070;background:#F5F2EE;border-radius:6px;padding:4px 8px;">此情境日期已過期</div>';
+              if (isCurrent) return '<div style="font-size:11px;color:#1E6E3D;background:#E8F5EE;border-radius:6px;padding:4px 8px;font-weight:600;">✓ 進行中（今日在情境期間內）</div>';
+              if (isFuture) return \`<div style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border-radius:6px;padding:4px 8px;">📅 共 \${days} 天，\${s} 自動啟動</div>\`;
+              return '';
+            })()}
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
+            <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;"><i class="ti ti-chef-hat" style="font-size:12px;" aria-hidden="true"></i> 情境期間菜單</div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+              ${['normal','all'].map(val=>{
+                const isChecked = val==='normal' ? !p.presetMenuOverride : p.presetMenuOverride===val;
+                const label = val==='normal' ? '照常顯示菜單' : '全部不煮（隱藏菜單）';
+                return `<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:${isChecked?'#FFF4E0':'white'};border:0.5px solid ${isChecked?'#C07030':'#E5DDD5'};cursor:pointer;">
+                  <input type="radio" name="presetMenu_${p.id}" ${isChecked?'checked':''} onchange="updateSituationPresetMenuOverride('${p.id}','${val}')" style="width:13px;height:13px;accent-color:#C07030;">
+                  <span style="font-size:12px;color:#4A2808;">${label}</span>
+                </label>`;
+              }).join('')}
+            </div>
+          </div>
+          ${(()=>{
+            const s = p.plannedStartDate;
+            const todayStr = ymd(new Date());
+            const sm = state.situationMode;
+            const alreadyActive = sm && sm.active && sm.scenarioId === p.id;
+            if (alreadyActive) return '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
+            if (!s) return '';
+            const canActivate = s && (!p.plannedEndDate || p.plannedEndDate >= todayStr);
+            return \`<button onclick="activateSituationFromPreset('\${p.id}')" \${canActivate?'':'disabled'} style="width:100%;margin-top:10px;background:\${canActivate?'#2D5A1A':'#D5C5B0'};color:\${canActivate?'white':'#9A8070'};border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:\${canActivate?'pointer':'not-allowed'};">
+              <i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境
+            </button>\`;
+          })()}
         </div>
       </div>`;
   });
@@ -7828,6 +7916,52 @@ function updateSituationReminderZh(presetId, val){
   preset.reminderZh = val;
   save();
 }
+function updateSituationPlannedDate(presetId, field, val){
+  const preset = state.situationPresets.find(p=>p.id===presetId);
+  if (!preset) return;
+  preset[field] = val;
+  save();
+}
+function updateSituationPresetMenuOverride(presetId, val){
+  const preset = state.situationPresets.find(p=>p.id===presetId);
+  if (!preset) return;
+  preset.presetMenuOverride = (val === 'normal') ? null : val;
+  save();
+  renderSituationConfigModal();
+}
+/* 從情境設定直接啟動（已知日期情境） */
+function activateSituationFromPreset(presetId){
+  const preset = getSituationPresets().find(p=>p.id===presetId);
+  if (!preset) return;
+  const todayStr = ymd(new Date());
+  const startDate = preset.plannedStartDate || todayStr;
+  const endDate   = (preset.plannedEndDate && preset.plannedEndDate >= startDate) ? preset.plannedEndDate : startDate;
+  const scope = preset.scopes[0] || 'all';
+  const activeTasks = (preset.tasks||[]).map(t=>({...t, done:false}));
+  const activeRestTime = (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
+  state.situationMode = {
+    active: true,
+    scenarioId: presetId,
+    timeScope: scope,
+    startDate, endDate,
+    date: startDate,
+    activeTasks,
+    dailyCompletions: {},
+    suspendedTemplateIds: preset.suspendedTemplateIds || [],
+    activeRestTime,
+    menuOverride: preset.presetMenuOverride || null
+  };
+  if (preset.reminderZh && preset.reminderZh.trim()) {
+    if (!state.reminders[todayStr] || !state.reminders[todayStr].zh) {
+      state.reminders[todayStr] = { zh: preset.reminderZh.trim(), id: preset.reminderId||'', by:'情境', at: new Date().toISOString() };
+    }
+  }
+  save();
+  renderSituationConfigModal();
+  renderManagerView();
+  renderManagerSituationBar();
+  alert('情境「' + preset.labelZh + '」已啟動！');
+}
 function deleteSituationPreset(presetId){
   if (!confirm('確定要刪除這個情境？')) return;
   const idx = state.situationPresets.findIndex(p=>p.id===presetId);
@@ -7849,7 +7983,10 @@ function addSituationPreset(){
     tasks: [],
     restTimes: [],
     reminderZh: '',
-    reminderId: ''
+    reminderId: '',
+    plannedStartDate: '',
+    plannedEndDate: '',
+    presetMenuOverride: null
   };
   state.situationPresets.push(newPreset);
   save(); renderSituationConfigModal();
@@ -7932,7 +8069,7 @@ function renderManagerSituationBar(){
           <i class="ti ti-alert-circle" style="font-size:13px;color:#C07030;" aria-hidden="true"></i>
         </div>
         <div>
-          <div class="text-sm font-semibold" style="color:#7A5A40;">今日有突發狀況？</div>
+          <div class="text-sm font-semibold" style="color:#7A5A40;">臨時調整今日安排</div>
           <div class="text-xs" style="color:#B0A090;">一鍵通知 ${getHelperName()} 並調整工作安排</div>
         </div>
         <i class="ti ti-chevron-right" style="font-size:14px;color:#C0A880;margin-left:auto;" aria-hidden="true"></i>
@@ -12588,6 +12725,7 @@ function refreshAll(){
 async function init(){
   load();
   checkSituationExpiry();
+  checkScheduledSituations();
   // 裝置本地設定（不上雲）：字體大小、欄數
   applyDevicePrefs();
   renderPinDots();
