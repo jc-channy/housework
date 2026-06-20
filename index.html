@@ -5976,6 +5976,12 @@ function saveIngredient(){
 function renderTodayMenuCard(){
   const el = document.getElementById('atikaTodayMenu');
   if (!el) return;
+  // 情境菜單覆蓋：全部不煮 → 直接隱藏
+  const _sm = getActiveSituation();
+  const _mo = _sm ? _sm.menuOverride : null;
+  if (_mo === 'all'){ el.classList.add('hidden'); return; }
+  const _skipMeals = Array.isArray(_mo) ? _mo : [];
+
   const dow = today().getDay();
   const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const todayDk = dayKeyArr[dow];
@@ -5991,6 +5997,8 @@ function renderTodayMenuCard(){
     meals = (state.mealConfig.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
     menuObj = getCurrentCycleMenu();
   }
+  // 過濾情境略過的餐次
+  if (_skipMeals.length) meals = meals.filter(m=>!_skipMeals.includes(m.name));
   if (!meals.length){ el.classList.add('hidden'); return; }
   let hasAny = false;
   let html = '';
@@ -6054,6 +6062,12 @@ function renderMgrTodayMenuCard(){
   const body = document.getElementById('mgrTodayMenuBody');
   if (!card || !body) return;
 
+  // 情境菜單覆蓋：全部不煮 → 直接隱藏
+  const _sm = getActiveSituation();
+  const _mo = _sm ? _sm.menuOverride : null;
+  if (_mo === 'all'){ card.classList.add('hidden'); return; }
+  const _skipMeals = Array.isArray(_mo) ? _mo : [];
+
   const dow = today().getDay();
   const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const todayDk = dayKeyArr[dow];
@@ -6068,6 +6082,8 @@ function renderMgrTodayMenuCard(){
     meals = (state.mealConfig?.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99'));
     menuObj = getCurrentCycleMenu();
   }
+  // 過濾情境略過的餐次
+  if (_skipMeals.length) meals = meals.filter(m=>!_skipMeals.includes(m.name));
   if (!meals.length){ card.classList.add('hidden'); return; }
 
   let rows = '';
@@ -7427,16 +7443,87 @@ function getHelperName(){ return state.users?.find(u=>u.role==='helper')?.name |
 function openSituationModal(){
   const modal = document.getElementById('situationModal');
   if (!modal) return;
+  window._sitStep = 1;
+  window._sitMenuOverride = null; // null=照常, 'all'=全略, [...]= 指定餐次
   renderSituationModal();
   modal.classList.remove('hidden');
 }
 function closeSituationModal(){
   const modal = document.getElementById('situationModal');
   if (modal) modal.classList.add('hidden');
+  window._sitStep = 1;
+  window._sitMenuOverride = null;
 }
 function renderSituationModal(){
   const body = document.getElementById('situationModalBody');
   if (!body) return;
+
+  // ── 第二步：菜單調整 ──
+  if (window._sitStep === 2) {
+    const dow = today().getDay();
+    const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const todayDk = dayKeyArr[dow];
+    const setId = getActiveSetId();
+    const activeSet = setId ? (state.weekMenuSets||[]).find(x=>x.id===setId) : null;
+    let todayMeals = [];
+    if (activeSet){
+      const menuObj = activeSet.menu||{};
+      todayMeals = (activeSet.meals||[]).filter(m=>m.enabled!==false).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')).filter(m=>{
+        const key = `${m.name}_${todayDk}`;
+        const cell = menuObj[key];
+        return cell && cell.type !== 'skip' && (cell.dishes||[]).length > 0;
+      }).map(m=>m.name);
+    } else {
+      const menuObj = getCurrentCycleMenu();
+      todayMeals = (state.mealConfig?.meals||[]).filter(m=>m.enabled).sort((a,b)=>(a.mealTime||'99:99').localeCompare(b.mealTime||'99:99')).filter(m=>{
+        const key = getMenuKey(dow, m.id);
+        const cell = menuObj[key];
+        return cell && cell.type !== 'skip' && (cell.dishes||[]).length > 0;
+      }).map(m=>m.name);
+    }
+
+    const override = window._sitMenuOverride; // null | 'all' | string[]
+    const isAll = override === 'all';
+    const isNormal = override === null;
+    const isCustom = Array.isArray(override);
+
+    const mealCheckboxes = todayMeals.length
+      ? todayMeals.map(name=>{
+          const checked = isCustom && override.includes(name);
+          return `<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:${checked?'#FFF4E0':'white'};border:0.5px solid ${checked?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="checkbox" ${checked?'checked':''} onchange="toggleSitMenuMeal('${name}',this.checked)" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">${name}</span>
+          </label>`;
+        }).join('')
+      : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">今日無排菜色</div>`;
+
+    body.innerHTML = `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:8px;"><i class="ti ti-chef-hat" style="font-size:13px;" aria-hidden="true"></i> 今日菜單調整</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:${isNormal?'#FFF4E0':'white'};border:0.5px solid ${isNormal?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="radio" name="sitMenu" ${isNormal?'checked':''} onchange="setSitMenuOverride('normal')" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">照常顯示</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:${isAll?'#FFF4E0':'white'};border:0.5px solid ${isAll?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="radio" name="sitMenu" ${isAll?'checked':''} onchange="setSitMenuOverride('all')" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">今日全部不煮</span>
+          </label>
+          ${todayMeals.length ? `<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:${isCustom?'#FFF4E0':'white'};border:0.5px solid ${isCustom?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="radio" name="sitMenu" ${isCustom?'checked':''} onchange="setSitMenuOverride('custom')" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">指定略過的餐次</span>
+          </label>
+          ${isCustom ? `<div style="padding:4px 0 4px 12px;display:flex;flex-direction:column;gap:5px;">${mealCheckboxes}</div>` : ''}` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="window._sitStep=1;renderSituationModal();" style="flex:1;border:1px solid #D5C5B0;background:white;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#7A5A00;cursor:pointer;">← 上一步</button>
+        <button onclick="activateSituation()" style="flex:2;background:#5C3D1E;color:white;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">啟動情境</button>
+      </div>`;
+    return;
+  }
+
+  // ── 第一步：選擇情境 ──
   const sm = getActiveSituation();
   const selectedId = window._sitSelectedId || (sm ? sm.scenarioId : null);
   const selectedScope = window._sitSelectedScope || (sm ? sm.timeScope : null);
@@ -7478,8 +7565,8 @@ function renderSituationModal(){
   });
 
   const canActivate = selectedId && (selectedScope || (getSituationPresets().find(p=>p.id===selectedId)?.scopes.length === 1));
-  const activeBtnStyle = canActivate ? 'background:#5C3D1E;color:white;cursor:pointer;' : 'background:#D5C5B0;color:#9A8070;cursor:not-allowed;';
-  html += `<button onclick="activateSituation()" style="${activeBtnStyle}width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-top:4px;">啟動情境</button>`;
+  const nextBtnStyle = canActivate ? 'background:#5C3D1E;color:white;cursor:pointer;' : 'background:#D5C5B0;color:#9A8070;cursor:not-allowed;';
+  html += `<button onclick="${canActivate?'window._sitStep=2;renderSituationModal();':''}" style="${nextBtnStyle}width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-top:4px;">下一步：菜單設定 →</button>`;
   body.innerHTML = html;
 }
 function selectSituation(id){
@@ -7494,6 +7581,18 @@ function selectSituationScope(scope){
   window._sitSelectedScope = scope;
   renderSituationModal();
 }
+/* 菜單覆蓋輔助 */
+function setSitMenuOverride(type){
+  if (type === 'normal') window._sitMenuOverride = null;
+  else if (type === 'all') window._sitMenuOverride = 'all';
+  else if (type === 'custom') window._sitMenuOverride = [];
+  renderSituationModal();
+}
+function toggleSitMenuMeal(mealName, checked){
+  if (!Array.isArray(window._sitMenuOverride)) window._sitMenuOverride = [];
+  if (checked){ if (!window._sitMenuOverride.includes(mealName)) window._sitMenuOverride.push(mealName); }
+  else { window._sitMenuOverride = window._sitMenuOverride.filter(n=>n!==mealName); }
+}
 function activateSituation(){
   const id = window._sitSelectedId;
   const preset = getSituationPresets().find(p=>p.id===id);
@@ -7503,7 +7602,8 @@ function activateSituation(){
   const activeTasks = (preset.tasks||[]).map(t=>({ ...t, done:false }));
   // 小憩時間（array）
   const activeRestTime = (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
-  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()), activeTasks, activeRestTime };
+  const menuOverride = window._sitMenuOverride || null; // null | 'all' | string[]
+  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()), activeTasks, activeRestTime, menuOverride };
   // 自動填入今日提醒（若有設定且今日尚未設定）
   if (preset.reminderZh && preset.reminderZh.trim()) {
     const todayKey = ymd(new Date());
