@@ -2739,7 +2739,10 @@ function getSituationPresets(){ return state.situationPresets && state.situation
 function getActiveSituation(){
   const sm = state.situationMode;
   if (!sm || !sm.active) return null;
-  if (sm.date !== ymd(new Date())) return null;
+  const todayStr = ymd(new Date());
+  const start = sm.startDate || sm.date;
+  const end   = sm.endDate   || sm.date;
+  if (todayStr < start || todayStr > end) return null;
   return sm;
 }
 function situationAffectedSlots(sm){
@@ -2753,7 +2756,19 @@ function situationAffectedSlots(sm){
 function checkSituationExpiry(){
   const sm = state.situationMode;
   if (!sm || !sm.active) return;
-  if (sm.date !== ymd(new Date())){ state.situationMode = null; save(); }
+  const todayStr = ymd(new Date());
+  const end = sm.endDate || sm.date;
+  if (todayStr > end){ state.situationMode = null; save(); }
+}
+/* 多天情境：剩餘天數（含今日） */
+function situationDaysLeft(){
+  const sm = state.situationMode;
+  if (!sm || !sm.active || !sm.endDate) return null;
+  const todayStr = ymd(new Date());
+  if (!sm.endDate || sm.endDate === todayStr) return null; // 單日
+  const end = new Date(sm.endDate + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  return Math.max(0, Math.round((end - now) / 86400000));
 }
 
 
@@ -6574,10 +6589,13 @@ function renderTaskCard(t, opts={}){
   const showLastDone = !opts.hideLastDone;
 
   const sitFlex = opts.situationFlex && !done;
+  const sitSuspend = opts.situationSuspend && !done;
   const sitFlexStyle = sitFlex ? 'background:#F5F2EE;opacity:0.85;' : '';
+  const sitSuspendStyle = sitSuspend ? 'background:#F0EDE8;opacity:0.65;' : '';
   const sitFlexBadge = sitFlex ? `<span style="font-size:10px;color:#9A8070;background:#EDE8E0;border-radius:99px;padding:1px 7px;margin-left:4px;">彈性・可順延</span>` : '';
+  const sitSuspendBadge = sitSuspend ? `<span style="font-size:10px;color:#9A8070;background:#E8E4DE;border-radius:99px;padding:1px 7px;margin-left:4px;">情境暫停</span>` : '';
   return `
-    <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}${sitFlexStyle}" data-tid="${t.id}">
+    <div class="task-card ${warnClass} ${done?'done':''} bg-white border border-gray-200 rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="${catStripeStyle}${sitFlexStyle}${sitSuspendStyle}" data-tid="${t.id}">
       <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:var(--ic-caramel);"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
       <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${done?'background:#6A7840;border-color:#6A7840;color:#FAF7F2':'border-color:#D0C4B0;'}"
               onclick="event.stopPropagation(); quickToggle('${t.id}',this)">${done?'<i class="ti ti-check" style="font-size:16px;"></i>':''}</button>
@@ -6586,7 +6604,7 @@ function renderTaskCard(t, opts={}){
           <span class="task-title font-bold text-base ${primaryClass} leading-tight">${primary}</span>
           ${showMode ? modeBadgeTiny(t) : ''}
           ${parityBadge}
-          ${sitFlexBadge}
+          ${sitFlexBadge}${sitSuspendBadge}
         </div>
         <div class="${secondaryClass} text-sm text-gray-500 leading-tight">${secondary}</div>
         ${showLastDone ? `<div class="text-xs text-gray-500 mt-1">${done?`<i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;color:#6A7840;"></i> 完成於 ${completionStampText(t)}`:`<i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> ${lastDoneText(t)}`}</div>` : (done?`<div class="text-xs mt-1" style="color:#6A7840;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;"></i> 完成於 ${completionStampText(t)}</div>`:'')}
@@ -6922,12 +6940,13 @@ function renderAtikaView(){
     if (sm && activeTasks.length) {
       sitTasksEl.classList.remove('hidden');
       const taskRows = activeTasks.map((t,i)=>{
+        const done = getSitTaskDone(sm, i);
         const nameZh = t.nameZh||'';
         const nameId = t.nameId||'';
         const displayName = lang==='id' ? (nameId||nameZh) : nameZh;
-        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${t.done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${t.done?'#D8D0C8':'#EDD87A'};cursor:pointer;" onclick="toggleSituationTask(${i})">
-          <i class="ti ${t.done?'ti-circle-check':'ti-circle'}" style="font-size:18px;color:${t.done?'#4A8A42':'#C9A830'};flex-shrink:0;" aria-hidden="true"></i>
-          <span style="flex:1;font-size:13px;color:${t.done?'#A09080':'#4A2C08'};${t.done?'text-decoration:line-through;':''}">${displayName}</span>
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${done?'#D8D0C8':'#EDD87A'};cursor:pointer;" onclick="toggleSituationTask(${i})">
+          <i class="ti ${done?'ti-circle-check':'ti-circle'}" style="font-size:18px;color:${done?'#4A8A42':'#C9A830'};flex-shrink:0;" aria-hidden="true"></i>
+          <span style="flex:1;font-size:13px;color:${done?'#A09080':'#4A2C08'};${done?'text-decoration:line-through;':''}">${displayName}</span>
         </div>`;
       }).join('');
       sitTasksEl.innerHTML = `<div style="border:0.5px solid #EDD87A;border-left:3px solid #C9A830;border-radius:0 10px 10px 0;padding:10px 12px;background:white;">
@@ -6954,13 +6973,15 @@ function renderAtikaView(){
   tdInc.forEach(t => { const s=getSlot(t); (bySlot[s]||bySlot.flexible).push({_type:'tmpl', item:t}); });
   fxInc.forEach(t => { (bySlot.flexible).push({_type:'flex', item:t}); }); // flex templates → always flexible
 
+  const _suspendedIds = new Set((_activeSit?.suspendedTemplateIds) || []);
   function renderSlotItems(slotArr, slot){
     if (!slotArr.length) return '';
     const isSitFlex = _affectedSlots.includes(slot);
-    return slotArr.map(({_type, item})=>
-      _type==='adhoc' ? renderAdhocCard(item, {situationFlex:isSitFlex})
-      : renderTaskCard(item,{hideMode:true,hideLastDone:true,situationFlex:isSitFlex})
-    ).join('');
+    return slotArr.map(({_type, item})=>{
+      const isSuspended = _type !== 'adhoc' && _suspendedIds.has(item.id);
+      return _type==='adhoc' ? renderAdhocCard(item, {situationFlex:isSitFlex})
+        : renderTaskCard(item,{hideMode:true,hideLastDone:true,situationFlex:isSitFlex && !isSuspended,situationSuspend:isSuspended});
+    }).join('');
   }
   function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
 
@@ -7444,7 +7465,8 @@ function openSituationModal(){
   const modal = document.getElementById('situationModal');
   if (!modal) return;
   window._sitStep = 1;
-  window._sitMenuOverride = null; // null=照常, 'all'=全略, [...]= 指定餐次
+  window._sitEndDate = null;   // null = 單日；否則為 'YYYY-MM-DD'
+  window._sitMenuOverride = null;
   renderSituationModal();
   modal.classList.remove('hidden');
 }
@@ -7452,14 +7474,46 @@ function closeSituationModal(){
   const modal = document.getElementById('situationModal');
   if (modal) modal.classList.add('hidden');
   window._sitStep = 1;
+  window._sitEndDate = null;
   window._sitMenuOverride = null;
 }
 function renderSituationModal(){
   const body = document.getElementById('situationModalBody');
   if (!body) return;
 
-  // ── 第二步：菜單調整 ──
+  // ── 第二步：日期範圍 ──
   if (window._sitStep === 2) {
+    const todayStr = ymd(new Date());
+    const endDate = window._sitEndDate || '';
+    const isMulti = !!endDate;
+    body.innerHTML = `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:600;color:#854F0B;margin-bottom:8px;"><i class="ti ti-calendar" style="font-size:13px;" aria-hidden="true"></i> 情境持續時間</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:${!isMulti?'#FFF4E0':'white'};border:0.5px solid ${!isMulti?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="radio" name="sitDuration" ${!isMulti?'checked':''} onchange="window._sitEndDate=null;renderSituationModal();" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">只有今天</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:${isMulti?'#FFF4E0':'white'};border:0.5px solid ${isMulti?'#C07030':'#E5DDD5'};cursor:pointer;">
+            <input type="radio" name="sitDuration" ${isMulti?'checked':''} onchange="window._sitEndDate=window._sitEndDate||(()=>{const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10)})();renderSituationModal();" style="width:15px;height:15px;accent-color:#C07030;">
+            <span style="font-size:13px;color:#4A2808;font-weight:600;">多天（設定結束日期）</span>
+          </label>
+          ${isMulti?`<div style="padding:4px 0 4px 12px;display:flex;align-items:center;gap:8px;">
+            <label style="font-size:11px;color:#6A7080;white-space:nowrap;">結束日期</label>
+            <input type="date" value="${endDate}" min="${todayStr}" onchange="window._sitEndDate=this.value;renderSituationModal();" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid #C0C8D0;border-radius:7px;">
+            ${endDate?`<span style="font-size:11px;color:#9A8070;white-space:nowrap;">${(()=>{const d=new Date(endDate+'T00:00:00');const n=new Date();n.setHours(0,0,0,0);const diff=Math.round((d-n)/86400000);return diff>0?`共 ${diff+1} 天`:'請選今日之後的日期';})()}</span>`:''}
+          </div>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="window._sitStep=1;renderSituationModal();" style="flex:1;border:1px solid #D5C5B0;background:white;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#7A5A00;cursor:pointer;">← 上一步</button>
+        <button onclick="${(!isMulti || (endDate && endDate > ymd(new Date())))?'window._sitStep=3;renderSituationModal();':''}" style="flex:2;background:${(!isMulti || (endDate && endDate > ymd(new Date())))?'#5C3D1E':'#D5C5B0'};color:${(!isMulti || (endDate && endDate > ymd(new Date())))?'white':'#9A8070'};border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:${(!isMulti || (endDate && endDate > ymd(new Date())))?'pointer':'not-allowed'};">下一步：菜單設定 →</button>
+      </div>`;
+    return;
+  }
+
+  // ── 第三步：菜單調整 ──
+  if (window._sitStep === 3) {
     const dow = today().getDay();
     const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const todayDk = dayKeyArr[dow];
@@ -7517,7 +7571,7 @@ function renderSituationModal(){
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
-        <button onclick="window._sitStep=1;renderSituationModal();" style="flex:1;border:1px solid #D5C5B0;background:white;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#7A5A00;cursor:pointer;">← 上一步</button>
+        <button onclick="window._sitStep=2;renderSituationModal();" style="flex:1;border:1px solid #D5C5B0;background:white;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#7A5A00;cursor:pointer;">← 上一步</button>
         <button onclick="activateSituation()" style="flex:2;background:#5C3D1E;color:white;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">啟動情境</button>
       </div>`;
     return;
@@ -7566,7 +7620,7 @@ function renderSituationModal(){
 
   const canActivate = selectedId && (selectedScope || (getSituationPresets().find(p=>p.id===selectedId)?.scopes.length === 1));
   const nextBtnStyle = canActivate ? 'background:#5C3D1E;color:white;cursor:pointer;' : 'background:#D5C5B0;color:#9A8070;cursor:not-allowed;';
-  html += `<button onclick="${canActivate?'window._sitStep=2;renderSituationModal();':''}" style="${nextBtnStyle}width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-top:4px;">下一步：菜單設定 →</button>`;
+  html += `<button onclick="${canActivate?'window._sitStep=2;renderSituationModal();':''}" style="${nextBtnStyle}width:100%;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;margin-top:4px;">下一步：設定期間 →</button>`;
   body.innerHTML = html;
 }
 function selectSituation(id){
@@ -7602,8 +7656,18 @@ function activateSituation(){
   const activeTasks = (preset.tasks||[]).map(t=>({ ...t, done:false }));
   // 小憩時間（array）
   const activeRestTime = (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
-  const menuOverride = window._sitMenuOverride || null; // null | 'all' | string[]
-  state.situationMode = { active:true, scenarioId:id, timeScope:scope, date:ymd(new Date()), activeTasks, activeRestTime, menuOverride };
+  const menuOverride = window._sitMenuOverride || null;
+  const startDate = ymd(new Date());
+  const endDate = (window._sitEndDate && window._sitEndDate > startDate) ? window._sitEndDate : startDate;
+  state.situationMode = {
+    active:true, scenarioId:id, timeScope:scope,
+    startDate, endDate,
+    date: startDate,            // backward compat
+    activeTasks,
+    dailyCompletions: {},       // { 'YYYY-MM-DD': { taskId: true/false } }
+    suspendedTemplateIds: preset.suspendedTemplateIds || [],
+    activeRestTime, menuOverride
+  };
   // 自動填入今日提醒（若有設定且今日尚未設定）
   if (preset.reminderZh && preset.reminderZh.trim()) {
     const todayKey = ymd(new Date());
@@ -7622,13 +7686,38 @@ function deactivateSituation(){
   renderManagerView();
   renderManagerSituationBar();
 }
+/* 情境預設：切換暫停工作 */
+function toggleSituationSuspend(presetId, templateId, checked){
+  const preset = state.situationPresets.find(p=>p.id===presetId);
+  if (!preset) return;
+  if (!preset.suspendedTemplateIds) preset.suspendedTemplateIds = [];
+  if (checked){
+    if (!preset.suspendedTemplateIds.includes(templateId)) preset.suspendedTemplateIds.push(templateId);
+  } else {
+    preset.suspendedTemplateIds = preset.suspendedTemplateIds.filter(id=>id!==templateId);
+  }
+  save();
+}
 /* 情境任務完成切換（幫傭端） */
 function toggleSituationTask(idx){
   const sm = state.situationMode;
   if (!sm || !sm.activeTasks) return;
-  sm.activeTasks[idx].done = !sm.activeTasks[idx].done;
+  const todayKey = ymd(new Date());
+  if (!sm.dailyCompletions) sm.dailyCompletions = {};
+  if (!sm.dailyCompletions[todayKey]) sm.dailyCompletions[todayKey] = {};
+  const taskId = sm.activeTasks[idx].id;
+  sm.dailyCompletions[todayKey][taskId] = !sm.dailyCompletions[todayKey][taskId];
   save();
   renderAtikaView();
+}
+/* 取得今日情境任務的完成狀態 */
+function getSitTaskDone(sm, idx){
+  if (!sm || !sm.activeTasks) return false;
+  const todayKey = ymd(new Date());
+  const taskId = sm.activeTasks[idx].id;
+  // 向下相容舊資料：若 dailyCompletions 不存在，用 activeTasks[idx].done
+  if (!sm.dailyCompletions) return sm.activeTasks[idx].done || false;
+  return !!(sm.dailyCompletions[todayKey]?.[taskId]);
 }
 /* ===== 情境設定 Modal ===== */
 function openSituationConfigModal(){
@@ -7663,6 +7752,17 @@ function renderSituationConfigModal(){
       </div>`).join('');
 
     const reminderZh = p.reminderZh || '';
+    const suspendedIds = new Set(p.suspendedTemplateIds || []);
+    const allTemplates = state.templates || [];
+    const suspendRows = allTemplates.length
+      ? allTemplates.map(t=>{
+          const checked = suspendedIds.has(t.id);
+          return `<label style="display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:${checked?'#F0EDE8':'white'};border:0.5px solid ${checked?'#C8A870':'#E5DDD5'};cursor:pointer;margin-bottom:3px;">
+            <input type="checkbox" ${checked?'checked':''} onchange="toggleSituationSuspend('${p.id}','${t.id}',this.checked)" style="width:13px;height:13px;accent-color:#C07030;">
+            <span style="font-size:12px;color:#4A2808;">${t.nameZh||''}</span>
+          </label>`;
+        }).join('')
+      : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">工作庫尚無項目</div>`;
 
     html += `
       <div style="border-radius:12px;border:1px solid #E5DDD5;overflow:hidden;margin-bottom:10px;">
@@ -7677,6 +7777,10 @@ function renderSituationConfigModal(){
           <div style="display:flex;gap:6px;margin-top:7px;">
             <button onclick="openSitTaskPicker('${p.id}')" style="font-size:11px;color:#4A80C4;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-library" style="font-size:11px;" aria-hidden="true"></i> 從工作庫選</button>
             <button onclick="openSitTaskCustom('${p.id}')" style="font-size:11px;color:#5C3D1E;background:#F0E8DC;border:0.5px solid #C8A870;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增臨時任務</button>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
+            <div style="font-size:11px;font-weight:600;color:#8A6000;margin-bottom:6px;"><i class="ti ti-eye-off" style="font-size:12px;" aria-hidden="true"></i> 情境期間暫停哪些工作（灰底顯示）</div>
+            <div style="max-height:140px;overflow-y:auto;">${suspendRows}</div>
           </div>
           <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
             <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:6px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩時間調整（可多段，空白=沿用原設定）</div>
@@ -7804,13 +7908,20 @@ function renderManagerSituationBar(){
     const preset = getSituationPresets().find(p=>p.id===sm.scenarioId);
     const label = preset ? preset.labelZh : '情境中';
     const scopeLabel = SITUATION_SCOPE_LABELS[sm.timeScope] || '';
+    const daysLeft = situationDaysLeft();
+    const daysChip = daysLeft !== null
+      ? `<span style="font-size:11px;font-weight:700;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:1px 8px;white-space:nowrap;">剩 ${daysLeft} 天</span>`
+      : '';
+    const subText = daysLeft !== null
+      ? `情境進行中・${sm.endDate} 結束 · 已通知${getHelperName()}`
+      : `今日結束自動解除 · 已通知${getHelperName()}`;
     bar.innerHTML = `<div style="border-radius:14px;border:1.5px solid #E8B840;border-left:4px solid #C9A830;background:#FFF9E8;padding:9px 12px;display:flex;align-items:center;gap:8px;margin-bottom:0;">
       <div style="width:26px;height:26px;border-radius:50%;background:#FFF5C0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <i class="ti ti-alert-triangle" style="font-size:13px;color:#8A6A00;" aria-hidden="true"></i>
       </div>
       <div class="flex-1 min-w-0">
-        <div class="text-sm font-bold" style="color:#5C3D1E;">今日情境：${label}（${scopeLabel}）</div>
-        <div class="text-xs" style="color:#8A6A00;">今日結束自動解除 · 已通知${getHelperName()}</div>
+        <div class="text-sm font-bold" style="color:#5C3D1E;display:flex;align-items:center;gap:6px;">情境：${label}（${scopeLabel}）${daysChip}</div>
+        <div class="text-xs" style="color:#8A6A00;">${subText}</div>
       </div>
       <button onclick="deactivateSituation()" style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:2px 10px;cursor:pointer;white-space:nowrap;">解除</button>
     </div>`;
