@@ -9920,38 +9920,78 @@ function renderAtikaRestSchedules(){
 }
 
 /* === 明日休假相關 === */
-function getUpcomingHolidayRange(){
+// 僅依審核通過的請假單計算明日起連假區間（排定休假日無請假單不觸發）
+function getUpcomingApprovedLeaveRange(){
   const c = state.payrollConfig;
   if (!c) return null;
   const tomorrow = new Date(today());
   tomorrow.setDate(tomorrow.getDate()+1);
   tomorrow.setHours(0,0,0,0);
-  const isHoliday = d => {
-    if (c.holidays.includes(d.getDay())) return true;
+  const hasApprovedLeave = d => {
     const dStr = ymd(d);
     return state.leaveRequests.some(r => r.date === dStr && r.status === 'approved' && r.period === 'full');
   };
-  if (!isHoliday(tomorrow)) return null;
+  // 明天必須有審核通過的請假單才啟動
+  if (!hasApprovedLeave(tomorrow)) return null;
   let endDate = new Date(tomorrow);
+  // 連假延伸：後續連續的固定休假日或已批准請假日都算進去
   for (let i=0;i<30;i++){
     const next = new Date(endDate); next.setDate(next.getDate()+1);
-    if (isHoliday(next)) endDate = next;
+    const nextIsOff = (c.holidays||[]).includes(next.getDay()) || hasApprovedLeave(next);
+    if (nextIsOff) endDate = next;
     else break;
   }
   return { start: tomorrow, end: endDate };
 }
+// 明天是否為排定休假日（依設定，不論有無請假單）
+function isTomorrowScheduledOff(){
+  const c = state.payrollConfig;
+  if (!c) return false;
+  const tomorrow = new Date(today());
+  tomorrow.setDate(tomorrow.getDate()+1);
+  return (c.holidays||[]).includes(tomorrow.getDay());
+}
 function _renderTomorrowOffInto(chipId, bannerId, isManager){
   const chip = document.getElementById(chipId);
   const banner = document.getElementById(bannerId);
-  const range = getUpcomingHolidayRange();
-  if (!range){
+  const leaveRange = getUpcomingApprovedLeaveRange();
+  const schedOff = isTomorrowScheduledOff();
+
+  // 幫傭端：只有批准請假單才顯示，排定休假日不觸發
+  if (!isManager){
     if (chip){ chip.classList.add('hidden'); chip.textContent=''; }
-    if (banner){ banner.classList.add('hidden'); banner.innerHTML=''; }
+    if (!leaveRange){
+      if (banner){ banner.classList.add('hidden'); banner.innerHTML=''; }
+      return;
+    }
+  }
+
+  // 管理者端：排定休假日但無請假單 → 灰色提示
+  if (isManager && !leaveRange){
+    if (chip){ chip.classList.add('hidden'); chip.textContent=''; }
+    if (banner){
+      if (schedOff){
+        const tomorrow = new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
+        const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+        banner.classList.remove('hidden');
+        banner.innerHTML = `
+          <div class="flex items-center gap-2 px-1" style="color:#9A8070;">
+            <i class="ti ti-calendar-off" style="font-size:17px;flex-shrink:0;"></i>
+            <span class="text-sm">明天（${fmt(tomorrow)}）是排定休假日，但 ${getHelperName()} 未申請休假。</span>
+          </div>
+        `;
+      } else {
+        banner.classList.add('hidden'); banner.innerHTML='';
+      }
+    }
     return;
   }
+
+  // 有批准請假單 → 原橘色 banner
+  const range = leaveRange;
   const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
   const days = Math.round((range.end - range.start)/86400000) + 1;
-  const lang = isManager ? 'zh' : getCurrentLang();  // 管理者主視角中文
+  const lang = isManager ? 'zh' : getCurrentLang();
   const subject = isManager ? getHelperName()+' ' : '';
   const chipText = days===1
     ? `🎉 ${subject}${lang==='id'?'Libur Besok':'明日休假'} ${fmt(range.start)}`
