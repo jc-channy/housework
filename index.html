@@ -7795,12 +7795,50 @@ function renderSituationConfigModal(){
     const suspendRows = allTemplates.length
       ? allTemplates.map(t=>{
           const checked = suspendedIds.has(t.id);
-          return `<label style="display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:${checked?'#F0EDE8':'white'};border:0.5px solid ${checked?'#C8A870':'#E5DDD5'};cursor:pointer;margin-bottom:3px;">
-            <input type="checkbox" ${checked?'checked':''} onchange="toggleSituationSuspend('${p.id}','${t.id}',this.checked)" style="width:13px;height:13px;accent-color:#C07030;">
-            <span style="font-size:12px;color:#4A2808;">${t.nameZh||''}</span>
-          </label>`;
+          return '<label style="display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:'+(checked?'#F0EDE8':'white')+';border:0.5px solid '+(checked?'#C8A870':'#E5DDD5')+';cursor:pointer;margin-bottom:3px;">'
+            +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleSituationSuspend(\''+p.id+'\',\''+t.id+'\',this.checked)" style="width:13px;height:13px;accent-color:#C07030;">'
+            +'<span style="font-size:12px;color:#4A2808;">'+(t.nameZh||'')+'</span>'
+            +'</label>';
         }).join('')
-      : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">工作庫尚無項目</div>`;
+      : '<div style="font-size:12px;color:#B0A090;padding:4px 0;">工作庫尚無項目</div>';
+
+    // 排程日期狀態提示
+    const _ps = p.plannedStartDate||'', _pe = p.plannedEndDate||'';
+    const _todayStr = ymd(new Date());
+    let dateStatusHtml = '';
+    if (_ps) {
+      if (_pe && _pe < _ps) {
+        dateStatusHtml = '<div style="font-size:11px;color:#C04040;">結束日期不能早於開始日期</div>';
+      } else {
+        const _days = _pe ? (Math.round((new Date(_pe+'T00:00:00')-new Date(_ps+'T00:00:00'))/86400000)+1) : 1;
+        const _end = _pe||_ps;
+        if (_todayStr > _end) dateStatusHtml = '<div style="font-size:11px;color:#9A8070;background:#F5F2EE;border-radius:6px;padding:4px 8px;">此情境日期已過期</div>';
+        else if (_todayStr >= _ps) dateStatusHtml = '<div style="font-size:11px;color:#1E6E3D;background:#E8F5EE;border-radius:6px;padding:4px 8px;font-weight:600;">✓ 進行中（今日在情境期間內）</div>';
+        else dateStatusHtml = '<div style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border-radius:6px;padding:4px 8px;">📅 共 '+_days+' 天，'+_ps+' 自動啟動</div>';
+      }
+    }
+
+    // 菜單覆蓋選項
+    const menuOverrideHtml = ['normal','all'].map(val=>{
+      const isChecked = val==='normal' ? !p.presetMenuOverride : p.presetMenuOverride===val;
+      const mlabel = val==='normal' ? '照常顯示菜單' : '全部不煮（隱藏菜單）';
+      return '<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:'+(isChecked?'#FFF4E0':'white')+';border:0.5px solid '+(isChecked?'#C07030':'#E5DDD5')+';cursor:pointer;">'
+        +'<input type="radio" name="presetMenu_'+p.id+'" '+(isChecked?'checked':'')+' onchange="updateSituationPresetMenuOverride(\''+p.id+'\',\''+val+'\')" style="width:13px;height:13px;accent-color:#C07030;">'
+        +'<span style="font-size:12px;color:#4A2808;">'+mlabel+'</span>'
+        +'</label>';
+    }).join('');
+
+    // 啟動按鈕
+    const _sm = state.situationMode;
+    const _alreadyActive = _sm && _sm.active && _sm.scenarioId === p.id;
+    let activateBtnHtml = '';
+    if (_alreadyActive) {
+      activateBtnHtml = '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
+    } else if (_ps) {
+      const canActivate = !_pe || _pe >= _todayStr;
+      activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" '+(canActivate?'':'disabled')+' style="width:100%;margin-top:10px;background:'+(canActivate?'#2D5A1A':'#D5C5B0')+';color:'+(canActivate?'white':'#9A8070')+';border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:'+(canActivate?'pointer':'not-allowed')+';">'
+        +'<i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境</button>';
+    }
 
     html += `
       <div style="border-radius:12px;border:1px solid #E5DDD5;overflow:hidden;margin-bottom:10px;">
@@ -7839,46 +7877,15 @@ function renderSituationConfigModal(){
               <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">結束</label>
               <input type="date" value="${p.plannedEndDate||''}" min="${p.plannedStartDate||''}" onchange="updateSituationPlannedDate('${p.id}','plannedEndDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
             </div>
-            ${(()=>{
-              const s = p.plannedStartDate, e = p.plannedEndDate;
-              const todayStr = ymd(new Date());
-              if (!s) return '';
-              if (s && e && e < s) return '<div style="font-size:11px;color:#C04040;">結束日期不能早於開始日期</div>';
-              const days = s && e ? (()=>{const sd=new Date(s+'T00:00:00'),ed=new Date(e+'T00:00:00');return Math.round((ed-sd)/86400000)+1;})() : 1;
-              const isCurrent = todayStr >= s && todayStr <= (e||s);
-              const isPast = todayStr > (e||s);
-              const isFuture = todayStr < s;
-              if (isPast) return '<div style="font-size:11px;color:#9A8070;background:#F5F2EE;border-radius:6px;padding:4px 8px;">此情境日期已過期</div>';
-              if (isCurrent) return '<div style="font-size:11px;color:#1E6E3D;background:#E8F5EE;border-radius:6px;padding:4px 8px;font-weight:600;">✓ 進行中（今日在情境期間內）</div>';
-              if (isFuture) return \`<div style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border-radius:6px;padding:4px 8px;">📅 共 \${days} 天，\${s} 自動啟動</div>\`;
-              return '';
-            })()}
+            ${dateStatusHtml}
           </div>
           <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
             <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;"><i class="ti ti-chef-hat" style="font-size:12px;" aria-hidden="true"></i> 情境期間菜單</div>
             <div style="display:flex;flex-direction:column;gap:5px;">
-              ${['normal','all'].map(val=>{
-                const isChecked = val==='normal' ? !p.presetMenuOverride : p.presetMenuOverride===val;
-                const label = val==='normal' ? '照常顯示菜單' : '全部不煮（隱藏菜單）';
-                return `<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:${isChecked?'#FFF4E0':'white'};border:0.5px solid ${isChecked?'#C07030':'#E5DDD5'};cursor:pointer;">
-                  <input type="radio" name="presetMenu_${p.id}" ${isChecked?'checked':''} onchange="updateSituationPresetMenuOverride('${p.id}','${val}')" style="width:13px;height:13px;accent-color:#C07030;">
-                  <span style="font-size:12px;color:#4A2808;">${label}</span>
-                </label>`;
-              }).join('')}
+              ${menuOverrideHtml}
             </div>
           </div>
-          ${(()=>{
-            const s = p.plannedStartDate;
-            const todayStr = ymd(new Date());
-            const sm = state.situationMode;
-            const alreadyActive = sm && sm.active && sm.scenarioId === p.id;
-            if (alreadyActive) return '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
-            if (!s) return '';
-            const canActivate = s && (!p.plannedEndDate || p.plannedEndDate >= todayStr);
-            return \`<button onclick="activateSituationFromPreset('\${p.id}')" \${canActivate?'':'disabled'} style="width:100%;margin-top:10px;background:\${canActivate?'#2D5A1A':'#D5C5B0'};color:\${canActivate?'white':'#9A8070'};border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:\${canActivate?'pointer':'not-allowed'};">
-              <i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境
-            </button>\`;
-          })()}
+          ${activateBtnHtml}
         </div>
       </div>`;
   });
