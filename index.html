@@ -9969,17 +9969,7 @@ function _renderTomorrowOffInto(chipId, bannerId, isManager){
   // 管理者端：排定休假日但無請假單 → 灰色 chip（同位置，不同顏色）
   if (isManager && !leaveRange){
     if (banner){ banner.classList.add('hidden'); banner.innerHTML=''; }
-    if (chip){
-      if (schedOff){
-        const tomorrow = new Date(today()); tomorrow.setDate(tomorrow.getDate()+1);
-        const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
-        chip.classList.remove('hidden');
-        chip.style.cssText = 'background:#DDE8F0;color:#2E5F7A;border-color:#9EC4D8;';
-        chip.textContent = `📅 明日休假日・將出勤 ${fmt(tomorrow)}`;
-      } else {
-        chip.classList.add('hidden'); chip.style.cssText=''; chip.textContent='';
-      }
-    }
+    if (chip){ chip.classList.add('hidden'); chip.style.cssText=''; chip.textContent=''; }
     return;
   }
 
