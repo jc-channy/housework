@@ -11872,6 +11872,7 @@ function switchTab(tabName){
   const tabEl = document.getElementById('tab-'+tabName);
   if (tabEl) tabEl.classList.remove('hidden');
   if (tabName === 'menu') renderMenuTab();
+  if (tabName === 'payroll') setTimeout(()=>{ const r=document.getElementById('payrollTodayRow'); if(r) r.scrollIntoView({behavior:'smooth',block:'center'}); }, 80);
   // 記住目前分頁，重新整理後還原
   try { localStorage.setItem('lastTab', tabName); } catch(e){}
   // 切到頂端（instant 避免縮頁後卡在半空白畫面）
