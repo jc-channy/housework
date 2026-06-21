@@ -991,9 +991,9 @@
           <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-day" style="font-size:14px;color:var(--ic-caramel);vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
           <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
         </div>
-        <div class="flex gap-1.5 mb-3">
-          <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-caramel);background:var(--ic-lemon);color:var(--ic-chocolate);">例行 <span id="mgrTabRoutineCount"></span></button>
-          <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-vanilla);background:transparent;color:var(--ic-choc-mid);">彈性 <span id="mgrTabFlexCount"></span></button>
+        <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;margin-bottom:12px;">
+          <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行 <span id="mgrTabRoutineCount" style="color:#C4706A;"></span></button>
+          <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性 <span id="mgrTabFlexCount" style="color:#C4706A;"></span></button>
         </div>
         <div id="mgrSlotView"></div>
         <div id="mgrFlexView" class="space-y-2 hidden"></div>
@@ -7183,14 +7183,14 @@ function renderMgrSlotView(){
   const routineBtn=document.getElementById('mgrTabRoutine');
   const flexBtn=document.getElementById('mgrTabFlex');
   if(routineBtn){
-    routineBtn.style.borderColor=isRoutine?'var(--ic-caramel)':'var(--ic-vanilla)';
-    routineBtn.style.background=isRoutine?'var(--ic-lemon)':'transparent';
-    routineBtn.style.color=isRoutine?'var(--ic-chocolate)':'var(--ic-choc-mid)';
+    routineBtn.style.background=isRoutine?'white':'transparent';
+    routineBtn.style.color=isRoutine?'#7A5530':'#9A7A58';
+    routineBtn.style.boxShadow=isRoutine?'0 1px 4px rgba(0,0,0,0.12)':'none';
   }
   if(flexBtn){
-    flexBtn.style.borderColor=!isRoutine?'var(--ic-caramel)':'var(--ic-vanilla)';
-    flexBtn.style.background=!isRoutine?'var(--ic-lemon)':'transparent';
-    flexBtn.style.color=!isRoutine?'var(--ic-chocolate)':'var(--ic-choc-mid)';
+    flexBtn.style.background=!isRoutine?'white':'transparent';
+    flexBtn.style.color=!isRoutine?'#7A5530':'#9A7A58';
+    flexBtn.style.boxShadow=!isRoutine?'0 1px 4px rgba(0,0,0,0.12)':'none';
   }
   // 角標數量
   const rcEl=document.getElementById('mgrTabRoutineCount');
