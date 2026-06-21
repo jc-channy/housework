@@ -991,7 +991,12 @@
           <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-day" style="font-size:14px;color:var(--ic-caramel);vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
           <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
         </div>
-        <div id="mgrSlotView" class="space-y-3"></div>
+        <div class="flex gap-1.5 mb-3">
+          <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-caramel);background:var(--ic-lemon);color:var(--ic-chocolate);">例行 <span id="mgrTabRoutineCount"></span></button>
+          <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-vanilla);background:transparent;color:var(--ic-choc-mid);">彈性 <span id="mgrTabFlexCount"></span></button>
+        </div>
+        <div id="mgrSlotView" class="space-y-2"></div>
+        <div id="mgrFlexView" class="space-y-2 hidden"></div>
         <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrTodayAllDoneLabel"></span>
@@ -5221,16 +5226,15 @@ function renderMenuCell(key, cell, isToday){
   const catColors = state.mealConfig.ingCategoryColors||{};
   const dishHtml = dishes.map((d, di)=>{
     const _dm = (d.cookMethods&&d.cookMethods.length)?d.cookMethods:(d.cookMethod?[d.cookMethod]:[]);
-    const methodLabel = _dm.map(m=>`<span style="font-size:15px;font-weight:700;color:#854F0B;background:#FAEEDA;border-radius:5px;padding:2px 9px;line-height:1.5;">${m}</span>`).join(' ');
+    const methodPrefix = _dm.length ? `<span style="font-size:10px;font-weight:600;color:#9A7858;flex-shrink:0;">[${_dm.join('/')}]</span>` : '';
     const ingPills = (d.ingredientIds||[]).map(id=>{ const ing=allIngs.find(x=>x.id===id); if(!ing)return null; const cc=catColors[ing.category]||'#A89880'; return {name:ing.name,cc}; }).filter(Boolean);
-    const ingLine = ingPills.length ? `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding-left:2px;">${ingPills.map((p,pi)=>`<span style="font-size:13px;font-weight:600;padding:1px 8px;border-radius:99px;background:${p.cc}22;color:${p.cc};border:1px solid ${p.cc};">${p.name}</span>${pi<ingPills.length-1?'<span style="font-size:14px;font-weight:800;color:#C67843;">＋</span>':''}`).join('')}</div>` : '';
-    const nameStr = d.dishName ? `<span class="ty-section-title" style="color:#2A1508;line-height:1.4;padding-left:4px;">${d.dishName}</span>` : '';
-    const noteStr = (d.note||d.noteId) ? `<span style="font-size:13px;color:#9A7A58;font-style:italic;line-height:1.3;">${d.note||d.noteId}</span>` : '';
+    const ingHtml = ingPills.map((p,pi)=>`<span style="font-size:11px;padding:1px 6px;border-radius:99px;background:${p.cc}22;color:${p.cc};border:1px solid ${p.cc};flex-shrink:0;">${p.name}</span>${pi<ingPills.length-1?'<span style="font-size:12px;font-weight:700;color:#C67843;flex-shrink:0;">＋</span>':''}`).join('');
+    const nameStr = d.dishName ? `<span style="font-size:13px;font-weight:600;color:#2A1508;flex-shrink:0;">${d.dishName}</span>` : '';
+    const noteStr = (d.note||d.noteId) ? `<span style="font-size:11px;color:#9A7A58;font-style:italic;flex-shrink:0;">${d.note||d.noteId}</span>` : '';
     const isLast = di === dishes.length - 1;
-    return `<div style="display:flex;flex-direction:column;gap:4px;${isLast?'':'padding-bottom:8px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
-      ${(methodLabel||noteStr)?`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">${methodLabel}${noteStr}</div>`:''}
-      ${nameStr}
-      ${ingLine}
+    const hasMid = ingPills.length && (nameStr||methodPrefix);
+    return `<div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;${isLast?'':'padding-bottom:6px;border-bottom:0.5px solid #E8DDD0;margin-bottom:2px;'}">
+      ${methodPrefix}${nameStr}${noteStr}${hasMid?'<span style="font-size:11px;color:#C4A068;flex-shrink:0;">·</span>':''}${ingHtml}
     </div>`;
   }).join('');
   const more = dishes.length>4 ? `<span style="font-size:12px;color:var(--ic-caramel);">＋${dishes.length-4} 道</span>` : '';
@@ -6101,11 +6105,8 @@ function renderTodayMenuCard(){
       </div>`;
     }
   });
+  if (!hasAny){ el.classList.add('hidden'); return; }
   el.classList.remove('hidden');
-  if (!hasAny){
-    document.getElementById('atikaTodayMenuBody').innerHTML = `<div style="font-size:13px;color:var(--ic-choc-mid);padding:8px 0;text-align:center;">今日尚未規劃菜色 / Belum ada menu hari ini</div>`;
-    return;
-  }
   document.getElementById('atikaTodayMenuBody').innerHTML = html;
 }
 
@@ -6151,6 +6152,7 @@ function renderMgrTodayMenuCard(){
     let dishesHtml = `<span style="font-size:11px;color:#C8B49A;font-style:italic;">尚未設定</span>`;
     if (cell){
       if (cell.type==='skip'){
+        hasAny = true;
         dishesHtml = `<span style="font-size:11px;color:#9A8A80;">✕ 不煮</span>`;
       } else {
         const dishes = cell.dishes||[];
@@ -6982,10 +6984,10 @@ function renderAtikaView(){
         const nameZh = t.nameZh||'';
         const nameId = t.nameId||'';
         const displayName = lang==='id' ? (nameId||nameZh) : nameZh;
-        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${done?'#D8D0C8':'#EDD87A'};cursor:pointer;" onclick="toggleSituationTask(${i})">
+        return `<button onclick="toggleSituationTask(${i})" style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${done?'#D8D0C8':'#EDD87A'};cursor:pointer;width:100%;text-align:left;">
           <i class="ti ${done?'ti-circle-check':'ti-circle'}" style="font-size:18px;color:${done?'#4A8A42':'#C9A830'};flex-shrink:0;" aria-hidden="true"></i>
           <span style="flex:1;font-size:13px;color:${done?'#A09080':'#4A2C08'};${done?'text-decoration:line-through;':''}">${displayName}</span>
-        </div>`;
+        </button>`;
       }).join('');
       sitTasksEl.innerHTML = `<div style="border:0.5px solid #EDD87A;border-left:3px solid #C9A830;border-radius:0 10px 10px 0;padding:10px 12px;background:white;">
         <div style="font-size:11px;font-weight:700;color:#854F0B;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
@@ -7168,6 +7170,11 @@ function completeFocusTask(){
 }
 
 /* ========== 本日工作時間分段視圖 ========== */
+window._mgrTaskTab = window._mgrTaskTab || 'routine';
+function switchMgrTaskTab(tab){
+  window._mgrTaskTab = tab;
+  renderMgrSlotView();
+}
 function renderMgrSlotView(){
   const d=today();
   const todays=todaysTemplates();
@@ -7178,40 +7185,82 @@ function renderMgrSlotView(){
   const fxInc=fxAll.filter(t=>!isDone(t,d)), fxDone=fxAll.filter(t=>isDone(t,d));
   const totalAll=todays.length+fxAll.length, totalDone=tdDone.length+fxDone.length;
   document.getElementById('mgrTodayCount').textContent=`${totalDone}/${totalAll} 完成`;
-  const bySlot={morning:[],afternoon:[],evening:[],flexible:[]};
-  tdInc.forEach(t=>{const s=getSlot(t);(bySlot[s]||bySlot.flexible).push(t);});
-  fxInc.forEach(t=>bySlot.flexible.push(t));
-  const doneCnt={
-    morning:tdDone.filter(t=>getSlot(t)==='morning').length,
-    afternoon:tdDone.filter(t=>getSlot(t)==='afternoon').length,
-    evening:tdDone.filter(t=>getSlot(t)==='evening').length,
-    flexible:tdDone.filter(t=>getSlot(t)==='flexible').length+fxDone.length,
-  };
-  const SLOT_CFG=[
-    {slot:'flexible',icon:'ti-arrows-shuffle',label:'彈性工作',color:'var(--ic-choc-mid)'},
-    {slot:'morning',icon:'ti-sunrise',label:'早上',color:'var(--ic-caramel)'},
-    {slot:'afternoon',icon:'ti-sun',label:'下午',color:'var(--ic-caramel)'},
-    {slot:'evening',icon:'ti-moon',label:'晚上',color:'var(--ic-caramel)'},
-  ];
-  const container=document.getElementById('mgrSlotView');
-  if (!container) return;
-  let html='';
-  SLOT_CFG.forEach(({slot,icon,label,color})=>{
-    const items=bySlot[slot], done=doneCnt[slot], total=items.length+done;
-    if (!items.length) return;   // Q5: 無未完成（無工作或全部完成）皆隱藏
-    html+=`<div class="mb-2">
-      <div class="flex items-center gap-1.5 mb-1.5">
-        <i class="ti ${icon}" style="font-size:12px;color:${color};"></i>
-        <span class="text-xs font-bold" style="color:var(--ic-chocolate);">${label}</span>
-        <span class="text-xs ml-auto" style="color:var(--ic-choc-mid);">${done}/${total} 完成</span>
-      </div>
-      <div class="space-y-2">${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div class="text-xs text-gray-400 italic py-1">全部完成</div>'}</div>
-    </div>`;
-  });
-  if (!html) html= totalAll===0 ? '<div class="text-sm text-gray-400 italic py-2 text-center">今日無排定工作</div>' : '<div class="text-sm text-gray-400 italic py-2 text-center">今日工作全部完成 🎉</div>';
-  container.innerHTML=html;
-  const allDone=[...tdDone,...fxDone];
-  renderSectionDone('mgrTodayAllDoneWrap','mgrTodayAllDone','mgrTodayAllDoneLabel',allDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
+
+  // Tab 按鈕樣式
+  const isRoutine=(window._mgrTaskTab||'routine')==='routine';
+  const routineBtn=document.getElementById('mgrTabRoutine');
+  const flexBtn=document.getElementById('mgrTabFlex');
+  if(routineBtn){
+    routineBtn.style.borderColor=isRoutine?'var(--ic-caramel)':'var(--ic-vanilla)';
+    routineBtn.style.background=isRoutine?'var(--ic-lemon)':'transparent';
+    routineBtn.style.color=isRoutine?'var(--ic-chocolate)':'var(--ic-choc-mid)';
+  }
+  if(flexBtn){
+    flexBtn.style.borderColor=!isRoutine?'var(--ic-caramel)':'var(--ic-vanilla)';
+    flexBtn.style.background=!isRoutine?'var(--ic-lemon)':'transparent';
+    flexBtn.style.color=!isRoutine?'var(--ic-chocolate)':'var(--ic-choc-mid)';
+  }
+  // 角標數量
+  const rcEl=document.getElementById('mgrTabRoutineCount');
+  const fcEl=document.getElementById('mgrTabFlexCount');
+  if(rcEl) rcEl.textContent=tdInc.length?`(${tdInc.length})`:'';
+  if(fcEl) fcEl.textContent=fxInc.length?`(${fxInc.length})`:'';
+
+  const slotView=document.getElementById('mgrSlotView');
+  const flexView=document.getElementById('mgrFlexView');
+  if(!slotView||!flexView) return;
+
+  if(isRoutine){
+    slotView.classList.remove('hidden');
+    flexView.classList.add('hidden');
+    const bySlot={morning:[],afternoon:[],evening:[],flexible:[]};
+    tdInc.forEach(t=>{const s=getSlot(t);(bySlot[s]||bySlot.flexible).push(t);});
+    const doneCnt={
+      morning:tdDone.filter(t=>getSlot(t)==='morning').length,
+      afternoon:tdDone.filter(t=>getSlot(t)==='afternoon').length,
+      evening:tdDone.filter(t=>getSlot(t)==='evening').length,
+      flexible:tdDone.filter(t=>getSlot(t)==='flexible').length,
+    };
+    const SLOT_CFG=[
+      {slot:'morning',icon:'ti-sunrise',label:'早上',color:'var(--ic-caramel)'},
+      {slot:'afternoon',icon:'ti-sun',label:'下午',color:'var(--ic-caramel)'},
+      {slot:'evening',icon:'ti-moon',label:'晚上',color:'var(--ic-caramel)'},
+      {slot:'flexible',icon:'ti-arrows-shuffle',label:'其他時段',color:'var(--ic-choc-mid)'},
+    ];
+    let html='';
+    SLOT_CFG.forEach(({slot,icon,label,color})=>{
+      const items=bySlot[slot], done=doneCnt[slot], total=items.length+done;
+      if(!total) return;
+      html+=`<div style="border:1px solid #E5DDD5;border-radius:10px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:#FBF6F0;border-bottom:0.5px solid #E5DDD5;">
+          <i class="ti ${icon}" style="font-size:13px;color:${color};" aria-hidden="true"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--ic-chocolate);">${label}</span>
+          <span style="font-size:11px;color:var(--ic-choc-mid);margin-left:auto;">${done}/${total} 完成</span>
+        </div>
+        <div style="padding:6px 8px;display:flex;flex-direction:column;gap:5px;">
+          ${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div style="font-size:12px;color:var(--ic-choc-mid);font-style:italic;padding:4px 2px;">全部完成</div>'}
+        </div>
+      </div>`;
+    });
+    if(!html) html=todays.length===0
+      ?'<div class="text-sm text-gray-400 italic py-2 text-center">今日無排定例行工作</div>'
+      :'<div class="text-sm text-gray-400 italic py-2 text-center">今日例行工作全部完成</div>';
+    slotView.innerHTML=html;
+    renderSectionDone('mgrTodayAllDoneWrap','mgrTodayAllDone','mgrTodayAllDoneLabel',tdDone.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})));
+  } else {
+    slotView.classList.add('hidden');
+    flexView.classList.remove('hidden');
+    let html='';
+    if(fxInc.length){
+      html=fxInc.map(t=>renderTaskCard(t,{hideMode:false,hideLastDone:true})).join('');
+    } else if(!fxAll.length){
+      html='<div class="text-sm text-gray-400 italic py-2 text-center">無彈性工作項目</div>';
+    } else {
+      html='<div class="text-sm text-gray-400 italic py-2 text-center">本週彈性工作全部完成</div>';
+    }
+    flexView.innerHTML=html;
+    renderSectionDone('mgrTodayAllDoneWrap','mgrTodayAllDone','mgrTodayAllDoneLabel',fxDone.map(t=>renderTaskCard(t,{hideMode:false,hideLastDone:true})));
+  }
 }
 
 /* ========== 管理者時間分配 Kanban ========== */
@@ -8981,6 +9030,11 @@ function renderPayrollTab(){
   document.getElementById('payrollDayList').innerHTML = p.days.map(d=>renderPayrollDayRow(d)).join('');
   // 請假審核清單
   renderLeaveLists(viewDate);
+  // 自動滾動到當天
+  setTimeout(()=>{
+    const todayRow = document.getElementById('payrollTodayRow');
+    if(todayRow) todayRow.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 80);
 }
 
 function renderPayrollDayRow(d){
@@ -9055,7 +9109,7 @@ function renderPayrollDayRow(d){
   const noteHtml = d.leave?.managerNote
     ? `<div class="text-xs text-amber-700 ml-16 mt-1"><i class="ti ti-speakerphone" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> ${d.leave.managerNote}</div>` : '';
   return `
-    <div class="p-2 ${isToday?'bg-blue-50':''}">
+    <div class="p-2 ${isToday?'bg-blue-50':''}" ${isToday?'id="payrollTodayRow"':''}>
       <div class="flex items-center gap-3">
         <div class="w-12 text-xs font-mono shrink-0">${dt.getMonth()+1}/${dt.getDate()}</div>
         <div class="w-6 text-center font-bold ${sundayCls} shrink-0">${dowName}</div>
@@ -11542,12 +11596,20 @@ function renderSuppliesManager(){
   document.getElementById('suppliesOk').innerHTML=ok.length
     ? ok.map(s=>{
         const cat=getSupplyCat(s.catId);
-        return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);padding:11px 12px;display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;min-width:0;overflow:hidden;">
-            <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-size:12px;font-weight:600;background:var(--ic-surface);color:#7A5840;border-radius:7px;padding:2px 8px;border:1px solid var(--ic-vanilla);flex-shrink:0;">${cat.nameZh}</span><span style="font-size:14px;font-weight:600;color:#2A1A08;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span><span class="id-text" style="font-size:12px;color:#B0A090;flex-shrink:0;">/ ${s.nameId}</span></div>
+        const stripeColor=cat.color||'#C09060';
+        return `<div style="background:var(--ic-lemon);border-radius:12px;border:0.5px solid var(--ic-vanilla);display:flex;align-items:stretch;overflow:hidden;">
+          <div style="width:4px;background:${stripeColor};flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;padding:9px 10px;overflow:hidden;">
+            <div style="font-size:10px;font-weight:600;color:${stripeColor};margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cat.nameZh}</div>
+            <div style="display:flex;align-items:baseline;gap:5px;overflow:hidden;">
+              <span style="font-size:14px;font-weight:600;color:#2A1A08;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;">${s.nameZh}</span>
+              <span class="id-text" style="font-size:11px;color:#B0A090;white-space:nowrap;flex-shrink:0;">/ ${s.nameId}</span>
+            </div>
           </div>
-          <button onclick="openSupplyHistory(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;flex-shrink:0;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
-          <button onclick="openEditSupplyModal(\'${s.id}\')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;flex-shrink:0;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          <div style="display:flex;align-items:center;gap:4px;padding:0 8px;flex-shrink:0;">
+            <button onclick="openSupplyHistory('${s.id}')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;" title="歷史"><i class="ti ti-history" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+            <button onclick="openEditSupplyModal('${s.id}')" class="btn-sm-secondary" style="padding:0 8px;min-height:30px;" title="編輯"><i class="ti ti-pencil" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i></button>
+          </div>
         </div>`;
       }).join('')
     : `<div style="grid-column:1/-1;padding:14px;font-size:13px;color:#B0A090;font-style:italic;text-align:center;">目前無庫存品項</div>`;
