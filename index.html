@@ -9026,10 +9026,11 @@ function renderPayrollTab(){
   document.getElementById('payrollDayList').innerHTML = p.days.map(d=>renderPayrollDayRow(d)).join('');
   // 請假審核清單
   renderLeaveLists(viewDate);
-  // 自動滾動到當天
+  // 自動滾動到當天（在出勤明細容器內捲，不影響整頁位置）
   setTimeout(()=>{
-    const todayRow = document.getElementById('payrollTodayRow');
-    if(todayRow) todayRow.scrollIntoView({behavior:'smooth', block:'center'});
+    const c=document.getElementById('payrollDayList');
+    const r=document.getElementById('payrollTodayRow');
+    if(c&&r) c.scrollTop=r.offsetTop-c.offsetHeight/2+r.offsetHeight/2;
   }, 80);
 }
 
@@ -11876,7 +11877,7 @@ function switchTab(tabName){
   const tabEl = document.getElementById('tab-'+tabName);
   if (tabEl) tabEl.classList.remove('hidden');
   if (tabName === 'menu') renderMenuTab();
-  if (tabName === 'payroll') setTimeout(()=>{ const r=document.getElementById('payrollTodayRow'); if(r) r.scrollIntoView({behavior:'smooth',block:'center'}); }, 80);
+  if (tabName === 'payroll') setTimeout(()=>{ const c=document.getElementById('payrollDayList'); const r=document.getElementById('payrollTodayRow'); if(c&&r) c.scrollTop=r.offsetTop-c.offsetHeight/2+r.offsetHeight/2; }, 80);
   // 記住目前分頁，重新整理後還原
   try { localStorage.setItem('lastTab', tabName); } catch(e){}
   // 切到頂端（instant 避免縮頁後卡在半空白畫面）
