@@ -995,7 +995,7 @@
           <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-caramel);background:var(--ic-lemon);color:var(--ic-chocolate);">例行 <span id="mgrTabRoutineCount"></span></button>
           <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" class="flex-1 py-1.5 text-sm font-semibold rounded-full border transition-colors" style="border-color:var(--ic-vanilla);background:transparent;color:var(--ic-choc-mid);">彈性 <span id="mgrTabFlexCount"></span></button>
         </div>
-        <div id="mgrSlotView" class="space-y-2"></div>
+        <div id="mgrSlotView"></div>
         <div id="mgrFlexView" class="space-y-2 hidden"></div>
         <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
@@ -7220,17 +7220,21 @@ function renderMgrSlotView(){
       {slot:'flexible',icon:'ti-arrows-shuffle',label:'其他時段',color:'var(--ic-choc-mid)'},
     ];
     let html='';
+    let isFirst=true;
     SLOT_CFG.forEach(({slot,icon,label,color})=>{
       const items=bySlot[slot], done=doneCnt[slot], total=items.length+done;
       if(!total) return;
-      html+=`<div style="border:1px solid #E5DDD5;border-radius:10px;overflow:hidden;">
-        <div style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:#FBF6F0;border-bottom:0.5px solid #E5DDD5;">
-          <i class="ti ${icon}" style="font-size:13px;color:${color};" aria-hidden="true"></i>
-          <span style="font-size:12px;font-weight:700;color:var(--ic-chocolate);">${label}</span>
-          <span style="font-size:11px;color:var(--ic-choc-mid);margin-left:auto;">${done}/${total} 完成</span>
+      const borderTop=isFirst?'':'border-top:1px solid var(--ic-vanilla);';
+      isFirst=false;
+      html+=`<div style="${borderTop}padding:10px 0 6px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i class="ti ${icon}" style="font-size:14px;color:${color};" aria-hidden="true"></i>
+          <span style="font-size:16px;font-weight:800;color:var(--ic-chocolate);">${label}</span>
+          <div style="flex:1;height:1px;background:var(--ic-vanilla);"></div>
+          <span style="font-size:11px;color:var(--ic-choc-mid);white-space:nowrap;">${done}/${total} 完成</span>
         </div>
-        <div style="padding:6px 8px;display:flex;flex-direction:column;gap:5px;">
-          ${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div style="font-size:12px;color:var(--ic-choc-mid);font-style:italic;padding:4px 2px;">全部完成</div>'}
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          ${items.length?items.map(t=>renderTaskCard(t,{hideMode:true,hideLastDone:true})).join(''):'<div style="font-size:12px;color:var(--ic-choc-mid);font-style:italic;padding:2px 0;">全部完成</div>'}
         </div>
       </div>`;
     });
