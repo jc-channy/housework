@@ -986,18 +986,20 @@
       </section>
 
       <!-- 本日工作（時間分段） -->
-      <section>
-        <div class="flex items-center justify-between mb-2">
+      <section style="background:white;border-radius:16px;border:0.5px solid var(--ic-vanilla);overflow:hidden;">
+        <div class="flex items-center justify-between" style="padding:12px 16px 0;">
           <h3 class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-day" style="font-size:14px;color:var(--ic-caramel);vertical-align:-1px;" aria-hidden="true"></i>本日工作</h3>
           <span id="mgrTodayCount" class="text-xs text-gray-500"></span>
         </div>
-        <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;margin-bottom:12px;">
-          <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行 <span id="mgrTabRoutineCount" style="color:#C4706A;"></span></button>
-          <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性 <span id="mgrTabFlexCount" style="color:#C4706A;"></span></button>
+        <div style="padding:10px 16px 0;">
+          <div style="background:#F0E8DC;border-radius:99px;display:flex;padding:3px;gap:3px;">
+            <button id="mgrTabRoutine" onclick="switchMgrTaskTab('routine')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:white;color:#7A5530;box-shadow:0 1px 4px rgba(0,0,0,0.12);">例行 <span id="mgrTabRoutineCount" style="color:#C4706A;"></span></button>
+            <button id="mgrTabFlex" onclick="switchMgrTaskTab('flex')" style="flex:1;border:none;border-radius:99px;padding:9px 0;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:#9A7A58;box-shadow:none;">彈性 <span id="mgrTabFlexCount" style="color:#C4706A;"></span></button>
+          </div>
         </div>
-        <div id="mgrSlotView"></div>
-        <div id="mgrFlexView" class="space-y-2 hidden"></div>
-        <details id="mgrTodayAllDoneWrap" class="mt-2 hidden">
+        <div id="mgrSlotView" style="padding:0 16px 12px;"></div>
+        <div id="mgrFlexView" class="hidden" style="padding:0 16px 12px;"></div>
+        <details id="mgrTodayAllDoneWrap" class="hidden" style="padding:0 16px 12px;">
           <summary class="text-xs py-1.5 px-2 rounded-lg flex items-center justify-between cursor-pointer select-none" style="background:var(--ic-lemon);color:var(--ic-choc-mid);">
             <span id="mgrTodayAllDoneLabel"></span>
             <i class="ti ti-chevron-down done-chevron" style="font-size:12px;transition:transform .2s;" aria-hidden="true"></i>
