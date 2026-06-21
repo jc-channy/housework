@@ -6063,19 +6063,11 @@ function renderTodayMenuCard(){
     const key = activeSet ? `${meal.name}_${todayDk}` : getMenuKey(dow, meal.id);
     const cell = menuObj[key];
     const mealTimeDisplay = meal.time || meal.mealTime || '';
-    if (!cell) return;
-    hasAny = true;
-    if (cell.type==='skip'){
-      html += `<div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid #DEC99A;margin-bottom:8px;">
-        <div style="width:5px;background:#C4A068;flex-shrink:0;"></div>
-        <div style="flex:1;padding:9px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="font-size:16px;font-weight:800;color:#8B5A2B;">${meal.name}</span>
-          ${mealTimeDisplay?`<span style="font-size:14px;font-weight:600;color:#A07040;">${mealTimeDisplay}</span>`:''}
-          <span style="font-size:13px;color:#9A7A58;">✕ 不煮</span>
-        </div>
-      </div>`;
-    } else {
+    if (!cell || cell.type==='skip') return;
+    {
       const dishes = cell.dishes||[];
+      if (!dishes.length) return;
+      hasAny = true;
       const catColors = state.mealConfig?.ingCategoryColors||{};
       const _cookIdMap = {'大火快炒':'Tumis','清蒸':'Kukus','紅燒':'Semur','滷':'Rebus Bumbu','煮湯':'Sup','炸':'Goreng','烤':'Panggang','涼拌':'Salad','生食':'Mentah','炒':'Tumis','燉':'Rebus','蒸':'Kukus'};
       const dishRows = dishes.map(d=>{
