@@ -2741,25 +2741,25 @@ const SITUATION_PRESETS_DEFAULT = [
     scopes:['all'],
     msgZh:'今天保母請假，所有工作彈性處理，育兒優先。',
     msgId:'Hari ini pengasuh tidak hadir. Semua tugas bersifat fleksibel, utamakan pengasuhan anak.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    tasks:[], restTimes:[], restOverrideMode:'keep', reminderZh:'', reminderId:'',
     plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'kid_home',       icon:'ti-school',        labelZh:'大寶請假在家',  labelId:'Anak Besar di Rumah',
     scopes:['all'],
     msgZh:'大寶今天在家，請多留意，家務彈性處理。',
     msgId:'Anak sulung di rumah hari ini. Harap perhatikan dan selesaikan pekerjaan rumah secara fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    tasks:[], restTimes:[], restOverrideMode:'keep', reminderZh:'', reminderId:'',
     plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'medical',        icon:'ti-stethoscope',   labelZh:'帶寶寶看診',   labelId:'Bawa Bayi ke Dokter',
     scopes:['morning','afternoon'],
     msgZh:'帶寶寶看診，該時段任務彈性處理。',
     msgId:'Menemani bayi ke dokter. Tugas di sesi tersebut bersifat fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    tasks:[], restTimes:[], restOverrideMode:'keep', reminderZh:'', reminderId:'',
     plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
   { id:'night_sleep',    icon:'ti-moon',          labelZh:'晚間陪睡',     labelId:'Menemani Tidur Malam',
     scopes:['evening'],
     msgZh:'今晚需要你協助陪寶寶睡覺，晚間任務彈性處理。',
     msgId:'Malam ini tolong bantu menemani bayi tidur. Tugas malam bersifat fleksibel.',
-    tasks:[], restTimes:[], reminderZh:'', reminderId:'',
+    tasks:[], restTimes:[], restOverrideMode:'keep', reminderZh:'', reminderId:'',
     plannedStartDate:'', plannedEndDate:'', presetMenuOverride:null },
 ];
 const SITUATION_SCOPE_LABELS = { all:'全天', morning:'上午', afternoon:'下午', evening:'晚間' };
@@ -7729,7 +7729,8 @@ function activateSituation(){
   // 複製任務清單（加入完成狀態）
   const activeTasks = (preset.tasks||[]).map(t=>({ ...t, done:false }));
   // 小憩時間（array）
-  const activeRestTime = (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
+  const restOverrideMode = preset.restOverrideMode || 'keep';
+  const activeRestTime = (restOverrideMode === 'override' && preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
   const menuOverride = window._sitMenuOverride || null;
   const startDate = ymd(new Date());
   const endDate = (window._sitEndDate && window._sitEndDate > startDate) ? window._sitEndDate : startDate;
@@ -7740,7 +7741,7 @@ function activateSituation(){
     activeTasks,
     dailyCompletions: {},       // { 'YYYY-MM-DD': { taskId: true/false } }
     suspendedTemplateIds: preset.suspendedTemplateIds || [],
-    activeRestTime, menuOverride
+    restOverrideMode, activeRestTime, menuOverride
   };
   // 自動填入今日提醒（若有設定且今日尚未設定）
   if (preset.reminderZh && preset.reminderZh.trim()) {
@@ -8038,9 +8039,27 @@ function renderSitConfigDetail(){
       <div style="max-height:140px;overflow-y:auto;">${suspendRows}</div>
     </div>
     <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
-      <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:6px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩時間調整（可多段，空白=沿用原設定）</div>
-      ${rtRows}
-      <button onclick="addSituationRestTime('${p.id}')" style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:3px 10px;cursor:pointer;margin-top:2px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增時段</button>
+      <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:8px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩安排</div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;">
+        ${['keep','override','none'].map(mode=>{
+          const labels = { keep:'維持原設定', override:'調整時段', none:'今日不安排小憩' };
+          const descs  = { keep:'使用每週固定的小憩排程，不做變更', override:'設定情境專屬的小憩時間，取代原設定', none:'暫停所有小憩打卡，情境結束後自動恢復' };
+          const cur = p.restOverrideMode || 'keep';
+          const active = cur === mode;
+          return `<label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:9px;background:${active?'#EBF2FA':'white'};border:${active?'1px solid #4A80C4':'0.5px solid #D8DDE5'};cursor:pointer;">
+            <input type="radio" name="restMode_${p.id}" value="${mode}" ${active?'checked':''} onchange="updateSituationRestOverrideMode('${p.id}','${mode}')" style="width:14px;height:14px;accent-color:#2D5E9E;flex-shrink:0;margin-top:2px;">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:${active?'#1A3E70':'#3A3A3A'};">${labels[mode]}</div>
+              <div style="font-size:11px;color:${active?'#2D5E9E':'#8A8A8A'};margin-top:1px;">${descs[mode]}</div>
+            </div>
+          </label>`;
+        }).join('')}
+      </div>
+      ${(p.restOverrideMode||'keep')==='override' ? `
+      <div style="border-top:0.5px solid #D8DDE5;padding-top:8px;">
+        ${rtRows||'<div style="font-size:11px;color:#9A9A9A;padding:2px 0;">尚未設定時段</div>'}
+        <button onclick="addSituationRestTime('${p.id}')" style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:4px 12px;cursor:pointer;margin-top:4px;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增時段</button>
+      </div>` : ''}
     </div>
     <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
       <div style="font-size:11px;font-weight:600;color:#5C3D1E;margin-bottom:6px;"><i class="ti ti-speakerphone" style="font-size:12px;" aria-hidden="true"></i> 啟動時自動填入今日提醒（可留空）</div>
@@ -8082,6 +8101,12 @@ function removeSituationRestTime(presetId, idx){
   const preset = _getSitEditTarget(presetId);
   if (!preset || !preset.restTimes) return;
   preset.restTimes.splice(idx,1);
+  _maybeSave(); renderSituationConfigModal();
+}
+function updateSituationRestOverrideMode(presetId, mode){
+  const preset = _getSitEditTarget(presetId);
+  if (!preset) return;
+  preset.restOverrideMode = mode;
   _maybeSave(); renderSituationConfigModal();
 }
 function updateSituationRestTimeField(presetId, idx, field, val){
@@ -8127,7 +8152,8 @@ function activateSituationFromPreset(presetId){
   const endDate   = (preset.plannedEndDate && preset.plannedEndDate >= startDate) ? preset.plannedEndDate : startDate;
   const scope = preset.scopes[0] || 'all';
   const activeTasks = (preset.tasks||[]).map(t=>({...t, done:false}));
-  const activeRestTime = (preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
+  const restOverrideMode = preset.restOverrideMode || 'keep';
+  const activeRestTime = (restOverrideMode === 'override' && preset.restTimes && preset.restTimes.length) ? [...preset.restTimes] : null;
   state.situationMode = {
     active: true,
     scenarioId: presetId,
@@ -8137,7 +8163,7 @@ function activateSituationFromPreset(presetId){
     activeTasks,
     dailyCompletions: {},
     suspendedTemplateIds: preset.suspendedTemplateIds || [],
-    activeRestTime,
+    restOverrideMode, activeRestTime,
     menuOverride: preset.presetMenuOverride || null
   };
   if (preset.reminderZh && preset.reminderZh.trim()) {
@@ -8573,6 +8599,22 @@ const PUNCH_TYPES = [
    每段 rest 產生 rest_<rsId>_start / rest_<rsId>_end。
    若今日無 restSchedule，回退到舊版單段 rest_start/rest_end。 */
 function getTodayRestSchedules(d=today()){
+  const sm = getActiveSituation();
+  if (sm) {
+    const mode = sm.restOverrideMode || 'keep';
+    if (mode === 'none') return [];
+    if (mode === 'override' && sm.activeRestTime && sm.activeRestTime.length) {
+      return sm.activeRestTime.map((rt, i) => ({
+        id: `sit_rt_${i}`,
+        nameZh: rt.nameZh || '小憩',
+        nameId: rt.nameId || rt.nameZh || 'Istirahat',
+        startTime: rt.startTime,
+        endTime: rt.endTime,
+        weekdays: [0,1,2,3,4,5,6],
+      }));
+    }
+    // mode === 'keep' → fall through to normal logic
+  }
   const dow = d.getDay();
   return (state.restSchedules||[])
     .filter(rs=>(rs.weekdays||[]).includes(dow))
@@ -10873,41 +10915,36 @@ function renderAtikaRestSchedules(){
   const el = document.getElementById('atikaRestSchedules');
   if (!el) return;
   const lang = getCurrentLang();
-  // 情境覆蓋：若今日情境啟動且有 activeRestTime，優先顯示
   const sm = getActiveSituation();
-  if (sm && sm.activeRestTime && sm.activeRestTime.length) {
-    el.classList.remove('hidden');
-    const preset = getSituationPresets().find(p=>p.id===sm.scenarioId);
-    const sitLabel = preset ? (lang==='id'?preset.labelId:preset.labelZh) : '情境';
-    const rtPills = sm.activeRestTime.map(rt=>`
-      <div style="background:#DDE8F0;border:1px solid #9EC4D8;border-radius:8px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:6px;">
-        ${rt.nameZh?`<span style="font-weight:700;color:#2D5E9E;">${rt.nameZh}</span>`:''}
-        <span style="color:#2D4A6A;font-family:monospace;font-weight:600;">${rt.startTime||'?'} – ${rt.endTime||'?'}</span>
-        <span style="font-size:10px;color:#4A80C4;background:#EBF2FA;border-radius:99px;padding:1px 6px;">情境</span>
-      </div>`).join('');
-    el.innerHTML = `
-      <div class="text-xs mb-1" style="color:#4A80C4;font-weight:600;"><i class="ti ti-moon" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${lang==='id'?'Waktu Istirahat (Disesuaikan)':'今日小憩時段（情境調整）'}</div>
-      <div class="flex flex-wrap gap-2">${rtPills}</div>`;
-    return;
-  }
-  // 一般邏輯
-  const dow = today().getDay();
-  const todayRests = (state.restSchedules||[]).filter(rs => (rs.weekdays||[]).includes(dow));
+  const mode = sm ? (sm.restOverrideMode || 'keep') : null;
+  // 情境「不安排小憩」→ 隱藏區塊
+  if (mode === 'none') { el.classList.add('hidden'); el.innerHTML=''; return; }
+  const todayRests = getTodayRestSchedules();
   if (!todayRests.length){ el.classList.add('hidden'); el.innerHTML=''; return; }
   el.classList.remove('hidden');
+  const isSitOverride = mode === 'override';
+  const headerColor = isSitOverride ? '#2D5E9E' : '#D4A870';
+  const headerLabel = isSitOverride
+    ? (lang==='id'?'Waktu Istirahat (Disesuaikan)':'今日小憩時段（情境調整）')
+    : (lang==='id'?'Jadwal Istirahat Hari Ini':'今日休息時段 / Istirahat Hari Ini');
+  const pills = todayRests.map(rs => {
+    const pri = lang==='id' ? (rs.nameId||rs.nameZh) : rs.nameZh;
+    const sec = lang==='id' ? rs.nameZh : (rs.nameId||'');
+    const bg  = isSitOverride ? '#DDE8F0' : '#F5ECD8';
+    const bd  = isSitOverride ? '#9EC4D8' : '#C8A96A';
+    const tc  = isSitOverride ? '#1A3E70' : '#6B3D0F';
+    const sc  = isSitOverride ? '#2D5E9E' : '#8B5E2A';
+    const badge = isSitOverride ? `<span style="font-size:10px;color:#4A80C4;background:#EBF2FA;border-radius:99px;padding:1px 6px;margin-left:4px;">情境</span>` : '';
+    return `<div style="background:${bg};border:1px solid ${bd};border-radius:8px;padding:5px 12px;font-size:12px;display:flex;align-items:center;gap:4px;">
+      <span style="font-weight:700;color:${tc};">${pri}</span>
+      ${sec&&sec!==pri?`<span style="color:${sc};">${sec}</span>`:''}
+      <span style="font-family:monospace;font-weight:600;color:${tc};margin-left:2px;">${rs.startTime||'?'}–${rs.endTime||'?'}</span>
+      ${badge}
+    </div>`;
+  }).join('');
   el.innerHTML = `
-    <div class="text-xs mb-1" style="color:#D4A870;font-weight:600;">😴 今日休息時段 / Istirahat Hari Ini</div>
-    <div class="flex flex-wrap gap-2">
-      ${todayRests.map(rs => {
-        const pri = lang==='id' ? rs.nameId : rs.nameZh;
-        const sec = lang==='id' ? rs.nameZh : rs.nameId;
-        return `<div style="background:#F5ECD8;border:1px solid #C8A96A;border-radius:8px;padding:5px 12px;font-size:12px;">
-          <span style="font-weight:700;color:#6B3D0F;">${pri}</span><span style="color:#8B5E2A;margin-left:5px;">${sec}</span>
-          <span style="color:#5C3310;font-family:monospace;margin-left:6px;font-weight:600;">${rs.startTime}-${rs.endTime}</span>
-        </div>`;
-      }).join('')}
-    </div>
-  `;
+    <div class="text-xs mb-1" style="color:${headerColor};font-weight:600;"><i class="ti ti-moon" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${headerLabel}</div>
+    <div class="flex flex-wrap gap-2">${pills}</div>`;
 }
 
 /* === 明日休假相關 === */
