@@ -6990,12 +6990,15 @@ function renderAtikaView(){
       const _preset = getSituationPresets().find(p=>p.id===_activeSit.scenarioId);
       const _sitMsg = _preset ? (_preset[lang==='id'?'msgId':'msgZh']) : '';
       const _scopeLabel = SITUATION_SCOPE_LABELS[_activeSit.timeScope]||'';
+      const _sitIcon = (_preset && _preset.icon) ? _preset.icon : 'ti-alert-triangle';
+      const _sitLabel = _preset ? (_preset[lang==='id'?'labelId':'labelZh'] || _preset.labelZh) : '';
+      const _sitReminder = (_preset && _preset.reminderZh && _preset.reminderZh.trim()) ? _preset.reminderZh : (_preset ? (_preset[lang==='id'?'msgId':'msgZh'] || '') : '');
       sitBanner.classList.remove('hidden');
       sitBanner.innerHTML = `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:#FFF9E8;">
-        <i class="ti ti-alert-triangle" style="font-size:20px;color:#8A6A00;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+        <i class="ti ${_sitIcon}" style="font-size:20px;color:#8A6A00;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
         <div>
-          <div style="font-size:13px;font-weight:700;color:#3A2000;margin-bottom:3px;">${lang==='id'?'Situasi Hari Ini':'今日情境'}：${_preset?(_preset[lang==='id'?'labelId':'labelZh']):''}（${_scopeLabel}）</div>
-          <div style="font-size:12px;color:#6A4A10;line-height:1.6;">${_sitMsg}</div>
+          <div style="font-size:13px;font-weight:700;color:#3A2000;margin-bottom:3px;">${lang==='id'?'Situasi Hari Ini':'今日情境'}：${_sitLabel}（${_scopeLabel}）</div>
+          ${_sitReminder ? `<div style="font-size:12px;color:#6A4A10;line-height:1.6;">${_sitReminder}</div>` : ''}
         </div>
       </div>`;
     } else {
