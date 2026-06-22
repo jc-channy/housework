@@ -707,8 +707,7 @@
 
     <!-- ═══ 今日情境橫幅 ═══ -->
     <div id="atikaSituationBanner" class="hidden rounded-2xl overflow-hidden" style="border:2px solid #E8B840;"></div>
-    <!-- 情境任務區塊 -->
-    <div id="atikaSituationTasks" class="hidden"></div>
+    <!-- 情境任務區塊（舊位置，已停用） -->
 
     <!-- ═══ 卡片 1.5：今日菜單 ═══ -->
     <section id="atikaTodayMenu" class="hidden rounded-2xl border overflow-hidden" style="background:#FBF3E4;border-color:#DEC99A;">
@@ -737,6 +736,9 @@
         <div class="text-sm mb-3" style="color:var(--ic-choc-mid);">Semua tugas hari ini selesai 🎉</div>
         <div class="text-xs px-4 py-2 rounded-full inline-block" style="background:var(--ic-vanilla);color:var(--ic-choc-mid);">好好休息，辛苦了 ☕</div>
       </div>
+
+      <!-- 情境任務（注入到工作區頂部）-->
+      <div id="atikaSituationTasksInSlot" class="hidden" style="padding:10px 12px 0;"></div>
 
       <!-- 彈性（優先顯示在最上方） -->
       <div id="atikaFlexSection" class="atika-slot-section" style="border-top:1px solid var(--ic-vanilla);">
@@ -6988,8 +6990,8 @@ function renderAtikaView(){
     }
   }
 
-  // ── 情境任務區塊 ──
-  const sitTasksEl = document.getElementById('atikaSituationTasks');
+  // ── 情境任務區塊（注入工作區頂部）──
+  const sitTasksEl = document.getElementById('atikaSituationTasksInSlot');
   if (sitTasksEl) {
     const sm = _activeSit;
     const activeTasks = sm?.activeTasks || [];
