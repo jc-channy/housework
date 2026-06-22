@@ -1586,15 +1586,19 @@
 
 <!-- ===== 情境設定 Modal ===== -->
 <div id="situationConfigModal" class="hidden fixed inset-0 z-50 flex items-end justify-center modal-backdrop p-4 pb-6">
-  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden">
-    <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:#E5DDD5;">
-      <div>
-        <div class="text-base font-bold" style="color:#5C3D1E;">情境設定</div>
-        <div class="text-xs mt-0.5" style="color:#9A8070;">為每個情境預設任務清單與小憩時間</div>
+  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden" style="display:flex;flex-direction:column;max-height:88vh;">
+    <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color:#E5DDD5;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="sitConfigBackBtn" onclick="cancelSitConfigEdit()" class="hidden" style="font-size:26px;color:#9A8070;line-height:1;background:none;border:none;cursor:pointer;padding:0 4px 0 0;" aria-label="返回">‹</button>
+        <div>
+          <div id="sitConfigTitle" class="text-base font-bold" style="color:#5C3D1E;">情境設定</div>
+          <div id="sitConfigSubtitle" class="text-xs mt-0.5" style="color:#9A8070;">為每個情境預設任務清單與小憩時間</div>
+        </div>
       </div>
       <button onclick="closeSituationConfigModal()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
     </div>
-    <div id="situationConfigBody" class="p-4 max-h-[80vh] overflow-y-auto space-y-4"></div>
+    <div id="situationConfigBody" style="flex:1;min-height:0;overflow-y:auto;padding:16px;"></div>
+    <div id="sitConfigFooter" style="display:none;padding:12px 16px;border-top:0.5px solid #E5DDD5;flex-shrink:0;gap:8px;"></div>
   </div>
 </div>
 
@@ -7807,7 +7811,7 @@ function deactivateSituation(){
 }
 /* 情境預設：切換暫停工作 */
 function toggleSituationSuspend(presetId, templateId, checked){
-  const preset = state.situationPresets.find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   if (!preset.suspendedTemplateIds) preset.suspendedTemplateIds = [];
   if (checked){
@@ -7815,7 +7819,7 @@ function toggleSituationSuspend(presetId, templateId, checked){
   } else {
     preset.suspendedTemplateIds = preset.suspendedTemplateIds.filter(id=>id!==templateId);
   }
-  save();
+  _maybeSave();
 }
 /* 情境任務完成切換（幫傭端） */
 function toggleSituationTask(idx){
@@ -7840,187 +7844,225 @@ function getSitTaskDone(sm, idx){
 }
 /* ===== 情境設定 Modal ===== */
 function openSituationConfigModal(){
+  window._sitEditDraft = null;
+  window._sitEditId = null;
   document.getElementById('situationConfigModal').classList.remove('hidden');
   renderSituationConfigModal();
 }
 function closeSituationConfigModal(){
+  window._sitEditDraft = null;
+  window._sitEditId = null;
   document.getElementById('situationConfigModal').classList.add('hidden');
 }
 function renderSituationConfigModal(){
+  if(window._sitEditDraft && window._sitEditId) renderSitConfigDetail();
+  else renderSitConfigList();
+}
+function renderSitConfigList(){
+  document.getElementById('sitConfigTitle').textContent = '情境設定';
+  document.getElementById('sitConfigSubtitle').textContent = '為每個情境預設任務清單與小憩時間';
+  document.getElementById('sitConfigBackBtn').classList.add('hidden');
+  document.getElementById('sitConfigFooter').style.display = 'none';
   const body = document.getElementById('situationConfigBody');
   const presets = getSituationPresets();
-  let html = '';
-  presets.forEach((p, pi) => {
-    const tasks = p.tasks || [];
-    const restTimes = p.restTimes || [];
-    const taskRows = tasks.length
-      ? tasks.map((t,i)=>`
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#FFFDF5;border-radius:7px;border:0.5px solid #EDD87A;margin-bottom:4px;">
-          <span style="flex:1;font-size:12px;color:#4A2C08;">${t.nameZh}</span>
-          <button onclick="removeSituationTask('${p.id}',${i})" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 4px;" aria-label="移除">✕</button>
-        </div>`).join('')
-      : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">尚未設定任何任務</div>`;
-
-    const rtRows = restTimes.map((rt,ri)=>`
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-        <input type="text" value="${rt.nameZh||''}" placeholder="名稱（如午睡）" onchange="updateSituationRestTimeField('${p.id}',${ri},'nameZh',this.value)" style="width:72px;font-size:11px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
-        <input type="time" value="${rt.startTime||''}" onchange="updateSituationRestTimeField('${p.id}',${ri},'startTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
-        <span style="font-size:11px;color:#9A8070;">–</span>
-        <input type="time" value="${rt.endTime||''}" onchange="updateSituationRestTimeField('${p.id}',${ri},'endTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
-        <button onclick="removeSituationRestTime('${p.id}',${ri})" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 4px;" aria-label="移除">✕</button>
-      </div>`).join('');
-
-    const reminderZh = p.reminderZh || '';
-    const suspendedIds = new Set(p.suspendedTemplateIds || []);
-    const allTemplates = state.templates || [];
-    const suspendRows = allTemplates.length
-      ? allTemplates.map(t=>{
-          const checked = suspendedIds.has(t.id);
-          return '<label style="display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:'+(checked?'#F0EDE8':'white')+';border:0.5px solid '+(checked?'#C8A870':'#E5DDD5')+';cursor:pointer;margin-bottom:3px;">'
-            +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleSituationSuspend(\''+p.id+'\',\''+t.id+'\',this.checked)" style="width:13px;height:13px;accent-color:#C07030;">'
-            +'<span style="font-size:12px;color:#4A2808;">'+(t.nameZh||'')+'</span>'
-            +'</label>';
-        }).join('')
-      : '<div style="font-size:12px;color:#B0A090;padding:4px 0;">工作庫尚無項目</div>';
-
-    // 排程日期狀態提示
-    const _ps = p.plannedStartDate||'', _pe = p.plannedEndDate||'';
-    const _todayStr = ymd(new Date());
-    let dateStatusHtml = '';
-    if (_ps) {
-      if (_pe && _pe < _ps) {
-        dateStatusHtml = '<div style="font-size:11px;color:#C04040;">結束日期不能早於開始日期</div>';
-      } else {
-        const _days = _pe ? (Math.round((new Date(_pe+'T00:00:00')-new Date(_ps+'T00:00:00'))/86400000)+1) : 1;
-        const _end = _pe||_ps;
-        if (_todayStr > _end) dateStatusHtml = '<div style="font-size:11px;color:#9A8070;background:#F5F2EE;border-radius:6px;padding:4px 8px;">此情境日期已過期</div>';
-        else if (_todayStr >= _ps) dateStatusHtml = '<div style="font-size:11px;color:#1E6E3D;background:#E8F5EE;border-radius:6px;padding:4px 8px;font-weight:600;">✓ 進行中（今日在情境期間內）</div>';
-        else dateStatusHtml = '<div style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border-radius:6px;padding:4px 8px;">📅 共 '+_days+' 天，'+_ps+' 自動啟動</div>';
-      }
-    }
-
-    // 菜單覆蓋選項
-    const menuOverrideHtml = ['normal','all'].map(val=>{
-      const isChecked = val==='normal' ? !p.presetMenuOverride : p.presetMenuOverride===val;
-      const mlabel = val==='normal' ? '照常顯示菜單' : '全部不煮（隱藏菜單）';
-      return '<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:'+(isChecked?'#FFF4E0':'white')+';border:0.5px solid '+(isChecked?'#C07030':'#E5DDD5')+';cursor:pointer;">'
-        +'<input type="radio" name="presetMenu_'+p.id+'" '+(isChecked?'checked':'')+' onchange="updateSituationPresetMenuOverride(\''+p.id+'\',\''+val+'\')" style="width:13px;height:13px;accent-color:#C07030;">'
-        +'<span style="font-size:12px;color:#4A2808;">'+mlabel+'</span>'
-        +'</label>';
-    }).join('');
-
-    // 啟動按鈕
-    const _sm = state.situationMode;
-    const _alreadyActive = _sm && _sm.active && _sm.scenarioId === p.id;
-    let activateBtnHtml = '';
-    if (_alreadyActive) {
-      activateBtnHtml = '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
-    } else if (_ps) {
-      const canActivate = !_pe || _pe >= _todayStr;
-      activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" '+(canActivate?'':'disabled')+' style="width:100%;margin-top:10px;background:'+(canActivate?'#2D5A1A':'#D5C5B0')+';color:'+(canActivate?'white':'#9A8070')+';border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:'+(canActivate?'pointer':'not-allowed')+';">'
-        +'<i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境</button>';
-    }
-
-    html += `
-      <div style="border-radius:12px;border:1px solid #E5DDD5;overflow:hidden;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#FAF6F0;">
-          <button onclick="openSituationIconPicker('${p.id}')" style="width:32px;height:32px;border-radius:8px;border:1px solid #DDD0C0;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="更換圖示" aria-label="更換圖示">
-            <i class="ti ${p.icon}" style="font-size:18px;color:#854F0B;" aria-hidden="true"></i>
-          </button>
-          <input value="${p.labelZh.replace(/"/g,'&quot;')}" onchange="updateSituationPresetField('${p.id}','labelZh',this.value)" style="flex:1;font-size:13px;font-weight:700;color:#5C3D1E;border:none;background:transparent;outline:none;min-width:0;" placeholder="情境名稱">
-          <button onclick="deleteSituationPreset('${p.id}')" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 6px;flex-shrink:0;" aria-label="刪除情境">✕ 刪除</button>
-        </div>
-        <div style="padding:10px 12px;">
-          <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;">情境任務</div>
-          ${taskRows}
-          <div style="display:flex;gap:6px;margin-top:7px;">
-            <button onclick="openSitTaskPicker('${p.id}')" style="font-size:11px;color:#4A80C4;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-library" style="font-size:11px;" aria-hidden="true"></i> 從工作庫選</button>
-            <button onclick="openSitTaskCustom('${p.id}')" style="font-size:11px;color:#5C3D1E;background:#F0E8DC;border:0.5px solid #C8A870;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增臨時任務</button>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
-            <div style="font-size:11px;font-weight:600;color:#8A6000;margin-bottom:6px;"><i class="ti ti-eye-off" style="font-size:12px;" aria-hidden="true"></i> 情境期間暫停哪些工作（灰底顯示）</div>
-            <div style="max-height:140px;overflow-y:auto;">${suspendRows}</div>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
-            <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:6px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩時間調整（可多段，空白=沿用原設定）</div>
-            ${rtRows}
-            <button onclick="addSituationRestTime('${p.id}')" style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:3px 10px;cursor:pointer;margin-top:2px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增時段</button>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
-            <div style="font-size:11px;font-weight:600;color:#5C3D1E;margin-bottom:6px;"><i class="ti ti-speakerphone" style="font-size:12px;" aria-hidden="true"></i> 啟動時自動填入今日提醒（可留空）</div>
-            <textarea rows="2" placeholder="輸入啟動此情境時要顯示的提醒內容…" onchange="updateSituationReminderZh('${p.id}',this.value)" style="width:100%;font-size:12px;padding:6px 8px;border:0.5px solid #C0C8D0;border-radius:7px;resize:none;box-sizing:border-box;">${reminderZh}</textarea>
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
-            <div style="font-size:11px;font-weight:600;color:#1E6E3D;margin-bottom:6px;"><i class="ti ti-calendar-event" style="font-size:12px;" aria-hidden="true"></i> 排程日期（已知的多天情境，到日期自動啟動）</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-              <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">開始</label>
-              <input type="date" value="${p.plannedStartDate||''}" onchange="updateSituationPlannedDate('${p.id}','plannedStartDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-              <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">結束</label>
-              <input type="date" value="${p.plannedEndDate||''}" min="${p.plannedStartDate||''}" onchange="updateSituationPlannedDate('${p.id}','plannedEndDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
-            </div>
-            ${dateStatusHtml}
-          </div>
-          <div style="margin-top:10px;padding-top:10px;border-top:0.5px solid #E5DDD5;">
-            <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;"><i class="ti ti-chef-hat" style="font-size:12px;" aria-hidden="true"></i> 情境期間菜單</div>
-            <div style="display:flex;flex-direction:column;gap:5px;">
-              ${menuOverrideHtml}
-            </div>
-          </div>
-          ${activateBtnHtml}
-        </div>
-      </div>`;
+  let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+  presets.forEach(p => {
+    const isActive = state.situationMode && state.situationMode.active && state.situationMode.scenarioId === p.id;
+    html += `<button onclick="enterSitConfigEdit('${p.id}')" style="display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:white;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};border-radius:12px;cursor:pointer;text-align:left;">
+      <div style="width:38px;height:38px;border-radius:10px;background:${isActive?'#FFF4D0':'#FAF6F0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};">
+        <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:20px;color:${isActive?'#8A5A00':'#854F0B'};" aria-hidden="true"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;color:#5C3D1E;">${p.labelZh}</div>
+        ${isActive?'<div style="font-size:11px;color:#C07030;font-weight:600;margin-top:1px;">進行中</div>':'<div style="font-size:11px;color:#B0A090;margin-top:1px;">'+(p.tasks&&p.tasks.length?p.tasks.length+' 項任務':'尚未設定任務')+'</div>'}
+      </div>
+      <i class="ti ti-chevron-right" style="font-size:18px;color:#C8A870;flex-shrink:0;" aria-hidden="true"></i>
+    </button>`;
   });
-  html += `<button onclick="addSituationPreset()" style="width:100%;border:1.5px dashed #C8A870;border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:#7A5A00;background:transparent;cursor:pointer;margin-top:4px;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增情境</button>`;
+  html += '</div>';
+  html += `<button onclick="addSituationPreset()" style="width:100%;border:1.5px dashed #C8A870;border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:#7A5A00;background:transparent;cursor:pointer;margin-top:10px;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增情境</button>`;
   body.innerHTML = html;
 }
+function renderSitConfigDetail(){
+  const p = window._sitEditDraft;
+  if(!p) return;
+  // Update header chrome
+  document.getElementById('sitConfigTitle').textContent = p.labelZh || '情境設定';
+  document.getElementById('sitConfigSubtitle').textContent = '調整後請按儲存';
+  document.getElementById('sitConfigBackBtn').classList.remove('hidden');
+  const footer = document.getElementById('sitConfigFooter');
+  footer.style.display = 'flex';
+  footer.innerHTML = '<button onclick="cancelSitConfigEdit()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #C8A870;background:white;color:#7A5530;font-size:13px;font-weight:600;cursor:pointer;">取消</button>'
+    +'<button onclick="saveSitConfigEdit()" style="flex:2;padding:10px;border-radius:10px;background:#5C3D1E;color:white;border:none;font-size:13px;font-weight:700;cursor:pointer;">儲存</button>';
+
+  const tasks = p.tasks || [];
+  const restTimes = p.restTimes || [];
+  const taskRows = tasks.length
+    ? tasks.map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#FFFDF5;border-radius:7px;border:0.5px solid #EDD87A;margin-bottom:4px;">
+        <span style="flex:1;font-size:12px;color:#4A2C08;">${t.nameZh}</span>
+        <button onclick="removeSituationTask('${p.id}',${i})" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 4px;" aria-label="移除">✕</button>
+      </div>`).join('')
+    : `<div style="font-size:12px;color:#B0A090;padding:4px 0;">尚未設定任何任務</div>`;
+
+  const rtRows = restTimes.map((rt,ri)=>`
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+      <input type="text" value="${rt.nameZh||''}" placeholder="名稱（如午睡）" onchange="updateSituationRestTimeField('${p.id}',${ri},'nameZh',this.value)" style="width:72px;font-size:11px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+      <input type="time" value="${rt.startTime||''}" onchange="updateSituationRestTimeField('${p.id}',${ri},'startTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+      <span style="font-size:11px;color:#9A8070;">–</span>
+      <input type="time" value="${rt.endTime||''}" onchange="updateSituationRestTimeField('${p.id}',${ri},'endTime',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+      <button onclick="removeSituationRestTime('${p.id}',${ri})" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 4px;" aria-label="移除">✕</button>
+    </div>`).join('');
+
+  const reminderZh = p.reminderZh || '';
+  const suspendedIds = new Set(p.suspendedTemplateIds || []);
+  const allTemplates = state.templates || [];
+  const suspendRows = allTemplates.length
+    ? allTemplates.map(t=>{
+        const checked = suspendedIds.has(t.id);
+        return '<label style="display:flex;align-items:center;gap:7px;padding:4px 6px;border-radius:6px;background:'+(checked?'#F0EDE8':'white')+';border:0.5px solid '+(checked?'#C8A870':'#E5DDD5')+';cursor:pointer;margin-bottom:3px;">'
+          +'<input type="checkbox" '+(checked?'checked':'')+' onchange="toggleSituationSuspend(\''+p.id+'\',\''+t.id+'\',this.checked)" style="width:13px;height:13px;accent-color:#C07030;">'
+          +'<span style="font-size:12px;color:#4A2808;">'+(t.nameZh||'')+'</span>'
+          +'</label>';
+      }).join('')
+    : '<div style="font-size:12px;color:#B0A090;padding:4px 0;">工作庫尚無項目</div>';
+
+  const _ps = p.plannedStartDate||'', _pe = p.plannedEndDate||'';
+  const _todayStr = ymd(new Date());
+  let dateStatusHtml = '';
+  if (_ps) {
+    if (_pe && _pe < _ps) {
+      dateStatusHtml = '<div style="font-size:11px;color:#C04040;">結束日期不能早於開始日期</div>';
+    } else {
+      const _days = _pe ? (Math.round((new Date(_pe+'T00:00:00')-new Date(_ps+'T00:00:00'))/86400000)+1) : 1;
+      const _end = _pe||_ps;
+      if (_todayStr > _end) dateStatusHtml = '<div style="font-size:11px;color:#9A8070;background:#F5F2EE;border-radius:6px;padding:4px 8px;">此情境日期已過期</div>';
+      else if (_todayStr >= _ps) dateStatusHtml = '<div style="font-size:11px;color:#1E6E3D;background:#E8F5EE;border-radius:6px;padding:4px 8px;font-weight:600;">✓ 進行中（今日在情境期間內）</div>';
+      else dateStatusHtml = '<div style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border-radius:6px;padding:4px 8px;">📅 共 '+_days+' 天，'+_ps+' 自動啟動</div>';
+    }
+  }
+
+  const menuOverrideHtml = ['normal','all'].map(val=>{
+    const isChecked = val==='normal' ? !p.presetMenuOverride : p.presetMenuOverride===val;
+    const mlabel = val==='normal' ? '照常顯示菜單' : '全部不煮（隱藏菜單）';
+    return '<label style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;background:'+(isChecked?'#FFF4E0':'white')+';border:0.5px solid '+(isChecked?'#C07030':'#E5DDD5')+';cursor:pointer;">'
+      +'<input type="radio" name="presetMenu_'+p.id+'" '+(isChecked?'checked':'')+' onchange="updateSituationPresetMenuOverride(\''+p.id+'\',\''+val+'\')" style="width:13px;height:13px;accent-color:#C07030;">'
+      +'<span style="font-size:12px;color:#4A2808;">'+mlabel+'</span>'
+      +'</label>';
+  }).join('');
+
+  const _alreadyActive = state.situationMode && state.situationMode.active && state.situationMode.scenarioId === p.id;
+  let activateBtnHtml = '';
+  if (_alreadyActive) {
+    activateBtnHtml = '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
+  } else if (_ps) {
+    const canActivate = !_pe || _pe >= _todayStr;
+    activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" '+(canActivate?'':'disabled')+' style="width:100%;margin-top:10px;background:'+(canActivate?'#2D5A1A':'#D5C5B0')+';color:'+(canActivate?'white':'#9A8070')+';border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:'+(canActivate?'pointer':'not-allowed')+';">'
+      +'<i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境</button>';
+  }
+
+  const body = document.getElementById('situationConfigBody');
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FAF6F0;border-radius:10px;margin-bottom:14px;border:0.5px solid #E5DDD5;">
+      <button onclick="openSituationIconPicker('${p.id}')" style="width:40px;height:40px;border-radius:10px;border:1px solid #DDD0C0;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="更換圖示" aria-label="更換圖示">
+        <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:22px;color:#854F0B;" aria-hidden="true"></i>
+      </button>
+      <input id="sitDetailNameInput" value="${p.labelZh.replace(/"/g,'&quot;')}" oninput="updateSituationPresetField('${p.id}','labelZh',this.value)" style="flex:1;font-size:15px;font-weight:700;color:#5C3D1E;border:none;background:transparent;outline:none;min-width:0;" placeholder="情境名稱">
+      <button onclick="deleteSituationPreset('${p.id}')" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 6px;flex-shrink:0;" aria-label="刪除情境">✕ 刪除</button>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;">情境任務</div>
+    ${taskRows}
+    <div style="display:flex;gap:6px;margin-top:7px;">
+      <button onclick="openSitTaskPicker('${p.id}')" style="font-size:11px;color:#4A80C4;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-library" style="font-size:11px;" aria-hidden="true"></i> 從工作庫選</button>
+      <button onclick="openSitTaskCustom('${p.id}')" style="font-size:11px;color:#5C3D1E;background:#F0E8DC;border:0.5px solid #C8A870;border-radius:7px;padding:4px 10px;cursor:pointer;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增臨時任務</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+      <div style="font-size:11px;font-weight:600;color:#8A6000;margin-bottom:6px;"><i class="ti ti-eye-off" style="font-size:12px;" aria-hidden="true"></i> 情境期間暫停哪些工作（灰底顯示）</div>
+      <div style="max-height:140px;overflow-y:auto;">${suspendRows}</div>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+      <div style="font-size:11px;font-weight:600;color:#2D5E9E;margin-bottom:6px;"><i class="ti ti-moon" style="font-size:12px;" aria-hidden="true"></i> 小憩時間調整（可多段，空白=沿用原設定）</div>
+      ${rtRows}
+      <button onclick="addSituationRestTime('${p.id}')" style="font-size:11px;color:#2D5E9E;background:#EBF2FA;border:0.5px solid #9EC4D8;border-radius:7px;padding:3px 10px;cursor:pointer;margin-top:2px;"><i class="ti ti-plus" style="font-size:11px;" aria-hidden="true"></i> 新增時段</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+      <div style="font-size:11px;font-weight:600;color:#5C3D1E;margin-bottom:6px;"><i class="ti ti-speakerphone" style="font-size:12px;" aria-hidden="true"></i> 啟動時自動填入今日提醒（可留空）</div>
+      <textarea rows="2" placeholder="輸入啟動此情境時要顯示的提醒內容…" oninput="updateSituationReminderZh('${p.id}',this.value)" style="width:100%;font-size:12px;padding:6px 8px;border:0.5px solid #C0C8D0;border-radius:7px;resize:none;box-sizing:border-box;">${reminderZh}</textarea>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+      <div style="font-size:11px;font-weight:600;color:#1E6E3D;margin-bottom:6px;"><i class="ti ti-calendar-event" style="font-size:12px;" aria-hidden="true"></i> 排程日期（已知的多天情境，到日期自動啟動）</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+        <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">開始</label>
+        <input type="date" value="${_ps}" onchange="updateSituationPlannedDate('${p.id}','plannedStartDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <label style="font-size:11px;color:#6A7080;white-space:nowrap;width:48px;">結束</label>
+        <input type="date" value="${_pe}" min="${_ps}" onchange="updateSituationPlannedDate('${p.id}','plannedEndDate',this.value);renderSituationConfigModal();" style="flex:1;font-size:12px;padding:4px 6px;border:0.5px solid #C0C8D0;border-radius:6px;">
+      </div>
+      ${dateStatusHtml}
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+      <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;"><i class="ti ti-chef-hat" style="font-size:12px;" aria-hidden="true"></i> 情境期間菜單</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">${menuOverrideHtml}</div>
+    </div>
+    ${activateBtnHtml}`;
+}
 function removeSituationTask(presetId, idx){
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
+  if (!preset.tasks) preset.tasks = [];
   preset.tasks.splice(idx,1);
-  save(); renderSituationConfigModal();
+  _maybeSave(); renderSituationConfigModal();
 }
 function addSituationRestTime(presetId){
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   if (!preset.restTimes) preset.restTimes = [];
   preset.restTimes.push({ nameZh:'', startTime:'', endTime:'' });
-  save(); renderSituationConfigModal();
+  _maybeSave(); renderSituationConfigModal();
 }
 function removeSituationRestTime(presetId, idx){
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset || !preset.restTimes) return;
   preset.restTimes.splice(idx,1);
-  save(); renderSituationConfigModal();
+  _maybeSave(); renderSituationConfigModal();
 }
 function updateSituationRestTimeField(presetId, idx, field, val){
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset || !preset.restTimes || !preset.restTimes[idx]) return;
   preset.restTimes[idx][field] = val;
-  save();
+  _maybeSave();
 }
 function updateSituationReminderZh(presetId, val){
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   preset.reminderZh = val;
-  save();
+  _maybeSave();
 }
 function updateSituationPlannedDate(presetId, field, val){
-  const preset = state.situationPresets.find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   preset[field] = val;
-  save();
+  _maybeSave();
 }
 function updateSituationPresetMenuOverride(presetId, val){
-  const preset = state.situationPresets.find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   preset.presetMenuOverride = (val === 'normal') ? null : val;
-  save();
+  _maybeSave();
   renderSituationConfigModal();
 }
 /* 從情境設定直接啟動（已知日期情境） */
 function activateSituationFromPreset(presetId){
+  // If in draft mode, auto-save draft first
+  if(window._sitEditDraft && window._sitEditId === presetId){
+    if(!state.situationPresets) state.situationPresets = [];
+    const _draftIdx = state.situationPresets.findIndex(p=>p.id===presetId);
+    if(_draftIdx === -1) state.situationPresets.push(window._sitEditDraft);
+    else state.situationPresets[_draftIdx] = window._sitEditDraft;
+    window._sitEditDraft = null;
+    window._sitEditId = null;
+  }
   const preset = getSituationPresets().find(p=>p.id===presetId);
   if (!preset) return;
   const todayStr = ymd(new Date());
@@ -8054,8 +8096,11 @@ function activateSituationFromPreset(presetId){
 }
 function deleteSituationPreset(presetId){
   if (!confirm('確定要刪除這個情境？')) return;
+  // Discard draft first
+  window._sitEditDraft = null;
+  window._sitEditId = null;
   const idx = state.situationPresets.findIndex(p=>p.id===presetId);
-  if (idx === -1) return;
+  if (idx === -1) { renderSituationConfigModal(); return; }
   state.situationPresets.splice(idx,1);
   save(); renderSituationConfigModal();
 }
@@ -8072,10 +8117,45 @@ const SITUATION_ICON_OPTIONS = [
   'ti-swim','ti-dumbbell','ti-run','ti-yoga',
 ];
 let _sitIconPickerTarget = null; // 'edit:{presetId}' or 'add'
+window._sitEditDraft = null;
+window._sitEditId = null;
+
+/* ===== Draft helpers for 情境設定 two-level nav ===== */
+function _getSitEditTarget(presetId){
+  if(window._sitEditDraft && window._sitEditId === presetId) return window._sitEditDraft;
+  return getSituationPresets().find(p=>p.id===presetId);
+}
+function _maybeSave(){
+  if(!window._sitEditDraft) save();
+}
+function enterSitConfigEdit(presetId){
+  const preset = getSituationPresets().find(p=>p.id===presetId);
+  if(!preset) return;
+  window._sitEditDraft = JSON.parse(JSON.stringify(preset));
+  window._sitEditId = presetId;
+  renderSituationConfigModal();
+}
+function saveSitConfigEdit(){
+  if(!window._sitEditDraft || !window._sitEditId) return;
+  if(!state.situationPresets) state.situationPresets = [];
+  const idx = state.situationPresets.findIndex(p=>p.id===window._sitEditId);
+  if(idx === -1) state.situationPresets.push(window._sitEditDraft);
+  else state.situationPresets[idx] = window._sitEditDraft;
+  window._sitEditDraft = null;
+  window._sitEditId = null;
+  save();
+  renderManagerSituationBar();
+  renderSituationConfigModal();
+}
+function cancelSitConfigEdit(){
+  window._sitEditDraft = null;
+  window._sitEditId = null;
+  renderSituationConfigModal();
+}
 
 function openSituationIconPicker(presetId){
   _sitIconPickerTarget = 'edit:' + presetId;
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   const current = preset ? preset.icon : '';
   _renderIconPickerGrid('situationIconPickerBody', current, (icon)=>{
     updateSituationPresetField(presetId,'icon',icon);
@@ -8138,26 +8218,31 @@ function confirmAddSituationPreset(){
   state.situationPresets.push(newPreset);
   save();
   closeAddSituationModal();
+  // Enter detail edit view for the new preset
+  window._sitEditDraft = JSON.parse(JSON.stringify(newPreset));
+  window._sitEditId = newPreset.id;
   renderSituationConfigModal();
 }
 function addSituationPreset(){
   openAddSituationModal();
 }
 function updateSituationPresetField(presetId, field, value){
-  const presets = getSituationPresets();
-  const p = presets.find(x=>x.id===presetId);
-  if(!p) return;
-  if(!state.situationPresets || !state.situationPresets.length) state.situationPresets = presets;
-  const sp = state.situationPresets.find(x=>x.id===presetId);
-  if(sp) sp[field] = value;
-  save();
+  const preset = _getSitEditTarget(presetId);
+  if(!preset) return;
+  preset[field] = value;
+  _maybeSave();
+  // Update title in header if name changed while in detail view
+  if(field === 'labelZh' && window._sitEditDraft && window._sitEditId === presetId){
+    const titleEl = document.getElementById('sitConfigTitle');
+    if(titleEl) titleEl.textContent = value || '情境設定';
+  }
 }
 /* 從工作庫選 */
 function openSitTaskPicker(presetId){
   window._sitPickerPresetId = presetId;
   document.getElementById('sitTaskPickerModal').classList.remove('hidden');
   const body = document.getElementById('sitTaskPickerBody');
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   const cfgTasks = preset ? (preset.tasks || []) : [];
   const existingIds = new Set(cfgTasks.filter(t=>t.source==='template').map(t=>t.templateId));
   const templates = (state.templates||[]);
@@ -8179,11 +8264,11 @@ function addSituationTaskFromTemplate(templateId){
   if (!presetId) return;
   const t = (state.templates||[]).find(x=>x.id===templateId);
   if (!t) return;
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   if (!preset.tasks) preset.tasks = [];
   preset.tasks.push({ id:'st_'+Date.now(), templateId:t.id, nameZh:t.nameZh||'', nameId:t.nameId||'', source:'template' });
-  save();
+  _maybeSave();
   openSitTaskPicker(presetId); // refresh picker
   renderSituationConfigModal();
 }
@@ -8192,11 +8277,11 @@ function openSitTaskCustom(presetId){
   const nameZh = prompt('任務名稱（中文）：');
   if (!nameZh || !nameZh.trim()) return;
   const nameId = prompt('任務名稱（印尼文，可空白）：') || '';
-  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const preset = _getSitEditTarget(presetId);
   if (!preset) return;
   if (!preset.tasks) preset.tasks = [];
   preset.tasks.push({ id:'st_'+Date.now(), nameZh:nameZh.trim(), nameId:nameId.trim(), source:'custom' });
-  save(); renderSituationConfigModal();
+  _maybeSave(); renderSituationConfigModal();
 }
 function renderManagerSituationBar(){
   const bar = document.getElementById('mgrSituationBar');
