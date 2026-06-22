@@ -7750,6 +7750,7 @@ function toggleSituationTask(idx){
   sm.dailyCompletions[todayKey][taskId] = wasDone ? false : { done: true, at: new Date().toISOString() };
   save();
   renderAtikaView();
+  renderManagerSituationBar();
 }
 /* 取得今日情境任務的完成狀態 */
 function getSitTaskDone(sm, idx){
@@ -8319,6 +8320,36 @@ function renderManagerSituationBar(){
     const subText = daysLeft !== null
       ? `情境進行中・${sm.endDate} 結束 · 已通知${getHelperName()}`
       : `今日結束自動解除 · 已通知${getHelperName()}`;
+    // 情境任務卡（獨立方案 B）
+    const tasks = sm.activeTasks || [];
+    const todayKey = ymd(new Date());
+    const dayComp = sm.dailyCompletions?.[todayKey] || {};
+    const doneCount = tasks.filter(t=>{ const v=dayComp[t.id]; return !!(v===true||(v&&v.done)); }).length;
+    const taskRows = tasks.map((t,idx)=>{
+      const v = dayComp[t.id];
+      const done = !!(v===true||(v&&v.done));
+      const checkStyle = done
+        ? 'background:#6A7840;border-color:#6A7840;'
+        : 'background:transparent;border:1.5px dashed #C8A870;';
+      const checkIcon = done ? `<i class="ti ti-check" style="font-size:10px;color:#FAF7F2;" aria-hidden="true"></i>` : '';
+      const nameStyle = done ? 'color:var(--ic-choc-mid);text-decoration:line-through;' : 'color:var(--ic-chocolate);';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;${idx>0?'border-top:0.5px solid #EDE8D8;':''}">
+        <button onclick="toggleSituationTask(${idx})" style="width:20px;height:20px;border-radius:50%;${checkStyle}display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px;" aria-label="切換完成狀態">${checkIcon}</button>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;${nameStyle}">${t.nameZh||''}</div>
+          <div class="id-text" style="font-size:11px;color:var(--ic-choc-mid);">${t.nameId||''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const taskCard = tasks.length ? `
+    <div style="border:1px solid #E8D880;border-radius:12px;background:#FFFDF5;padding:10px 12px;margin-top:8px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <i class="ti ti-list-check" style="font-size:13px;color:#8A6A00;" aria-hidden="true"></i>
+        <span style="font-size:12px;font-weight:600;color:#5C3D1E;">情境臨時工作</span>
+        <span style="font-size:10px;color:#9A7A00;background:#FFF5C0;border-radius:4px;padding:0 5px;margin-left:auto;">${doneCount} / ${tasks.length} 完成</span>
+      </div>
+      ${taskRows}
+    </div>` : '';
     bar.innerHTML = `<div style="border-radius:14px;border:1.5px solid #E8B840;border-left:4px solid #C9A830;background:#FFF9E8;padding:9px 12px;display:flex;align-items:center;gap:8px;margin-bottom:0;">
       <div style="width:26px;height:26px;border-radius:50%;background:#FFF5C0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <i class="ti ti-alert-triangle" style="font-size:13px;color:#8A6A00;" aria-hidden="true"></i>
@@ -8328,7 +8359,7 @@ function renderManagerSituationBar(){
         <div class="text-xs" style="color:#8A6A00;">${subText}</div>
       </div>
       <button onclick="deactivateSituation()" style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:2px 10px;cursor:pointer;white-space:nowrap;">解除</button>
-    </div>`;
+    </div>${taskCard}`;
   } else {
     bar.innerHTML = `<div style="display:flex;align-items:center;gap:6px;">
       <button onclick="openSituationModal()" style="flex:1;border-radius:14px;border:1px dashed #D5C5B0;background:transparent;padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;text-align:left;">
