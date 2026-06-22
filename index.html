@@ -7654,12 +7654,23 @@ function renderSituationModal(){
   const sm = getActiveSituation();
   const selectedId = window._sitSelectedId || (sm ? sm.scenarioId : null);
   const selectedScope = window._sitSelectedScope || (sm ? sm.timeScope : null);
+  const _todayStrStep1 = ymd(new Date());
 
   let html = '';
   getSituationPresets().forEach(p => {
     const isSelected = selectedId === p.id;
-    const borderStyle = isSelected ? 'border:2px solid #C07030;' : 'border:0.5px solid #E5DDD5;';
+    const isCurrentlyActive = sm && sm.scenarioId === p.id;
+    const isScheduled = !isCurrentlyActive && p.plannedStartDate && p.plannedStartDate > _todayStrStep1;
+    const borderStyle = isSelected ? 'border:2px solid #C07030;' : isCurrentlyActive ? 'border:1.5px solid #C9A830;' : isScheduled ? 'border:1px solid #6A8DC0;' : 'border:0.5px solid #E5DDD5;';
     const bgStyle = isSelected ? 'background:#FFF4E0;' : 'background:white;';
+
+    // 狀態 badge
+    let statusBadge = '';
+    if (isCurrentlyActive) {
+      statusBadge = `<span style="font-size:10px;font-weight:700;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:1px 7px;white-space:nowrap;">▶ 進行中</span>`;
+    } else if (isScheduled) {
+      statusBadge = `<span style="font-size:10px;font-weight:700;color:#3A5A8A;background:#EEF3FF;border:0.5px solid #6A8DC0;border-radius:99px;padding:1px 7px;white-space:nowrap;"><i class="ti ti-calendar-clock" style="font-size:9px;" aria-hidden="true"></i> ${p.plannedStartDate} 排程</span>`;
+    }
 
     let scopeHtml = '';
     if (isSelected && p.scopes.length > 1) {
@@ -7679,14 +7690,15 @@ function renderSituationModal(){
 
     html += `<div onclick="selectSituation('${p.id}')" style="${bgStyle}${borderStyle}border-radius:12px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:32px;height:32px;border-radius:10px;${isSelected?'background:#FFE88A;':'background:#F0E8DC;'}display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="ti ${p.icon}" style="font-size:16px;color:${isSelected?'#7A4800':'#854F0B'};" aria-hidden="true"></i>
+        <div style="width:32px;height:32px;border-radius:10px;${isSelected?'background:#FFE88A;':isCurrentlyActive?'background:#FFF4D0;':isScheduled?'background:#EEF3FF;':'background:#F0E8DC;'}display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ${p.icon}" style="font-size:16px;color:${isSelected?'#7A4800':isCurrentlyActive?'#8A5A00':isScheduled?'#3A5A8A':'#854F0B'};" aria-hidden="true"></i>
         </div>
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <div class="font-bold text-sm" style="color:${isSelected?'#3A2000':'#5C3D1E'};">${p.labelZh}</div>
           <div class="text-xs" style="color:#9A8070;">${p.scopes.map(s=>SITUATION_SCOPE_LABELS[s]).join('・')}</div>
         </div>
-        ${isSelected ? `<i class="ti ti-check" style="font-size:16px;color:#C07030;" aria-hidden="true"></i>` : ''}
+        ${statusBadge}
+        ${isSelected ? `<i class="ti ti-check" style="font-size:16px;color:#C07030;flex-shrink:0;" aria-hidden="true"></i>` : ''}
       </div>
       ${scopeHtml}${msgPreview}
     </div>`;
@@ -7698,10 +7710,26 @@ function renderSituationModal(){
   body.innerHTML = html;
 }
 function selectSituation(id){
-  window._sitSelectedId = id;
   const preset = getSituationPresets().find(p=>p.id===id);
+  if (!preset) return;
+  const todayStr = ymd(new Date());
+  const sm = getActiveSituation();
+
+  // 確認1：當前已有進行中情境（不同情境）
+  if (sm && sm.active && sm.scenarioId !== id) {
+    const activePreset = getSituationPresets().find(p=>p.id===sm.scenarioId);
+    const activeName = activePreset ? activePreset.labelZh : '目前情境';
+    if (!confirm(`已有「${activeName}」進行中，啟動新情境會取代它，確定嗎？`)) return;
+  }
+
+  // 確認2：選擇的情境已排程（未來日期）
+  if (preset.plannedStartDate && preset.plannedStartDate > todayStr) {
+    if (!confirm(`此情境已排程 ${preset.plannedStartDate} 自動啟動，確定要今天立即啟動？`)) return;
+  }
+
+  window._sitSelectedId = id;
   // 若只有一個時段選項，自動選好
-  if (preset && preset.scopes.length === 1) window._sitSelectedScope = preset.scopes[0];
+  if (preset.scopes.length === 1) window._sitSelectedScope = preset.scopes[0];
   else window._sitSelectedScope = null;
   renderSituationModal();
 }
