@@ -7865,23 +7865,126 @@ function renderSitConfigList(){
   document.getElementById('sitConfigFooter').style.display = 'none';
   const body = document.getElementById('situationConfigBody');
   const presets = getSituationPresets();
-  let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
-  presets.forEach(p => {
+  let html = '<div id="sitListContainer" style="display:flex;flex-direction:column;gap:8px;">';
+  presets.forEach((p, i) => {
     const isActive = state.situationMode && state.situationMode.active && state.situationMode.scenarioId === p.id;
-    html += `<button onclick="enterSitConfigEdit('${p.id}')" style="display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:white;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};border-radius:12px;cursor:pointer;text-align:left;">
-      <div style="width:38px;height:38px;border-radius:10px;background:${isActive?'#FFF4D0':'#FAF6F0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};">
-        <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:20px;color:${isActive?'#8A5A00':'#854F0B'};" aria-hidden="true"></i>
+    html += `<div id="sitListRow_${i}"
+      draggable="true"
+      ondragstart="sitDragStart(${i},event)"
+      ondragover="sitDragOver(${i},event)"
+      ondrop="sitDragDrop(${i},event)"
+      ondragend="sitDragEnd()"
+      style="display:flex;align-items:center;background:white;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};border-radius:12px;overflow:hidden;user-select:none;">
+      <div ontouchstart="sitTouchStart(${i},event)" style="padding:14px 6px 14px 12px;cursor:grab;color:#C8B898;flex-shrink:0;touch-action:none;" aria-label="拖移排序">
+        <i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i>
       </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:700;color:#5C3D1E;">${p.labelZh}</div>
-        ${isActive?'<div style="font-size:11px;color:#C07030;font-weight:600;margin-top:1px;">進行中</div>':'<div style="font-size:11px;color:#B0A090;margin-top:1px;">'+(p.tasks&&p.tasks.length?p.tasks.length+' 項任務':'尚未設定任務')+'</div>'}
+      <div onclick="enterSitConfigEdit('${p.id}')" style="display:flex;align-items:center;gap:12px;flex:1;padding:10px 14px 10px 6px;cursor:pointer;min-width:0;">
+        <div style="width:38px;height:38px;border-radius:10px;background:${isActive?'#FFF4D0':'#FAF6F0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};">
+          <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:20px;color:${isActive?'#8A5A00':'#854F0B'};" aria-hidden="true"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;color:#5C3D1E;">${p.labelZh}</div>
+          ${isActive?'<div style="font-size:11px;color:#C07030;font-weight:600;margin-top:1px;">進行中</div>':'<div style="font-size:11px;color:#B0A090;margin-top:1px;">'+(p.tasks&&p.tasks.length?p.tasks.length+' 項任務':'尚未設定任務')+'</div>'}
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:#C8A870;flex-shrink:0;" aria-hidden="true"></i>
       </div>
-      <i class="ti ti-chevron-right" style="font-size:18px;color:#C8A870;flex-shrink:0;" aria-hidden="true"></i>
-    </button>`;
+    </div>`;
   });
   html += '</div>';
   html += `<button onclick="addSituationPreset()" style="width:100%;border:1.5px dashed #C8A870;border-radius:12px;padding:10px;font-size:13px;font-weight:600;color:#7A5A00;background:transparent;cursor:pointer;margin-top:10px;"><i class="ti ti-plus" style="font-size:13px;" aria-hidden="true"></i> 新增情境</button>`;
   body.innerHTML = html;
+}
+/* ===== 情境列表拖移排序 ===== */
+let _sitDragSrcIdx = null;
+let _sitTouchSrcIdx = null;
+let _sitTouchClone = null;
+let _sitTouchOrigRect = null;
+
+function _sitReorderPresets(fromIdx, toIdx){
+  if(fromIdx === toIdx) return;
+  const presets = getSituationPresets();
+  if(!state.situationPresets || !state.situationPresets.length)
+    state.situationPresets = JSON.parse(JSON.stringify(presets));
+  const item = state.situationPresets.splice(fromIdx, 1)[0];
+  state.situationPresets.splice(toIdx, 0, item);
+  save();
+  renderSitConfigList();
+}
+function _sitListRows(){ return document.querySelectorAll('[id^="sitListRow_"]'); }
+function _sitClearDragStyles(){
+  _sitListRows().forEach(el=>{
+    el.style.opacity = '1';
+    el.style.border = el.dataset.active==='1' ? '0.5px solid #C9A830' : '0.5px solid #E5DDD5';
+  });
+}
+/* Desktop drag */
+function sitDragStart(idx, e){
+  _sitDragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(()=>{ const r=document.getElementById('sitListRow_'+idx); if(r) r.style.opacity='0.35'; }, 0);
+}
+function sitDragOver(idx, e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  _sitListRows().forEach((el,i)=>{
+    el.style.borderColor = (i===idx && i!==_sitDragSrcIdx) ? '#C8A870' : (el.dataset.active==='1' ? '#C9A830' : '#E5DDD5');
+    el.style.borderWidth = (i===idx && i!==_sitDragSrcIdx) ? '2px' : '0.5px';
+  });
+}
+function sitDragDrop(idx, e){
+  e.preventDefault();
+  if(_sitDragSrcIdx === null) return;
+  _sitReorderPresets(_sitDragSrcIdx, idx);
+  _sitDragSrcIdx = null;
+}
+function sitDragEnd(){
+  _sitDragSrcIdx = null;
+  _sitClearDragStyles();
+}
+/* Touch drag */
+function sitTouchStart(idx, e){
+  _sitTouchSrcIdx = idx;
+  const srcEl = document.getElementById('sitListRow_'+idx);
+  if(!srcEl) return;
+  _sitTouchOrigRect = srcEl.getBoundingClientRect();
+  _sitTouchClone = srcEl.cloneNode(true);
+  Object.assign(_sitTouchClone.style, {
+    position:'fixed', zIndex:'9999', opacity:'0.88', pointerEvents:'none',
+    width: _sitTouchOrigRect.width+'px', left: _sitTouchOrigRect.left+'px',
+    top: _sitTouchOrigRect.top+'px', boxShadow:'0 6px 24px rgba(0,0,0,0.18)',
+    borderRadius:'12px', transition:'none'
+  });
+  document.body.appendChild(_sitTouchClone);
+  srcEl.style.opacity = '0.3';
+  document.addEventListener('touchmove', sitTouchMove, { passive:false });
+  document.addEventListener('touchend', sitTouchEnd, { once:true });
+}
+function sitTouchMove(e){
+  e.preventDefault();
+  if(!_sitTouchClone) return;
+  const touch = e.touches[0];
+  _sitTouchClone.style.top = (touch.clientY - _sitTouchOrigRect.height/2) + 'px';
+  _sitListRows().forEach((el,i)=>{
+    const r = el.getBoundingClientRect();
+    const over = touch.clientY >= r.top && touch.clientY <= r.bottom && i !== _sitTouchSrcIdx;
+    el.style.borderColor = over ? '#C8A870' : (el.dataset.active==='1' ? '#C9A830' : '#E5DDD5');
+    el.style.borderWidth = over ? '2px' : '0.5px';
+  });
+}
+function sitTouchEnd(e){
+  document.removeEventListener('touchmove', sitTouchMove);
+  if(_sitTouchClone){ document.body.removeChild(_sitTouchClone); _sitTouchClone=null; }
+  const touch = e.changedTouches[0];
+  let targetIdx = null;
+  _sitListRows().forEach((el,i)=>{
+    const r = el.getBoundingClientRect();
+    if(touch.clientY >= r.top && touch.clientY <= r.bottom) targetIdx = i;
+  });
+  _sitClearDragStyles();
+  if(targetIdx !== null && targetIdx !== _sitTouchSrcIdx)
+    _sitReorderPresets(_sitTouchSrcIdx, targetIdx);
+  _sitTouchSrcIdx = null;
+  _sitTouchOrigRect = null;
 }
 function renderSitConfigDetail(){
   const p = window._sitEditDraft;
