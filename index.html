@@ -6995,22 +6995,36 @@ function renderAtikaView(){
     const activeTasks = sm?.activeTasks || [];
     if (sm && activeTasks.length) {
       sitTasksEl.classList.remove('hidden');
+      const _todayKey = ymd(new Date());
+      const _dayComp = sm.dailyCompletions?.[_todayKey] || {};
+      const _doneCnt = activeTasks.filter(t=>{ const v=_dayComp[t.id]; return !!(v===true||(v&&v.done)); }).length;
       const taskRows = activeTasks.map((t,i)=>{
-        const done = getSitTaskDone(sm, i);
-        const nameZh = t.nameZh||'';
-        const nameId = t.nameId||'';
-        const displayName = lang==='id' ? (nameId||nameZh) : nameZh;
-        return `<button onclick="toggleSituationTask(${i})" style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:${done?'#F5F3F0':'#FFFDF5'};border-radius:8px;border:0.5px solid ${done?'#D8D0C8':'#EDD87A'};cursor:pointer;width:100%;text-align:left;">
-          <i class="ti ${done?'ti-circle-check':'ti-circle'}" style="font-size:18px;color:${done?'#4A8A42':'#C9A830'};flex-shrink:0;" aria-hidden="true"></i>
-          <span style="flex:1;font-size:13px;color:${done?'#A09080':'#4A2C08'};${done?'text-decoration:line-through;':''}">${displayName}</span>
-        </button>`;
+        const v = _dayComp[t.id];
+        const done = !!(v===true||(v&&v.done));
+        const doneAt = (v&&v.at) ? new Date(v.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+        const checkBtnStyle = done ? 'background:#C9A830;border-color:#C9A830;' : 'border-color:#C9A830;background:transparent;';
+        const checkIcon = done ? `<i class="ti ti-check" style="font-size:16px;color:#FFF9E8;" aria-hidden="true"></i>` : '';
+        const cardOpacity = done ? 'opacity:0.65;' : '';
+        const primary  = lang==='id' ? (t.nameId||t.nameZh||'') : (t.nameZh||'');
+        const secondary= lang==='id' ? (t.nameZh||'') : (t.nameId||'');
+        return `<div class="task-card ${done?'done':''} rounded-xl p-2.5 flex items-start gap-1.5 min-w-0" style="border-left:5px solid #C9A830;border:1.5px solid ${done?'#E8C840':'#C9A830'};border-left-width:5px;background:#FFFBE8;${cardOpacity}">
+          <span class="drag-handle shrink-0 select-none flex items-center justify-center" style="width:28px;height:44px;color:#C9A830;"><i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i></span>
+          <button class="check-btn shrink-0 w-9 h-9 rounded-full border-2 text-base mt-0.5" style="${checkBtnStyle}" onclick="event.stopPropagation();toggleSituationTask(${i})" aria-label="切換完成狀態">${checkIcon}</button>
+          <div class="flex-1 min-w-0">
+            <div class="task-title font-bold text-base leading-tight" style="${done?'color:#8A7040;text-decoration:line-through;':'color:#5C3D1E;'}">${primary}</div>
+            <div class="id-text text-sm leading-tight" style="${done?'color:#A08040;':'color:#8A6A00;'}">${secondary}</div>
+            ${done&&doneAt?`<div class="text-xs mt-1" style="color:#9A7A00;"><i class="ti ti-circle-check" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 完成於 ${doneAt}</div>`:''}
+          </div>
+        </div>`;
       }).join('');
-      sitTasksEl.innerHTML = `<div style="border:0.5px solid #EDD87A;border-left:3px solid #C9A830;border-radius:0 10px 10px 0;padding:10px 12px;background:white;">
-        <div style="font-size:11px;font-weight:700;color:#854F0B;margin-bottom:8px;display:flex;align-items:center;gap:5px;">
-          <i class="ti ti-list-check" style="font-size:13px;" aria-hidden="true"></i>
-          ${lang==='id'?'Tugas Situasi Hari Ini':'今日情境任務'}
+      sitTasksEl.innerHTML = `<div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <i class="ti ti-sparkles" style="font-size:14px;color:#9A7A00;" aria-hidden="true"></i>
+          <span style="font-size:16px;font-weight:800;color:#5C3D1E;">${lang==='id'?'Tugas Situasi':'情境任務'}</span>
+          <div style="flex:1;height:1px;background:#E8D880;"></div>
+          <span style="font-size:11px;color:#8A6A00;white-space:nowrap;">${_doneCnt}/${activeTasks.length} 完成</span>
         </div>
-        <div style="display:flex;flex-direction:column;gap:5px;">${taskRows}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">${taskRows}</div>
       </div>`;
     } else {
       sitTasksEl.classList.add('hidden');
