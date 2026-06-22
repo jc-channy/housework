@@ -7651,16 +7651,23 @@ function renderSituationModal(){
   }
 
   // ── 第一步：選擇情境 ──
-  const sm = getActiveSituation();
+  const _smRaw = state.situationMode; // 直接讀 state，不過濾日期
+  const _todayStrStep1 = ymd(new Date());
+  const _smActiveToday = _smRaw && _smRaw.active && (_smRaw.startDate||'') <= _todayStrStep1 && (_smRaw.endDate||_smRaw.startDate||'') >= _todayStrStep1;
+  const _smScheduledFuture = _smRaw && _smRaw.active && (_smRaw.startDate||'') > _todayStrStep1;
+  const sm = _smActiveToday ? _smRaw : null; // 給 selectedId 初始化用
   const selectedId = window._sitSelectedId || (sm ? sm.scenarioId : null);
   const selectedScope = window._sitSelectedScope || (sm ? sm.timeScope : null);
-  const _todayStrStep1 = ymd(new Date());
 
   let html = '';
   getSituationPresets().forEach(p => {
     const isSelected = selectedId === p.id;
-    const isCurrentlyActive = sm && sm.scenarioId === p.id;
-    const isScheduled = !isCurrentlyActive && p.plannedStartDate && p.plannedStartDate > _todayStrStep1;
+    const isCurrentlyActive = _smActiveToday && _smRaw.scenarioId === p.id;
+    // 排程：來自 state.situationMode（今日有狀況流程設未來日）或 preset.plannedStartDate（情境設定流程）
+    const isScheduledViaMode = _smScheduledFuture && _smRaw.scenarioId === p.id;
+    const isScheduledViaPreset = !isCurrentlyActive && !isScheduledViaMode && p.plannedStartDate && p.plannedStartDate > _todayStrStep1;
+    const isScheduled = isScheduledViaMode || isScheduledViaPreset;
+    const scheduledDate = isScheduledViaMode ? (_smRaw.startDate||'') : p.plannedStartDate;
     const borderStyle = isSelected ? 'border:2px solid #C07030;' : isCurrentlyActive ? 'border:1.5px solid #C9A830;' : isScheduled ? 'border:1px solid #6A8DC0;' : 'border:0.5px solid #E5DDD5;';
     const bgStyle = isSelected ? 'background:#FFF4E0;' : 'background:white;';
 
@@ -7669,7 +7676,7 @@ function renderSituationModal(){
     if (isCurrentlyActive) {
       statusBadge = `<span style="font-size:10px;font-weight:700;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:1px 7px;white-space:nowrap;">▶ 進行中</span>`;
     } else if (isScheduled) {
-      statusBadge = `<span style="font-size:10px;font-weight:700;color:#3A5A8A;background:#EEF3FF;border:0.5px solid #6A8DC0;border-radius:99px;padding:1px 7px;white-space:nowrap;"><i class="ti ti-calendar-clock" style="font-size:9px;" aria-hidden="true"></i> ${p.plannedStartDate} 排程</span>`;
+      statusBadge = `<span style="font-size:10px;font-weight:700;color:#3A5A8A;background:#EEF3FF;border:0.5px solid #6A8DC0;border-radius:99px;padding:1px 7px;white-space:nowrap;"><i class="ti ti-calendar-clock" style="font-size:9px;" aria-hidden="true"></i> ${scheduledDate} 排程</span>`;
     }
 
     let scopeHtml = '';
@@ -7722,9 +7729,14 @@ function selectSituation(id){
     if (!confirm(`已有「${activeName}」進行中，啟動新情境會取代它，確定嗎？`)) return;
   }
 
-  // 確認2：選擇的情境已排程（未來日期）
-  if (preset.plannedStartDate && preset.plannedStartDate > todayStr) {
-    if (!confirm(`此情境已排程 ${preset.plannedStartDate} 自動啟動，確定要今天立即啟動？`)) return;
+  // 確認2：選擇的情境已排程（未來日期）— 來自 preset 或 state.situationMode
+  const _smCheck = state.situationMode;
+  const _scheduledDate = (preset.plannedStartDate && preset.plannedStartDate > todayStr)
+    ? preset.plannedStartDate
+    : (_smCheck && _smCheck.active && _smCheck.scenarioId === id && (_smCheck.startDate||'') > todayStr)
+      ? _smCheck.startDate : null;
+  if (_scheduledDate) {
+    if (!confirm(`此情境已排程 ${_scheduledDate} 自動啟動，確定要今天立即啟動？`)) return;
   }
 
   window._sitSelectedId = id;
