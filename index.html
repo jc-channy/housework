@@ -1598,6 +1598,39 @@
   </div>
 </div>
 
+<!-- ===== 情境圖示選擇器 Modal ===== -->
+<div id="situationIconPickerModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-sm rounded-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:#E5DDD5;">
+      <div class="text-sm font-bold" style="color:#5C3D1E;">選擇圖示</div>
+      <button onclick="closeSituationIconPicker()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
+    </div>
+    <div id="situationIconPickerBody" class="p-4 max-h-[70vh] overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- ===== 新增情境 Modal ===== -->
+<div id="addSituationModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-sm rounded-2xl overflow-hidden">
+    <div class="flex items-center justify-between px-5 py-3 border-b" style="border-color:#E5DDD5;">
+      <div class="text-sm font-bold" style="color:#5C3D1E;">新增情境</div>
+      <button onclick="closeAddSituationModal()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
+    </div>
+    <div class="p-4 space-y-4">
+      <div>
+        <label class="block text-xs font-semibold mb-1" style="color:#5C3D1E;">情境名稱</label>
+        <input id="addSitName" type="text" placeholder="例：保母請假、孩子生病…" style="width:100%;font-size:14px;padding:8px 10px;border:0.5px solid #C0C8D0;border-radius:8px;box-sizing:border-box;">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-2" style="color:#5C3D1E;">選擇圖示</label>
+        <div id="addSitIconGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+        <input id="addSitIcon" type="hidden" value="ti-alert-triangle">
+      </div>
+      <button onclick="confirmAddSituationPreset()" style="width:100%;background:#854F0B;color:white;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">建立情境</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 情境任務選工作庫 Modal ===== -->
 <div id="sitTaskPickerModal" class="hidden fixed inset-0 z-[60] flex items-end justify-center modal-backdrop p-4 pb-6">
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl overflow-hidden">
@@ -7890,9 +7923,11 @@ function renderSituationConfigModal(){
     html += `
       <div style="border-radius:12px;border:1px solid #E5DDD5;overflow:hidden;margin-bottom:10px;">
         <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#FAF6F0;">
-          <i class="ti ${p.icon}" style="font-size:16px;color:#854F0B;" aria-hidden="true"></i>
-          <span style="font-size:13px;font-weight:700;color:#5C3D1E;flex:1;">${p.labelZh}</span>
-          <button onclick="deleteSituationPreset('${p.id}')" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 6px;" aria-label="刪除情境">✕ 刪除</button>
+          <button onclick="openSituationIconPicker('${p.id}')" style="width:32px;height:32px;border-radius:8px;border:1px solid #DDD0C0;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;" title="更換圖示" aria-label="更換圖示">
+            <i class="ti ${p.icon}" style="font-size:18px;color:#854F0B;" aria-hidden="true"></i>
+          </button>
+          <input value="${p.labelZh.replace(/"/g,'&quot;')}" onchange="updateSituationPresetField('${p.id}','labelZh',this.value)" style="flex:1;font-size:13px;font-weight:700;color:#5C3D1E;border:none;background:transparent;outline:none;min-width:0;" placeholder="情境名稱">
+          <button onclick="deleteSituationPreset('${p.id}')" style="font-size:11px;color:#A85550;background:none;border:none;cursor:pointer;padding:2px 6px;flex-shrink:0;" aria-label="刪除情境">✕ 刪除</button>
         </div>
         <div style="padding:10px 12px;">
           <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;">情境任務</div>
@@ -8023,13 +8058,69 @@ function deleteSituationPreset(presetId){
   state.situationPresets.splice(idx,1);
   save(); renderSituationConfigModal();
 }
-function addSituationPreset(){
-  const labelZh = prompt('情境名稱（中文）：');
-  if (!labelZh || !labelZh.trim()) return;
+const SITUATION_ICON_OPTIONS = [
+  'ti-baby-carriage','ti-mood-sick','ti-building-hospital','ti-stethoscope',
+  'ti-plane','ti-car','ti-bike','ti-walk',
+  'ti-home','ti-door','ti-sun','ti-moon',
+  'ti-calendar-event','ti-clock','ti-alarm','ti-hourglass',
+  'ti-school','ti-briefcase','ti-tools','ti-package',
+  'ti-shopping-cart','ti-chef-hat','ti-paw','ti-plant-2',
+  'ti-heart','ti-star','ti-gift','ti-confetti',
+  'ti-alert-triangle','ti-bell','ti-users','ti-user-off',
+  'ti-umbrella','ti-cloud-rain','ti-snowflake','ti-flame',
+  'ti-swim','ti-dumbbell','ti-run','ti-yoga',
+];
+let _sitIconPickerTarget = null; // 'edit:{presetId}' or 'add'
+
+function openSituationIconPicker(presetId){
+  _sitIconPickerTarget = 'edit:' + presetId;
+  const preset = getSituationPresets().find(p=>p.id===presetId);
+  const current = preset ? preset.icon : '';
+  _renderIconPickerGrid('situationIconPickerBody', current, (icon)=>{
+    updateSituationPresetField(presetId,'icon',icon);
+    closeSituationIconPicker();
+    renderSituationConfigModal();
+  });
+  document.getElementById('situationIconPickerModal').classList.remove('hidden');
+}
+function closeSituationIconPicker(){
+  document.getElementById('situationIconPickerModal').classList.add('hidden');
+  _sitIconPickerTarget = null;
+}
+function _renderIconPickerGrid(containerId, current, onPick){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el._onPickIcon = onPick;
+  el.innerHTML = SITUATION_ICON_OPTIONS.map(ic=>{
+    const active = ic===current;
+    return `<button onclick="document.getElementById('${containerId}')._onPickIcon('${ic}')" style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;border-radius:8px;border:1.5px solid ${active?'#854F0B':'#E5DDD5'};background:${active?'#FFF0DC':'white'};cursor:pointer;" aria-label="${ic}">
+      <i class="ti ${ic}" style="font-size:20px;color:${active?'#854F0B':'#5C3D1E'};" aria-hidden="true"></i>
+    </button>`;
+  }).join('');
+}
+
+function openAddSituationModal(){
+  document.getElementById('addSitName').value = '';
+  document.getElementById('addSitIcon').value = 'ti-alert-triangle';
+  function _addSitPick(icon){
+    document.getElementById('addSitIcon').value = icon;
+    _renderIconPickerGrid('addSitIconGrid', icon, _addSitPick);
+  }
+  _renderIconPickerGrid('addSitIconGrid','ti-alert-triangle', _addSitPick);
+  document.getElementById('addSituationModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('addSitName').focus(), 80);
+}
+function closeAddSituationModal(){
+  document.getElementById('addSituationModal').classList.add('hidden');
+}
+function confirmAddSituationPreset(){
+  const labelZh = document.getElementById('addSitName').value.trim();
+  if (!labelZh) { document.getElementById('addSitName').focus(); return; }
+  const icon = document.getElementById('addSitIcon').value || 'ti-alert-triangle';
   const newPreset = {
     id: 'sit_' + Date.now(),
-    icon: 'ti-alert-triangle',
-    labelZh: labelZh.trim(),
+    icon,
+    labelZh,
     labelId: '',
     scopes: ['all'],
     msgZh: '',
@@ -8043,7 +8134,21 @@ function addSituationPreset(){
     presetMenuOverride: null
   };
   state.situationPresets.push(newPreset);
-  save(); renderSituationConfigModal();
+  save();
+  closeAddSituationModal();
+  renderSituationConfigModal();
+}
+function addSituationPreset(){
+  openAddSituationModal();
+}
+function updateSituationPresetField(presetId, field, value){
+  const presets = getSituationPresets();
+  const p = presets.find(x=>x.id===presetId);
+  if(!p) return;
+  if(!state.situationPresets || !state.situationPresets.length) state.situationPresets = presets;
+  const sp = state.situationPresets.find(x=>x.id===presetId);
+  if(sp) sp[field] = value;
+  save();
 }
 /* 從工作庫選 */
 function openSitTaskPicker(presetId){
