@@ -8405,6 +8405,7 @@ function renderManagerSituationBar(){
         <div class="text-sm font-bold" style="color:#5C3D1E;display:flex;align-items:center;gap:6px;">情境：${label}（${scopeLabel}）${daysChip}</div>
         <div class="text-xs" style="color:#8A6A00;">${subText}</div>
       </div>
+      <button onclick="openSituationConfigModal()" style="width:30px;height:30px;border-radius:50%;background:#FFF5C0;border:0.5px solid #C9A830;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" title="情境設定" aria-label="情境設定"><i class="ti ti-settings" style="font-size:14px;color:#7A5A00;" aria-hidden="true"></i></button>
       <button onclick="deactivateSituation()" style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF5C0;border:0.5px solid #C9A830;border-radius:99px;padding:2px 10px;cursor:pointer;white-space:nowrap;">解除</button>
     </div>`;
   } else {
