@@ -694,15 +694,13 @@
     </section>
 
     <!-- ═══ 本日提醒（最上方）═══ -->
-    <div id="atikaReminder" class="hidden rounded-2xl overflow-hidden" style="border:2px solid var(--ic-strawberry);">
-      <div class="flex items-stretch">
-        <div style="background:var(--ic-strawberry);padding:16px 18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <i class="ti ti-bell" style="font-size:52px;color:#FAF7F2;" aria-hidden="true"></i>
-        </div>
-        <div class="flex-1 p-4" style="background:var(--ic-straw-lt);">
-          <div class="text-xs font-bold mb-2" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</div>
-          <div id="atikaReminderZh" class="font-semibold leading-relaxed" style="font-size:15px;color:var(--ic-chocolate);"></div>
-          <div id="atikaReminderId" class="id-text text-sm leading-relaxed mt-1" style="color:var(--ic-choc-mid);"></div>
+    <div id="atikaReminder" class="hidden rounded-2xl" style="border:2px solid var(--ic-strawberry);background:var(--ic-straw-lt);padding:12px 14px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <i class="ti ti-bell" style="font-size:20px;color:#C05050;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+        <div>
+          <div class="text-xs font-bold mb-1" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</div>
+          <div id="atikaReminderZh" class="font-semibold leading-relaxed" style="font-size:13px;color:var(--ic-chocolate);"></div>
+          <div id="atikaReminderId" class="id-text leading-relaxed mt-0.5" style="font-size:12px;color:var(--ic-choc-mid);"></div>
         </div>
       </div>
     </div>
@@ -873,19 +871,18 @@
           </div>
 
           <!-- 今日提醒（獨立卡片）-->
-          <div id="mgrReminderCard" class="overflow-hidden" style="border-radius:14px;border:1.5px solid #F4C4A0;border-left:4px solid #C86830;background:#FDF4EE;">
-            <div class="flex items-center gap-2" style="padding:8px 12px;background:#FAEDE0;border-bottom:0.5px solid #F4C4A0;">
-              <div style="width:26px;height:26px;border-radius:50%;background:#F5D8BC;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="ti ti-speakerphone" style="font-size:13px;color:#7A3C10;" aria-hidden="true"></i>
+          <div id="mgrReminderCard" style="border-radius:14px;border:2px solid #D4848A;background:#FEF0F0;padding:12px 14px;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <i class="ti ti-bell" style="font-size:20px;color:#C05050;flex-shrink:0;margin-top:2px;" aria-hidden="true"></i>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                  <span class="text-xs font-bold" style="color:#A85550;">今日提醒 / Pengingat Hari Ini</span>
+                  <button onclick="toggleReminderEdit()" class="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:#F5D0D0;color:#8A2020;border:0.5px solid #D4848A;white-space:nowrap;">編輯</button>
+                </div>
+                <span id="reminderPreview" class="text-sm" style="color:var(--ic-chocolate);line-height:1.5;display:block;"></span>
               </div>
-              <span class="text-sm font-bold" style="color:#4A2808;">今日提醒</span>
-              <button onclick="toggleReminderEdit()" class="ml-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style="background:#F5D8BC;color:#7A3C10;border:0.5px solid #C86830;">編輯</button>
             </div>
-            <div style="background:#FFFEFB;">
-              <div class="px-4 py-2.5">
-                <span id="reminderPreview" class="text-sm" style="color:var(--ic-chocolate);line-height:1.4;display:block;"></span>
-              </div>
-              <div id="reminderInlineEdit" class="hidden px-4 pb-3">
+            <div id="reminderInlineEdit" class="hidden" style="margin-top:10px;padding-top:10px;border-top:0.5px solid #F4C4C4;">
                 <div class="flex gap-2 items-start mb-2">
                   <textarea id="mgrReminderZh" rows="2" data-lang="zh" data-pair="mgrReminderId" class="flex-1 border border-amber-300 rounded-lg p-2 text-sm bg-white bi-input min-w-0" placeholder="中文，例如：貓咪需要看醫生"></textarea>
                   <button onclick="translateField('mgrReminderZh','mgrReminderId','zh','id')" class="trans-btn shrink-0 py-2 px-2.5 bg-white border border-blue-200 rounded-lg" title="翻譯成印尼文"><i class="ti ti-language" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
@@ -900,7 +897,6 @@
                 </div>
                 <div id="reminderMeta" class="text-xs text-gray-500 mt-1"></div>
               </div>
-            </div>
           </div>
 
           <!-- 今日菜單 -->
