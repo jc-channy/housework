@@ -7034,8 +7034,8 @@ function renderAtikaView(){
     const isSitFlex = _affectedSlots.includes(slot);
     return slotArr.map(({_type, item})=>{
       const isSuspended = _type !== 'adhoc' && _suspendedIds.has(item.id);
-      return _type==='adhoc' ? renderAdhocCard(item, {situationFlex:isSitFlex})
-        : renderTaskCard(item,{hideMode:true,hideLastDone:true,situationFlex:isSitFlex && !isSuspended,situationSuspend:isSuspended});
+      return _type==='adhoc' ? renderAdhocCard(item, {})
+        : renderTaskCard(item,{hideMode:true,hideLastDone:true,situationSuspend:isSuspended});
     }).join('');
   }
   function badgeTxt(slotArr){ return `${slotArr.filter(x=>x._type==='adhoc'?x.item.completed:isDone(x.item,d)).length}/${slotArr.length+([...adDone,...tdDone,...fxDone].filter(x=>true)).length} 完`; }
