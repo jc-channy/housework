@@ -7719,7 +7719,8 @@ function renderSituationModal(){
       </div>`;
     }
 
-    const msgPreview = isSelected ? `<div style="background:white;border-radius:7px;padding:6px 8px;margin-top:6px;border:0.5px solid #EDD87A;font-size:11px;color:#5C3D1E;line-height:1.5;">${p.msgZh}</div>` : '';
+    const _previewMsg = (p.reminderZh && p.reminderZh.trim()) ? p.reminderZh : p.msgZh;
+    const msgPreview = isSelected && _previewMsg ? `<div style="background:white;border-radius:7px;padding:6px 8px;margin-top:6px;border:0.5px solid #EDD87A;font-size:11px;color:#5C3D1E;line-height:1.5;">${_previewMsg}</div>` : '';
 
     html += `<div onclick="selectSituation('${p.id}')" style="${bgStyle}${borderStyle}border-radius:12px;padding:10px 12px;cursor:pointer;">
       <div style="display:flex;align-items:center;gap:8px;">
