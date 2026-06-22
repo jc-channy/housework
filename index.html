@@ -12425,7 +12425,7 @@ function openReasonForAction(action){
     skipPeriod:   { zh:'⏸ 本期不執行',   id:'Lewati periode ini' },
   };
   const m = titleMap[action] || { zh:'執行動作', id:'' };
-  document.getElementById('reasonModalTitle').textContent = `${m.zh}：${t.nameZh}`;
+  document.getElementById('reasonModalTitle').innerHTML = `${m.zh}：${t.nameZh}`;
   document.getElementById('reasonModalSub').textContent = m.id;
   document.getElementById('reasonInput').value = '';
   document.getElementById('reasonPromptModal').classList.remove('hidden');
