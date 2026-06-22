@@ -1605,7 +1605,7 @@
       <div class="text-sm font-bold" style="color:#5C3D1E;">選擇圖示</div>
       <button onclick="closeSituationIconPicker()" style="font-size:22px;color:#9A8070;line-height:1;" aria-label="關閉">×</button>
     </div>
-    <div id="situationIconPickerBody" class="p-4 max-h-[70vh] overflow-y-auto"></div>
+    <div id="situationIconPickerBody" class="max-h-[70vh] overflow-y-auto" style="padding:12px;"></div>
   </div>
 </div>
 
@@ -1623,7 +1623,7 @@
       </div>
       <div>
         <label class="block text-xs font-semibold mb-2" style="color:#5C3D1E;">選擇圖示</label>
-        <div id="addSitIconGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+        <div id="addSitIconGrid"></div>
         <input id="addSitIcon" type="hidden" value="ti-alert-triangle">
       </div>
       <button onclick="confirmAddSituationPreset()" style="width:100%;background:#854F0B;color:white;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;">建立情境</button>
@@ -8091,10 +8091,11 @@ function _renderIconPickerGrid(containerId, current, onPick){
   const el = document.getElementById(containerId);
   if(!el) return;
   el._onPickIcon = onPick;
+  el.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:4px;';
   el.innerHTML = SITUATION_ICON_OPTIONS.map(ic=>{
     const active = ic===current;
-    return `<button onclick="document.getElementById('${containerId}')._onPickIcon('${ic}')" style="display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;border-radius:8px;border:1.5px solid ${active?'#854F0B':'#E5DDD5'};background:${active?'#FFF0DC':'white'};cursor:pointer;" aria-label="${ic}">
-      <i class="ti ${ic}" style="font-size:20px;color:${active?'#854F0B':'#5C3D1E'};" aria-hidden="true"></i>
+    return `<button onclick="document.getElementById('${containerId}')._onPickIcon('${ic}')" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;border:${active?'2px solid #854F0B':'1.5px solid #E5DDD5'};background:${active?'#FFF0DC':'#FDFAF6'};cursor:pointer;flex-shrink:0;" aria-label="${ic}">
+      <i class="ti ${ic}" style="font-size:22px;color:${active?'#854F0B':'#5C3D1E'};" aria-hidden="true"></i>
     </button>`;
   }).join('');
 }
