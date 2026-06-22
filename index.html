@@ -7821,25 +7821,34 @@ function renderSitConfigList(){
   const body = document.getElementById('situationConfigBody');
   const presets = getSituationPresets();
   let html = '<div id="sitListContainer" style="display:flex;flex-direction:column;gap:8px;">';
+  const _todayForList = ymd(new Date());
   presets.forEach((p, i) => {
     const isActive = state.situationMode && state.situationMode.active && state.situationMode.scenarioId === p.id;
+    const isScheduled = !isActive && p.plannedStartDate && p.plannedStartDate > _todayForList;
+    const borderColor = isActive ? '#C9A830' : isScheduled ? '#6A8DC0' : '#E5DDD5';
+    const iconBg = isActive ? '#FFF4D0' : isScheduled ? '#EEF3FF' : '#FAF6F0';
+    const iconColor = isActive ? '#8A5A00' : isScheduled ? '#3A5A8A' : '#854F0B';
+    let subText;
+    if (isActive) subText = '<div style="font-size:11px;color:#C07030;font-weight:600;margin-top:1px;">進行中</div>';
+    else if (isScheduled) subText = `<div style="font-size:11px;color:#3A5A8A;font-weight:600;margin-top:1px;"><i class="ti ti-calendar-clock" style="font-size:10px;" aria-hidden="true"></i> ${p.plannedStartDate} 排程啟動</div>`;
+    else subText = '<div style="font-size:11px;color:#B0A090;margin-top:1px;">'+(p.tasks&&p.tasks.length?p.tasks.length+' 項任務':'尚未設定任務')+'</div>';
     html += `<div id="sitListRow_${i}"
       draggable="true"
       ondragstart="sitDragStart(${i},event)"
       ondragover="sitDragOver(${i},event)"
       ondrop="sitDragDrop(${i},event)"
       ondragend="sitDragEnd()"
-      style="display:flex;align-items:center;background:white;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};border-radius:12px;overflow:hidden;user-select:none;">
+      style="display:flex;align-items:center;background:white;border:0.5px solid ${borderColor};border-radius:12px;overflow:hidden;user-select:none;">
       <div ontouchstart="sitTouchStart(${i},event)" style="padding:14px 6px 14px 12px;cursor:grab;color:#C8B898;flex-shrink:0;touch-action:none;" aria-label="拖移排序">
         <i class="ti ti-grip-vertical" style="font-size:18px;" aria-hidden="true"></i>
       </div>
       <div onclick="enterSitConfigEdit('${p.id}')" style="display:flex;align-items:center;gap:12px;flex:1;padding:10px 14px 10px 6px;cursor:pointer;min-width:0;">
-        <div style="width:38px;height:38px;border-radius:10px;background:${isActive?'#FFF4D0':'#FAF6F0'};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid ${isActive?'#C9A830':'#E5DDD5'};">
-          <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:20px;color:${isActive?'#8A5A00':'#854F0B'};" aria-hidden="true"></i>
+        <div style="width:38px;height:38px;border-radius:10px;background:${iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;border:0.5px solid ${borderColor};">
+          <i class="ti ${p.icon||'ti-alert-triangle'}" style="font-size:20px;color:${iconColor};" aria-hidden="true"></i>
         </div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:14px;font-weight:700;color:#5C3D1E;">${p.labelZh}</div>
-          ${isActive?'<div style="font-size:11px;color:#C07030;font-weight:600;margin-top:1px;">進行中</div>':'<div style="font-size:11px;color:#B0A090;margin-top:1px;">'+(p.tasks&&p.tasks.length?p.tasks.length+' 項任務':'尚未設定任務')+'</div>'}
+          ${subText}
         </div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:#C8A870;flex-shrink:0;" aria-hidden="true"></i>
       </div>
@@ -8015,8 +8024,16 @@ function renderSitConfigDetail(){
     activateBtnHtml = '<div style="margin-top:10px;text-align:center;font-size:12px;color:#1E6E3D;font-weight:600;padding:6px;">✓ 此情境目前進行中</div>';
   } else if (_ps) {
     const canActivate = !_pe || _pe >= _todayStr;
-    activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" '+(canActivate?'':'disabled')+' style="width:100%;margin-top:10px;background:'+(canActivate?'#2D5A1A':'#D5C5B0')+';color:'+(canActivate?'white':'#9A8070')+';border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:'+(canActivate?'pointer':'not-allowed')+';">'
-      +'<i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境</button>';
+    const isFuture = _ps > _todayStr;
+    if (!canActivate) {
+      activateBtnHtml = '<button disabled style="width:100%;margin-top:10px;background:#D5C5B0;color:#9A8070;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:not-allowed;">日期已過期</button>';
+    } else if (isFuture) {
+      activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" style="width:100%;margin-top:10px;background:#3A5A8A;color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">'
+        +'<i class="ti ti-calendar-clock" style="font-size:13px;" aria-hidden="true"></i> 確認排程（'+_ps+' 自動啟動）</button>';
+    } else {
+      activateBtnHtml = '<button onclick="activateSituationFromPreset(\''+p.id+'\')" style="width:100%;margin-top:10px;background:#2D5A1A;color:white;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">'
+        +'<i class="ti ti-player-play" style="font-size:13px;" aria-hidden="true"></i> 立即啟動此情境</button>';
+    }
   }
 
   const body = document.getElementById('situationConfigBody');
@@ -8150,6 +8167,15 @@ function activateSituationFromPreset(presetId){
   const todayStr = ymd(new Date());
   const startDate = preset.plannedStartDate || todayStr;
   const endDate   = (preset.plannedEndDate && preset.plannedEndDate >= startDate) ? preset.plannedEndDate : startDate;
+
+  // 未來日期 → 僅加入排程，不覆蓋當前情境
+  if (startDate > todayStr) {
+    save();
+    renderSituationConfigModal();
+    alert('情境「' + preset.labelZh + '」已加入排程，' + startDate + ' 將自動啟動。');
+    return;
+  }
+
   const scope = preset.scopes[0] || 'all';
   const activeTasks = (preset.tasks||[]).map(t=>({...t, done:false}));
   const restOverrideMode = preset.restOverrideMode || 'keep';
