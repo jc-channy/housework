@@ -10309,7 +10309,7 @@ function doPrintPayroll(){
 @page{size:A4;margin:16mm 18mm}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:32px 64px;max-width:760px;margin:0 auto}
-@media print{body{padding:0;max-width:100%;width:100%}.no-print{display:none!important}}
+@media print{body{padding:0;max-width:100%;width:100%;display:flex;flex-direction:column;min-height:265mm}.no-print{display:none!important}}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1a1a;padding-bottom:14px;margin-bottom:24px}
 .hd h1{font-size:20px;font-weight:800;letter-spacing:-.3px;color:#1a1a1a}
 .hd .sub{font-size:11px;color:#222;font-weight:600;margin-top:4px;letter-spacing:.8px}
@@ -10329,22 +10329,25 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 .d-ok{color:#166534;font-weight:500}.d-lv{color:#991b1b;font-weight:500}.d-ot{color:#1d4ed8;font-weight:500}
 .days-lbl{font-size:11px;font-weight:600;color:#888;letter-spacing:.6px;margin-bottom:10px;text-transform:uppercase}
 .sig-sec{border:1px solid #ccc;border-radius:8px;padding:20px 24px;margin-top:8px}
-.cut-wrap{margin-top:28px;page-break-inside:avoid;break-inside:avoid}
+.cut-wrap{page-break-inside:avoid;break-inside:avoid;margin-top:auto}
 .cut-line{padding:8px 0;border-top:1.5px dashed #bbb;text-align:center;font-size:10px;color:#bbb;letter-spacing:.8px}
-.slip-h{border:1px solid #ccc;border-radius:4px;margin-top:6px;overflow:hidden}
-.slip-h-hd{background:#f5f5f5;border-bottom:1px solid #ddd;padding:5px 10px;display:flex;justify-content:space-between;align-items:baseline}
-.slip-h-title{font-size:11px;font-weight:700;color:#1a1a1a}
-.slip-h-sub{font-size:9px;color:#444;letter-spacing:.4px}
-.sh-tbl{width:100%;border-collapse:collapse}
-.sh-th{padding:4px 8px;font-size:9px;color:#333;font-weight:600;border-bottom:1px solid #ddd;border-right:0.5px solid #e0e0e0;text-align:left;white-space:nowrap;background:#fafafa}
-.sh-th:last-child{border-right:none}
-.sh-tid{display:block;font-size:8px;color:#555;font-weight:400;margin-top:1px}
-.sh-td{padding:5px 8px;font-size:10px;font-weight:500;vertical-align:top;border-right:0.5px solid #f0f0f0;white-space:nowrap}
-.sh-td:last-child{border-right:none;min-width:80px}
-.sh-dt{display:block;font-size:8px;color:#555;font-weight:400;margin-top:2px}
-.sh-add{color:#166534}.sh-ded{color:#991b1b}
-.sh-net{background:#f5f5f5;font-size:11px;font-weight:700}
-.sh-sig{border-bottom:1px solid #aaa;height:20px;margin-top:4px}
+.sc-outer{width:100%;height:56mm;overflow:hidden;position:relative;margin-top:6px}
+.sc-inner{position:absolute;left:0;top:0;width:56mm;height:174mm;transform:translateY(56mm) rotate(90deg);transform-origin:top left}
+.sc-card{width:56mm;height:174mm;background:#fff;border:.5px solid #ccc;font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif}
+.sc-hd{background:#f5f5f5;border-bottom:.5px solid #ddd;padding:7px 10px}
+.sc-hd-title{font-size:11px;font-weight:700;color:#1a1a1a}
+.sc-hd-sub{font-size:8.5px;color:#555;margin-top:2px}
+.sc-meta{padding:5px 10px;background:#fafafa;border-bottom:.5px solid #eee;font-size:9.5px;font-weight:600;color:#1a1a1a}
+.sc-meta-sub{font-size:8px;color:#666;font-weight:400;margin-top:1px}
+.sc-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 10px;border-bottom:.5px solid #f0f0f0}
+.sc-lbl{font-size:9.5px;color:#444;font-weight:600}
+.sc-lbl-id{display:block;font-size:8px;color:#666;font-weight:400;margin-top:1px}
+.sc-val{font-size:10px;font-weight:600;color:#1a1a1a;text-align:right}
+.sc-val-dt{display:block;font-size:7.5px;color:#666;font-weight:400;text-align:right;margin-top:1px}
+.sc-add{color:#166534}.sc-ded{color:#991b1b}
+.sc-net{background:#f5f5f5;border-top:1px solid #ccc;border-bottom:1px solid #ccc}
+.sc-net .sc-lbl{font-size:11px;font-weight:700}
+.sc-net .sc-val{font-size:12px;font-weight:700}
 .sig-stmt{font-size:13px;color:#222;line-height:1.7;margin-bottom:6px}
 .sig-stmt-id{font-size:12px;color:#333;line-height:1.6;margin-bottom:20px}
 .sig-row{display:flex;gap:32px;margin-top:4px}
@@ -10441,39 +10444,27 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     return `${ny}/${String(am).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
   })();
 
-  /* ── 薪資條（橫式欄位表，沿線撕下） ── */
+  /* ── 薪資條（直式內容旋轉 90°，A4 底部撕下） ── */
   html += `
 <div class="cut-wrap">
 <div class="cut-line">✂&nbsp;&nbsp;&nbsp;沿線撕下 · Potong di sini&nbsp;&nbsp;&nbsp;✂</div>
-<div class="slip-h">
-  <div class="slip-h-hd">
-    <span class="slip-h-title">${periodLabel} 薪資條 · SLIP GAJI</span>
-    <span class="slip-h-sub">週期 Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}&nbsp;&nbsp;·&nbsp;&nbsp;發薪日 Tanggal Gaji：${payDayLabel}</span>
+<div class="sc-outer">
+  <div class="sc-inner">
+    <div class="sc-card">
+      <div class="sc-hd">
+        <div class="sc-hd-title">${periodLabel} 薪資條</div>
+        <div class="sc-hd-sub">SLIP GAJI</div>
+      </div>
+      <div class="sc-meta">${formalName || helperName}<div class="sc-meta-sub">週期 Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div></div>
+      <div class="sc-row"><div class="sc-lbl">底薪<span class="sc-lbl-id">Gaji Pokok</span></div><div class="sc-val">NT$ ${p.baseSalary.toLocaleString()}</div></div>
+      ${p.overtimeDays > 0 ? `<div class="sc-row"><div class="sc-lbl">假日加班 ${p.overtimeDays}日<span class="sc-lbl-id">Lembur ${p.overtimeDays} hari</span></div><div class="sc-val sc-add">+NT$ ${p.overtimePay.toLocaleString()}<span class="sc-val-dt">${overtimeDates.join('、')}</span></div></div>` : ''}
+      ${p.adjAdd > 0 ? `<div class="sc-row"><div class="sc-lbl">額外津貼<span class="sc-lbl-id">Tunjangan</span></div><div class="sc-val sc-add">+NT$ ${p.adjAdd.toLocaleString()}</div></div>` : ''}
+      ${p.leavePay > 0 ? `<div class="sc-row"><div class="sc-lbl">請假扣款 ${p.leaveDays}日<span class="sc-lbl-id">Potongan cuti ${p.leaveDays} hari</span></div><div class="sc-val sc-ded">−NT$ ${p.leavePay.toLocaleString()}<span class="sc-val-dt">${leaveDates.join('、')}</span></div></div>` : ''}
+      ${p.adjDeduct > 0 ? `<div class="sc-row"><div class="sc-lbl">其他扣項<span class="sc-lbl-id">Potongan lain</span></div><div class="sc-val sc-ded">−NT$ ${p.adjDeduct.toLocaleString()}</div></div>` : ''}
+      <div class="sc-row sc-net"><div class="sc-lbl">本期實領<span class="sc-lbl-id">Gaji Bersih</span></div><div class="sc-val">NT$ ${p.netSalary.toLocaleString()}</div></div>
+      <div class="sc-row"><div class="sc-lbl">發薪日<span class="sc-lbl-id">Tanggal Gaji</span></div><div class="sc-val">${payDayLabel}</div></div>
+    </div>
   </div>
-  <table class="sh-tbl">
-    <thead>
-      <tr>
-        <th class="sh-th">員工<span class="sh-tid">Karyawan</span></th>
-        <th class="sh-th">底薪<span class="sh-tid">Gaji Pokok</span></th>
-        ${p.overtimeDays > 0 ? `<th class="sh-th">假日加班 ${p.overtimeDays}日<span class="sh-tid">Lembur ${p.overtimeDays} hari</span></th>` : ''}
-        ${p.adjAdd > 0 ? `<th class="sh-th">額外津貼<span class="sh-tid">Tunjangan</span></th>` : ''}
-        ${p.leavePay > 0 ? `<th class="sh-th">請假扣款 ${p.leaveDays}日<span class="sh-tid">Potongan cuti ${p.leaveDays} hari</span></th>` : ''}
-        ${p.adjDeduct > 0 ? `<th class="sh-th">其他扣項<span class="sh-tid">Potongan lain</span></th>` : ''}
-        <th class="sh-th">本期實領<span class="sh-tid">Gaji Bersih</span></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="sh-td">${formalName || helperName}</td>
-        <td class="sh-td">NT$ ${p.baseSalary.toLocaleString()}</td>
-        ${p.overtimeDays > 0 ? `<td class="sh-td sh-add">+NT$ ${p.overtimePay.toLocaleString()}<span class="sh-dt">${overtimeDates.join('、')}</span></td>` : ''}
-        ${p.adjAdd > 0 ? `<td class="sh-td sh-add">+NT$ ${p.adjAdd.toLocaleString()}</td>` : ''}
-        ${p.leavePay > 0 ? `<td class="sh-td sh-ded">−NT$ ${p.leavePay.toLocaleString()}<span class="sh-dt">${leaveDates.join('、')}</span></td>` : ''}
-        ${p.adjDeduct > 0 ? `<td class="sh-td sh-ded">−NT$ ${p.adjDeduct.toLocaleString()}</td>` : ''}
-        <td class="sh-td sh-net">NT$ ${p.netSalary.toLocaleString()}</td>
-      </tr>
-    </tbody>
-  </table>
 </div>
 </div>`;
 
