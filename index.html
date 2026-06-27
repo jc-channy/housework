@@ -2580,12 +2580,12 @@
       </div>
     </div>
     <div class="space-y-2 text-sm">
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prSummary" checked class="w-4 h-4"> 薪資摘要（底薪・加減項・實領）</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prAttendSummary" checked class="w-4 h-4"> 出勤摘要（應出勤・實出・請假・加班）</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prActivity" checked class="w-4 h-4"> 本期異動（請假＋加扣項整合列表）</label>
-      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prReceipt" checked class="w-4 h-4"> 簽收區</label>
-      <label class="flex items-center gap-2 cursor-pointer" style="color:#9CA3AF;"><input type="checkbox" id="prDays" class="w-4 h-4"> 每日出勤明細（通常不需要）</label>
+      <label class="flex items-center gap-2 cursor-pointer" style="color:#9CA3AF;"><input type="checkbox" id="prDays" class="w-4 h-4"> 附上每日出勤明細（打卡時間）</label>
     </div>
+    <input type="hidden" id="prSummary" value="1">
+    <input type="hidden" id="prAttendSummary" value="0">
+    <input type="hidden" id="prActivity" value="0">
+    <input type="hidden" id="prReceipt" value="1">
     <button onclick="doPrintPayroll()" class="btn-primary w-full mt-4"><i class="ti ti-printer" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 列印</button>
   </div>
 </div>
@@ -10307,132 +10307,77 @@ function doPrintPayroll(){
 <meta charset="UTF-8">
 <title>薪資結算單 ${periodLabel}</title>
 <style>
-@page{size:A4;margin:14mm 16mm}
+@page{size:A4;margin:16mm 18mm}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:32px 36px;max-width:700px;margin:0 auto}
 @media print{body{padding:0;max-width:100%;width:100%}.no-print{display:none!important}}
-.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:14px;margin-bottom:22px}
-.hd h1{font-size:21px;font-weight:800;letter-spacing:-.5px}
-.hd .sub{font-size:12px;color:#555;font-weight:500;margin-top:3px;letter-spacing:.3px}
-.hd-r{text-align:right;font-size:12px;color:#444;line-height:1.8}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1a1a;padding-bottom:14px;margin-bottom:24px}
+.hd h1{font-size:20px;font-weight:800;letter-spacing:-.3px;color:#1a1a1a}
+.hd .sub{font-size:11px;color:#555;font-weight:600;margin-top:4px;letter-spacing:.8px}
+.hd-r{text-align:right;font-size:12px;color:#444;line-height:1.9}
 .hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
-.hero{background:#1a1a1a;color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between}
-.hero-lbl{font-size:12px;color:rgba(255,255,255,.8);letter-spacing:.5px;margin-bottom:5px}
-.hero-amt{font-size:36px;font-weight:900;letter-spacing:-2px}
-.hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.85);line-height:2}
-.sec{margin-bottom:22px}
-.sec-ttl{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid #ccc}
-.sec-ttl .id{font-size:11px;color:#444;margin-left:6px;font-weight:600;letter-spacing:.3px}
-table.sum{width:100%;border-collapse:collapse}
-table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
-table.sum td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
-table.sum tr:last-child td{border-bottom:none}
-table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px solid #1a1a1a;border-bottom:none}
-.add{color:#166534}.ded{color:#991b1b}
-.att-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.att-card{background:#f7f7f7;border-radius:10px;padding:11px 10px;text-align:center}
-.att-card .n{font-size:22px;font-weight:800;color:#1a1a1a;line-height:1;margin-bottom:3px}
-.att-card .l{font-size:10px;color:#666;line-height:1.4}
-.att-ok{background:#f0fdf4}.att-ok .n{color:#166534}
-.att-warn{background:#fff7ed}.att-warn .n{color:#9a3412}
-.att-blue{background:#eff6ff}.att-blue .n{color:#1d4ed8}
-ul.act{list-style:none}
-ul.act li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
-ul.act li:last-child{border-bottom:none}
-.act-dt{font-size:12px;color:#888;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
-.act-lbl{flex:1;color:#222}
-.act-note{font-size:12px;color:#888}
-.act-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
-table.days{width:100%;border-collapse:collapse;font-size:12px}
+.sal-sec{margin-bottom:28px}
+.sal-lbl{font-size:11px;font-weight:600;color:#888;letter-spacing:.6px;margin-bottom:10px;text-transform:uppercase}
+table.sal{width:100%;border-collapse:collapse}
+table.sal td{padding:9px 0;border-bottom:1px solid #ebebeb;font-size:13px;vertical-align:top}
+table.sal td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.sal .id-lbl{display:block;font-size:11px;color:#777;margin-top:2px;font-weight:400}
+.add{color:#166534;font-weight:500}.ded{color:#991b1b;font-weight:500}
+table.sal .net-row td{border-top:1.5px solid #1a1a1a;border-bottom:none;padding-top:12px;font-size:15px;font-weight:800}
+table.days{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
 table.days th{text-align:left;padding:5px 6px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;font-size:11px;color:#777;font-weight:600}
 table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 .d-ok{color:#166534;font-weight:500}.d-lv{color:#991b1b;font-weight:500}.d-ot{color:#1d4ed8;font-weight:500}
-.sig-box{border:1.5px dashed #ccc;border-radius:12px;padding:20px 24px}
-.sig-box .sig-ttl{font-size:13px;font-weight:700;margin-bottom:8px}
-.sig-amt{font-size:20px;font-weight:800;margin-bottom:16px}
-.sig-row{display:flex;gap:24px}
-.sig-fld{flex:1;border-bottom:1px solid #bbb;padding-top:20px;font-size:11px;color:#888}
-.sig-ok{background:#f0fdf4;border-radius:10px;padding:14px 18px;font-size:13px}
-.sig-ok .sig-ok-badge{font-weight:700;color:#166534;margin-bottom:4px}
-.footer{margin-top:22px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#999;text-align:center}
+.days-lbl{font-size:11px;font-weight:600;color:#888;letter-spacing:.6px;margin-bottom:10px;text-transform:uppercase}
+.sig-sec{border:1px solid #ccc;border-radius:8px;padding:20px 24px;margin-top:8px}
+.sig-stmt{font-size:13px;color:#222;line-height:1.7;margin-bottom:6px}
+.sig-stmt-id{font-size:12px;color:#666;line-height:1.6;margin-bottom:20px}
+.sig-row{display:flex;gap:32px;margin-top:4px}
+.sig-fld{flex:1;border-top:1px solid #aaa;padding-top:6px;font-size:11px;color:#888}
+.sig-fld-sm{width:130px;flex-shrink:0;border-top:1px solid #aaa;padding-top:6px;font-size:11px;color:#888}
+.sig-ok{background:#f0fdf4;border-radius:8px;padding:14px 18px}
+.sig-ok-badge{font-weight:700;color:#166534;font-size:13px;margin-bottom:4px}
+.footer{margin-top:20px;padding-top:10px;border-top:1px solid #eee;font-size:11px;color:#aaa;text-align:center}
 </style>
 </head>
 <body>
 
 <div class="hd">
-  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">DAFTAR PENJELASAN GAJI · Laporan Penggajian</div></div>
+  <div>
+    <h1>${periodLabel} 薪資結算單</h1>
+    <div class="sub">DAFTAR PENJELASAN GAJI</div>
+  </div>
   <div class="hd-r">
     <strong>${formalName || helperName}</strong>
-    ${passport ? `<div style="font-size:11px;color:#555;font-weight:500">護照 / Paspor：${passport}</div>` : ''}
+    ${passport ? `<div>護照 / Paspor：${passport}</div>` : ''}
     <div>週期 / Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div>
     <div>列印 / Cetak：${new Date().toLocaleDateString('zh-TW')}</div>
   </div>
 </div>
 
-<div class="hero">
-  <div>
-    <div class="hero-lbl">本期實領 <span style="font-size:12px;opacity:.9">· Gaji Bersih</span></div>
-    <div class="hero-amt">NT$ ${p.netSalary.toLocaleString()}</div>
-  </div>
-  <div class="hero-r">
-    <div>底薪 NT$&nbsp;${p.baseSalary.toLocaleString()}</div>
-    ${p.overtimePay > 0 ? `<div style="color:rgba(134,255,134,1)">加班 +${p.overtimePay.toLocaleString()}</div>` : ''}
-    ${p.adjAdd > 0      ? `<div style="color:rgba(134,255,134,1)">津貼 +${p.adjAdd.toLocaleString()}</div>` : ''}
-    ${p.leavePay > 0    ? `<div style="color:rgba(255,180,140,1)">請假 −${p.leavePay.toLocaleString()}</div>` : ''}
-    ${p.adjDeduct > 0   ? `<div style="color:rgba(255,180,140,1)">扣項 −${p.adjDeduct.toLocaleString()}</div>` : ''}
-  </div>
+<div class="sal-sec">
+  <div class="sal-lbl">薪資計算 · Rincian Gaji</div>
+  <table class="sal">
+    ${breakdown.map(row => {
+      const cls   = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
+      const prefix = row.sign === '+' ? '+ ' : (row.sign === '-' ? '− ' : '');
+      return `<tr>
+        <td>${row.label}<span class="id-lbl">${row.labelId||''}</span></td>
+        <td class="${cls}">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td>
+      </tr>`;
+    }).join('')}
+    <tr class="net-row">
+      <td>本期實領<span class="id-lbl">Gaji Bersih</span></td>
+      <td>NT$&nbsp;${p.netSalary.toLocaleString()}</td>
+    </tr>
+  </table>
 </div>
 `;
 
-  if (opts.summary) {
-    html += `<div class="sec">
-  <div class="sec-ttl">薪資摘要 <span class="id">Ringkasan Gaji</span></div>
-  <table class="sum">
-    ${breakdown.map(row => {
-      const cls = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
-      const prefix = row.sign === '+' ? '+' : (row.sign === '-' ? '−' : '');
-      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:11px;color:#555;font-weight:500">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
-    }).join('')}
-    <tr class="net"><td>本期實領 <span style="font-size:12px;color:#555;font-weight:500">/ Gaji Bersih</span></td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
-  </table>
-</div>`;
-  }
-
-  if (opts.attendSummary) {
-    html += `<div class="sec">
-  <div class="sec-ttl">出勤摘要 <span class="id">Ringkasan Kehadiran</span></div>
-  <div class="att-grid">
-    <div class="att-card"><div class="n">${p.scheduledWorkdays}</div><div class="l">應出勤<br><span style="font-size:12px;color:#888">Hari Terjadwal</span></div></div>
-    <div class="att-card ${p.actualWorkdays > 0 ? 'att-ok' : ''}"><div class="n">${p.actualWorkdays}</div><div class="l">實際出勤<br><span style="font-size:12px;color:#666">Hadir Aktual</span></div></div>
-    <div class="att-card ${p.leaveDays > 0 ? 'att-warn' : ''}"><div class="n">${p.leaveDays}</div><div class="l">請假<br><span style="font-size:12px;color:#888">Hari Cuti</span></div></div>
-    <div class="att-card ${p.overtimeDays > 0 ? 'att-blue' : ''}"><div class="n">${p.overtimeDays}</div><div class="l">假日加班<br><span style="font-size:12px;color:#888">Lembur Libur</span></div></div>
-  </div>
-</div>`;
-  }
-
-  if (opts.activity) {
-    html += `<div class="sec">
-  <div class="sec-ttl">本期異動 <span class="id">Aktivitas Periode Ini</span></div>`;
-    if (activityItems.length) {
-      html += `<ul class="act">` +
-        activityItems.map(item => {
-          const dt    = item.date ? item.date.slice(5).replace('-','/') : '—';
-          const amtHtml = item.amount >= 0
-            ? `<span class="act-amt add">+${item.amount.toLocaleString()}</span>`
-            : `<span class="act-amt ded">−${Math.abs(item.amount).toLocaleString()}</span>`;
-          return `<li><span class="act-dt">${dt}</span><span class="act-lbl">${item.label}${item.note ? `<span class="act-note"> · ${item.note}</span>` : ''}</span>${amtHtml}</li>`;
-        }).join('') +
-        `</ul>`;
-    } else {
-      html += `<div style="font-size:12px;color:#bbb;padding:8px 0">本期無特殊異動項目</div>`;
-    }
-    html += `</div>`;
-  }
-
   if (opts.days) {
     const workDays = p.days.filter(d => d.isWorkday || d.isHoliday);
-    html += `<div class="sec">
-  <div class="sec-ttl">每日出勤明細 <span class="id">Rincian Kehadiran Harian</span></div>
+    html += `<div style="margin-bottom:28px">
+  <div class="days-lbl">每日出勤明細 · Rincian Kehadiran Harian</div>
   <table class="days">
     <thead><tr><th>日期</th><th>狀態</th><th>上班</th><th>午休開始</th><th>午休結束</th><th>下班</th></tr></thead>
     <tbody>` +
@@ -10451,23 +10396,23 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     `</tbody></table></div>`;
   }
 
-  if (opts.receipt) {
-    const r = (state.payrollReceipts||[]).find(rr => rr.periodKey === p.periodKey);
-    if (r) {
-      html += `<div class="sec"><div class="sec-ttl">簽收紀錄 <span class="id">Tanda Terima</span></div>
+  /* ── 簽收區（已簽收 or 空白待簽） ── */
+  const r = (state.payrollReceipts||[]).find(rr => rr.periodKey === p.periodKey);
+  if (r) {
+    html += `<div class="sig-sec">
   <div class="sig-ok"><div class="sig-ok-badge">✓ 已簽收 · Sudah Diterima</div>
-  <div style="color:#444;font-size:13px">金額 NT$&nbsp;${(r.amount||0).toLocaleString()}　日期 ${r.signedDate}${r.note?` · ${r.note}`:''}</div>
-  ${r.photoDataUrl?`<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:200px;border-radius:6px;border:1px solid #ccc"></div>`:''}</div></div>`;
-    } else {
-      html += `<div class="sec"><div class="sig-box">
-  <div class="sig-ttl">薪資簽收 <span style="font-size:12px;color:#555;font-weight:400">· Tanda Terima Gaji</span></div>
-  <div class="sig-amt">本期實領 / Gaji Bersih：NT$&nbsp;${p.netSalary.toLocaleString()}</div>
+  <div style="color:#444;font-size:13px;margin-top:4px">金額 NT$&nbsp;${(r.amount||0).toLocaleString()}　日期 ${r.signedDate}${r.note?` · ${r.note}`:''}</div>
+  ${r.photoDataUrl?`<div style="margin-top:10px"><img src="${r.photoDataUrl}" style="max-width:200px;border-radius:6px;border:1px solid #ccc"></div>`:''}</div>
+</div>`;
+  } else {
+    html += `<div class="sig-sec">
+  <div class="sig-stmt">本人確認已收到 ${periodLabel} 薪資 <strong>NT$&nbsp;${p.netSalary.toLocaleString()}</strong> 整。</div>
+  <div class="sig-stmt-id">Saya menyatakan telah menerima gaji bulan ini sebesar NT$&nbsp;${p.netSalary.toLocaleString()}.</div>
   <div class="sig-row">
-    <div class="sig-fld">簽名 / Tanda Tangan</div>
-    <div class="sig-fld" style="max-width:160px">日期 / Tanggal</div>
+    <div class="sig-fld">員工簽名 / Tanda Tangan Karyawan</div>
+    <div class="sig-fld-sm">日期 / Tanggal</div>
   </div>
-</div></div>`;
-    }
+</div>`;
   }
 
   html += `<div class="footer">列印時間 ${new Date().toLocaleString('zh-TW')} · 本單據僅供薪資確認，請妥善保存</div></body></html>`;
