@@ -2568,6 +2568,17 @@
       <button onclick="closePrintOptions()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
     <p class="text-xs mb-3" style="color:#9CA3AF;">預設輸出人性化閱讀版；勾選「每日明細」可附完整打卡紀錄。</p>
+    <div class="border border-gray-200 rounded-xl p-3 mb-3 space-y-2">
+      <div class="text-xs font-semibold" style="color:#374151;">幫傭資訊 <span style="color:#9CA3AF;font-weight:400">Informasi Karyawan</span></div>
+      <div class="flex items-center gap-2">
+        <label class="text-xs shrink-0 w-20" style="color:#374151;">正式姓名</label>
+        <input id="prFormalName" type="text" class="flex-1 border border-gray-300 rounded-lg px-2 py-1 text-sm" placeholder="護照英文全名">
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-xs shrink-0 w-20" style="color:#374151;">護照號碼</label>
+        <input id="prPassport" type="text" class="flex-1 border border-gray-300 rounded-lg px-2 py-1 text-sm" placeholder="Nomor Paspor">
+      </div>
+    </div>
     <div class="space-y-2 text-sm">
       <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prSummary" checked class="w-4 h-4"> 薪資摘要（底薪・加減項・實領）</label>
       <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="prAttendSummary" checked class="w-4 h-4"> 出勤摘要（應出勤・實出・請假・加班）</label>
@@ -9585,7 +9596,7 @@ function printLeaveForm(rid){
   const r = state.leaveRequests.find(x=>x.id===rid);
   if (!r) return;
   const helperName = getHelperName();
-  const managerName = state.users.find(u=>u.role==='manager')?.name || '管理者';
+  const formalName = state.payrollConfig?.helperFormalName || helperName;
   const typeName = (state.leaveTypes||[]).find(t=>t.id===r.type)?.nameZh || r.type;
   const PERIOD_ZH = { full:'全天（1日）', am:'上午（0.5日）', pm:'下午（0.5日）' };
   const policyZh = state.payrollConfig?.leavePolicyNote || '';
@@ -9598,38 +9609,36 @@ function printLeaveForm(rid){
     </div>` : '';
   const typeNameId = (state.leaveTypes||[]).find(t=>t.id===r.type)?.nameId || typeName;
   const PERIOD_ID = { full:'Satu Hari Penuh (1 Hari)', am:'Pagi Hari (0,5 Hari)', pm:'Sore Hari (0,5 Hari)' };
-  const isApproved = r.status==='approved';
-  const statusZh = isApproved ? '✓ 已批准' : '✗ 已拒絕';
-  const statusId = isApproved ? '✓ Disetujui' : '✗ Ditolak';
   const html = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><title>請假單 / Formulir Cuti</title>
   <style>
-    body { font-family: 'PingFang TC', 'Noto Sans TC', 'Noto Sans', sans-serif; max-width: 640px; margin: 40px auto; padding: 20px; color: #333; }
-    h1 { text-align:center; font-size:22px; margin-bottom:2px; }
-    .subtitle { text-align:center; color:#777; font-size:13px; margin-bottom:20px; }
-    table { width:100%; border-collapse:collapse; margin-bottom:20px; }
-    td { padding:7px 10px; border:1px solid #ccc; font-size:13px; }
-    td:first-child { background:#f5f5f5; font-weight:bold; width:50%; }
+    @page { size: A5; margin: 8mm 10mm; }
+    body { font-family: 'PingFang TC', 'Noto Sans TC', 'Noto Sans', sans-serif; max-width: 148mm; margin: 24px auto; padding: 16px; color: #333; font-size: 13px; }
+    h1 { text-align:center; font-size:18px; margin-bottom:2px; font-weight:800; }
+    .subtitle { text-align:center; color:#555; font-size:12px; font-weight:600; margin-bottom:18px; letter-spacing:.3px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:18px; }
+    td { padding:7px 10px; border:1px solid #ccc; font-size:12px; }
+    td:first-child { background:#f5f5f5; font-weight:bold; width:46%; }
     .lbl-zh { display:block; }
-    .lbl-id { display:block; font-size:12px; color:#888; font-weight:normal; }
+    .lbl-id { display:block; font-size:11px; color:#666; font-weight:600; margin-top:1px; }
     .val-zh { display:block; }
-    .val-id { display:block; font-size:12px; color:#777; }
-    .section { border:1px solid #ddd; border-radius:8px; padding:14px 16px; margin-bottom:20px; background:#fafaf8; }
-    .section-title { font-weight:bold; font-size:14px; margin-bottom:8px; color:#555; border-bottom:1px solid #e0e0e0; padding-bottom:6px; }
-    .sign-row { display:flex; gap:40px; margin-top:32px; }
-    .sign-box { flex:1; border-top:1px solid #999; padding-top:8px; font-size:13px; color:#666; }
+    .val-id { display:block; font-size:11px; color:#555; font-weight:500; margin-top:1px; }
+    .time-input { border:none; border-bottom:1px solid #bbb; width:90%; font-size:12px; padding:2px 0; outline:none; background:transparent; }
+    .section { border:1px solid #ddd; border-radius:8px; padding:12px 14px; margin-bottom:16px; background:#fafaf8; }
+    .section-title { font-weight:bold; font-size:13px; margin-bottom:8px; color:#555; border-bottom:1px solid #e0e0e0; padding-bottom:5px; }
+    .sign-row { display:flex; gap:32px; margin-top:28px; }
+    .sign-box { flex:1; border-top:1px solid #999; padding-top:8px; font-size:12px; color:#666; }
     @media print { button { display:none; } }
   </style></head><body>
   <h1>請假申請單</h1>
-  <div class="subtitle">Formulir Permohonan Cuti</div>
+  <div class="subtitle">FORMULIR PERMOHONAN CUTI</div>
   <table>
-    <tr><td><span class="lbl-zh">員工姓名</span><span class="lbl-id">Nama Karyawan</span></td><td>${helperName}</td></tr>
+    <tr><td><span class="lbl-zh">員工姓名</span><span class="lbl-id">Nama Karyawan</span></td><td>${formalName}</td></tr>
     <tr><td><span class="lbl-zh">請假日期</span><span class="lbl-id">Tanggal Cuti</span></td><td>${r.date}</td></tr>
+    <tr><td><span class="lbl-zh">起始時間</span><span class="lbl-id">Waktu Mulai</span></td><td><input class="time-input" type="text" placeholder="如 09:00"></td></tr>
+    <tr><td><span class="lbl-zh">結束時間</span><span class="lbl-id">Waktu Selesai</span></td><td><input class="time-input" type="text" placeholder="如 18:00"></td></tr>
     <tr><td><span class="lbl-zh">請假類型</span><span class="lbl-id">Jenis Cuti</span></td><td><span class="val-zh">${typeName}</span><span class="val-id">${typeNameId}</span></td></tr>
     <tr><td><span class="lbl-zh">請假時段</span><span class="lbl-id">Periode Cuti</span></td><td><span class="val-zh">${PERIOD_ZH[r.period]||r.period}</span><span class="val-id">${PERIOD_ID[r.period]||r.period}</span></td></tr>
     <tr><td><span class="lbl-zh">請假原因</span><span class="lbl-id">Alasan Cuti</span></td><td>${r.reason||'—'}</td></tr>
-    <tr><td><span class="lbl-zh">審核結果</span><span class="lbl-id">Hasil Keputusan</span></td><td><b>${statusZh}</b><span class="val-id">${statusId}</span></td></tr>
-    <tr><td><span class="lbl-zh">批准人</span><span class="lbl-id">Diputuskan oleh</span></td><td>${r.decidedBy||managerName}</td></tr>
-    <tr><td><span class="lbl-zh">批准日期</span><span class="lbl-id">Tanggal Keputusan</span></td><td>${r.decidedAt?r.decidedAt.slice(0,10):''}</td></tr>
     ${r.managerNote?`<tr><td><span class="lbl-zh">管理者備註</span><span class="lbl-id">Catatan Majikan</span></td><td>${r.managerNote}</td></tr>`:''}
   </table>
   ${policyHtml}
@@ -9637,8 +9646,8 @@ function printLeaveForm(rid){
     <div class="sign-box">員工簽名<br><small style="color:#aaa;">Tanda Tangan Karyawan</small><br><br><br></div>
     <div class="sign-box">管理者確認<br><small style="color:#aaa;">Konfirmasi Majikan</small><br><br><br></div>
   </div>
-  <p style="font-size:12px;color:#aaa;text-align:center;margin-top:32px;">列印日期 / Tanggal Cetak：${new Date().toLocaleDateString('zh-TW')}</p>
-  <div style="text-align:center;margin-top:16px;"><button onclick="window.print()">🖨 列印 / Print</button></div>
+  <p style="font-size:11px;color:#aaa;text-align:center;margin-top:28px;">列印日期 / Tanggal Cetak：${new Date().toLocaleDateString('zh-TW')}</p>
+  <div style="text-align:center;margin-top:14px;" class="no-print"><button onclick="window.print()">🖨 列印 / Print</button></div>
   </body></html>`;
   const w = window.open('', '_blank');
   if (w){ w.document.write(html); w.document.close(); }
@@ -10220,7 +10229,14 @@ function saveReceipt(){
 }
 
 /* ========== 列印 ========== */
-function printPayroll(){ document.getElementById('printOptionsModal').classList.remove('hidden'); }
+function printPayroll(){
+  document.getElementById('printOptionsModal').classList.remove('hidden');
+  const c = state.payrollConfig || {};
+  const fnEl = document.getElementById('prFormalName');
+  const ppEl = document.getElementById('prPassport');
+  if (fnEl) fnEl.value = c.helperFormalName || '';
+  if (ppEl) ppEl.value = c.helperPassport || '';
+}
 function closePrintOptions(){ document.getElementById('printOptionsModal').classList.add('hidden'); }
 function doPrintPayroll(){
   const opts = {
@@ -10235,6 +10251,13 @@ function doPrintPayroll(){
   const fmtD = d => `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
   const helperName = (state.users?.find(u=>u.role==='helper')?.name) || '幫傭';
   const periodLabel = `${p.cycleStart.getFullYear()} 年 ${p.cycleStart.getMonth()+1} 月`;
+  /* ── 正式姓名 / 護照號碼（儲存到 state） ── */
+  const formalName = (document.getElementById('prFormalName')?.value || '').trim();
+  const passport   = (document.getElementById('prPassport')?.value   || '').trim();
+  if (!state.payrollConfig) state.payrollConfig = {};
+  if (formalName) state.payrollConfig.helperFormalName = formalName;
+  if (passport)   state.payrollConfig.helperPassport   = passport;
+  if (formalName || passport) save();
 
   /* ── 本期異動 items ── */
   const activityItems = [];
@@ -10257,15 +10280,23 @@ function doPrintPayroll(){
     return a.date.localeCompare(b.date);
   });
 
+  /* ── 假日加班 / 請假 日期列表 ── */
+  const overtimeDates = p.days.filter(d => d.addedPay > 0).map(d => d.dateStr.slice(5).replace('-','/'));
+  const leaveDates    = p.days.filter(d => d.leave && d.deductedPay > 0).map(d => d.dateStr.slice(5).replace('-','/'));
+
   /* ── 薪資摘要 rows ── */
   const breakdown = [];
   breakdown.push({ label: '底薪', labelId: 'Gaji Pokok', amount: p.baseSalary, sign: '' });
-  if (p.overtimeDays > 0)
-    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日`, labelId: `Lembur ${p.overtimeDays} hari`, amount: p.overtimePay, sign: '+' });
+  if (p.overtimeDays > 0) {
+    const dtStr = overtimeDates.length ? `（${overtimeDates.join('、')}）` : '';
+    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日${dtStr}`, labelId: `Lembur ${p.overtimeDays} hari`, amount: p.overtimePay, sign: '+' });
+  }
   if (p.adjAdd > 0)
     breakdown.push({ label: '額外津貼', labelId: 'Tunjangan', amount: p.adjAdd, sign: '+' });
-  if (p.leavePay > 0)
-    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日`, labelId: `Potongan cuti ${p.leaveDays} hari`, amount: p.leavePay, sign: '-' });
+  if (p.leavePay > 0) {
+    const dtStr = leaveDates.length ? `（${leaveDates.join('、')}）` : '';
+    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日${dtStr}`, labelId: `Potongan cuti ${p.leaveDays} hari`, amount: p.leavePay, sign: '-' });
+  }
   if (p.adjDeduct > 0)
     breakdown.push({ label: '其他扣項', labelId: 'Potongan lain', amount: p.adjDeduct, sign: '-' });
 
@@ -10276,26 +10307,27 @@ function doPrintPayroll(){
 <meta charset="UTF-8">
 <title>薪資結算單 ${periodLabel}</title>
 <style>
+@page{size:A5;margin:7mm 9mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:14px;color:#1a1a1a;background:#fff;padding:36px 40px;max-width:700px;margin:0 auto}
-@media print{body{padding:22px 28px}.no-print{display:none!important}}
-.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:14px;margin-bottom:22px}
-.hd h1{font-size:21px;font-weight:800;letter-spacing:-.5px}
-.hd .sub{font-size:12px;color:#999;margin-top:3px}
-.hd-r{text-align:right;font-size:12px;color:#444;line-height:1.8}
-.hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
-.hero{background:#1a1a1a;color:#fff;border-radius:14px;padding:22px 26px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between}
-.hero-lbl{font-size:12px;color:rgba(255,255,255,.8);letter-spacing:.5px;margin-bottom:5px}
-.hero-amt{font-size:38px;font-weight:900;letter-spacing:-2px}
+body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:12px;color:#1a1a1a;background:#fff;padding:20px 22px;max-width:148mm;margin:0 auto}
+@media print{body{padding:0}.no-print{display:none!important}}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:11px;margin-bottom:16px}
+.hd h1{font-size:17px;font-weight:800;letter-spacing:-.5px}
+.hd .sub{font-size:11px;color:#555;font-weight:500;margin-top:3px;letter-spacing:.3px}
+.hd-r{text-align:right;font-size:11px;color:#444;line-height:1.8}
+.hd-r strong{display:block;font-size:13px;font-weight:700;color:#1a1a1a}
+.hero{background:#1a1a1a;color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.hero-lbl{font-size:11px;color:rgba(255,255,255,.8);letter-spacing:.5px;margin-bottom:4px}
+.hero-amt{font-size:28px;font-weight:900;letter-spacing:-1.5px}
 .hero-r{text-align:right;font-size:12px;color:rgba(255,255,255,.85);line-height:2}
-.sec{margin-bottom:22px}
-.sec-ttl{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:10px;padding-bottom:5px;border-bottom:1.5px solid #ccc}
-.sec-ttl .id{font-size:12px;color:#555;margin-left:6px;font-weight:500;letter-spacing:.3px}
+.sec{margin-bottom:16px}
+.sec-ttl{font-size:12px;font-weight:700;color:#1a1a1a;margin-bottom:8px;padding-bottom:4px;border-bottom:1.5px solid #ccc}
+.sec-ttl .id{font-size:11px;color:#444;margin-left:6px;font-weight:600;letter-spacing:.3px}
 table.sum{width:100%;border-collapse:collapse}
-table.sum td{padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
+table.sum td{padding:5px 0;border-bottom:1px solid #f2f2f2;font-size:12px}
 table.sum td:last-child{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
 table.sum tr:last-child td{border-bottom:none}
-table.sum .net td{padding-top:12px;font-size:16px;font-weight:800;border-top:2px solid #1a1a1a;border-bottom:none}
+table.sum .net td{padding-top:10px;font-size:14px;font-weight:800;border-top:2px solid #1a1a1a;border-bottom:none}
 .add{color:#166534}.ded{color:#991b1b}
 .att-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .att-card{background:#f7f7f7;border-radius:10px;padding:11px 10px;text-align:center}
@@ -10328,8 +10360,13 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 <body>
 
 <div class="hd">
-  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">Laporan Penggajian · Payroll Statement</div></div>
-  <div class="hd-r"><strong>${helperName}</strong><div>週期 / Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div><div>列印 / Cetak：${new Date().toLocaleDateString('zh-TW')}</div></div>
+  <div><h1>${periodLabel} 薪資結算單</h1><div class="sub">DAFTAR PENJELASAN GAJI · Laporan Penggajian</div></div>
+  <div class="hd-r">
+    <strong>${formalName || helperName}</strong>
+    ${passport ? `<div style="font-size:11px;color:#555;font-weight:500">護照 / Paspor：${passport}</div>` : ''}
+    <div>週期 / Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</div>
+    <div>列印 / Cetak：${new Date().toLocaleDateString('zh-TW')}</div>
+  </div>
 </div>
 
 <div class="hero">
@@ -10354,7 +10391,7 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     ${breakdown.map(row => {
       const cls = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
       const prefix = row.sign === '+' ? '+' : (row.sign === '-' ? '−' : '');
-      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:12px;color:#888">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
+      return `<tr><td style="color:#222">${row.label}<br><span style="font-size:11px;color:#555;font-weight:500">${row.labelId||''}</span></td><td class="${cls}" style="vertical-align:top">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td></tr>`;
     }).join('')}
     <tr class="net"><td>本期實領 <span style="font-size:12px;color:#555;font-weight:500">/ Gaji Bersih</span></td><td>NT$&nbsp;${p.netSalary.toLocaleString()}</td></tr>
   </table>
