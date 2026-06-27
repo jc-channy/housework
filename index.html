@@ -10330,6 +10330,21 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 .d-ok{color:#166534;font-weight:500}.d-lv{color:#991b1b;font-weight:500}.d-ot{color:#1d4ed8;font-weight:500}
 .days-lbl{font-size:11px;font-weight:600;color:#888;letter-spacing:.6px;margin-bottom:10px;text-transform:uppercase}
 .sig-sec{border:1px solid #ccc;border-radius:8px;padding:20px 24px;margin-top:8px}
+.cut-line{margin:28px 0 0;padding:10px 0 0;border-top:1.5px dashed #bbb;text-align:center;font-size:10px;color:#bbb;letter-spacing:.8px}
+.slip-outer{width:174mm;height:82mm;overflow:hidden;position:relative;margin:10px auto 0}
+.slip-inner{position:absolute;left:0;top:0;width:82mm;height:174mm;transform:translateY(82mm) rotate(90deg);transform-origin:top left}
+.slip-card{width:82mm;border:0.5px solid #bbb;font-size:10px;color:#1a1a1a;font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif}
+.slip-hd{padding:6px 10px;background:#f5f5f5;border-bottom:0.5px solid #ddd;display:flex;justify-content:space-between;align-items:baseline}
+.slip-title{font-size:11px;font-weight:700;color:#1a1a1a}
+.slip-title-id{font-size:9px;color:#888;letter-spacing:.5px}
+.slip-tbl{width:100%;border-collapse:collapse}
+.s-lbl{padding:5px 8px;color:#666;border-bottom:0.5px solid #f0f0f0;width:44%;vertical-align:top;line-height:1.4;font-size:10px}
+.s-id{display:block;font-size:9px;color:#aaa;margin-top:1px}
+.s-val{padding:5px 8px;border-bottom:0.5px solid #f0f0f0;vertical-align:top;line-height:1.4;font-size:10px;font-weight:500}
+.s-dt{display:block;font-size:9px;color:#888;margin-top:1px;font-weight:400}
+.s-add{color:#166534}.s-ded{color:#991b1b}
+.slip-net td{background:#f5f5f5;border-top:1px solid #ccc!important;border-bottom:1px solid #ccc!important;font-size:11px;font-weight:700}
+.slip-net .s-val{font-size:12px}
 .sig-stmt{font-size:13px;color:#222;line-height:1.7;margin-bottom:6px}
 .sig-stmt-id{font-size:12px;color:#666;line-height:1.6;margin-bottom:20px}
 .sig-row{display:flex;gap:32px;margin-top:4px}
@@ -10414,6 +10429,73 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
   </div>
 </div>`;
   }
+
+  /* ── 發薪日計算 ── */
+  const payDayLabel = (() => {
+    const d = state.payrollConfig?.paydayReminderDay;
+    if (!d) return '—';
+    const ce = p.cycleEnd;
+    const nm = ce.getMonth() + 2;
+    const ny = ce.getFullYear() + (nm > 12 ? 1 : 0);
+    const am = nm > 12 ? 1 : nm;
+    return `${ny}/${String(am).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+  })();
+
+  /* ── 薪資條（旋轉 90° 橫放於 A4 底部） ── */
+  html += `
+<div class="cut-line">✂&nbsp;&nbsp;&nbsp;沿線撕下 · Potong di sini&nbsp;&nbsp;&nbsp;✂</div>
+<div class="slip-outer">
+  <div class="slip-inner">
+    <div class="slip-card">
+      <div class="slip-hd">
+        <span class="slip-title">${periodLabel} 薪資條</span>
+        <span class="slip-title-id">SLIP GAJI</span>
+      </div>
+      <table class="slip-tbl">
+        <tr>
+          <td class="s-lbl">員工<span class="s-id">Karyawan</span></td>
+          <td class="s-val">${formalName || helperName}</td>
+        </tr>
+        <tr>
+          <td class="s-lbl">週期<span class="s-id">Periode</span></td>
+          <td class="s-val">${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}</td>
+        </tr>
+        <tr>
+          <td class="s-lbl">底薪<span class="s-id">Gaji Pokok</span></td>
+          <td class="s-val">NT$ ${p.baseSalary.toLocaleString()}</td>
+        </tr>
+        ${p.overtimeDays > 0 ? `<tr>
+          <td class="s-lbl">假日加班 ${p.overtimeDays} 日<span class="s-id">Lembur ${p.overtimeDays} hari</span></td>
+          <td class="s-val s-add">+ NT$ ${p.overtimePay.toLocaleString()}<span class="s-dt">${overtimeDates.join('、')}</span></td>
+        </tr>` : ''}
+        ${p.adjAdd > 0 ? `<tr>
+          <td class="s-lbl">額外津貼<span class="s-id">Tunjangan</span></td>
+          <td class="s-val s-add">+ NT$ ${p.adjAdd.toLocaleString()}</td>
+        </tr>` : ''}
+        ${p.leavePay > 0 ? `<tr>
+          <td class="s-lbl">請假扣款 ${p.leaveDays} 日<span class="s-id">Potongan ${p.leaveDays} hari</span></td>
+          <td class="s-val s-ded">− NT$ ${p.leavePay.toLocaleString()}<span class="s-dt">${leaveDates.join('、')}</span></td>
+        </tr>` : ''}
+        ${p.adjDeduct > 0 ? `<tr>
+          <td class="s-lbl">其他扣項<span class="s-id">Potongan lain</span></td>
+          <td class="s-val s-ded">− NT$ ${p.adjDeduct.toLocaleString()}</td>
+        </tr>` : ''}
+        <tr class="slip-net">
+          <td class="s-lbl">本期實領<span class="s-id">Gaji Bersih</span></td>
+          <td class="s-val">NT$ ${p.netSalary.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td class="s-lbl">發薪日<span class="s-id">Tanggal Pembayaran</span></td>
+          <td class="s-val">${payDayLabel}</td>
+        </tr>
+        <tr>
+          <td class="s-lbl">員工簽名<span class="s-id">Tanda Tangan</span></td>
+          <td class="s-val"><div style="border-bottom:0.5px solid #aaa;height:20px;margin-top:2px;"></div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>`;
 
   html += `<div class="footer">列印時間 ${new Date().toLocaleString('zh-TW')} · 本單據僅供薪資確認，請妥善保存</div></body></html>`;
 
