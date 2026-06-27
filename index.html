@@ -10307,10 +10307,10 @@ function doPrintPayroll(){
 <meta charset="UTF-8">
 <title>薪資結算單 ${periodLabel}</title>
 <style>
-@page{size:A5;margin:7mm 9mm}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:12px;color:#1a1a1a;background:#fff;padding:20px 22px;max-width:148mm;margin:0 auto}
-@media print{body{padding:0}.no-print{display:none!important}}
+@page{size:A5;margin:9mm 11mm}
+*{box-sizing:border-box;margin:0;padding:0;word-break:break-word;overflow-wrap:break-word}
+body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size:12px;color:#1a1a1a;background:#fff;padding:18px 20px;max-width:148mm;margin:0 auto}
+@media print{body{padding:0;max-width:100%;width:100%}.no-print{display:none!important}}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #1a1a1a;padding-bottom:11px;margin-bottom:16px}
 .hd h1{font-size:17px;font-weight:800;letter-spacing:-.5px}
 .hd .sub{font-size:11px;color:#555;font-weight:500;margin-top:3px;letter-spacing:.3px}
@@ -10331,13 +10331,13 @@ table.sum .net td{padding-top:10px;font-size:14px;font-weight:800;border-top:2px
 .add{color:#166534}.ded{color:#991b1b}
 .att-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
 .att-card{background:#f7f7f7;border-radius:10px;padding:11px 10px;text-align:center}
-.att-card .n{font-size:22px;font-weight:800;color:#1a1a1a;line-height:1;margin-bottom:3px}
+.att-card .n{font-size:18px;font-weight:800;color:#1a1a1a;line-height:1;margin-bottom:3px}
 .att-card .l{font-size:10px;color:#666;line-height:1.4}
 .att-ok{background:#f0fdf4}.att-ok .n{color:#166534}
 .att-warn{background:#fff7ed}.att-warn .n{color:#9a3412}
 .att-blue{background:#eff6ff}.att-blue .n{color:#1d4ed8}
 ul.act{list-style:none}
-ul.act li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f2f2f2;font-size:13px}
+ul.act li{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f2f2f2;font-size:12px}
 ul.act li:last-child{border-bottom:none}
 .act-dt{font-size:12px;color:#888;width:50px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .act-lbl{flex:1;color:#222}
