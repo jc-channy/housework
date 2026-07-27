@@ -7676,12 +7676,16 @@ function renderSituationModal(){
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button onclick="window._sitStep=1;renderSituationModal();" style="flex:1;border:1px solid #D5C5B0;background:white;border-radius:10px;padding:11px;font-size:13px;font-weight:600;color:#7A5A00;cursor:pointer;">← 上一步</button>
-        <button onclick="${(!isMulti || (endDate && endDate > ymd(new Date())))?'window._sitStep=3;renderSituationModal();':''}" style="flex:2;background:${(!isMulti || (endDate && endDate > ymd(new Date())))?'#5C3D1E':'#D5C5B0'};color:${(!isMulti || (endDate && endDate > ymd(new Date())))?'white':'#9A8070'};border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:${(!isMulti || (endDate && endDate > ymd(new Date())))?'pointer':'not-allowed'};">下一步：菜單設定 →</button>
+        <button onclick="${(!isMulti || (endDate && endDate > ymd(new Date())))?(!isMenuEnabled()?'activateSituation()':'window._sitStep=3;renderSituationModal();'):''}" style="flex:2;background:${(!isMulti || (endDate && endDate > ymd(new Date())))?'#5C3D1E':'#D5C5B0'};color:${(!isMulti || (endDate && endDate > ymd(new Date())))?'white':'#9A8070'};border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:${(!isMulti || (endDate && endDate > ymd(new Date())))?'pointer':'not-allowed'};">${isMenuEnabled()?'下一步：菜單設定 →':'啟動情境'}</button>
       </div>`;
     return;
   }
 
-  // ── 第三步：菜單調整 ──
+  // ── 第三步：菜單調整 ──（菜單功能關閉時跳過）
+  if (window._sitStep === 3 && !isMenuEnabled()) {
+    activateSituation();
+    return;
+  }
   if (window._sitStep === 3) {
     const dow = today().getDay();
     const dayKeyArr = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -8230,10 +8234,10 @@ function renderSitConfigDetail(){
       </div>
       ${dateStatusHtml}
     </div>
-    <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
+    ${isMenuEnabled() ? `<div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #E5DDD5;">
       <div style="font-size:11px;font-weight:600;color:#854F0B;margin-bottom:6px;"><i class="ti ti-chef-hat" style="font-size:12px;" aria-hidden="true"></i> 情境期間菜單</div>
       <div style="display:flex;flex-direction:column;gap:5px;">${menuOverrideHtml}</div>
-    </div>
+    </div>` : ''}
     ${activateBtnHtml}`;
 }
 function removeSituationTask(presetId, idx){
