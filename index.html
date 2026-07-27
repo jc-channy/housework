@@ -10657,7 +10657,6 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
           <td>${row.label}${row.labelId?`<span class="id-lbl">${row.labelId}</span>`:''}${row.note?`<span class="note-lbl">${row.note}</span>`:''}</td>
           <td class="add">＋ NT$&nbsp;${row.amount.toLocaleString()}</td>
         </tr>`).join('');
-        rows += `<tr class="subtotal-row"><td>加項小計</td><td class="add">＋ NT$&nbsp;${addSubTotal.toLocaleString()}</td></tr>`;
       }
       // 扣項區塊
       if (dedRows.length > 0){
@@ -10666,7 +10665,6 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
           <td>${row.label}${row.labelId?`<span class="id-lbl">${row.labelId}</span>`:''}${row.note?`<span class="note-lbl">${row.note}</span>`:''}</td>
           <td class="ded">－ NT$&nbsp;${row.amount.toLocaleString()}</td>
         </tr>`).join('');
-        rows += `<tr class="subtotal-row"><td>扣項小計</td><td class="ded">－ NT$&nbsp;${dedSubTotal.toLocaleString()}</td></tr>`;
       }
       return rows;
     })()}
@@ -10730,36 +10728,46 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
     return `${ny}/${String(am).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
   })();
 
-  /* ── 薪資條（橫式欄位表，沿線撕下） ── */
+  /* ── 薪資條（橫式明細表，沿線撕下） ── */
   html += `
 <div class="cut-wrap">
 <div class="cut-line">✂&nbsp;&nbsp;&nbsp;沿線撕下 · Potong di sini&nbsp;&nbsp;&nbsp;✂</div>
 <div class="slip-h">
   <div class="slip-h-hd">
-    <span class="slip-h-title">${periodLabel} 薪資條 · SLIP GAJI</span>
+    <span class="slip-h-title">${periodLabel} 薪資條 · SLIP GAJI &nbsp;|&nbsp; ${formalName || helperName}</span>
     <span class="slip-h-sub">週期 Periode：${fmtD(p.cycleStart)} ～ ${fmtD(p.cycleEnd)}&nbsp;&nbsp;·&nbsp;&nbsp;發薪日 Tanggal Gaji：${payDayLabel}</span>
   </div>
   <table class="sh-tbl">
     <thead>
       <tr>
-        <th class="sh-th">員工<span class="sh-tid">Karyawan</span></th>
-        <th class="sh-th">底薪<span class="sh-tid">Gaji Pokok</span></th>
-        ${p.overtimeDays > 0 ? `<th class="sh-th">假日加班 ${p.overtimeDays}日<span class="sh-tid">Lembur ${p.overtimeDays} hari</span></th>` : ''}
-        ${p.adjAdd > 0 ? `<th class="sh-th">額外津貼<span class="sh-tid">Tunjangan</span></th>` : ''}
-        ${p.leavePay > 0 ? `<th class="sh-th">請假扣款 ${p.leaveDays}日<span class="sh-tid">Potongan cuti ${p.leaveDays} hari</span></th>` : ''}
-        ${p.adjDeduct > 0 ? `<th class="sh-th">其他扣項<span class="sh-tid">Potongan lain</span></th>` : ''}
-        <th class="sh-th">本期實領<span class="sh-tid">Gaji Bersih</span></th>
+        <th class="sh-th" style="width:38%">項目 Item</th>
+        <th class="sh-th" style="text-align:right">金額 Jumlah</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td class="sh-td">${formalName || helperName}</td>
-        <td class="sh-td">NT$ ${p.baseSalary.toLocaleString()}</td>
-        ${p.overtimeDays > 0 ? `<td class="sh-td sh-add">+NT$ ${p.overtimePay.toLocaleString()}<span class="sh-dt">${overtimeDates.join('、')}</span></td>` : ''}
-        ${p.adjAdd > 0 ? `<td class="sh-td sh-add">+NT$ ${p.adjAdd.toLocaleString()}</td>` : ''}
-        ${p.leavePay > 0 ? `<td class="sh-td sh-ded">−NT$ ${p.leavePay.toLocaleString()}<span class="sh-dt">${leaveDates.join('、')}</span></td>` : ''}
-        ${p.adjDeduct > 0 ? `<td class="sh-td sh-ded">−NT$ ${p.adjDeduct.toLocaleString()}</td>` : ''}
-        <td class="sh-td sh-net">NT$ ${p.netSalary.toLocaleString()}</td>
+        <td class="sh-td">底薪 Gaji Pokok</td>
+        <td class="sh-td" style="text-align:right">NT$ ${p.baseSalary.toLocaleString()}</td>
+      </tr>
+      ${p.overtimeDays > 0 ? `<tr>
+        <td class="sh-td sh-add">假日加班 ${p.overtimeDays}日<span class="sh-dt">${overtimeDates.join('、')}</span></td>
+        <td class="sh-td sh-add" style="text-align:right">+NT$ ${p.overtimePay.toLocaleString()}</td>
+      </tr>` : ''}
+      ${activeAdjs.filter(a=>a.type==='add').map(a=>`<tr>
+        <td class="sh-td sh-add">${a.name}${a.source==='recurring'?' <span style="font-size:8px;color:#888;">(固定)</span>':''}</td>
+        <td class="sh-td sh-add" style="text-align:right">+NT$ ${a.amount.toLocaleString()}</td>
+      </tr>`).join('')}
+      ${p.leavePay > 0 ? `<tr>
+        <td class="sh-td sh-ded">請假扣款 ${p.leaveDays}日<span class="sh-dt">${leaveDates.join('、')}</span></td>
+        <td class="sh-td sh-ded" style="text-align:right">−NT$ ${p.leavePay.toLocaleString()}</td>
+      </tr>` : ''}
+      ${activeAdjs.filter(a=>a.type==='deduct').map(a=>`<tr>
+        <td class="sh-td sh-ded">${a.name}${a.source==='recurring'?' <span style="font-size:8px;color:#888;">(固定)</span>':''}</td>
+        <td class="sh-td sh-ded" style="text-align:right">−NT$ ${a.amount.toLocaleString()}</td>
+      </tr>`).join('')}
+      <tr class="sh-net">
+        <td class="sh-td" style="font-size:11px;font-weight:700;">本期實領 Gaji Bersih</td>
+        <td class="sh-td" style="text-align:right;font-size:12px;font-weight:700;">NT$ ${p.netSalary.toLocaleString()}</td>
       </tr>
     </tbody>
   </table>
