@@ -2463,7 +2463,7 @@
 
 <!-- ===== 薪資額外項目 Modal ===== -->
 <div id="adjustmentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
-  <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5">
+  <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5" style="max-height:90vh;overflow-y:auto;">
     <div class="flex items-start justify-between mb-3">
       <div id="adjModalTitle" class="ty-modal-title">新增額外項目</div>
       <button onclick="closeAdjustmentModal()" class="text-gray-400 text-2xl leading-none">×</button>
@@ -2471,13 +2471,13 @@
     <div class="space-y-3 text-sm">
       <div>
         <label class="block font-semibold mb-1">名稱</label>
-        <input id="adjName" type="text" class="w-full border border-gray-300 rounded-lg p-2" placeholder="例如：勞健保、表現獎金">
+        <input id="adjName" type="text" class="w-full border border-gray-300 rounded-lg p-2" placeholder="例如：健保費、表現獎金">
       </div>
       <div>
         <label class="block font-semibold mb-1">類型</label>
         <div class="flex gap-2">
-          <button type="button" id="adjTypeAdd" onclick="setAdjType('add')" class="flex-1 py-2 rounded-lg border"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i> 加薪 (加項)</button>
-          <button type="button" id="adjTypeDeduct" onclick="setAdjType('deduct')" class="flex-1 py-2 rounded-lg border"><i class="ti ti-minus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i> 扣薪 (扣項)</button>
+          <button type="button" id="adjTypeAdd" onclick="setAdjType('add')" class="flex-1 py-2 rounded-lg border"><i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i> 加薪（加項）</button>
+          <button type="button" id="adjTypeDeduct" onclick="setAdjType('deduct')" class="flex-1 py-2 rounded-lg border"><i class="ti ti-minus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i> 扣薪（扣項）</button>
         </div>
       </div>
       <div>
@@ -2485,14 +2485,66 @@
         <input id="adjAmount" type="number" min="0" class="w-full border border-gray-300 rounded-lg p-2">
       </div>
       <div>
+        <label class="block font-semibold mb-1">套用方式</label>
+        <div class="flex gap-2">
+          <button type="button" id="adjFreqOnce" onclick="setAdjFreq('once')" class="flex-1 py-2 rounded-lg border text-sm">僅此薪資週期</button>
+          <button type="button" id="adjFreqMonthly" onclick="setAdjFreq('monthly')" class="flex-1 py-2 rounded-lg border text-sm">每月固定套用</button>
+        </div>
+      </div>
+      <!-- 固定項目：生效期間（僅 monthly 顯示） -->
+      <div id="adjRecurringFields" class="hidden space-y-2 border border-gray-200 rounded-xl p-3 bg-gray-50">
+        <div class="text-xs font-semibold text-gray-500 mb-1">固定增減項設定</div>
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="block text-xs font-semibold mb-1">生效月份</label>
+            <input id="adjStartPeriod" type="month" class="w-full border border-gray-300 rounded-lg p-2 text-sm">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-semibold mb-1">結束月份（可選）</label>
+            <input id="adjEndPeriod" type="month" class="w-full border border-gray-300 rounded-lg p-2 text-sm" placeholder="不填=持續套用">
+          </div>
+        </div>
+        <div id="adjActiveBtnRow" class="flex gap-2 mt-1">
+          <button type="button" id="adjStatusActive" onclick="setAdjStatus('active')" class="flex-1 py-1.5 rounded-lg border text-xs">啟用</button>
+          <button type="button" id="adjStatusPaused" onclick="setAdjStatus('paused')" class="flex-1 py-1.5 rounded-lg border text-xs">暫停</button>
+        </div>
+      </div>
+      <div>
         <label class="block font-semibold mb-1">備註（可選）</label>
-        <input id="adjNote" type="text" class="w-full border border-gray-300 rounded-lg p-2">
+        <input id="adjNote" type="text" class="w-full border border-gray-300 rounded-lg p-2" placeholder="例如：依當年健保費率">
       </div>
     </div>
     <div class="flex gap-2 mt-4">
       <button id="adjDeleteBtn" onclick="deleteAdjustment()" class="btn-ghost-danger hidden">刪除</button>
       <button onclick="saveAdjustment()" class="btn-primary flex-1">儲存</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== 固定項目覆寫選擇 Modal ===== -->
+<div id="adjOverrideModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-sm rounded-2xl p-5">
+    <div class="ty-modal-title mb-1">修改固定項目</div>
+    <div id="adjOverrideDesc" class="text-sm text-gray-500 mb-4"></div>
+    <div class="space-y-2">
+      <button onclick="doAdjOverride('this')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm">
+        <div class="font-semibold">僅修改本期</div>
+        <div class="text-xs text-gray-500 mt-0.5">只改這個薪資週期，規則不變</div>
+      </button>
+      <button onclick="doAdjOverride('future')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm">
+        <div class="font-semibold">從本期起修改</div>
+        <div class="text-xs text-gray-500 mt-0.5">更新規則金額，本期及未來套用新金額</div>
+      </button>
+      <button onclick="doAdjOverride('suspend')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-sm">
+        <div class="font-semibold">暫停本期不套用</div>
+        <div class="text-xs text-gray-500 mt-0.5">本期不計算此項目，下期恢復正常</div>
+      </button>
+      <button onclick="doAdjOverride('end')" class="w-full text-left px-4 py-3 rounded-xl border border-red-200 hover:bg-red-50 text-sm">
+        <div class="font-semibold text-red-600">結束此固定項目</div>
+        <div class="text-xs text-gray-500 mt-0.5">本期後不再自動套用</div>
+      </button>
+    </div>
+    <button onclick="closeAdjOverrideModal()" class="mt-3 w-full py-2 text-sm text-gray-500">取消</button>
   </div>
 </div>
 
@@ -3039,6 +3091,7 @@ let state = {
   leaveRequests: [],
   leaveTypes: [],
   payrollAdjustments: [],
+  recurringAdjRules: [],
   payrollReceipts: [],
   payrollViewDate: null,
   taskSkips: [],
@@ -3104,7 +3157,10 @@ function load() {
       state.payrollConfig = d.payrollConfig || null;
       state.leaveRequests = d.leaveRequests || [];
       state.leaveTypes = d.leaveTypes || [];
-      state.payrollAdjustments = d.payrollAdjustments || [];
+      state.payrollAdjustments = (d.payrollAdjustments || []).map(a => ({
+        source: 'manual', recurringRuleId: null, isOverride: false, isSuspended: false,
+        createdAt: a.createdAt || new Date().toISOString(), ...a }));
+      state.recurringAdjRules = d.recurringAdjRules || [];
       state.payrollReceipts = d.payrollReceipts || [];
       state.taskSkips = d.taskSkips || [];
       state.restSchedules = d.restSchedules || [];
@@ -3320,6 +3376,7 @@ function save() {
     leaveRequests: state.leaveRequests,
     leaveTypes: state.leaveTypes,
     payrollAdjustments: state.payrollAdjustments,
+    recurringAdjRules: state.recurringAdjRules,
     payrollReceipts: state.payrollReceipts,
     taskSkips: state.taskSkips,
     restSchedules: state.restSchedules,
@@ -3502,7 +3559,8 @@ async function cloudPull(){
         if (d.payrollConfig      !== undefined) state.payrollConfig      = d.payrollConfig;
         if (d.leaveRequests      !== undefined) state.leaveRequests      = d.leaveRequests;
         if (d.leaveTypes         !== undefined) state.leaveTypes         = d.leaveTypes;
-        if (d.payrollAdjustments !== undefined) state.payrollAdjustments = d.payrollAdjustments;
+        if (d.payrollAdjustments !== undefined) state.payrollAdjustments = (d.payrollAdjustments||[]).map(a=>({source:'manual',recurringRuleId:null,isOverride:false,isSuspended:false,createdAt:a.createdAt||new Date().toISOString(),...a}));
+        if (d.recurringAdjRules  !== undefined) state.recurringAdjRules  = d.recurringAdjRules;
         if (d.payrollReceipts    !== undefined) state.payrollReceipts    = d.payrollReceipts;
         if (d.taskSkips          !== undefined) state.taskSkips          = d.taskSkips;
         if (d.restSchedules      !== undefined) state.restSchedules      = d.restSchedules;
@@ -3594,6 +3652,7 @@ async function cloudPushImmediate(){
       leaveRequests: state.leaveRequests,
       leaveTypes: state.leaveTypes,
       payrollAdjustments: state.payrollAdjustments,
+      recurringAdjRules: state.recurringAdjRules,
       payrollReceipts: state.payrollReceipts,
       taskSkips: state.taskSkips,
       restSchedules: state.restSchedules,
@@ -9263,8 +9322,9 @@ function calculatePayroll(viewDate){
   // 額外加扣項
   const periodKey = ymd(start);
   const adjustments = (state.payrollAdjustments||[]).filter(a=>a.periodKey===periodKey);
-  const adjAdd = adjustments.filter(a=>a.type==='add').reduce((s,a)=>s+(a.amount||0),0);
-  const adjDeduct = adjustments.filter(a=>a.type==='deduct').reduce((s,a)=>s+(a.amount||0),0);
+  const activeAdjs = adjustments.filter(a=>!a.isSuspended);
+  const adjAdd = activeAdjs.filter(a=>a.type==='add').reduce((s,a)=>s+(a.amount||0),0);
+  const adjDeduct = activeAdjs.filter(a=>a.type==='deduct').reduce((s,a)=>s+(a.amount||0),0);
   const netSalary = baseSalary - leavePay + overtimePay + adjAdd - adjDeduct;
   return {
     cycleStart: start, cycleEnd: end, periodKey, dailyRate, baseSalary,
@@ -9273,6 +9333,43 @@ function calculatePayroll(viewDate){
     adjustments, adjAdd, adjDeduct, netSalary,
     days,
   };
+}
+
+/* ── 固定增減項：依規則為當期建立快照 ─────────────────────────────── */
+function periodKeyToYM(pk){
+  // periodKey = 'YYYY-MM-DD' → 'YYYY-MM'
+  return pk ? pk.slice(0,7) : '';
+}
+function ymCompare(a, b){ return a.localeCompare(b); } // YYYY-MM 字串可直接比較
+
+function applyRecurringRules(periodKey){
+  const rules = state.recurringAdjRules || [];
+  const adjs  = state.payrollAdjustments || [];
+  const ym    = periodKeyToYM(periodKey);
+  let changed = false;
+  rules.forEach(rule => {
+    if (!rule.active) return;
+    if (rule.startPeriod && ymCompare(ym, rule.startPeriod) < 0) return; // 尚未生效
+    if (rule.endPeriod   && ymCompare(ym, rule.endPeriod)   > 0) return; // 已結束
+    // 已有此規則的快照（任何狀態）→ 不重複新增
+    const exists = adjs.find(a => a.recurringRuleId === rule.id && a.periodKey === periodKey);
+    if (exists) return;
+    adjs.push({
+      id: 'adj_r_' + rule.id + '_' + periodKey,
+      periodKey,
+      name: rule.name,
+      type: rule.type,
+      amount: rule.amount,
+      note: rule.note || '',
+      source: 'recurring',
+      recurringRuleId: rule.id,
+      isOverride: false,
+      isSuspended: false,
+      createdAt: new Date().toISOString(),
+    });
+    changed = true;
+  });
+  if (changed){ state.payrollAdjustments = adjs; save(); }
 }
 
 /* 渲染薪資分頁 */
@@ -9297,6 +9394,9 @@ function payrollCurrentPeriod(){
 function renderPayrollTab(){
   if (!state.payrollConfig) return;
   const viewDate = state.payrollViewDate ? new Date(state.payrollViewDate) : today();
+  // 固定規則：在計算前先建立當期快照
+  const _preKey = ymd(getPayrollCycle(viewDate).start);
+  applyRecurringRules(_preKey);
   const p = calculatePayroll(viewDate);
   const fmtD = (d) => `${d.getMonth()+1}/${d.getDate()}`;
   // 標題
@@ -9481,17 +9581,43 @@ function renderPayrollDayRow(d){
 
 function renderAdjustments(p){
   const list = p.adjustments || [];
-  document.getElementById('payrollAdjList').innerHTML = list.length ? list.map(a=>`
-    <div class="flex items-center justify-between bg-white border rounded-lg p-2">
+  const isLocked = !!(state.payrollReceipts||[]).find(r=>r.periodKey===p.periodKey);
+  const recurring = list.filter(a=>a.source==='recurring');
+  const manual    = list.filter(a=>a.source!=='recurring');
+
+  function adjRow(a){
+    const colorCls = a.isSuspended ? 'text-gray-400' : (a.type==='add'?'text-green-700':'text-orange-700');
+    const amtStr   = a.isSuspended ? `<span class="line-through text-gray-400">$${a.amount.toLocaleString()}</span><span class="text-xs text-gray-400 ml-1">（暫停）</span>` : `${a.type==='add'?'+':'-'}$${a.amount.toLocaleString()}`;
+    const noteHtml = a.note ? `<div class="text-xs text-gray-400 mt-0.5">${a.note}</div>` : '';
+    const editBtn  = isLocked ? '' : `<button onclick="openEditAdjustment('${a.id}')" class="text-xs text-blue-600 shrink-0">編輯</button>`;
+    return `<div class="flex items-start justify-between bg-white border rounded-lg px-3 py-2 gap-2">
       <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold">${a.type==='add'?'<i class="ti ti-plus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i>':'<i class="ti ti-minus" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i>'} ${a.name}${a.note?' <span class="text-xs text-gray-500">('+a.note+')</span>':''}</div>
+        <div class="text-sm font-semibold ${a.isSuspended?'text-gray-400':''}">${a.name}${a.isOverride?'<span class="text-xs text-amber-600 ml-1">（本期調整）</span>':''}</div>
+        ${noteHtml}
       </div>
-      <div class="flex items-center gap-2">
-        <div class="font-bold ${a.type==='add'?'text-green-700':'text-orange-700'}">${a.type==='add'?'+':'-'}$${a.amount.toLocaleString()}</div>
-        <button onclick="openEditAdjustment('${a.id}')" class="text-xs text-blue-600">編輯</button>
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="font-bold text-sm ${colorCls}">${amtStr}</div>
+        ${editBtn}
       </div>
-    </div>
-  `).join('') : '<div class="text-xs text-gray-400 italic">本期無額外項目</div>';
+    </div>`;
+  }
+
+  let html = '';
+  if (recurring.length){
+    html += `<div class="text-xs font-semibold text-gray-500 mb-1 mt-2">固定增減項</div>`;
+    html += recurring.map(adjRow).join('');
+  }
+  if (manual.length){
+    html += `<div class="text-xs font-semibold text-gray-500 mb-1 mt-2">本期單次項目</div>`;
+    html += manual.map(adjRow).join('');
+  }
+  if (!recurring.length && !manual.length){
+    html = '<div class="text-xs text-gray-400 italic">本期無額外項目</div>';
+  }
+  if (isLocked){
+    html = `<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 mb-2">此週期已簽收，薪資記錄鎖定。</div>` + html;
+  }
+  document.getElementById('payrollAdjList').innerHTML = html;
 }
 
 function renderReceiptBox(p){
@@ -10085,25 +10211,75 @@ function closeMyPayroll(){ document.getElementById('myPayrollModal').classList.a
 /* ========== 額外項目 CRUD ========== */
 let _editingAdjId = null;
 let _editingAdjType = 'add';
+let _editingAdjFreq = 'once';
+let _editingAdjStatus = 'active';
+// 覆寫 modal 暫存
+let _overrideAdjId = null;
+let _overrideName = '';
+let _overrideAmount = 0;
+let _overrideNote = '';
+
 function openAddAdjustment(){ openAdjustmentModal(null); }
-function openEditAdjustment(id){ openAdjustmentModal(id); }
+function openEditAdjustment(id){
+  const a = (state.payrollAdjustments||[]).find(x=>x.id===id);
+  if (!a) return;
+  // 已簽收週期：唯讀
+  const receipt = (state.payrollReceipts||[]).find(r=>r.periodKey===a.periodKey);
+  if (receipt){ alert('此週期已簽收，薪資記錄已鎖定，無法修改。'); return; }
+  // 固定項目：開覆寫選擇 Modal
+  if (a.source === 'recurring'){
+    _overrideAdjId = id;
+    _overrideName = a.name; _overrideAmount = a.amount; _overrideNote = a.note||'';
+    document.getElementById('adjOverrideDesc').textContent = `「${a.name}」為每月固定項目，請選擇修改範圍：`;
+    document.getElementById('adjOverrideModal').classList.remove('hidden');
+    return;
+  }
+  openAdjustmentModal(id);
+}
 function openAdjustmentModal(id){
   _editingAdjId = id;
   const a = id ? (state.payrollAdjustments||[]).find(x=>x.id===id) : null;
+  const periodKey = ymd((state.payrollViewDate?getPayrollCycle(new Date(state.payrollViewDate)):getPayrollCycle(today())).start);
+  const ym = periodKey.slice(0,7);
   document.getElementById('adjModalTitle').textContent = a ? '編輯額外項目' : '新增額外項目';
   document.getElementById('adjDeleteBtn').classList.toggle('hidden', !a);
   document.getElementById('adjName').value = a?.name || '';
   document.getElementById('adjAmount').value = a?.amount || '';
   document.getElementById('adjNote').value = a?.note || '';
   setAdjType(a?.type || 'add');
+  // 新增時預設為單次，已有規則的手動項也顯示 once
+  const freq = a?.freq || 'once';
+  setAdjFreq(freq);
+  // 固定項目預設生效月為當期
+  if (!a) document.getElementById('adjStartPeriod').value = ym;
+  else if (a.source==='recurring'){
+    const rule = (state.recurringAdjRules||[]).find(r=>r.id===a.recurringRuleId);
+    document.getElementById('adjStartPeriod').value = rule?.startPeriod || ym;
+    document.getElementById('adjEndPeriod').value = rule?.endPeriod || '';
+    setAdjStatus(rule?.active===false?'paused':'active');
+  }
   document.getElementById('adjustmentModal').classList.remove('hidden');
 }
 function closeAdjustmentModal(){ document.getElementById('adjustmentModal').classList.add('hidden'); }
+function closeAdjOverrideModal(){ document.getElementById('adjOverrideModal').classList.add('hidden'); }
+
 function setAdjType(t){
   _editingAdjType = t;
   document.getElementById('adjTypeAdd').className = `flex-1 py-2 rounded-lg border ${t==='add'?'bg-green-600 text-white border-green-600':''}`;
   document.getElementById('adjTypeDeduct').className = `flex-1 py-2 rounded-lg border ${t==='deduct'?'bg-orange-600 text-white border-orange-600':''}`;
 }
+function setAdjFreq(f){
+  _editingAdjFreq = f;
+  document.getElementById('adjFreqOnce').className = `flex-1 py-2 rounded-lg border text-sm ${f==='once'?'bg-blue-600 text-white border-blue-600':''}`;
+  document.getElementById('adjFreqMonthly').className = `flex-1 py-2 rounded-lg border text-sm ${f==='monthly'?'bg-blue-600 text-white border-blue-600':''}`;
+  document.getElementById('adjRecurringFields').classList.toggle('hidden', f!=='monthly');
+}
+function setAdjStatus(s){
+  _editingAdjStatus = s;
+  document.getElementById('adjStatusActive').className = `flex-1 py-1.5 rounded-lg border text-xs ${s==='active'?'bg-green-600 text-white border-green-600':''}`;
+  document.getElementById('adjStatusPaused').className = `flex-1 py-1.5 rounded-lg border text-xs ${s==='paused'?'bg-orange-500 text-white border-orange-500':''}`;
+}
+
 function saveAdjustment(){
   const name = document.getElementById('adjName').value.trim();
   const amount = parseInt(document.getElementById('adjAmount').value) || 0;
@@ -10111,25 +10287,104 @@ function saveAdjustment(){
   if (!name){ alert('請填寫名稱'); return; }
   if (amount <= 0){ alert('請填寫金額'); return; }
   const periodKey = ymd((state.payrollViewDate?getPayrollCycle(new Date(state.payrollViewDate)):getPayrollCycle(today())).start);
-  if (_editingAdjId){
-    const a = state.payrollAdjustments.find(x=>x.id===_editingAdjId);
-    Object.assign(a, { name, amount, note, type:_editingAdjType });
+
+  if (_editingAdjFreq === 'monthly'){
+    // === 固定增減項規則 ===
+    const startPeriod = document.getElementById('adjStartPeriod').value || periodKey.slice(0,7);
+    const endPeriod = document.getElementById('adjEndPeriod').value || null;
+    const isActive = _editingAdjStatus !== 'paused';
+    // 是否正在編輯一個 recurring 項目的規則（由 override modal 跳轉過來）
+    const existingRuleId = _editingAdjId
+      ? (state.payrollAdjustments||[]).find(x=>x.id===_editingAdjId)?.recurringRuleId
+      : null;
+    if (existingRuleId){
+      const rule = (state.recurringAdjRules||[]).find(r=>r.id===existingRuleId);
+      if (rule) Object.assign(rule, { name, amount, type:_editingAdjType, startPeriod, endPeriod, active:isActive, note, updatedAt:new Date().toISOString() });
+    } else {
+      const ruleId = 'rar_' + Date.now();
+      state.recurringAdjRules.push({ id:ruleId, name, type:_editingAdjType, amount, startPeriod, endPeriod, active:isActive, note, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() });
+    }
   } else {
-    state.payrollAdjustments.push({
-      id:'adj'+Date.now(), periodKey,
-      name, amount, note, type:_editingAdjType,
-    });
+    // === 單次增減項 ===
+    if (_editingAdjId){
+      const a = state.payrollAdjustments.find(x=>x.id===_editingAdjId);
+      if (a) Object.assign(a, { name, amount, note, type:_editingAdjType });
+    } else {
+      state.payrollAdjustments.push({
+        id:'adj_'+Date.now(), periodKey, name, amount, note, type:_editingAdjType,
+        source:'manual', recurringRuleId:null, isOverride:false, isSuspended:false,
+        createdAt:new Date().toISOString(),
+      });
+    }
   }
   save(); closeAdjustmentModal(); renderManagerView();
 }
+
 async function deleteAdjustment(){
+  const a = (state.payrollAdjustments||[]).find(x=>x.id===_editingAdjId);
+  if (!a){ closeAdjustmentModal(); return; }
   if (!await customConfirm('刪除？')) return;
-  const removed = state.payrollAdjustments.find(a=>a.id===_editingAdjId);
-  state.payrollAdjustments = state.payrollAdjustments.filter(a=>a.id!==_editingAdjId);
+  const removed = a;
+  state.payrollAdjustments = state.payrollAdjustments.filter(x=>x.id!==_editingAdjId);
   save(); closeAdjustmentModal(); renderManagerView();
-  if (removed) setUndo(`已刪除額外項目「${removed.name}」`, ()=>{
-    state.payrollAdjustments.push(removed); save(); renderManagerView();
-  });
+  setUndo(`已刪除「${removed.name}」`, ()=>{ state.payrollAdjustments.push(removed); save(); renderManagerView(); });
+}
+
+// 固定項目覆寫邏輯
+async function doAdjOverride(action){
+  const a = (state.payrollAdjustments||[]).find(x=>x.id===_overrideAdjId);
+  if (!a){ closeAdjOverrideModal(); return; }
+  const rule = (state.recurringAdjRules||[]).find(r=>r.id===a.recurringRuleId);
+  const periodKey = a.periodKey;
+  const ym = periodKey.slice(0,7);
+  closeAdjOverrideModal();
+
+  if (action === 'suspend'){
+    a.isSuspended = true;
+    save(); renderManagerView();
+    return;
+  }
+  if (action === 'end'){
+    if (!await customConfirm(`結束固定項目「${a.name}」後，下期起不再自動套用。確定？`)) return;
+    if (rule){ rule.active = false; rule.endPeriod = ym; rule.updatedAt = new Date().toISOString(); }
+    save(); renderManagerView();
+    return;
+  }
+  if (action === 'this'){
+    // 僅改本期：把快照設為 override，開單次編輯 modal
+    a.isOverride = true;
+    _editingAdjId = a.id;
+    _editingAdjFreq = 'once'; // 強制顯示為 once 以便直接存
+    document.getElementById('adjName').value = a.name;
+    document.getElementById('adjAmount').value = a.amount;
+    document.getElementById('adjNote').value = a.note||'';
+    setAdjType(a.type);
+    setAdjFreq('once');
+    document.getElementById('adjModalTitle').textContent = `修改本期「${a.name}」`;
+    document.getElementById('adjDeleteBtn').classList.add('hidden');
+    document.getElementById('adjustmentModal').classList.remove('hidden');
+    return;
+  }
+  if (action === 'future'){
+    // 從本期起修改：更新規則，同時更新本期快照金額
+    if (rule){
+      // 開 modal 讓使用者輸入新金額
+      _editingAdjId = a.id; // 存著 adj id 以便存完後更新快照
+      _editingAdjFreq = 'monthly';
+      document.getElementById('adjName').value = rule.name;
+      document.getElementById('adjAmount').value = rule.amount;
+      document.getElementById('adjNote').value = rule.note||'';
+      setAdjType(rule.type);
+      setAdjFreq('monthly');
+      document.getElementById('adjStartPeriod').value = rule.startPeriod||ym;
+      document.getElementById('adjEndPeriod').value = rule.endPeriod||'';
+      setAdjStatus(rule.active===false?'paused':'active');
+      document.getElementById('adjModalTitle').textContent = `從本期起修改「${rule.name}」`;
+      document.getElementById('adjDeleteBtn').classList.add('hidden');
+      document.getElementById('adjustmentModal').classList.remove('hidden');
+    }
+    return;
+  }
 }
 
 /* ========== 假別 CRUD ========== */
@@ -10269,7 +10524,8 @@ function doPrintPayroll(){
       activityItems.push({ date: d.dateStr, label: '假日加班', amount: d.addedPay });
     }
   });
-  p.adjustments.forEach(a => {
+  // 本期異動：只含手動/override 增減項（固定且金額未調整者略過）及請假/加班事件
+  p.adjustments.filter(a => !a.isSuspended && (a.source !== 'recurring' || a.isOverride)).forEach(a => {
     const amt = a.type === 'add' ? a.amount : -a.amount;
     activityItems.push({ date: null, label: a.name, amount: amt, note: a.note });
   });
@@ -10283,21 +10539,29 @@ function doPrintPayroll(){
   const overtimeDates = p.days.filter(d => d.addedPay > 0).map(d => d.dateStr.slice(5).replace('-','/'));
   const leaveDates    = p.days.filter(d => d.leave && d.deductedPay > 0).map(d => d.dateStr.slice(5).replace('-','/'));
 
-  /* ── 薪資摘要 rows ── */
-  const breakdown = [];
-  breakdown.push({ label: '底薪', labelId: 'Gaji Pokok', amount: p.baseSalary, sign: '' });
+  /* ── 薪資明細：逐筆展開 ── */
+  // 加項（底薪 + 加班 + 每一筆加項）
+  const addRows = [];
+  addRows.push({ label: '底薪', labelId: 'Gaji Pokok', amount: p.baseSalary, sign: '', isBase: true });
   if (p.overtimeDays > 0) {
     const dtStr = overtimeDates.length ? `（${overtimeDates.join('、')}）` : '';
-    breakdown.push({ label: `假日加班 ${p.overtimeDays} 日${dtStr}`, labelId: `Lembur ${p.overtimeDays} hari`, amount: p.overtimePay, sign: '+' });
+    addRows.push({ label: `假日加班 ${p.overtimeDays} 日${dtStr}`, labelId: `Lembur ${p.overtimeDays} hari`, amount: p.overtimePay, sign: '+' });
   }
-  if (p.adjAdd > 0)
-    breakdown.push({ label: '額外津貼', labelId: 'Tunjangan', amount: p.adjAdd, sign: '+' });
+  const activeAdjs = (p.adjustments||[]).filter(a => !a.isSuspended);
+  activeAdjs.filter(a => a.type === 'add').forEach(a => {
+    addRows.push({ label: a.name + (a.source==='recurring'?' <span class="tag-fixed">每月固定</span>':''), labelId: '', amount: a.amount, sign: '+', note: a.note||'' });
+  });
+  // 扣項（請假 + 每一筆扣項）
+  const dedRows = [];
   if (p.leavePay > 0) {
     const dtStr = leaveDates.length ? `（${leaveDates.join('、')}）` : '';
-    breakdown.push({ label: `請假扣款 ${p.leaveDays} 日${dtStr}`, labelId: `Potongan cuti ${p.leaveDays} hari`, amount: p.leavePay, sign: '-' });
+    dedRows.push({ label: `請假扣款 ${p.leaveDays} 日${dtStr}`, labelId: `Potongan cuti ${p.leaveDays} hari`, amount: p.leavePay, sign: '-' });
   }
-  if (p.adjDeduct > 0)
-    breakdown.push({ label: '其他扣項', labelId: 'Potongan lain', amount: p.adjDeduct, sign: '-' });
+  activeAdjs.filter(a => a.type === 'deduct').forEach(a => {
+    dedRows.push({ label: a.name + (a.source==='recurring'?' <span class="tag-fixed">每月固定</span>':''), labelId: '', amount: a.amount, sign: '-', note: a.note||'' });
+  });
+  const addSubTotal = addRows.slice(1).reduce((s,r)=>s+r.amount,0); // 底薪以外的加項小計
+  const dedSubTotal = dedRows.reduce((s,r)=>s+r.amount,0);
 
   /* ── HTML ── */
   let html = `<!DOCTYPE html>
@@ -10317,12 +10581,18 @@ body{font-family:-apple-system,'Noto Sans TC','PingFang TC',sans-serif;font-size
 .hd-r strong{display:block;font-size:14px;font-weight:700;color:#1a1a1a}
 .sal-sec{margin-bottom:28px}
 .sal-lbl{font-size:11px;font-weight:600;color:#888;letter-spacing:.6px;margin-bottom:10px;text-transform:uppercase}
+.sal-group-hd{font-size:10px;font-weight:700;color:#777;letter-spacing:.5px;text-transform:uppercase;padding:8px 0 4px;border-top:1px solid #e5e5e5;margin-top:4px}
+.sal-group-hd:first-child{border-top:none;margin-top:0}
 table.sal{width:100%;border-collapse:collapse}
-table.sal td{padding:9px 0;border-bottom:1px solid #ebebeb;font-size:13px;vertical-align:top}
+table.sal td{padding:8px 0;border-bottom:1px solid #ebebeb;font-size:13px;vertical-align:top}
 table.sal td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 table.sal .id-lbl{display:block;font-size:11px;color:#444;margin-top:2px;font-weight:400}
+table.sal .note-lbl{display:block;font-size:10px;color:#888;margin-top:1px;font-weight:400}
 .add{color:#166534;font-weight:500}.ded{color:#991b1b;font-weight:500}
-table.sal .net-row td{border-top:1.5px solid #1a1a1a;border-bottom:none;padding-top:12px;font-size:15px;font-weight:800}
+table.sal .subtotal-row td{border-top:1px solid #d0d0d0;border-bottom:none;padding-top:8px;font-size:12px;font-weight:700;color:#444}
+table.sal .net-row td{border-top:2px solid #1a1a1a;border-bottom:none;padding-top:12px;font-size:15px;font-weight:800}
+.payroll-adjustment-group{break-inside:avoid;page-break-inside:avoid}
+.tag-fixed{display:inline-block;font-size:10px;font-weight:500;color:#666;background:#f0f0f0;border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:middle}
 table.days{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
 table.days th{text-align:left;padding:5px 6px;background:#f7f7f7;border-bottom:1px solid #e0e0e0;font-size:11px;color:#777;font-weight:600}
 table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
@@ -10371,16 +10641,35 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
 </div>
 
 <div class="sal-sec">
-  <div class="sal-lbl">薪資計算 · Rincian Gaji</div>
+  <div class="sal-lbl">薪資計算明細 · Rincian Gaji</div>
   <table class="sal">
-    ${breakdown.map(row => {
-      const cls   = row.sign === '+' ? 'add' : (row.sign === '-' ? 'ded' : '');
-      const prefix = row.sign === '+' ? '+ ' : (row.sign === '-' ? '− ' : '');
-      return `<tr>
-        <td>${row.label}<span class="id-lbl">${row.labelId||''}</span></td>
-        <td class="${cls}">${prefix}NT$&nbsp;${row.amount.toLocaleString()}</td>
-      </tr>`;
-    }).join('')}
+    <tr>
+      <td>底薪<span class="id-lbl">Gaji Pokok</span></td>
+      <td>NT$&nbsp;${p.baseSalary.toLocaleString()}</td>
+    </tr>
+    ${(()=>{
+      let rows = '';
+      // 加項區塊
+      const addItems = addRows.slice(1); // 除底薪外
+      if (addItems.length > 0){
+        rows += `<tr><td colspan="2" class="sal-group-hd">加項</td></tr>`;
+        rows += addItems.map(row=>`<tr>
+          <td>${row.label}${row.labelId?`<span class="id-lbl">${row.labelId}</span>`:''}${row.note?`<span class="note-lbl">${row.note}</span>`:''}</td>
+          <td class="add">＋ NT$&nbsp;${row.amount.toLocaleString()}</td>
+        </tr>`).join('');
+        rows += `<tr class="subtotal-row"><td>加項小計</td><td class="add">＋ NT$&nbsp;${addSubTotal.toLocaleString()}</td></tr>`;
+      }
+      // 扣項區塊
+      if (dedRows.length > 0){
+        rows += `<tr><td colspan="2" class="sal-group-hd">扣項</td></tr>`;
+        rows += dedRows.map(row=>`<tr>
+          <td>${row.label}${row.labelId?`<span class="id-lbl">${row.labelId}</span>`:''}${row.note?`<span class="note-lbl">${row.note}</span>`:''}</td>
+          <td class="ded">－ NT$&nbsp;${row.amount.toLocaleString()}</td>
+        </tr>`).join('');
+        rows += `<tr class="subtotal-row"><td>扣項小計</td><td class="ded">－ NT$&nbsp;${dedSubTotal.toLocaleString()}</td></tr>`;
+      }
+      return rows;
+    })()}
     <tr class="net-row">
       <td>本期實領<span class="id-lbl">Gaji Bersih</span></td>
       <td>NT$&nbsp;${p.netSalary.toLocaleString()}</td>
