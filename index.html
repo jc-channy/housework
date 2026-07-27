@@ -1996,6 +1996,25 @@
 
     <hr class="my-4 border-gray-200">
 
+    <!-- 功能模組 -->
+    <section class="mb-5">
+      <h3 class="font-bold text-base mb-3"><i class="ti ti-layout-grid" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 功能模組 / Modul Fitur</h3>
+      <div class="rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+        <div class="flex items-start justify-between gap-3 px-4 py-3 bg-white">
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-sm">菜單與煮餐 <span class="text-xs font-normal text-gray-400 ml-1">Menu Masak</span></div>
+            <div class="text-xs text-gray-500 mt-0.5 leading-relaxed">若煮餐是幫傭的工作內容，可使用菜單安排每日餐點。<br><span class="text-gray-400">關閉後菜單頁籤與今日菜單會隱藏，原有資料不刪除。</span></div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+            <input type="checkbox" id="menuModuleToggle" class="sr-only peer" onchange="toggleMenuModule(this.checked)">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <hr class="my-4 border-gray-200">
+
     <!-- 危險區 -->
     <section>
       <h3 class="font-bold text-base mb-2 text-red-600"><i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 危險區 / Berbahaya</h3>
@@ -3165,6 +3184,8 @@ function load() {
       state.taskSkips = d.taskSkips || [];
       state.restSchedules = d.restSchedules || [];
       state.preferences= d.preferences|| {};
+      // migration：舊資料若無 menuEnabled，預設為 true（避免既有家庭菜單突然消失）
+      if (state.preferences.menuEnabled === undefined) state.preferences.menuEnabled = true;
       if (d.mealConfig) state.mealConfig = Object.assign({}, state.mealConfig, d.mealConfig);
       state.ingredients = d.ingredients || [];
       state.weekMenu = d.weekMenu || {};
@@ -3614,6 +3635,8 @@ async function cloudPull(){
           {id:'ing_oyster',name:'蠔油',nameId:'Saus Tiram',category:'調味料'},
           {id:'ing_sesame',name:'麻油',nameId:'Minyak Wijen',category:'調味料'},
         ];
+        // migration：雲端舊資料若無 menuEnabled，補預設 true
+        if (state.preferences.menuEnabled === undefined) state.preferences.menuEnabled = true;
         // 遷移雲端拉下來的舊工作
         (state.templates||[]).forEach(migrateTemplateFreq);
         save();   // 寫進 localStorage（cloudPush 被 _cloudSyncing 旗標跳過）
@@ -4561,6 +4584,7 @@ function renderMenuDayDetail(){
 
 // ── 渲染 Tab ──
 function renderMenuTab(){
+  if (!isMenuEnabled()) return;
   renderMenuTabBar();
   renderMenuMainArea();
   renderIngredientList();
@@ -6108,6 +6132,7 @@ function saveIngredient(){
 function renderTodayMenuCard(){
   const el = document.getElementById('atikaTodayMenu');
   if (!el) return;
+  if (!isMenuEnabled()){ el.classList.add('hidden'); return; }
   // 情境菜單覆蓋：全部不煮 → 直接隱藏
   const _sm = getActiveSituation();
   const _mo = _sm ? _sm.menuOverride : null;
@@ -6182,6 +6207,7 @@ function renderMgrTodayMenuCard(){
   const card = document.getElementById('mgrTodayMenuCard');
   const body = document.getElementById('mgrTodayMenuBody');
   if (!card || !body) return;
+  if (!isMenuEnabled()){ card.classList.add('hidden'); return; }
 
   // 情境菜單覆蓋：全部不煮 → 直接隱藏
   const _sm = getActiveSituation();
@@ -6405,7 +6431,8 @@ function showMainView(){
     document.getElementById('managerView').classList.remove('hidden');
     const _rt1=document.getElementById('mgrRoleTag'); if(_rt1) _rt1.textContent=state.currentUser.name+'（管理者）';
     const savedTab = (() => { try { return localStorage.getItem('lastTab'); } catch(e){ return null; } })();
-    switchTab(savedTab || 'week');
+    const safeTab = (savedTab === 'menu' && !isMenuEnabled()) ? 'week' : (savedTab || 'week');
+    switchTab(safeTab);
     renderManagerView();
     const onboardKey='housework_onboarded_v1';
     if(!localStorage.getItem(onboardKey)) setTimeout(()=>showOnboarding(),600);
@@ -8697,6 +8724,7 @@ function renderManagerView(){
   renderCalendar();
   renderPayrollTab();
   initSortable();
+  applyMenuModuleVisibility();
 }
 
 /* ========== 打卡機制 ========== */
@@ -12541,8 +12569,71 @@ function openSupplyHistory(sid){
 }
 function closeSupplyHistory(){ document.getElementById('supplyHistoryModal').classList.add('hidden'); }
 
+/* ========== 菜單模組開關 ========== */
+function isMenuEnabled(){
+  return state.preferences?.menuEnabled !== false;
+}
+
+function applyMenuModuleVisibility(){
+  const enabled = isMenuEnabled();
+  // 導覽列頁籤
+  const tabBtn = document.querySelector('.tab-btn[data-tab="menu"]');
+  if (tabBtn) tabBtn.style.display = enabled ? '' : 'none';
+  // 菜單頁本體
+  if (!enabled){
+    const tabMenu = document.getElementById('tab-menu');
+    if (tabMenu) tabMenu.classList.add('hidden');
+  }
+  // 管理者首頁今日菜單卡
+  const mgrCard = document.getElementById('mgrTodayMenuCard');
+  if (mgrCard && !enabled) mgrCard.classList.add('hidden');
+  // Atika 今日菜單卡
+  const atikaCard = document.getElementById('atikaTodayMenu');
+  if (atikaCard && !enabled) atikaCard.classList.add('hidden');
+  // 設定 Modal 的 toggle 狀態同步
+  const tog = document.getElementById('menuModuleToggle');
+  if (tog) tog.checked = enabled;
+}
+
+async function toggleMenuModule(checked){
+  if (!checked){
+    // 由開啟切為關閉：需要確認
+    const ok = await customConfirm(
+      '關閉菜單功能？\n\n關閉後，管理者與 Atika 都不會看到菜單相關頁面與區塊。\n\n原有菜單、食材與設定會完整保留，之後重新開啟即可繼續使用。',
+      { ok: '確認關閉', cancel: '取消' }
+    );
+    if (!ok){
+      // 取消：把 toggle 還原為開啟
+      const tog = document.getElementById('menuModuleToggle');
+      if (tog) tog.checked = true;
+      return;
+    }
+    if (!state.preferences) state.preferences = {};
+    state.preferences.menuEnabled = false;
+    save();
+    applyMenuModuleVisibility();
+    // 若目前在菜單頁，自動跳回首頁
+    const activeTab = document.querySelector('.tab-btn.tab-active');
+    if (activeTab && activeTab.dataset.tab === 'menu') switchTab('week');
+  } else {
+    // 由關閉切為開啟：不需要確認
+    if (!state.preferences) state.preferences = {};
+    state.preferences.menuEnabled = true;
+    save();
+    applyMenuModuleVisibility();
+    // 提醒：若無啟用中煮餐工作（非阻擋式）
+    const hasCookTask = (state.taskTemplates||[]).some(t=>
+      !t.disabled && (t.nameZh||'').match(/煮|烹|備餐|午餐|晚餐/)
+    );
+    if (!hasCookTask){
+      setTimeout(()=> setUndo('菜單功能已開啟。若需安排煮餐，可至「工作」頁設定排程。', null), 300);
+    }
+  }
+}
+
 /* ========== Tabs ========== */
 function switchTab(tabName){
+  if (tabName === 'menu' && !isMenuEnabled()) tabName = 'week';
   const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
   if (!btn) return;
   document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('tab-active'));
@@ -13084,6 +13175,9 @@ function openSettingsModal(){
   if (sel) sel.value=state.preferences?.soundProfile || 'beep2';
   const _fni = document.getElementById('familyNameInput');
   if (_fni) _fni.value = state.preferences?.familyName || '';
+  // 功能模組 toggle 同步
+  const _tog = document.getElementById('menuModuleToggle');
+  if (_tog) _tog.checked = isMenuEnabled();
   document.getElementById('settingsModal').classList.remove('hidden');
 }
 
