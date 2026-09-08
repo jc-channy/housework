@@ -2704,6 +2704,7 @@
     <!-- 快速選取 -->
     <div class="flex gap-1.5 text-xs mb-2 flex-wrap">
       <button onclick="bpSelectAll('workdayUnpunched')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded">全選未打卡工作日</button>
+      <button onclick="bpSelectAll('holidayUnpunched')" class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">全選未打卡例假日（加班）</button>
       <button onclick="bpSelectAll('none')" class="bg-gray-200 text-gray-700 px-2 py-1 rounded">全清</button>
       <button onclick="bpSelectAll('invert')" class="bg-gray-200 text-gray-700 px-2 py-1 rounded">反選</button>
     </div>
@@ -10958,14 +10959,20 @@ function renderBatchPunchList(){
   const endDate = new Date(end);
   while (cursor <= endDate){
     const info = _bpDayInfo(cursor);
-    const blocked = info.isHoliday || info.leave;
-    const rowClass = blocked ? 'bg-gray-100 text-gray-400' : (info.hasPunch ? 'bg-amber-50' : '');
+    // 只擋已批准請假日；例假日仍可勾選（用於加班補登）
+    const blocked = !!info.leave;
+    let rowClass = '';
+    if (blocked) rowClass = 'bg-gray-100 text-gray-400';
+    else if (info.hasPunch) rowClass = 'bg-amber-50';
+    else if (info.isHoliday) rowClass = 'bg-yellow-50';
     const check = blocked
       ? '<span class="text-lg">⊘</span>'
       : `<input type="checkbox" data-date="${info.dStr}" ${window._bpSelected.has(info.dStr)?'checked':''} onchange="_bpToggle('${info.dStr}', this.checked)">`;
-    const label = blocked
-      ? (info.isHoliday ? '例假日' : '已批准請假')
-      : (info.hasPunch ? `⚠ 已有打卡 (${info.punches.length} 段)` : '未打卡');
+    let label;
+    if (blocked) label = '已批准請假';
+    else if (info.hasPunch) label = `⚠ 已有打卡 (${info.punches.length} 段)`;
+    else if (info.isHoliday) label = '例假日 · 未打卡 <span class="text-gray-400">(加班可勾)</span>';
+    else label = '未打卡';
     const dt = new Date(cursor);
     rows.push(`<label class="flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 ${rowClass} cursor-pointer">
       <div class="w-6 text-center">${check}</div>
@@ -11001,6 +11008,16 @@ function bpSelectAll(mode){
       if (!info.isHoliday && !info.leave && !info.hasPunch) window._bpSelected.add(info.dStr);
       cursor.setDate(cursor.getDate()+1);
     }
+  } else if (mode==='holidayUnpunched'){
+    // 加班：全選未打卡的例假日（排除已請假）
+    window._bpSelected.clear();
+    const cursor = new Date(start);
+    const endDate = new Date(end);
+    while (cursor <= endDate){
+      const info = _bpDayInfo(cursor);
+      if (info.isHoliday && !info.leave && !info.hasPunch) window._bpSelected.add(info.dStr);
+      cursor.setDate(cursor.getDate()+1);
+    }
   } else if (mode==='none'){
     window._bpSelected.clear();
   } else if (mode==='invert'){
@@ -11008,8 +11025,8 @@ function bpSelectAll(mode){
     const endDate = new Date(end);
     while (cursor <= endDate){
       const info = _bpDayInfo(cursor);
-      const blocked = info.isHoliday || info.leave;
-      if (!blocked){
+      // 只排除已請假日；例假日可反選
+      if (!info.leave){
         if (window._bpSelected.has(info.dStr)) window._bpSelected.delete(info.dStr);
         else window._bpSelected.add(info.dStr);
       }
