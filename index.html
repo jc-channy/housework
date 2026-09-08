@@ -2660,6 +2660,66 @@
   </div>
 </div>
 
+<!-- ===== 批次編輯打卡 Modal ===== -->
+<div id="batchPunchModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
+  <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[95vh] overflow-y-auto">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <div class="text-xl font-bold"><i class="ti ti-bolt" style="vertical-align:-3px;"></i> 批次編輯打卡</div>
+        <div class="id-text text-sm text-gray-500">Batch Edit Punch</div>
+      </div>
+      <button onclick="closeBatchPunchModal()" class="text-gray-400 text-2xl leading-none">×</button>
+    </div>
+
+    <!-- 時間模板 -->
+    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
+      <div class="text-xs font-bold text-gray-700 mb-2">🕐 打卡時間模板</div>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <label class="flex items-center gap-1">🌅 上班 <input id="bpWs" type="time" class="flex-1 border border-gray-300 rounded p-1"></label>
+        <label class="flex items-center gap-1">🏠 下班 <input id="bpWe" type="time" class="flex-1 border border-gray-300 rounded p-1"></label>
+        <label class="flex items-center gap-1">🌙 午休起 <input id="bpRs" type="time" class="flex-1 border border-gray-300 rounded p-1"></label>
+        <label class="flex items-center gap-1">☀ 午休收 <input id="bpRe" type="time" class="flex-1 border border-gray-300 rounded p-1"></label>
+      </div>
+      <label class="flex items-center gap-1 text-xs mt-2 text-gray-600">
+        <input id="bpNoRest" type="checkbox" onchange="renderBatchPunchList()"> 不使用午休段（連續上下班）
+      </label>
+    </div>
+
+    <!-- 週期選擇 -->
+    <div class="mb-3">
+      <div class="text-xs font-bold text-gray-700 mb-1">📅 週期</div>
+      <div class="flex gap-1.5 text-xs flex-wrap">
+        <button data-range="current" onclick="setBatchPunchRange('current')" class="bp-range-btn border border-gray-300 px-2 py-1 rounded">當期</button>
+        <button data-range="prev1" onclick="setBatchPunchRange('prev1')" class="bp-range-btn border border-gray-300 px-2 py-1 rounded">上期</button>
+        <button data-range="prev2" onclick="setBatchPunchRange('prev2')" class="bp-range-btn border border-gray-300 px-2 py-1 rounded">上上期</button>
+        <button data-range="custom" onclick="setBatchPunchRange('custom')" class="bp-range-btn border border-gray-300 px-2 py-1 rounded">自訂</button>
+      </div>
+      <div id="bpCustomRange" class="hidden mt-2 flex gap-1 items-center text-xs">
+        <input id="bpStartDate" type="date" class="flex-1 border border-gray-300 rounded p-1" onchange="renderBatchPunchList()">
+        <span>~</span>
+        <input id="bpEndDate" type="date" class="flex-1 border border-gray-300 rounded p-1" onchange="renderBatchPunchList()">
+      </div>
+    </div>
+
+    <!-- 快速選取 -->
+    <div class="flex gap-1.5 text-xs mb-2 flex-wrap">
+      <button onclick="bpSelectAll('workdayUnpunched')" class="bg-blue-100 text-blue-700 px-2 py-1 rounded">全選未打卡工作日</button>
+      <button onclick="bpSelectAll('none')" class="bg-gray-200 text-gray-700 px-2 py-1 rounded">全清</button>
+      <button onclick="bpSelectAll('invert')" class="bg-gray-200 text-gray-700 px-2 py-1 rounded">反選</button>
+    </div>
+
+    <!-- 日期清單 -->
+    <div id="batchPunchList" class="border border-gray-200 rounded-lg max-h-80 overflow-y-auto text-xs mb-3"></div>
+
+    <div id="batchPunchSelectedCount" class="text-xs text-gray-600 mb-3">已選 0 天</div>
+
+    <div class="flex gap-2">
+      <button onclick="closeBatchPunchModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm">取消</button>
+      <button onclick="executeBatchPunch()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold" id="bpExecuteBtn">⚡ 執行</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 管理者編輯任意日打卡 Modal ===== -->
 <div id="dayPunchEditModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-md rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
@@ -9499,8 +9559,11 @@ function renderPayrollTab(){
     }).join('');
     const [yy3,mm3] = days[0].dateStr.split('-');
     hm.innerHTML = `
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-bold" style="color:var(--ic-chocolate);">出勤日曆</span>
+      <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold" style="color:var(--ic-chocolate);">出勤日曆</span>
+          <button onclick="openBatchPunchModal()" class="text-xs font-semibold px-2 py-1 rounded-lg" style="background:var(--ic-caramel);color:white;"><i class="ti ti-bolt" style="vertical-align:-2px;" aria-hidden="true"></i> 批次編輯打卡</button>
+        </div>
         <div class="flex items-center gap-3" style="color:var(--ic-choc-mid);font-size:12px;">
           <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:var(--ic-caramel);display:inline-block;"></span>出勤</span>
           <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:12px;height:12px;border-radius:3px;background:#E5ADA8;display:inline-block;"></span>請假</span>
@@ -10802,6 +10865,200 @@ table.days td{padding:5px 6px;border-bottom:1px solid #f4f4f4}
   w.document.close();
   closePrintOptions();
   setTimeout(()=>w.print(), 500);
+}
+
+/* ========== 批次編輯打卡 ========== */
+const BATCH_PUNCH_PREF_KEY = 'batch_punch_pref_v1';
+window._bpRange = 'current';
+window._bpSelected = new Set();
+
+function _bpLoadPref(){
+  try { return JSON.parse(localStorage.getItem(BATCH_PUNCH_PREF_KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function _bpSavePref(pref){
+  try { localStorage.setItem(BATCH_PUNCH_PREF_KEY, JSON.stringify(pref)); } catch(e){}
+}
+function openBatchPunchModal(){
+  const pref = _bpLoadPref();
+  document.getElementById('bpWs').value = pref.ws || '08:00';
+  document.getElementById('bpRs').value = pref.rs || '12:00';
+  document.getElementById('bpRe').value = pref.re || '13:00';
+  document.getElementById('bpWe').value = pref.we || '18:00';
+  document.getElementById('bpNoRest').checked = !!pref.noRest;
+  window._bpSelected = new Set();
+  setBatchPunchRange('current');
+  document.getElementById('batchPunchModal').classList.remove('hidden');
+}
+function closeBatchPunchModal(){
+  document.getElementById('batchPunchModal').classList.add('hidden');
+}
+function setBatchPunchRange(range){
+  window._bpRange = range;
+  document.querySelectorAll('.bp-range-btn').forEach(b=>{
+    if (b.dataset.range===range){
+      b.classList.add('bg-blue-600','text-white'); b.classList.remove('border-gray-300');
+    } else {
+      b.classList.remove('bg-blue-600','text-white'); b.classList.add('border-gray-300');
+    }
+  });
+  const custom = document.getElementById('bpCustomRange');
+  if (range==='custom'){
+    custom.classList.remove('hidden');
+    if (!document.getElementById('bpStartDate').value){
+      const p = _bpGetPeriodByRange('current');
+      document.getElementById('bpStartDate').value = ymd(p.start);
+      document.getElementById('bpEndDate').value = ymd(p.end);
+    }
+  } else {
+    custom.classList.add('hidden');
+  }
+  renderBatchPunchList();
+}
+function _bpGetPeriodByRange(range){
+  const now = today();
+  if (range==='custom'){
+    const s = document.getElementById('bpStartDate').value;
+    const e = document.getElementById('bpEndDate').value;
+    return {
+      start: s ? new Date(s) : now,
+      end:   e ? new Date(e) : now,
+    };
+  }
+  const c = getPayrollCycle(now);
+  if (range==='current') return c;
+  if (range==='prev1'){
+    const d = new Date(c.start); d.setDate(d.getDate()-1);
+    return getPayrollCycle(d);
+  }
+  if (range==='prev2'){
+    const d = new Date(c.start); d.setDate(d.getDate()-1);
+    const p1 = getPayrollCycle(d);
+    const d2 = new Date(p1.start); d2.setDate(d2.getDate()-1);
+    return getPayrollCycle(d2);
+  }
+  return c;
+}
+function _bpDayInfo(d){
+  const dStr = ymd(d);
+  const dow = d.getDay();
+  const c = state.payrollConfig;
+  const isWorkday = c && (c.workdays||[]).includes(dow);
+  const isHoliday = c && (c.holidays||[]).includes(dow);
+  const leave = (state.leaveRequests||[]).find(r=>r.date===dStr && r.status==='approved' && r.period==='full');
+  const punches = state.punchLog?.[dStr] || [];
+  const hasPunch = punches.length>0;
+  return { dStr, dow, isWorkday, isHoliday, leave, hasPunch, punches };
+}
+function renderBatchPunchList(){
+  const { start, end } = _bpGetPeriodByRange(window._bpRange);
+  const rows = [];
+  const dowNames = '日一二三四五六';
+  const cursor = new Date(start);
+  const endDate = new Date(end);
+  while (cursor <= endDate){
+    const info = _bpDayInfo(cursor);
+    const blocked = info.isHoliday || info.leave;
+    const rowClass = blocked ? 'bg-gray-100 text-gray-400' : (info.hasPunch ? 'bg-amber-50' : '');
+    const check = blocked
+      ? '<span class="text-lg">⊘</span>'
+      : `<input type="checkbox" data-date="${info.dStr}" ${window._bpSelected.has(info.dStr)?'checked':''} onchange="_bpToggle('${info.dStr}', this.checked)">`;
+    const label = blocked
+      ? (info.isHoliday ? '例假日' : '已批准請假')
+      : (info.hasPunch ? `⚠ 已有打卡 (${info.punches.length} 段)` : '未打卡');
+    const dt = new Date(cursor);
+    rows.push(`<label class="flex items-center gap-2 px-3 py-1.5 border-b border-gray-100 ${rowClass} cursor-pointer">
+      <div class="w-6 text-center">${check}</div>
+      <div class="w-14 tabular-nums">${dt.getMonth()+1}/${dt.getDate()}</div>
+      <div class="w-6 text-center ${info.dow===0?'text-red-500':''}">${dowNames[info.dow]}</div>
+      <div class="flex-1 text-gray-600">${label}</div>
+    </label>`);
+    cursor.setDate(cursor.getDate()+1);
+  }
+  document.getElementById('batchPunchList').innerHTML = rows.join('') || '<div class="text-center text-gray-400 py-4">此範圍無日期</div>';
+  _bpUpdateCount();
+}
+function _bpToggle(dateStr, checked){
+  if (checked) window._bpSelected.add(dateStr);
+  else window._bpSelected.delete(dateStr);
+  _bpUpdateCount();
+}
+function _bpUpdateCount(){
+  const el = document.getElementById('batchPunchSelectedCount');
+  const btn = document.getElementById('bpExecuteBtn');
+  const n = window._bpSelected.size;
+  if (el) el.textContent = `已選 ${n} 天`;
+  if (btn) btn.textContent = n>0 ? `⚡ 執行（寫入 ${n} 天）` : '⚡ 執行';
+}
+function bpSelectAll(mode){
+  const { start, end } = _bpGetPeriodByRange(window._bpRange);
+  if (mode==='workdayUnpunched'){
+    window._bpSelected.clear();
+    const cursor = new Date(start);
+    const endDate = new Date(end);
+    while (cursor <= endDate){
+      const info = _bpDayInfo(cursor);
+      if (!info.isHoliday && !info.leave && !info.hasPunch) window._bpSelected.add(info.dStr);
+      cursor.setDate(cursor.getDate()+1);
+    }
+  } else if (mode==='none'){
+    window._bpSelected.clear();
+  } else if (mode==='invert'){
+    const cursor = new Date(start);
+    const endDate = new Date(end);
+    while (cursor <= endDate){
+      const info = _bpDayInfo(cursor);
+      const blocked = info.isHoliday || info.leave;
+      if (!blocked){
+        if (window._bpSelected.has(info.dStr)) window._bpSelected.delete(info.dStr);
+        else window._bpSelected.add(info.dStr);
+      }
+      cursor.setDate(cursor.getDate()+1);
+    }
+  }
+  renderBatchPunchList();
+}
+function executeBatchPunch(){
+  const ws = document.getElementById('bpWs').value;
+  const we = document.getElementById('bpWe').value;
+  const rs = document.getElementById('bpRs').value;
+  const re = document.getElementById('bpRe').value;
+  const noRest = document.getElementById('bpNoRest').checked;
+  if (!ws || !we){ alert('請設定上班與下班時間'); return; }
+  if (!noRest && (!rs || !re)){ alert('請設定午休起與收時間，或勾選「不使用午休段」'); return; }
+  const dates = [...window._bpSelected];
+  if (!dates.length){ alert('請至少勾選一天'); return; }
+  if (!confirm(`確定寫入 ${dates.length} 天的打卡？\n已有打卡的日子會被覆蓋。`)) return;
+  const meta = {
+    isBackfill: true,
+    by: state.currentUser?.name || '?',
+    backfillAt: new Date().toISOString(),
+    isProxy: true,
+  };
+  const prevState = {};
+  dates.forEach(dStr=>{
+    prevState[dStr] = state.punchLog[dStr] ? JSON.parse(JSON.stringify(state.punchLog[dStr])) : null;
+    const punches = [{ type:'work_start', at:ws, ...meta }];
+    if (!noRest){
+      punches.push({ type:'rest_start', at:rs, ...meta });
+      punches.push({ type:'rest_end',   at:re, ...meta });
+    }
+    punches.push({ type:'work_end', at:we, ...meta });
+    state.punchLog[dStr] = punches;
+  });
+  _bpSavePref({ ws, we, rs, re, noRest });
+  save();
+  closeBatchPunchModal();
+  if (typeof renderManagerView==='function') renderManagerView();
+  if (typeof setUndo==='function'){
+    setUndo(`已批次補登 ${dates.length} 天打卡`, ()=>{
+      Object.entries(prevState).forEach(([dStr,prev])=>{
+        if (prev) state.punchLog[dStr] = prev;
+        else delete state.punchLog[dStr];
+      });
+      save(); renderManagerView();
+    });
+  }
 }
 
 /* ========== 管理者編輯任意日打卡 ========== */
