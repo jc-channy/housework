@@ -839,7 +839,7 @@
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="menu"><i class="ti ti-chef-hat" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 菜單</button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="supplies"><i class="ti ti-package" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 備品<span id="suppliesBadge" class="ml-1"></span></button>
         <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="templates"><i class="ti ti-checklist" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 工作</button>
-        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤<span id="leaveBadge" class="ml-1"></span></button>
+        <button class="tab-btn flex-1 min-w-fit py-2 px-2 text-xs rounded-lg whitespace-nowrap" data-tab="payroll"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤薪資<span id="leaveBadge" class="ml-1"></span></button>
         </div>
         <div id="mgrTabFade" class="pointer-events-none absolute right-0 top-0 h-full w-10 rounded-r-xl transition-opacity duration-300" style="background:linear-gradient(to right, transparent, rgba(239,232,216,0.95));opacity:0;"></div>
       </div>
@@ -850,6 +850,21 @@
 
     <!-- 本週概覽 -->
     <div id="tab-week" class="tab-content hidden">
+      <!-- Quick Actions（V2：最上方 3 個高頻操作） -->
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <button onclick="openAddAdhocModal()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-plus" style="font-size:20px;color:var(--ic-strawberry);"></i>
+          <span class="text-xs font-semibold">臨時工作</span>
+        </button>
+        <button onclick="toggleReminderEdit()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-bell" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
+          <span class="text-xs font-semibold">編輯提醒</span>
+        </button>
+        <button onclick="switchTab('supplies')" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-package" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
+          <span class="text-xs font-semibold">備品狀態</span>
+        </button>
+      </div>
       <!-- 明日休假／排定未請假提示 -->
       <div id="mgrTomorrowOffBanner" class="hidden mb-3 px-4 py-2.5 rounded-xl" style="background:#F5F3F0;border:1px solid #E0D8D0;"></div>
       <!-- 雙欄版面：桌機左欄（進度+提醒+需處理+發薪）+ 右欄（時間軸）-->
@@ -1901,15 +1916,60 @@
 <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop p-4">
   <div class="modal-sheet w-full sm:max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
     <div class="flex items-start justify-between mb-3">
-      <div>
-        <div class="ty-modal-title"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 設定</div>
-        <div class="id-text text-sm text-gray-500">Pengaturan</div>
+      <div class="flex items-center gap-2">
+        <button id="settingsBackBtn" onclick="settingsHubBack()" class="hidden text-xl leading-none" style="color:var(--ic-choc-mid);"><i class="ti ti-arrow-left"></i></button>
+        <div>
+          <div id="settingsTitle" class="ty-modal-title"><i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 設定</div>
+          <div id="settingsSubtitle" class="id-text text-sm text-gray-500">Pengaturan</div>
+        </div>
       </div>
       <button onclick="closeSettingsModal()" class="text-gray-400 text-2xl leading-none">×</button>
     </div>
 
+    <!-- Hub Landing -->
+    <div id="settingsHub" class="space-y-2">
+      <button onclick="openSettingsSection('family')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-home" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">家庭</div><div class="text-xs" style="color:var(--ic-choc-mid);">家庭名稱 · 使用者 · PIN</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('payroll')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-cash" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">出勤薪資</div><div class="text-xs" style="color:var(--ic-choc-mid);">週期 · 底薪 · 工作日 · 假別 · 小憩</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('module')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-layout-grid" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">功能</div><div class="text-xs" style="color:var(--ic-choc-mid);">菜單模組</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('display')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-bell" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">通知與顯示</div><div class="text-xs" style="color:var(--ic-choc-mid);">提示音 · 字體 · 欄數</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('data')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-cloud" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">資料與同步</div><div class="text-xs" style="color:var(--ic-choc-mid);">雲端家庭 · 歷史快照 · JSON 備份</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('app')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-device-mobile" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">App</div><div class="text-xs" style="color:var(--ic-choc-mid);">PWA 安裝</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+      <button onclick="openSettingsSection('advanced')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-red-200 hover:bg-red-50 text-left">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#FEE2E2;"><i class="ti ti-alert-triangle" style="font-size:18px;color:#B91C1C;"></i></div>
+        <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">進階</div><div class="text-xs" style="color:var(--ic-choc-mid);">清空資料等危險操作</div></div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+    </div>
+
+    <!-- Sub-pages 容器（點 hub 卡切換顯示） -->
+    <div id="settingsSubPages" class="hidden">
+
     <!-- 家庭名稱 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="family">
       <h3 class="font-bold text-base mb-2"><i class="ti ti-home" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 家庭名稱 / Nama Keluarga</h3>
       <div class="flex gap-2 items-center">
         <input id="familyNameInput" type="text" maxlength="20" placeholder="例：林家、幸福之家" class="flex-1 border border-gray-300 rounded-lg p-2 text-sm bi-input">
@@ -1920,7 +1980,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 使用者管理 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="family">
       <h3 class="font-bold text-base mb-2"><i class="ti ti-user" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 使用者與 PIN / Pengguna & PIN</h3>
       <p class="text-xs text-gray-500 mb-3">PIN 必須為 6 位數字，請設定三組不同的 PIN。Atika 的 PIN 是執行者身分。</p>
       <div id="userList" class="space-y-3"></div>
@@ -1931,7 +1991,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 資料備份 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="data">
       <h3 class="font-bold text-base mb-2"><i class="ti ti-device-floppy" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 資料備份 / Cadangan Data</h3>
       <p class="text-xs text-gray-500 mb-3">建議每週匯出一次，存到 iCloud / Google Drive。平板故障時可從備份還原所有工作、打勾紀錄、備註、備品狀態。</p>
       <div class="grid grid-cols-2 gap-2">
@@ -1945,7 +2005,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 提示音 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="display">
       <h3 class="font-bold text-base mb-2"><i class="ti ti-bell" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 訊息提示音 / Nada Pesan</h3>
       <p class="text-xs text-gray-500 mb-3">即時對話收到訊息時的提示音。首次使用前請點過 App 任何按鈕讓瀏覽器授權音效。</p>
       <div class="flex gap-2 items-center">
@@ -1964,7 +2024,7 @@
     <!-- 字體大小已搬到 🎨 顯示設定（每台裝置獨立） -->
 
     <!-- PWA 安裝指引 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="app">
       <h3 class="font-bold text-base mb-2">📱 加入主畫面 / Tambah ke Layar Utama</h3>
       <p class="text-xs text-gray-500 mb-2">把此網頁加入平板/手機主畫面，就會像 App 一樣使用，不會被誤關。</p>
       <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs space-y-2">
@@ -1980,7 +2040,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 雲端家庭 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="data">
       <h3 class="font-bold text-base mb-2">☁️ 雲端家庭 / Keluarga Cloud</h3>
       <div id="cloudStatusBox" class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm"></div>
     </section>
@@ -1988,7 +2048,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 歷史快照 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="data">
       <h3 class="font-bold text-base mb-2">🕒 歷史快照 / Cadangan Otomatis</h3>
       <p class="text-xs text-gray-500 mb-3">系統會自動保留最近 5 次儲存前的狀態，可一鍵還原。</p>
       <div id="snapshotList" class="space-y-2"></div>
@@ -1997,7 +2057,7 @@
     <hr class="my-4 border-gray-200">
 
     <!-- 功能模組 -->
-    <section class="mb-5">
+    <section class="mb-5 settings-sub" data-section="module">
       <h3 class="font-bold text-base mb-3"><i class="ti ti-layout-grid" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 功能模組 / Modul Fitur</h3>
       <div class="rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
         <div class="flex items-start justify-between gap-3 px-4 py-3 bg-white">
@@ -2015,11 +2075,28 @@
 
     <hr class="my-4 border-gray-200">
 
-    <!-- 危險區 -->
-    <section>
-      <h3 class="font-bold text-base mb-2 text-red-600"><i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 危險區 / Berbahaya</h3>
-      <button onclick="resetAllData()" class="w-full text-red-600 border border-red-300 py-2 rounded-lg text-sm">清空所有資料（不可復原）</button>
+    <!-- 進階（原危險區） -->
+    <section class="settings-sub" data-section="advanced">
+      <h3 class="font-bold text-base mb-2"><i class="ti ti-flask" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 進階 / Lanjutan</h3>
+      <div class="rounded-xl border border-red-300 p-3 bg-red-50 mb-3">
+        <div class="text-xs font-bold text-red-700 mb-2"><i class="ti ti-alert-triangle" style="font-size:13px;vertical-align:-1px;"></i> 危險操作</div>
+        <button onclick="resetAllData()" class="w-full text-red-600 border border-red-300 py-2 rounded-lg text-sm bg-white">清空所有資料（不可復原）</button>
+      </div>
     </section>
+
+    <!-- 出勤薪資：連入原 payrollSettingsModal -->
+    <section class="settings-sub" data-section="payroll">
+      <div class="text-xs text-gray-500 mb-3">週期起算日、底薪、日薪、發薪日、工作日、加班倍率、允許請假時段、請假注意事項、假別、每日小憩時段等，都在完整的薪資設定內。</div>
+      <button onclick="closeSettingsModal(); openPayrollSettings();" class="w-full flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+        <div class="flex items-center gap-2">
+          <i class="ti ti-cash" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
+          <span class="font-semibold">開啟薪資設定</span>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+      </button>
+    </section>
+
+    </div><!-- /settingsSubPages -->
   </div>
 </div>
 
@@ -6509,6 +6586,52 @@ function showOnboarding(){
 function goOnboardStep(n){
   document.querySelectorAll('.ob-step').forEach(s=>s.classList.toggle('active',s.dataset.step==n));
   document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('active',i+1===n));
+  if (Number(n) === 3) renderSetupChecklist();
+}
+function renderSetupChecklist(){
+  const box = document.getElementById('setupChecklist');
+  if (!box) return;
+  const items = [
+    {
+      key: 'family',
+      label: '建立家庭名稱',
+      done: !!(state.preferences?.familyName || '').trim(),
+      goto: ()=>{ closeOnboarding(); openSettingsModal(); setTimeout(()=>openSettingsSection('family'), 60); },
+    },
+    {
+      key: 'pin',
+      label: '設定使用者 PIN',
+      done: (state.users||[]).some(u=>u.pin && u.pin !== u.defaultPin),
+      goto: ()=>{ closeOnboarding(); openSettingsModal(); setTimeout(()=>openSettingsSection('family'), 60); },
+    },
+    {
+      key: 'work',
+      label: '建立主要工作（至少 1 個）',
+      done: (state.templates||[]).length > 0,
+      goto: ()=>{ closeOnboarding(); switchTab('templates'); setTimeout(()=>openAddTemplateModal(), 60); },
+    },
+    {
+      key: 'menu',
+      label: '選擇是否使用菜單模組',
+      done: state.preferences?.menuModuleSet === true,
+      goto: ()=>{ closeOnboarding(); openSettingsModal(); setTimeout(()=>openSettingsSection('module'), 60); },
+    },
+    {
+      key: 'payroll',
+      label: '設定出勤與薪資規則',
+      done: !!(state.payrollConfig?.baseSalary),
+      goto: ()=>{ closeOnboarding(); openPayrollSettings(); },
+    },
+  ];
+  box.innerHTML = items.map(it=>`
+    <button onclick="(${it.goto.toString()})()" class="w-full flex items-center gap-2 p-2.5 rounded-lg border ${it.done?'bg-green-50 border-green-200':'border-gray-200 hover:bg-gray-50'}" style="text-align:left;">
+      <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0" style="border-color:${it.done?'#10b981':'#d1d5db'};background:${it.done?'#10b981':'transparent'};">
+        ${it.done?'<i class="ti ti-check" style="color:white;font-size:14px;"></i>':''}
+      </div>
+      <div class="flex-1 text-sm ${it.done?'line-through text-gray-500':''}" style="color:var(--ic-chocolate);">${it.label}</div>
+      ${it.done?'':'<i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>'}
+    </button>
+  `).join('');
 }
 function closeOnboarding(){
   document.getElementById('onboardingOverlay').classList.remove('open');
@@ -12874,6 +12997,9 @@ function applyMenuModuleVisibility(){
 }
 
 async function toggleMenuModule(checked){
+  // 標記使用者已做過選擇（供 Setup Checklist 判斷）
+  if (!state.preferences) state.preferences = {};
+  state.preferences.menuModuleSet = true;
   if (!checked){
     // 由開啟切為關閉：需要確認
     const ok = await customConfirm(
@@ -13456,7 +13582,42 @@ function openSettingsModal(){
   // 功能模組 toggle 同步
   const _tog = document.getElementById('menuModuleToggle');
   if (_tog) _tog.checked = isMenuEnabled();
+  // 每次開啟先回到 Hub landing
+  settingsHubBack();
   document.getElementById('settingsModal').classList.remove('hidden');
+}
+
+/* ===== Settings Hub 導航 ===== */
+function openSettingsSection(section){
+  document.getElementById('settingsHub').classList.add('hidden');
+  document.getElementById('settingsSubPages').classList.remove('hidden');
+  document.getElementById('settingsBackBtn').classList.remove('hidden');
+  const titles = {
+    family:    { zh:'家庭', id:'Keluarga' },
+    payroll:   { zh:'出勤薪資', id:'Absensi & Gaji' },
+    module:    { zh:'功能', id:'Fitur' },
+    display:   { zh:'通知與顯示', id:'Notifikasi & Tampilan' },
+    data:      { zh:'資料與同步', id:'Data & Sinkronisasi' },
+    app:       { zh:'App', id:'App' },
+    advanced:  { zh:'進階', id:'Lanjutan' },
+  };
+  const t = titles[section] || { zh:'設定', id:'Pengaturan' };
+  document.getElementById('settingsTitle').innerHTML = `<i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;"></i> ${t.zh}`;
+  document.getElementById('settingsSubtitle').textContent = t.id;
+  // 只顯示對應區塊
+  document.querySelectorAll('.settings-sub').forEach(el=>{
+    if (el.dataset.section === section) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  });
+  // 隱藏所有 hr（子頁不需要）
+  document.querySelectorAll('#settingsSubPages hr').forEach(hr=>hr.classList.add('hidden'));
+}
+function settingsHubBack(){
+  document.getElementById('settingsHub').classList.remove('hidden');
+  document.getElementById('settingsSubPages').classList.add('hidden');
+  document.getElementById('settingsBackBtn').classList.add('hidden');
+  document.getElementById('settingsTitle').innerHTML = `<i class="ti ti-settings" style="font-size:14px;vertical-align:-2px;"></i> 設定`;
+  document.getElementById('settingsSubtitle').textContent = 'Pengaturan';
 }
 
 /* ========== 情境模式 CRUD ========== */
@@ -14066,13 +14227,15 @@ init();
       </div>
     </div>
 
-    <!-- Step 3: Ready -->
+    <!-- Step 3: Setup Checklist -->
     <div class="ob-step" data-step="3">
-      <div class="ob-step-icon"><i class="ti ti-confetti" style="color:var(--ic-caramel-dk);"></i></div>
-      <h2>準備好了！</h2>
-      <p>你可以從左側「工作管理」開始建立第一批家務工作，或先在「訊息」傳一則訊息給幫傭。</p>
-      <p style="margin-top:10px;font-size:13px;color:var(--ic-choc-mid);">之後可隨時在 <i class="ti ti-dots-vertical" style="font-size:13px;vertical-align:-2px;"></i> 選單中找到所有設定。</p>
+      <div class="ob-step-icon"><i class="ti ti-list-check" style="color:var(--ic-caramel-dk);"></i></div>
+      <h2>開始設定你的家</h2>
+      <p style="margin-bottom:12px;">完成這些設定，讓平台真正貼合你的家：</p>
+      <div id="setupChecklist" class="space-y-2 text-left" style="margin-bottom:14px;"></div>
+      <p style="font-size:12px;color:var(--ic-choc-mid);text-align:left;padding:0 4px;">💡 可先跳過，之後任何時候都可從右上角「⋮ → 設定」補上。</p>
       <div class="ob-btn-row">
+        <button class="ob-skip" onclick="closeOnboarding()">稍後再設定</button>
         <button class="ob-next" onclick="closeOnboarding()">開始使用 ✓</button>
       </div>
     </div>
