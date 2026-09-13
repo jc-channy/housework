@@ -114,6 +114,11 @@
   /* 捲軸 */
   .scrollbar-thin::-webkit-scrollbar { height: 6px; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--ic-vanilla); border-radius: 4px; }
+  /* V2 Secondary Navigation Pills */
+  .sec-nav { display:flex; gap:4px; padding:4px; background:var(--ic-lemon); border-radius:12px; margin-bottom:14px; }
+  .sec-nav-btn { flex:1; padding:8px 12px; border-radius:8px; font-size:13px; font-weight:600; color:var(--ic-choc-mid); background:transparent; border:none; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .sec-nav-btn.active { background:var(--ic-surface); color:var(--ic-chocolate); box-shadow:0 1px 3px rgba(114,92,63,.12); }
+  .sec-nav-btn:not(.active):hover { color:var(--ic-chocolate); }
 
   @media (max-width: 480px) { .container-app { padding-left: 10px; padding-right: 10px; } }
 
@@ -850,23 +855,13 @@
 
     <!-- 本週概覽 -->
     <div id="tab-week" class="tab-content hidden">
-      <!-- Quick Actions（V2：最上方 3 個高頻操作） -->
-      <div class="grid grid-cols-3 gap-2 mb-3">
-        <button onclick="openAddAdhocModal()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
-          <i class="ti ti-plus" style="font-size:20px;color:var(--ic-strawberry);"></i>
-          <span class="text-xs font-semibold">臨時工作</span>
-        </button>
-        <button onclick="toggleReminderEdit()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
-          <i class="ti ti-bell" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
-          <span class="text-xs font-semibold">編輯提醒</span>
-        </button>
-        <button onclick="switchTab('supplies')" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
-          <i class="ti ti-package" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
-          <span class="text-xs font-semibold">備品狀態</span>
-        </button>
-      </div>
       <!-- 明日休假／排定未請假提示 -->
       <div id="mgrTomorrowOffBanner" class="hidden mb-3 px-4 py-2.5 rounded-xl" style="background:#F5F3F0;border:1px solid #E0D8D0;"></div>
+      <!-- ═══ A. 需要處理 ═══ -->
+      <div class="mb-2 flex items-center gap-2">
+        <span class="text-xs font-bold" style="color:var(--ic-choc-mid);letter-spacing:1px;">A · 需要處理</span>
+        <div class="flex-1 h-px" style="background:var(--ic-vanilla);"></div>
+      </div>
       <!-- 雙欄版面：桌機左欄（進度+提醒+需處理+發薪）+ 右欄（時間軸）-->
       <div class="md:grid md:grid-cols-2 md:gap-4 md:items-start mb-4">
         <!-- 左欄 -->
@@ -874,7 +869,7 @@
           <!-- 今日情境 Bar -->
           <div id="mgrSituationBar"></div>
 
-          <!-- 需要你處理（最上方） -->
+          <!-- A · 需要處理 -->
           <div id="mgrActionBlock" class="hidden overflow-hidden" style="border-radius:14px;border:1.5px solid #EEDCD8;border-left:4px solid #D89090;background:#FAF6F0;">
             <div class="flex items-center gap-2" style="padding:8px 12px;background:#FFF7F6;border-bottom:0.5px solid #EEDCD8;">
               <div style="width:26px;height:26px;border-radius:50%;background:#FAEEF0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -886,6 +881,11 @@
             <div id="mgrActionItems" class="divide-y divide-red-100 px-4 py-1"></div>
           </div>
 
+          <!-- ═══ B. 今天 ═══（提醒/菜單/發薪等 today summary） -->
+          <div class="pt-1 mt-1 mb-1 flex items-center gap-2">
+            <span class="text-xs font-bold" style="color:var(--ic-choc-mid);letter-spacing:1px;">B · 今天</span>
+            <div class="flex-1 h-px" style="background:var(--ic-vanilla);"></div>
+          </div>
           <!-- 今日提醒（獨立卡片）-->
           <div id="mgrReminderCard" style="border-radius:14px;border:2px solid #D4848A;background:#FEF0F0;padding:12px 14px;">
             <div style="display:flex;align-items:flex-start;gap:10px;">
@@ -954,6 +954,26 @@
         </section>
       </div>
 
+      <!-- ═══ C. 快速操作 & 今日工作 ═══ -->
+      <div class="mb-2 flex items-center gap-2">
+        <span class="text-xs font-bold" style="color:var(--ic-choc-mid);letter-spacing:1px;">C · 快速操作</span>
+        <div class="flex-1 h-px" style="background:var(--ic-vanilla);"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <button onclick="openAddAdhocModal()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-plus" style="font-size:20px;color:var(--ic-strawberry);"></i>
+          <span class="text-xs font-semibold">臨時工作</span>
+        </button>
+        <button onclick="toggleReminderEdit()" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-bell" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
+          <span class="text-xs font-semibold">編輯提醒</span>
+        </button>
+        <button onclick="switchTab('supplies')" class="flex flex-col items-center gap-1 py-2.5 rounded-xl border" style="background:var(--ic-surface);border-color:var(--ic-vanilla);color:var(--ic-chocolate);">
+          <i class="ti ti-package" style="font-size:20px;color:var(--ic-caramel-dk);"></i>
+          <span class="text-xs font-semibold">備品狀態</span>
+        </button>
+      </div>
+
       <!-- 臨時工作 -->
       <section id="mgrAdhocSection" class="mb-3">
         <div class="flex items-center justify-between mb-2">
@@ -1008,8 +1028,14 @@
 
     <!-- 工作排程（模板） -->
     <div id="tab-templates" class="tab-content hidden">
-      <!-- 工作時段分配 Kanban（預設收合） -->
-      <details id="kanbanDetails" class="rounded-2xl border overflow-hidden mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);box-shadow:0 2px 12px rgba(114,92,63,.08);">
+      <!-- V2 Secondary Nav -->
+      <div class="sec-nav">
+        <button class="sec-nav-btn" data-section="my" onclick="setSecondaryNav('templates','my')">我的工作</button>
+        <button class="sec-nav-btn" data-section="schedule" onclick="setSecondaryNav('templates','schedule')">排程</button>
+        <button class="sec-nav-btn" data-section="manage" onclick="setSecondaryNav('templates','manage')">管理</button>
+      </div>
+      <!-- 排程區塊：時段分配 Kanban -->
+      <details data-secondary="schedule" id="kanbanDetails" class="rounded-2xl border overflow-hidden mb-4" style="background:var(--ic-surface);border-color:var(--ic-vanilla);box-shadow:0 2px 12px rgba(114,92,63,.08);" open>
         <summary class="flex items-center justify-between px-4 py-2.5 cursor-pointer select-none" style="border-bottom:1px solid var(--ic-vanilla);background:var(--ic-lemon);list-style:none;">
           <span class="font-bold text-sm flex items-center gap-2" style="color:var(--ic-chocolate);">
             <i class="ti ti-clock-hour-4" style="font-size:14px;color:var(--ic-caramel);" aria-hidden="true"></i> 工作時段分配
@@ -1041,68 +1067,87 @@
         </div>
         </div>
       </details>
-      <div class="flex items-center justify-between mb-3 gap-2">
-        <div class="flex items-center gap-2">
-          <h3 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 工作排程</h3>
-          <span id="tmplStatChip" class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:var(--ic-lemon);color:var(--ic-choc-mid);"></span>
-        </div>
-        <div class="flex gap-2 items-center">
-          <!-- 更多選單 -->
-          <div class="relative" id="tmplMoreWrap">
-            <button onclick="toggleTmplMore()" class="btn-sm-secondary flex items-center gap-1">
-              <i class="ti ti-dots" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 更多
-            </button>
-            <div id="tmplMoreMenu" class="hidden absolute right-0 top-8 z-50 rounded-xl shadow-lg py-1 min-w-max"
-                 style="background:var(--ic-surface);border:1px solid var(--ic-vanilla);">
-              <button onclick="openScheduleOverview();toggleTmplMore()" class="tmpl-menu-item">
-                <i class="ti ti-calendar-event" style="font-size:13px;" aria-hidden="true"></i> 工作排程總覽
-              </button>
-              <button onclick="openCategoryManageModal();toggleTmplMore()" class="tmpl-menu-item">
-                <i class="ti ti-folder" style="font-size:13px;" aria-hidden="true"></i> 管理分類 <span id="catManageCount" class="text-xs" style="color:var(--ic-choc-mid);"></span>
-              </button>
-              <button onclick="openTaskLibrary();toggleTmplMore()" class="tmpl-menu-item">
-                <i class="ti ti-books" style="font-size:13px;" aria-hidden="true"></i> 工作庫
-              </button>
-              <button onclick="exportTemplatesXlsx();toggleTmplMore()" class="tmpl-menu-item">
-                <i class="ti ti-file-download" style="font-size:13px;" aria-hidden="true"></i> 匯出 Excel
-              </button>
-              <label class="tmpl-menu-item cursor-pointer">
-                <i class="ti ti-file-upload" style="font-size:13px;" aria-hidden="true"></i> 匯入 Excel
-                <input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importTemplatesXlsx(this);toggleTmplMore()">
-              </label>
-            </div>
+      <!-- 我的工作區塊 -->
+      <div data-secondary="my">
+        <div class="flex items-center justify-between mb-3 gap-2">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-checklist" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 我的工作</h3>
+            <span id="tmplStatChip" class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:var(--ic-lemon);color:var(--ic-choc-mid);"></span>
           </div>
-          <!-- 主 CTA -->
           <button onclick="openAddTemplateModal()" class="btn-sm-primary flex items-center gap-1" style="height:36px;padding:0 14px;">
             <i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增工作
           </button>
         </div>
+        <!-- 篩選器 -->
+        <div id="catFiltersWrap" style="position:relative;margin-bottom:12px;"><div id="catFilters" class="flex gap-2 overflow-x-auto scrollbar-thin pb-1" style="mask-image:linear-gradient(to right,black 85%,transparent);-webkit-mask-image:linear-gradient(to right,black 85%,transparent);">
+          <button class="cat-filter filter-chip" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+        </div>
+        </div>
+        <div class="text-xs mb-2 flex items-center gap-1.5" style="color:var(--ic-choc-mid);"><i class="ti ti-grip-vertical" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 長按左側拖移可調整順序</div>
+        <div id="templateList" class="space-y-2 sortable-list"></div>
       </div>
 
-      <!-- 篩選器 -->
-      <div id="catFiltersWrap" style="position:relative;margin-bottom:12px;"><div id="catFilters" class="flex gap-2 overflow-x-auto scrollbar-thin pb-1" style="mask-image:linear-gradient(to right,black 85%,transparent);-webkit-mask-image:linear-gradient(to right,black 85%,transparent);">
-        <button class="cat-filter filter-chip" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
+      <!-- 排程區塊：工作排程總覽（矩陣） -->
+      <div data-secondary="schedule" class="mt-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm" style="color:var(--ic-chocolate);"><i class="ti ti-calendar-event" style="font-size:14px;vertical-align:-2px;"></i> 工作排程總覽</h3>
+          <button onclick="openScheduleOverview()" class="btn-sm-secondary flex items-center gap-1">
+            <i class="ti ti-external-link" style="font-size:14px;vertical-align:-2px;"></i> 開啟總覽
+          </button>
+        </div>
+        <p class="text-xs mb-3" style="color:var(--ic-choc-mid);">上方時段分配 Kanban 可拖曳分配 · 排程總覽以矩陣方式檢視全週工作分布</p>
       </div>
+
+      <!-- 管理區塊 -->
+      <div data-secondary="manage">
+        <div class="mb-3">
+          <h3 class="font-bold text-sm mb-3" style="color:var(--ic-chocolate);"><i class="ti ti-tool" style="font-size:14px;vertical-align:-2px;"></i> 工作管理</h3>
+          <div class="space-y-2">
+            <button onclick="openCategoryManageModal()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-folder" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+              <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">管理分類 <span id="catManageCount" class="text-xs" style="color:var(--ic-choc-mid);"></span></div><div class="text-xs" style="color:var(--ic-choc-mid);">新增/編輯/刪除工作分類與顏色</div></div>
+              <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+            </button>
+            <button onclick="openTaskLibrary()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-books" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+              <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">工作庫</div><div class="text-xs" style="color:var(--ic-choc-mid);">從常見工作模板選擇批次加入</div></div>
+              <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+            </button>
+            <button onclick="exportTemplatesXlsx()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-file-download" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+              <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">匯出 Excel</div><div class="text-xs" style="color:var(--ic-choc-mid);">下載目前所有工作為 .xlsx</div></div>
+              <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+            </button>
+            <label class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left cursor-pointer">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-file-upload" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+              <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">匯入 Excel</div><div class="text-xs" style="color:var(--ic-choc-mid);">從 .xlsx / .csv 批次建立工作</div></div>
+              <input type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importTemplatesXlsx(this)">
+              <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+            </label>
+          </div>
+        </div>
       </div>
-      <div class="text-xs mb-2 flex items-center gap-1.5" style="color:var(--ic-choc-mid);"><i class="ti ti-grip-vertical" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 長按左側拖移可調整順序</div>
-      <div id="templateList" class="space-y-2 sortable-list"></div>
     </div>
 
     <!-- 備品 -->
     <div id="tab-supplies" class="tab-content hidden">
+      <!-- V2 Secondary Nav -->
+      <div class="sec-nav">
+        <button class="sec-nav-btn" data-section="status" onclick="setSecondaryNav('supplies','status')">狀態</button>
+        <button class="sec-nav-btn" data-section="manage" onclick="setSecondaryNav('supplies','manage')">管理</button>
+      </div>
+
+      <!-- 狀態區塊 -->
+      <div data-secondary="status">
       <!-- Header -->
       <div class="flex items-center mb-3">
-        <h3 class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i> 備品 / Perlengkapan</h3>
+        <h3 class="font-bold" style="font-size:16px;color:var(--ic-chocolate);display:flex;align-items:center;gap:7px;"><i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i> 備品狀態 / Status</h3>
       </div>
 
       <!-- 分類篩選 -->
       <div class="mb-1">
         <div id="supplyCatFilters" class="flex flex-wrap gap-2 mb-1">
           <button class="sc-filter filter-chip" style="background:var(--ic-chocolate);color:var(--ic-surface);border-color:var(--ic-chocolate);" data-cat="all">全部</button>
-        </div>
-        <div class="flex items-center justify-between mt-2 mb-3">
-          <div class="text-xs" style="color:#B0A090;font-style:italic;"><i class="ti ti-hand-finger" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> 雙擊分類標籤可編輯／刪除</div>
-          <button onclick="openAddSupplyCatModal()" style="font-size:14px;font-weight:600;color:var(--ic-caramel-dk);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px;padding:0;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增分類</button>
         </div>
       </div>
 
@@ -1142,25 +1187,51 @@
           <span class="ty-section-title" style="color:#4A6A30;display:flex;align-items:center;gap:7px;"><i class="ti ti-circle-check" style="font-size:18px;" aria-hidden="true"></i> 備品庫 · Gudang</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span id="cntOk" class="font-bold px-2.5 py-1 rounded-full" style="font-size:13px;background:#EAF3E0;color:#3A6820;"></span>
-            <button onclick="openAddSupplyModal()" class="btn-sm-primary flex items-center gap-1" style="font-size:13px;"><i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> 新增備品</button>
           </div>
         </div>
         <div id="suppliesOk" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;"></div>
+      </div>
+      </div><!-- /data-secondary="status" -->
+
+      <!-- 管理區塊 -->
+      <div data-secondary="manage" class="hidden">
+        <h3 class="font-bold text-sm mb-3" style="color:var(--ic-chocolate);"><i class="ti ti-tool" style="font-size:14px;vertical-align:-2px;"></i> 備品管理</h3>
+        <div class="space-y-2">
+          <button onclick="openAddSupplyModal()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-plus" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+            <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">新增備品</div><div class="text-xs" style="color:var(--ic-choc-mid);">加入新的備品項目到清單</div></div>
+            <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+          </button>
+          <button onclick="openSupplyCategoryManageModal()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-folder" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+            <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">管理分類</div><div class="text-xs" style="color:var(--ic-choc-mid);">新增/編輯/刪除備品分類</div></div>
+            <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+          </button>
+          <button onclick="openManageSuppliesModal()" class="w-full flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 text-left">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--ic-lemon);"><i class="ti ti-list" style="font-size:18px;color:var(--ic-caramel-dk);"></i></div>
+            <div class="flex-1 min-w-0"><div class="font-semibold text-sm" style="color:var(--ic-chocolate);">備品清單管理</div><div class="text-xs" style="color:var(--ic-choc-mid);">編輯/刪除/停用備品</div></div>
+            <i class="ti ti-chevron-right" style="color:var(--ic-choc-mid);"></i>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- 出勤與薪資（緊湊版） -->
     <div id="tab-payroll" class="tab-content hidden">
+      <!-- V2 Secondary Nav -->
+      <div class="sec-nav">
+        <button class="sec-nav-btn" data-section="attendance" onclick="setSecondaryNav('payroll','attendance')">出勤</button>
+        <button class="sec-nav-btn" data-section="salary" onclick="setSecondaryNav('payroll','salary')">薪資</button>
+      </div>
       <!-- 標題列 + 操作按鈕 -->
       <div class="flex items-center justify-between mb-2 gap-2">
-        <h3 class="font-bold text-base"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 出勤與薪資</h3>
+        <h3 class="font-bold text-base"><i class="ti ti-cash" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> <span data-secondary="attendance">出勤</span><span data-secondary="salary" class="hidden">薪資</span></h3>
         <div class="flex gap-1.5">
-          <button onclick="printPayroll()" class="btn-sm-secondary flex items-center gap-1"><i class="ti ti-printer" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i><span>列印</span></button>
-          <button onclick="openPayrollSettings()" class="btn-sm-secondary flex items-center gap-1"><i class="ti ti-settings" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i><span>基本設定</span></button>
+          <button data-secondary="salary" onclick="printPayroll()" class="btn-sm-secondary flex items-center gap-1"><i class="ti ti-printer" style="font-size:16px;vertical-align:-2px;" aria-hidden="true"></i><span>列印</span></button>
         </div>
       </div>
-      <!-- 週期切換（獨立一行） -->
-      <div class="flex items-center bg-white border border-gray-200 rounded-xl mb-3" style="overflow:hidden;">
+      <!-- 週期切換（共用兩個 section） -->
+      <div data-secondary="attendance,salary" class="flex items-center bg-white border border-gray-200 rounded-xl mb-3" style="overflow:hidden;">
         <button onclick="payrollPrevPeriod()" class="px-3 py-2 text-lg hover:bg-gray-100 font-bold" style="color:var(--ic-chocolate);">‹</button>
         <div class="flex-1 text-center py-2 leading-tight">
           <div id="payrollPeriodTitle" class="font-bold text-sm" style="color:var(--ic-chocolate);"></div>
@@ -1170,19 +1241,19 @@
         <button onclick="payrollCurrentPeriod()" class="text-xs font-semibold px-3 py-2 border-l border-gray-200" style="color:var(--ic-caramel-dk);text-decoration:underline;">當期</button>
       </div>
 
-      <!-- 摘要（緊湊一行） -->
-      <div id="payrollSummary" class="mb-2"></div>
+      <!-- 摘要（薪資頁重點） -->
+      <div data-secondary="salary" id="payrollSummary" class="mb-2"></div>
 
-      <!-- 出勤熱力圖 -->
-      <div id="payrollHeatmap" class="mb-3 hidden rounded-2xl p-3" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);"></div>
+      <!-- 出勤熱力圖（出勤頁） -->
+      <div data-secondary="attendance" id="payrollHeatmap" class="mb-3 hidden rounded-2xl p-3" style="background:var(--ic-surface);border:1.5px solid var(--ic-vanilla);"></div>
 
-      <!-- 請假申請待審核（不收合，最重要） -->
-      <section class="mb-2" id="payrollLeavePending">
+      <!-- 請假申請待審核（出勤頁最重要） -->
+      <section data-secondary="attendance" class="mb-2" id="payrollLeavePending">
         <div id="leavePendingList" class="space-y-1"></div>
       </section>
 
-      <!-- 詳情區（全部 details 摺疊） -->
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
+      <!-- 薪資頁：額外項目 -->
+      <details data-secondary="salary" class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between" style="font-size:15px;">
           <span class="flex items-center gap-1.5"><i class="ti ti-receipt" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 額外項目 / Tambahan</span>
           <button onclick="event.preventDefault(); event.stopPropagation(); openAddAdjustment();" class="btn-sm-primary">＋ 新增</button>
@@ -1190,12 +1261,14 @@
         <div id="payrollAdjList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
+      <!-- 薪資頁：簽收 -->
+      <details data-secondary="salary" class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-pencil-plus" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 薪資簽收 / Tanda Terima</summary>
         <div id="payrollReceiptBox" class="px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
+      <!-- 出勤頁：請假紀錄 -->
+      <details data-secondary="attendance" class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold flex items-center justify-between">
           <span class="flex items-center gap-1.5" style="font-size:15px;"><i class="ti ti-calendar-stats" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 請假紀錄 / Riwayat Cuti <span id="leaveHistoryCount" class="text-sm font-bold" style="color:#C4706A;"></span></span>
           <button onclick="event.preventDefault();event.stopPropagation();openAddLeaveForAtika();" class="btn-sm-primary flex items-center gap-1"><i class="ti ti-plus" style="font-size:14px;vertical-align:-1px;" aria-hidden="true"></i> 新增請假</button>
@@ -1203,24 +1276,33 @@
         <div id="leaveHistoryList" class="space-y-1 px-3 pb-3"></div>
       </details>
 
-      <details class="mb-2 bg-white border border-gray-200 rounded-xl" open>
+      <!-- 出勤頁：出勤明細 -->
+      <details data-secondary="attendance" class="mb-2 bg-white border border-gray-200 rounded-xl" open>
         <summary class="cursor-pointer px-3 py-2 font-semibold" style="font-size:15px;"><i class="ti ti-calendar-event" style="font-size:18px;vertical-align:-3px;" aria-hidden="true"></i> 當期出勤明細 / Detail Kehadiran</summary>
         <div id="payrollDayList" class="divide-y divide-gray-100 text-sm max-h-96 overflow-y-auto"></div>
       </details>
     </div>
 
     <div id="tab-menu" class="tab-content hidden">
-
-        <!-- 頁面標題 -->
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px;">
-          <i class="ti ti-calendar-week" style="font-size:18px;color:var(--ic-caramel);" aria-hidden="true"></i>
-          <span style="font-size:16px;font-weight:700;color:#2A1508;">菜單規劃</span>
+        <!-- V2 Secondary Nav -->
+        <div class="sec-nav">
+          <button class="sec-nav-btn" data-section="week" onclick="setSecondaryNav('menu','week')">本週</button>
+          <button class="sec-nav-btn" data-section="manage" onclick="setSecondaryNav('menu','manage')">管理</button>
         </div>
-        <!-- ── 菜單編輯區 ── -->
-        <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
-          <div id="menuTabBarArea" class="px-4 pt-3"></div>
-          <div id="menuColorBar" style="display:none;"></div>
-          <div id="menuMainArea"></div>
+
+        <!-- 本週規劃 -->
+        <div data-secondary="week">
+          <!-- 頁面標題 -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:0 2px;">
+            <i class="ti ti-calendar-week" style="font-size:18px;color:var(--ic-caramel);" aria-hidden="true"></i>
+            <span style="font-size:16px;font-weight:700;color:#2A1508;">菜單規劃</span>
+          </div>
+          <!-- ── 菜單編輯區 ── -->
+          <div class="rounded-2xl border mb-4 overflow-hidden" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
+            <div id="menuTabBarArea" class="px-4 pt-3"></div>
+            <div id="menuColorBar" style="display:none;"></div>
+            <div id="menuMainArea"></div>
+          </div>
         </div>
         <!-- 舊相容 div（隱藏，保留 id 供舊函數使用） -->
         <div id="menuSetSelector" class="hidden"></div>
@@ -1228,6 +1310,9 @@
         <div id="menuWeekStrip" class="hidden"></div>
         <div id="menuDayDetail" class="hidden"></div>
         <div id="menuGrid" class="hidden"></div>
+
+        <!-- 菜單管理區塊 -->
+        <div data-secondary="manage">
 
         <!-- 菜譜庫（預設展開） -->
         <div class="rounded-2xl border mb-3" style="background:var(--ic-surface);border-color:var(--ic-vanilla);">
@@ -1274,6 +1359,8 @@
 
         <!-- 烹飪方式（隱藏殼，保留 id 供 JS 存取不報錯） -->
         <div id="cookMethodBlockBody" class="hidden"><div id="cookMethodBlockList"></div><input id="newCookMethodBlockInput" type="hidden"><i id="cookMethodChevron"></i></div>
+
+        </div><!-- /data-secondary="manage" -->
     </div>
 
   </main>
@@ -13035,6 +13122,30 @@ async function toggleMenuModule(checked){
   }
 }
 
+/* ========== V2 Secondary Navigation ========== */
+window._secondaryNav = {}; // { tabName: 'section' }
+function setSecondaryNav(tabName, section){
+  window._secondaryNav[tabName] = section;
+  const scope = document.getElementById('tab-'+tabName);
+  if (!scope) return;
+  // 切換按鈕 active 狀態
+  scope.querySelectorAll('.sec-nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.section === section);
+  });
+  // 顯示對應 secondary section，隱藏其他
+  scope.querySelectorAll('[data-secondary]').forEach(el=>{
+    const sections = el.dataset.secondary.split(',');
+    if (sections.includes(section)) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  });
+  // 記憶
+  try { localStorage.setItem('sec_'+tabName, section); } catch(e){}
+}
+function initSecondaryNav(tabName, defaultSection){
+  const remembered = (()=>{ try { return localStorage.getItem('sec_'+tabName); } catch(e){ return null; } })();
+  setSecondaryNav(tabName, remembered || defaultSection);
+}
+
 /* ========== Tabs ========== */
 function switchTab(tabName){
   if (tabName === 'menu' && !isMenuEnabled()) tabName = 'week';
@@ -13047,6 +13158,9 @@ function switchTab(tabName){
   if (tabEl) tabEl.classList.remove('hidden');
   if (tabName === 'menu') renderMenuTab();
   if (tabName === 'payroll') setTimeout(()=>{ const c=document.getElementById('payrollDayList'); const r=document.getElementById('payrollTodayRow'); if(c&&r) c.scrollTop=r.offsetTop-c.offsetHeight/2+r.offsetHeight/2; }, 80);
+  // V2: 初始化該 tab 的 Secondary Navigation
+  const secDefaults = { templates:'my', menu:'week', supplies:'status', payroll:'attendance' };
+  if (secDefaults[tabName]) initSecondaryNav(tabName, secDefaults[tabName]);
   // 記住目前分頁，重新整理後還原
   try { localStorage.setItem('lastTab', tabName); } catch(e){}
   // 切到頂端（instant 避免縮頁後卡在半空白畫面）
